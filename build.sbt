@@ -1,5 +1,4 @@
 name := "com.microsoft.azure.cosmosdb.kafka.connect.sink"
-
 organization := "com.microsoft.azure"
 version := "0.0.1-preview"
 scalaVersion := "2.12.8"
