@@ -1,5 +1,5 @@
-# Created by https://www.gitignore.io/api/sbt,scala,visualstudiocode
-# Edit at https://www.gitignore.io/?templates=sbt,scala,visualstudiocode
+.idea/*
+out/
 
 ### SBT ###
 # Simple Build Tool
@@ -9,7 +9,6 @@ dist/*
 target/
 lib_managed/
 src_managed/
-project/
 project/boot/
 project/plugins/project/
 .history
@@ -19,15 +18,3 @@ project/plugins/project/
 ### Scala ###
 *.class
 *.log
-
-### VisualStudioCode ###
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-
-### VisualStudioCode Patch ###
-# Ignore all local history of files
-
-# End of https://www.gitignore.io/api/sbt,scala,visualstudiocode
