@@ -4,7 +4,6 @@ package com.microsoft.azure.cosmosdb.kafka.connect.sink
 import java.util
 
 import com.microsoft.azure.cosmosdb.kafka.connect.sink.config.{CosmosDBConfig, CosmosDBSinkSettings}
-import com.microsoft.azure.cosmosdb.kafka.connect.sink.helpers._
 import com.microsoft.azure.cosmosdb._
 import com.microsoft.azure.cosmosdb.rx._
 
