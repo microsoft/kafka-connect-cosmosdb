@@ -1,8 +1,6 @@
 ### Intellij ###
 
 # User-specific stuff
-src/.idea/*
-
 .idea/**/workspace.xml
 .idea/**/tasks.xml
 .idea/**/usage.statistics.xml
@@ -29,9 +27,12 @@ src/.idea/*
 # When using Gradle or Maven with auto-import, you should exclude module files,
 # since they will be recreated, and may cause churn.  Uncomment if using
 # auto-import.
-# .idea/modules.xml
-# .idea/*.iml
-# .idea/modules
+.idea/modules.xml
+.idea/*.iml
+.idea/modules
+.idea/misc.xml
+.idea/sbt.xml
+.idea/vcs.xml
 
 # CMake
 cmake-build-*/

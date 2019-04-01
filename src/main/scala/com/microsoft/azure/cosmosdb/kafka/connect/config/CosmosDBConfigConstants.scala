@@ -1,4 +1,4 @@
-package com.microsoft.azure.cosmosdb.kafka.connect.sink.config
+package com.microsoft.azure.cosmosdb.kafka.connect.config
 
 object CosmosDBConfigConstants {
     val CONNECTOR_PREFIX= "connect.cosmosdb"

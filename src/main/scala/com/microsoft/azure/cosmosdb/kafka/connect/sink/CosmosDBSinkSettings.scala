@@ -1,8 +1,9 @@
-package com.microsoft.azure.cosmosdb.kafka.connect.sink.config
+package com.microsoft.azure.cosmosdb.kafka.connect.sink
 
+
+import com.microsoft.azure.cosmosdb.kafka.connect.config.{CosmosDBConfig, CosmosDBConfigConstants}
 
 import org.apache.kafka.common.config.ConfigException
-
 import scala.util.Try
 
 case class CosmosDBSinkSettings(endpoint: String,

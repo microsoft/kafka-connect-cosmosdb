@@ -1,10 +1,10 @@
 package com.microsoft.azure.cosmosdb.kafka.connect.sink
 
-
 import java.util
 
-import com.microsoft.azure.cosmosdb.kafka.connect.sink.config.{CosmosDBConfig, CosmosDBSinkSettings}
-import com.microsoft.azure.cosmosdb.rx.AsyncDocumentClient
+import com.microsoft.azure.cosmosdb.kafka.connect.AsyncDocumentClientProvider
+import com.microsoft.azure.cosmosdb.kafka.connect.config.CosmosDBConfig
+import com.microsoft.azure.cosmosdb.rx._
 
 import scala.util.{Failure, Success, Try}
 import scala.collection.JavaConverters._
@@ -49,7 +49,6 @@ class CosmosDBSinkConnector private[sink](builder: CosmosDBSinkSettings => Async
 
     def initCosmosDB(settings: CosmosDBSinkSettings): Unit = {
         implicit val documentClient: AsyncDocumentClient = AsyncDocumentClientProvider.get(settings)
-//        val database = CosmosDBService.readOrCreateDatabase(settings)
-//        readOrCreateCollection(settings, database)
     }
+
 }
