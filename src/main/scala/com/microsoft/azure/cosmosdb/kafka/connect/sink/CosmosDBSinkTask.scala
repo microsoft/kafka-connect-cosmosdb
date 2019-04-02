@@ -1,12 +1,11 @@
 package com.microsoft.azure.cosmosdb.kafka.connect.sink
 
-import com.microsoft.azure.cosmosdb.kafka.connect.sink.config._
+
 import com.microsoft.azure.cosmosdb.rx.AsyncDocumentClient
-
 import com.typesafe.scalalogging.LazyLogging
-
 import java.util
 
+import com.microsoft.azure.cosmosdb.kafka.connect.config.CosmosDBConfig
 import org.apache.kafka.clients.consumer.OffsetAndMetadata
 import org.apache.kafka.common.TopicPartition
 import org.apache.kafka.connect.errors.ConnectException
@@ -17,7 +16,7 @@ import scala.util.{Failure, Success, Try}
 
 
 class CosmosDBSinkTask private[sink](val builder: CosmosDBSinkSettings => AsyncDocumentClient) extends SinkTask with LazyLogging {
-    private var writer: Option[CosmosDBWriter] = None
+    private var writer: Option[CosmosDBSinkService] = None
 
     override def start(props: util.Map[String, String]): Unit = {
         val config = if (context.configs.isEmpty) props else context.configs
@@ -30,7 +29,7 @@ class CosmosDBSinkTask private[sink](val builder: CosmosDBSinkSettings => AsyncD
         implicit val settings: CosmosDBSinkSettings = CosmosDBSinkSettings(taskConfig)
 
         logger.info("Initializing Cosmos DB Writer")
-        writer = Some(new CosmosDBWriter(settings, builder(settings)))
+        writer = Some(new CosmosDBSinkService(settings, builder(settings)))
     }
 
     override def put(records: util.Collection[SinkRecord]): Unit = {

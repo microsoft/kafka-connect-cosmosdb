@@ -1,4 +1,4 @@
-name := "com.microsoft.azure.cosmosdb.kafka.connect.sink"
+name := "com.microsoft.azure.cosmosdb.kafka.connect"
 organization := "com.microsoft.azure"
 version := "0.0.1-preview"
 scalaVersion := "2.12.8"
@@ -12,5 +12,10 @@ libraryDependencies += "com.google.code.gson" % "gson" % "2.8.5"
 
 trapExit := false
 fork in run := true
+
+libraryDependencies += "org.scalactic" %% "scalactic" % "3.0.5"
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.7" % "test"
+
+libraryDependencies += "com.typesafe" % "config" % "1.3.3" % "test"
 
 licenses += ("MIT", url("https://github.com/Microsoft/kafka-connect-cosmosdb/blob/master/LICENSE"))
