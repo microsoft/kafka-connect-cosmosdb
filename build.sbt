@@ -9,4 +9,9 @@ libraryDependencies += "javax.ws.rs" % "javax.ws.rs-api" % "2.1.1" artifacts( Ar
 libraryDependencies += "com.typesafe.scala-logging" %% "scala-logging" % "3.9.2"
 libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.3"
 
+libraryDependencies += "org.scalactic" %% "scalactic" % "3.0.5"
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.7" % "test"
+
+libraryDependencies += "com.typesafe" % "config" % "1.3.3" % "test"
+
 licenses += ("MIT", url("https://github.com/Microsoft/kafka-connect-cosmosdb/blob/master/LICENSE"))

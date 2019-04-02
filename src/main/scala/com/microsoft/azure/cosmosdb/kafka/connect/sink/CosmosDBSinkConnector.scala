@@ -2,7 +2,6 @@ package com.microsoft.azure.cosmosdb.kafka.connect.sink
 
 import java.util
 
-import com.microsoft.azure.cosmosdb.kafka.connect.AsyncDocumentClientProvider
 import com.microsoft.azure.cosmosdb.kafka.connect.config.CosmosDBConfig
 import com.microsoft.azure.cosmosdb.rx._
 

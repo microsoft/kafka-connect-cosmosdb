@@ -16,7 +16,7 @@ import scala.util.{Failure, Success, Try}
 
 
 class CosmosDBSinkTask private[sink](val builder: CosmosDBSinkSettings => AsyncDocumentClient) extends SinkTask with LazyLogging {
-    private var writer: Option[CosmosDBSinkWriter] = None
+    private var writer: Option[CosmosDBSinkService] = None
 
     override def start(props: util.Map[String, String]): Unit = {
         val config = if (context.configs.isEmpty) props else context.configs
@@ -29,7 +29,7 @@ class CosmosDBSinkTask private[sink](val builder: CosmosDBSinkSettings => AsyncD
         implicit val settings: CosmosDBSinkSettings = CosmosDBSinkSettings(taskConfig)
 
         logger.info("Initializing Cosmos DB Writer")
-        writer = Some(new CosmosDBSinkWriter(settings, builder(settings)))
+        writer = Some(new CosmosDBSinkService(settings, builder(settings)))
     }
 
     override def put(records: util.Collection[SinkRecord]): Unit = {

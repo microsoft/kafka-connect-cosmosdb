@@ -7,13 +7,11 @@ import org.apache.kafka.common.config.{AbstractConfig, ConfigDef}
 
 object CosmosDBConfig {
     lazy val config: ConfigDef = new ConfigDef()
-        .define(CosmosDBConfigConstants.CONNECTION_ENDPOINT_CONFIG, Type.STRING,
-            CosmosDBConfigConstants.CONNECTION_ENDPOINT_DEFAULT, Importance.HIGH,
+        .define(CosmosDBConfigConstants.CONNECTION_ENDPOINT_CONFIG, Type.STRING, Importance.HIGH,
             CosmosDBConfigConstants.CONNECTION_ENDPOINT_DOC, "Connection", 1,  Width.LONG,
             CosmosDBConfigConstants.CONNECTION_ENDPOINT_DISPLAY)
 
-        .define(CosmosDBConfigConstants.CONNECTION_MASTERKEY_CONFIG, Type.PASSWORD,
-            CosmosDBConfigConstants.CONNECTION_MASTERKEY_DEFAULT, Importance.HIGH,
+        .define(CosmosDBConfigConstants.CONNECTION_MASTERKEY_CONFIG, Type.PASSWORD, Importance.HIGH,
             CosmosDBConfigConstants.CONNECTION_MASTERKEY_DOC, "Connection", 2, Width.LONG,
             CosmosDBConfigConstants.CONNECTION_MASTERKEY_DISPLAY)
 
