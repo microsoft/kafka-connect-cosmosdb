@@ -10,7 +10,7 @@ object CosmosDBConfigConstants {
     val CONNECTION_ENDPOINT_DISPLAY = "Endpoint"
 
     val CONNECTION_MASTERKEY_CONFIG = s"$CONNECTOR_PREFIX.master.key"
-    val CONNECTION_MASTERKEY_DOC = "The connection aster key"
+    val CONNECTION_MASTERKEY_DOC = "The connection master key."
     val CONNECTION_MASTERKEY_DISPLAY = "Master Key"
 
     val DATABASE_CONFIG = s"$CONNECTOR_PREFIX.$DATABASE_PROP_SUFFIX"
@@ -30,6 +30,10 @@ object CosmosDBConfigConstants {
     val CREATE_COLLECTION_DOC = "If set to true it will create the collection if it doesn't exist. If not set to true, an exception will be raised."
     val CREATE_COLLECTION_DISPLAY = "Create Collection If Not Exists"
     val CREATE_COLLECTION_DEFAULT: Boolean = false
+
+    val TOPIC_CONFIG = s"$CONNECTOR_PREFIX.topic.name"
+    val TOPIC_CONFIG_DISPLAY = "Topic Name."
+    val TOPIC_CONFIG_DOC = "The Kafka Topic"
 }
 
 

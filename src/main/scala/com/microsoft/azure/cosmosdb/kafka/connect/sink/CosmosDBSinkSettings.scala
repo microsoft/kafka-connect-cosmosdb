@@ -1,10 +1,7 @@
 package com.microsoft.azure.cosmosdb.kafka.connect.sink
 
 
-import com.microsoft.azure.cosmosdb.kafka.connect.config.{CosmosDBConfig, CosmosDBConfigConstants}
-import org.apache.kafka.common.config.ConfigException
-
-import scala.util.Try
+import com.microsoft.azure.cosmosdb.kafka.connect.config.{CosmosDBConfigConstants, CosmosDBConfigSink}
 
 case class CosmosDBSinkSettings(endpoint: String,
                                 masterKey: String,
@@ -16,7 +13,7 @@ case class CosmosDBSinkSettings(endpoint: String,
 }
 
 object CosmosDBSinkSettings{
-    def apply(config: CosmosDBConfig): CosmosDBSinkSettings = {
+    def apply(config: CosmosDBConfigSink): CosmosDBSinkSettings = {
         val endpoint:String = config.getString(CosmosDBConfigConstants.CONNECTION_ENDPOINT_CONFIG)
         require(endpoint.trim.nonEmpty, s"Invalid value for ${CosmosDBConfigConstants.CONNECTION_ENDPOINT_CONFIG}")
         require(endpoint.startsWith("https://"), s"""Invalid value for ${CosmosDBConfigConstants.CONNECTION_ENDPOINT_CONFIG} - endpoint must start with "https://"""")
