@@ -1,6 +1,6 @@
 package com.microsoft.azure.cosmosdb.kafka.connect.sink
 
-import com.microsoft.azure.cosmosdb.kafka.connect.config.{CosmosDBConfig, CosmosDBConfigConstants}
+import com.microsoft.azure.cosmosdb.kafka.connect.config.{CosmosDBConfigConstants, CosmosDBConfigSink}
 import org.apache.kafka.common.config.ConfigException
 import org.scalatest.{Matchers, WordSpec}
 
@@ -17,7 +17,7 @@ class CosmosDBSinkSettingsTest extends WordSpec with Matchers {
             ).asJava
 
             val caught = intercept[IllegalArgumentException]{
-                CosmosDBSinkSettings(CosmosDBConfig(map))
+                CosmosDBSinkSettings(CosmosDBConfigSink(map))
             }
 
             caught.getMessage should endWith (s"Invalid value for ${CosmosDBConfigConstants.CONNECTION_ENDPOINT_CONFIG}")

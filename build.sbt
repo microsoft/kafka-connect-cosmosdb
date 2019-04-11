@@ -9,6 +9,7 @@ libraryDependencies += "javax.ws.rs" % "javax.ws.rs-api" % "2.1.1" artifacts( Ar
 libraryDependencies += "com.typesafe.scala-logging" %% "scala-logging" % "3.9.2"
 libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.3"
 libraryDependencies += "com.google.code.gson" % "gson" % "2.8.5"
+libraryDependencies += "io.reactivex" %% "rxscala" % "0.26.5"
 
 trapExit := false
 fork in run := true

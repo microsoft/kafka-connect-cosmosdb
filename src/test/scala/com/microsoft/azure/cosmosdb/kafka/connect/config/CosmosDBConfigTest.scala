@@ -15,7 +15,7 @@ class CosmosDBConfigTest extends WordSpec with Matchers {
             ).asJava
 
             val caught = intercept[ConfigException] {
-                CosmosDBConfig(map)
+                CosmosDBConfigSink(map)
             }
 
             caught.getMessage should startWith(s"""Missing required configuration "${CosmosDBConfigConstants.CONNECTION_ENDPOINT_CONFIG}" """)
@@ -29,7 +29,7 @@ class CosmosDBConfigTest extends WordSpec with Matchers {
             ).asJava
 
             val caught = intercept[ConfigException] {
-                CosmosDBConfig(map)
+                CosmosDBConfigSink(map)
             }
 
             caught.getMessage should startWith(s"""Missing required configuration "${CosmosDBConfigConstants.CONNECTION_MASTERKEY_CONFIG}" """)
@@ -43,7 +43,7 @@ class CosmosDBConfigTest extends WordSpec with Matchers {
             ).asJava
 
             val caught = intercept[ConfigException] {
-                CosmosDBConfig(map)
+                CosmosDBConfigSink(map)
             }
 
             caught.getMessage should startWith(s"""Missing required configuration "${CosmosDBConfigConstants.DATABASE_CONFIG}" """)
@@ -57,7 +57,7 @@ class CosmosDBConfigTest extends WordSpec with Matchers {
             ).asJava
 
             val caught = intercept[ConfigException] {
-                CosmosDBConfig(map)
+                CosmosDBConfigSink(map)
             }
 
             caught.getMessage should startWith(s"""Missing required configuration "${CosmosDBConfigConstants.COLLECTION_CONFIG}" """)
