@@ -44,16 +44,25 @@ object ConnectorConfig {
       **/
 
     lazy val sourceConfig: ConfigDef = ConnectorConfig.baseConfigDef
+//        .define(CosmosDBConfigConstants.EXTRA_SOURCE_CONFIG_01, Type.STRING, Importance.HIGH,
+//          CosmosDBConfigConstants.EXTRA_SOURCE_CONFIG_01_DOC, "Source", 1, Width.MEDIUM,
+//          CosmosDBConfigConstants.EXTRA_SOURCE_CONFIG_01_DISPLAY)
+//        .define(CosmosDBConfigConstants.EXTRA_SOURCE_CONFIG_02, Type.STRING, Importance.HIGH,
+//          CosmosDBConfigConstants.EXTRA_SOURCE_CONFIG_02_DOC, "Source", 2, Width.MEDIUM,
+//          CosmosDBConfigConstants.EXTRA_SOURCE_CONFIG_02_DISPLAY)
+
     /**
       * Holds the extra configurations for the sink on top of
       * the base.
       **/
     lazy val sinkConfig: ConfigDef = ConnectorConfig.baseConfigDef
+//        .define(CosmosDBConfigConstants.EXTRA_SINK_CONFIG_01, Type.STRING, Importance.HIGH,
+//          CosmosDBConfigConstants.EXTRA_SINK_CONFIG_01_DOC, "Sink", 1, Width.MEDIUM,
+//          CosmosDBConfigConstants.EXTRA_SINK_CONFIG_01_DISPLAY)
+//        .define(CosmosDBConfigConstants.EXTRA_SINK_CONFIG_02, Type.STRING, Importance.HIGH,
+//          CosmosDBConfigConstants.EXTRA_SINK_CONFIG_02_DOC, "Sink", 2, Width.MEDIUM,
+//          CosmosDBConfigConstants.EXTRA_SINK_CONFIG_02_DISPLAY)
 }
 
 case class CosmosDBConfig(config: ConfigDef, props: util.Map[String, String])
   extends AbstractConfig(config, props)
-
-
-
-
