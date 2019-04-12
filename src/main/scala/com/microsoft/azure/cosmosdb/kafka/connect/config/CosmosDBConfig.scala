@@ -43,7 +43,7 @@ object ConnectorConfig {
       * the base.
       **/
 
-    lazy val sourceConfig: ConfigDef = ConnectorConfig.baseConfigDef
+    lazy val sourceConfigDef: ConfigDef = ConnectorConfig.baseConfigDef
 //        .define(CosmosDBConfigConstants.EXTRA_SOURCE_CONFIG_01, Type.STRING, Importance.HIGH,
 //          CosmosDBConfigConstants.EXTRA_SOURCE_CONFIG_01_DOC, "Source", 1, Width.MEDIUM,
 //          CosmosDBConfigConstants.EXTRA_SOURCE_CONFIG_01_DISPLAY)
@@ -55,7 +55,7 @@ object ConnectorConfig {
       * Holds the extra configurations for the sink on top of
       * the base.
       **/
-    lazy val sinkConfig: ConfigDef = ConnectorConfig.baseConfigDef
+    lazy val sinkConfigDef: ConfigDef = ConnectorConfig.baseConfigDef
 //        .define(CosmosDBConfigConstants.EXTRA_SINK_CONFIG_01, Type.STRING, Importance.HIGH,
 //          CosmosDBConfigConstants.EXTRA_SINK_CONFIG_01_DOC, "Sink", 1, Width.MEDIUM,
 //          CosmosDBConfigConstants.EXTRA_SINK_CONFIG_01_DISPLAY)

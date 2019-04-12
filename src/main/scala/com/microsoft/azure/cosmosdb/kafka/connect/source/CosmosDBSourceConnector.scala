@@ -37,5 +37,5 @@ class CosmosDBSourceConnector extends SourceConnector with LazyLogging {
     (1 to maxTasks).map(_ => this.configProps).toList.asJava
   }
 
-  override def config(): ConfigDef = ConnectorConfig.sourceConfig
+  override def config(): ConfigDef = ConnectorConfig.sourceConfigDef
 }

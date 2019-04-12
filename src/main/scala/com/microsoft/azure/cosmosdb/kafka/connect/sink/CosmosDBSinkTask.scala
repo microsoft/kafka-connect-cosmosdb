@@ -21,7 +21,7 @@ class CosmosDBSinkTask private[sink](val builder: CosmosDBSinkSettings => AsyncD
     override def start(props: util.Map[String, String]): Unit = {
         val config = if (context.configs.isEmpty) props else context.configs
 
-        val taskConfig:CosmosDBConfig = Try(CosmosDBConfig(ConnectorConfig.sinkConfig, props)) match {
+        val taskConfig:CosmosDBConfig = Try(CosmosDBConfig(ConnectorConfig.sinkConfigDef, props)) match {
             case Failure(f) => throw new ConnectException ("Couldn't start Cosmos DB Sink due to configuration error.", f)
             case Success(s) => s
         }

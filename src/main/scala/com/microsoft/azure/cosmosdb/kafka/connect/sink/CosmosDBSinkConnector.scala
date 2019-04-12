@@ -21,7 +21,7 @@ class CosmosDBSinkConnector extends SinkConnector with LazyLogging {
     override def version(): String = getClass.getPackage.getImplementationVersion
 
     override def start(props: util.Map[String, String]): Unit = {
-        val config = Try(CosmosDBConfig(ConnectorConfig.sinkConfig, props)) match {
+        val config = Try(CosmosDBConfig(ConnectorConfig.sinkConfigDef, props)) match {
             case Failure(f) => throw new ConnectException(s"Couldn't start Cosmos DB Sink due to configuration error: ${f.getMessage}", f)
             case Success(c) => c
         }
@@ -44,7 +44,7 @@ class CosmosDBSinkConnector extends SinkConnector with LazyLogging {
         (1 to maxTasks).map(_ => this.configProps).toList.asJava
     }
 
-    override def config(): ConfigDef = ConnectorConfig.sinkConfig
+    override def config(): ConfigDef = ConnectorConfig.sinkConfigDef
 
     def initCosmosDB(settings: CosmosDBSinkSettings): Unit = {
         implicit val documentClient: AsyncDocumentClient = AsyncDocumentClientProvider.get(settings)

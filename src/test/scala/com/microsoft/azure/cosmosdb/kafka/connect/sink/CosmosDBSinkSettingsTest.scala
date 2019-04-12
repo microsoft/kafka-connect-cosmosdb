@@ -18,7 +18,7 @@ class CosmosDBSinkSettingsTest extends WordSpec with Matchers {
             ).asJava
 
             val caught = intercept[IllegalArgumentException]{
-                CosmosDBSinkSettings(CosmosDBConfig(ConnectorConfig.sinkConfig, map))
+                CosmosDBSinkSettings(CosmosDBConfig(ConnectorConfig.sinkConfigDef, map))
             }
 
             caught.getMessage should endWith (s"Invalid value for ${CosmosDBConfigConstants.CONNECTION_ENDPOINT_CONFIG}")
@@ -33,7 +33,7 @@ class CosmosDBSinkSettingsTest extends WordSpec with Matchers {
                 CosmosDBConfigConstants.TOPIC_CONFIG -> "f",
             ).asJava
 
-            val config = CosmosDBConfig(ConnectorConfig.sinkConfig, map)
+            val config = CosmosDBConfig(ConnectorConfig.sinkConfigDef, map)
             val caught = intercept[IllegalArgumentException]{
                 CosmosDBSinkSettings(config)
             }
@@ -50,7 +50,7 @@ class CosmosDBSinkSettingsTest extends WordSpec with Matchers {
                 CosmosDBConfigConstants.TOPIC_CONFIG -> "f",
             ).asJava
 
-            val config = CosmosDBConfig(ConnectorConfig.sinkConfig, map)
+            val config = CosmosDBConfig(ConnectorConfig.sinkConfigDef, map)
             val caught = intercept[IllegalArgumentException]{
                 CosmosDBSinkSettings(config)
             }
@@ -67,7 +67,7 @@ class CosmosDBSinkSettingsTest extends WordSpec with Matchers {
                 CosmosDBConfigConstants.TOPIC_CONFIG -> "f",
             ).asJava
 
-            val config = CosmosDBConfig(ConnectorConfig.sinkConfig, map)
+            val config = CosmosDBConfig(ConnectorConfig.sinkConfigDef, map)
             val caught = intercept[IllegalArgumentException]{
                 CosmosDBSinkSettings(config)
             }
@@ -84,7 +84,7 @@ class CosmosDBSinkSettingsTest extends WordSpec with Matchers {
                 CosmosDBConfigConstants.TOPIC_CONFIG -> "",
             ).asJava
 
-            val config = CosmosDBConfig(ConnectorConfig.sinkConfig, map)
+            val config = CosmosDBConfig(ConnectorConfig.sinkConfigDef, map)
             val caught = intercept[IllegalArgumentException]{
                 CosmosDBSinkSettings(config)
             }
@@ -101,7 +101,7 @@ class CosmosDBSinkSettingsTest extends WordSpec with Matchers {
                 CosmosDBConfigConstants.TOPIC_CONFIG -> "f",
             ).asJava
 
-            val config = CosmosDBConfig(ConnectorConfig.sinkConfig, map)
+            val config = CosmosDBConfig(ConnectorConfig.sinkConfigDef, map)
             val settings = CosmosDBSinkSettings(config)
 
             assert(!settings.createDatabase && !settings.createCollection, "createDatabase && createCollection should be false")
@@ -117,7 +117,7 @@ class CosmosDBSinkSettingsTest extends WordSpec with Matchers {
                 CosmosDBConfigConstants.CREATE_DATABASE_CONFIG -> "true"
             ).asJava
 
-            val config = CosmosDBConfig(ConnectorConfig.sinkConfig, map)
+            val config = CosmosDBConfig(ConnectorConfig.sinkConfigDef, map)
             val settings = CosmosDBSinkSettings(config)
 
             assert(settings.createDatabase, "createDatabase should be true")
@@ -133,7 +133,7 @@ class CosmosDBSinkSettingsTest extends WordSpec with Matchers {
                 CosmosDBConfigConstants.CREATE_COLLECTION_CONFIG -> "true"
             ).asJava
 
-            val config = CosmosDBConfig(ConnectorConfig.sinkConfig, map)
+            val config = CosmosDBConfig(ConnectorConfig.sinkConfigDef, map)
             val settings = CosmosDBSinkSettings(config)
 
             assert(settings.createCollection, "createCollection should be true")
@@ -150,7 +150,7 @@ class CosmosDBSinkSettingsTest extends WordSpec with Matchers {
             ).asJava
 
             val caught = intercept[ConfigException]{
-                CosmosDBConfig(ConnectorConfig.sinkConfig, map)
+                CosmosDBConfig(ConnectorConfig.sinkConfigDef, map)
             }
 
             caught.getMessage should endWith("Expected value to be either true or false")
@@ -167,7 +167,7 @@ class CosmosDBSinkSettingsTest extends WordSpec with Matchers {
             ).asJava
 
             val caught = intercept[ConfigException]{
-                CosmosDBConfig(ConnectorConfig.sinkConfig, map)
+                CosmosDBConfig(ConnectorConfig.sinkConfigDef, map)
             }
 
             caught.getMessage should endWith("Expected value to be either true or false")
