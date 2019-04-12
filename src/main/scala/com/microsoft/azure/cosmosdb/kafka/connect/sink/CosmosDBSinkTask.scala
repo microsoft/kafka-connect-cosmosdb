@@ -5,7 +5,7 @@ import com.microsoft.azure.cosmosdb.rx.AsyncDocumentClient
 import com.typesafe.scalalogging.LazyLogging
 import java.util
 
-import com.microsoft.azure.cosmosdb.kafka.connect.config.{CosmosDBConfigSink}
+import com.microsoft.azure.cosmosdb.kafka.connect.config.{ConnectorConfig, CosmosDBConfig}
 import org.apache.kafka.clients.consumer.OffsetAndMetadata
 import org.apache.kafka.common.TopicPartition
 import org.apache.kafka.connect.errors.ConnectException
@@ -21,7 +21,7 @@ class CosmosDBSinkTask private[sink](val builder: CosmosDBSinkSettings => AsyncD
     override def start(props: util.Map[String, String]): Unit = {
         val config = if (context.configs.isEmpty) props else context.configs
 
-        val taskConfig:CosmosDBConfigSink = Try(CosmosDBConfigSink(config)) match {
+        val taskConfig:CosmosDBConfig = Try(CosmosDBConfig(ConnectorConfig.sinkConfig, props)) match {
             case Failure(f) => throw new ConnectException ("Couldn't start Cosmos DB Sink due to configuration error.", f)
             case Success(s) => s
         }

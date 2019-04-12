@@ -1,6 +1,6 @@
 package com.microsoft.azure.cosmosdb.kafka.connect.sink
 
-import com.microsoft.azure.cosmosdb.kafka.connect.config.{CosmosDBConfigSink}
+import com.microsoft.azure.cosmosdb.kafka.connect.config.{CosmosDBConfig}
 import com.microsoft.azure.cosmosdb.rx.AsyncDocumentClient
 import com.typesafe.scalalogging.LazyLogging
 import org.apache.kafka.connect.sink.{SinkRecord, SinkTaskContext}
@@ -20,7 +20,7 @@ class CosmosDBSinkService(settings: CosmosDBSinkSettings, documentClient: AsyncD
 }
 
 object CosmosDBSinkService extends LazyLogging {
-    def apply(config: CosmosDBConfigSink, context: SinkTaskContext): CosmosDBSinkService = {
+    def apply(config: CosmosDBConfig, context: SinkTaskContext): CosmosDBSinkService = {
 
         implicit val settings: CosmosDBSinkSettings = CosmosDBSinkSettings(config)
         logger.info(s"Initialising Cosmos DB writer.")

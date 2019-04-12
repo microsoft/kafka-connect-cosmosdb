@@ -1,6 +1,6 @@
 package com.microsoft.azure.cosmosdb.kafka.connect.sink
 
-import com.microsoft.azure.cosmosdb.kafka.connect.config.{CosmosDBConfigConstants, CosmosDBConfigSink}
+import com.microsoft.azure.cosmosdb.kafka.connect.config.{ConnectorConfig, CosmosDBConfig, CosmosDBConfigConstants}
 import org.apache.kafka.common.config.ConfigException
 import org.scalatest.{Matchers, WordSpec}
 
@@ -14,10 +14,11 @@ class CosmosDBSinkSettingsTest extends WordSpec with Matchers {
                 CosmosDBConfigConstants.CONNECTION_MASTERKEY_CONFIG -> "f",
                 CosmosDBConfigConstants.DATABASE_CONFIG -> "f",
                 CosmosDBConfigConstants.COLLECTION_CONFIG -> "f",
+                CosmosDBConfigConstants.TOPIC_CONFIG -> "f",
             ).asJava
 
             val caught = intercept[IllegalArgumentException]{
-                CosmosDBSinkSettings(CosmosDBConfigSink(map))
+                CosmosDBSinkSettings(CosmosDBConfig(ConnectorConfig.sinkConfig, map))
             }
 
             caught.getMessage should endWith (s"Invalid value for ${CosmosDBConfigConstants.CONNECTION_ENDPOINT_CONFIG}")
@@ -29,9 +30,10 @@ class CosmosDBSinkSettingsTest extends WordSpec with Matchers {
                 CosmosDBConfigConstants.CONNECTION_MASTERKEY_CONFIG -> "",
                 CosmosDBConfigConstants.DATABASE_CONFIG -> "f",
                 CosmosDBConfigConstants.COLLECTION_CONFIG -> "f",
+                CosmosDBConfigConstants.TOPIC_CONFIG -> "f",
             ).asJava
 
-            val config = CosmosDBConfig(map)
+            val config = CosmosDBConfig(ConnectorConfig.sinkConfig, map)
             val caught = intercept[IllegalArgumentException]{
                 CosmosDBSinkSettings(config)
             }
@@ -45,9 +47,10 @@ class CosmosDBSinkSettingsTest extends WordSpec with Matchers {
                 CosmosDBConfigConstants.CONNECTION_MASTERKEY_CONFIG -> "f",
                 CosmosDBConfigConstants.DATABASE_CONFIG -> "",
                 CosmosDBConfigConstants.COLLECTION_CONFIG -> "f",
+                CosmosDBConfigConstants.TOPIC_CONFIG -> "f",
             ).asJava
 
-            val config = CosmosDBConfig(map)
+            val config = CosmosDBConfig(ConnectorConfig.sinkConfig, map)
             val caught = intercept[IllegalArgumentException]{
                 CosmosDBSinkSettings(config)
             }
@@ -61,14 +64,32 @@ class CosmosDBSinkSettingsTest extends WordSpec with Matchers {
                 CosmosDBConfigConstants.CONNECTION_MASTERKEY_CONFIG -> "f",
                 CosmosDBConfigConstants.DATABASE_CONFIG -> "f",
                 CosmosDBConfigConstants.COLLECTION_CONFIG -> "",
+                CosmosDBConfigConstants.TOPIC_CONFIG -> "f",
             ).asJava
 
-            val config = CosmosDBConfig(map)
+            val config = CosmosDBConfig(ConnectorConfig.sinkConfig, map)
             val caught = intercept[IllegalArgumentException]{
                 CosmosDBSinkSettings(config)
             }
 
             caught.getMessage should endWith (s"Invalid value for ${CosmosDBConfigConstants.COLLECTION_CONFIG}")
+        }
+
+        "throws an exception if topic name is empty" in {
+            val map = Map(
+                CosmosDBConfigConstants.CONNECTION_ENDPOINT_CONFIG -> "https://f",
+                CosmosDBConfigConstants.CONNECTION_MASTERKEY_CONFIG -> "f",
+                CosmosDBConfigConstants.DATABASE_CONFIG -> "f",
+                CosmosDBConfigConstants.COLLECTION_CONFIG -> "f",
+                CosmosDBConfigConstants.TOPIC_CONFIG -> "",
+            ).asJava
+
+            val config = CosmosDBConfig(ConnectorConfig.sinkConfig, map)
+            val caught = intercept[IllegalArgumentException]{
+                CosmosDBSinkSettings(config)
+            }
+
+            caught.getMessage should endWith (s"Invalid value for ${CosmosDBConfigConstants.TOPIC_CONFIG}")
         }
 
         "createDatabase && createCollection should be false if no setting provided" in {
@@ -77,9 +98,10 @@ class CosmosDBSinkSettingsTest extends WordSpec with Matchers {
                 CosmosDBConfigConstants.CONNECTION_MASTERKEY_CONFIG -> "f",
                 CosmosDBConfigConstants.DATABASE_CONFIG -> "f",
                 CosmosDBConfigConstants.COLLECTION_CONFIG -> "f",
+                CosmosDBConfigConstants.TOPIC_CONFIG -> "f",
             ).asJava
 
-            val config = CosmosDBConfig(map)
+            val config = CosmosDBConfig(ConnectorConfig.sinkConfig, map)
             val settings = CosmosDBSinkSettings(config)
 
             assert(!settings.createDatabase && !settings.createCollection, "createDatabase && createCollection should be false")
@@ -91,10 +113,11 @@ class CosmosDBSinkSettingsTest extends WordSpec with Matchers {
                 CosmosDBConfigConstants.CONNECTION_MASTERKEY_CONFIG -> "f",
                 CosmosDBConfigConstants.DATABASE_CONFIG -> "f",
                 CosmosDBConfigConstants.COLLECTION_CONFIG -> "f",
+                CosmosDBConfigConstants.TOPIC_CONFIG -> "f",
                 CosmosDBConfigConstants.CREATE_DATABASE_CONFIG -> "true"
             ).asJava
 
-            val config = CosmosDBConfig(map)
+            val config = CosmosDBConfig(ConnectorConfig.sinkConfig, map)
             val settings = CosmosDBSinkSettings(config)
 
             assert(settings.createDatabase, "createDatabase should be true")
@@ -106,10 +129,11 @@ class CosmosDBSinkSettingsTest extends WordSpec with Matchers {
                 CosmosDBConfigConstants.CONNECTION_MASTERKEY_CONFIG -> "f",
                 CosmosDBConfigConstants.DATABASE_CONFIG -> "f",
                 CosmosDBConfigConstants.COLLECTION_CONFIG -> "f",
+                CosmosDBConfigConstants.TOPIC_CONFIG -> "f",
                 CosmosDBConfigConstants.CREATE_COLLECTION_CONFIG -> "true"
             ).asJava
 
-            val config = CosmosDBConfig(map)
+            val config = CosmosDBConfig(ConnectorConfig.sinkConfig, map)
             val settings = CosmosDBSinkSettings(config)
 
             assert(settings.createCollection, "createCollection should be true")
@@ -121,11 +145,12 @@ class CosmosDBSinkSettingsTest extends WordSpec with Matchers {
                 CosmosDBConfigConstants.CONNECTION_MASTERKEY_CONFIG -> "f",
                 CosmosDBConfigConstants.DATABASE_CONFIG -> "f",
                 CosmosDBConfigConstants.COLLECTION_CONFIG -> "f",
+                CosmosDBConfigConstants.TOPIC_CONFIG -> "f",
                 CosmosDBConfigConstants.CREATE_DATABASE_CONFIG -> "foo"
             ).asJava
 
             val caught = intercept[ConfigException]{
-                CosmosDBConfig(map)
+                CosmosDBConfig(ConnectorConfig.sinkConfig, map)
             }
 
             caught.getMessage should endWith("Expected value to be either true or false")
@@ -137,11 +162,12 @@ class CosmosDBSinkSettingsTest extends WordSpec with Matchers {
                 CosmosDBConfigConstants.CONNECTION_MASTERKEY_CONFIG -> "f",
                 CosmosDBConfigConstants.DATABASE_CONFIG -> "f",
                 CosmosDBConfigConstants.COLLECTION_CONFIG -> "f",
+                CosmosDBConfigConstants.TOPIC_CONFIG -> "f",
                 CosmosDBConfigConstants.CREATE_COLLECTION_CONFIG -> "foo"
             ).asJava
 
             val caught = intercept[ConfigException]{
-                CosmosDBConfig(map)
+                CosmosDBConfig(ConnectorConfig.sinkConfig, map)
             }
 
             caught.getMessage should endWith("Expected value to be either true or false")
