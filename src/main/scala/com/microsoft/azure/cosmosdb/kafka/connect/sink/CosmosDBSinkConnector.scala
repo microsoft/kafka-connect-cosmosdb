@@ -2,8 +2,7 @@ package com.microsoft.azure.cosmosdb.kafka.connect.sink
 
 import java.util
 
-import com.microsoft.azure.cosmosdb.kafka.connect.config.{CosmosDBConfigSink}
-import com.microsoft.azure.cosmosdb.rx._
+import com.microsoft.azure.cosmosdb.kafka.connect.config.{ConnectorConfig, CosmosDBConfig}
 
 import scala.util.{Failure, Success, Try}
 import scala.collection.JavaConverters._
@@ -15,23 +14,20 @@ import org.apache.kafka.connect.errors.ConnectException
 
 
 
-class CosmosDBSinkConnector private[sink](builder: CosmosDBSinkSettings => AsyncDocumentClient) extends SinkConnector with LazyLogging {
+class CosmosDBSinkConnector extends SinkConnector with LazyLogging {
     private var configProps: util.Map[String, String] = _
 
     override def version(): String = getClass.getPackage.getImplementationVersion
 
     override def start(props: util.Map[String, String]): Unit = {
-        val config = Try(CosmosDBConfigSink(props)) match {
+        logger.info("Starting CosmosDBSinkConnector")
+
+        val config = Try(CosmosDBConfig(ConnectorConfig.sinkConfigDef, props)) match {
             case Failure(f) => throw new ConnectException(s"Couldn't start Cosmos DB Sink due to configuration error: ${f.getMessage}", f)
             case Success(c) => c
         }
 
         configProps = props
-
-        val settings = CosmosDBSinkSettings(config)
-        initCosmosDB(settings)
-
-        logger.info("Starting CosmosDBSinkConnector")
     }
 
     override def stop(): Unit = {
@@ -44,10 +40,7 @@ class CosmosDBSinkConnector private[sink](builder: CosmosDBSinkSettings => Async
         (1 to maxTasks).map(_ => this.configProps).toList.asJava
     }
 
-    override def config(): ConfigDef = CosmosDBConfigSink.sinkConfig
+    override def config(): ConfigDef = ConnectorConfig.sinkConfigDef
 
-    def initCosmosDB(settings: CosmosDBSinkSettings): Unit = {
-        implicit val documentClient: AsyncDocumentClient = AsyncDocumentClientProvider.get(settings)
-    }
 
 }
