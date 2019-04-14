@@ -1,0 +1,9 @@
+[debug] Acquiring lock on file C:\Dev\github\ryancrawcour\kafka-connect-cosmosdb\project\target\.sbt-compilation-infos\kafka-connect-cosmosdb-compile\.sbt-idea-lock ...
+[error] C:\Dev\github\ryancrawcour\kafka-connect-cosmosdb\src\main\scala\com\microsoft\azure\cosmosdb\kafka\connect\Runner.scala:65:13: value setName is not a member of com.microsoft.azure.cosmosdb.kafka.connect.SampleDoc
+[error]   sampleDoc.setName("test1")
+[error]             ^
+[error] C:\Dev\github\ryancrawcour\kafka-connect-cosmosdb\src\main\scala\com\microsoft\azure\cosmosdb\kafka\connect\sink\CosmosDBSinkTask.scala:20:32: not found: type CosmosDBProvider
+[error]     private var writer: Option[CosmosDBProvider] = None
+[error]                                ^
+[error] two errors found
+[debug] Releasing lock on file C:\Dev\github\ryancrawcour\kafka-connect-cosmosdb\project\target\.sbt-compilation-infos\kafka-connect-cosmosdb-compile\.sbt-idea-lock.
