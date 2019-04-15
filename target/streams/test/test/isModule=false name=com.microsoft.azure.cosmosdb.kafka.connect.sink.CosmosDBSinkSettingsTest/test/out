@@ -1,0 +1,12 @@
+[0m[[0m[0minfo[0m] [0m[0m[32mCosmosDBSinkSettingsTest:[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mCosmosDBSinkSettings[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32m- should throws an exception if endpoint is empty[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32m- should throws an exception if masterkey is empty[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32m- should throws an exception if database is empty[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32m- should throws an exception if collection is empty[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32m- should throws an exception if topic name is empty[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32m- should createDatabase && createCollection should be false if no setting provided[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32m- should set createDatabase flag if value is set to true[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32m- should set createCollection flag if value is set to true[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32m- should should throw an exception if createDatabase is neither "true" or "false[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32m- should should throw an exception if createCollection is neither "true" or "false[0m[0m

@@ -1,0 +1,6 @@
+[0m[[0m[0minfo[0m] [0m[0m[32mCosmosDBConfigTest:[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32mCosmosDBConfig[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32m- should throw an exception if endpoint not present[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32m- should throw an exception if master key not present[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32m- should throw an exception if database not present[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32m- should throw an exception if collection not present[0m[0m

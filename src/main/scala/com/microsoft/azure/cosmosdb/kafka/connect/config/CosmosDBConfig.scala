@@ -3,10 +3,10 @@ package com.microsoft.azure.cosmosdb.kafka.connect.config
 import java.util
 
 import org.apache.kafka.common.config.ConfigDef.{Importance, Type, Width}
-import org.apache.kafka.common.config.{ConfigDef}
+import org.apache.kafka.common.config.{AbstractConfig, ConfigDef}
 
-case class CosmosDBConfig() {
-    lazy val configDef: ConfigDef = new ConfigDef()
+object ConnectorConfig {
+    lazy val baseConfigDef: ConfigDef = new ConfigDef()
         .define(CosmosDBConfigConstants.CONNECTION_ENDPOINT_CONFIG, Type.STRING, Importance.HIGH,
             CosmosDBConfigConstants.CONNECTION_ENDPOINT_DOC, "Connection", 1,  Width.LONG,
             CosmosDBConfigConstants.CONNECTION_ENDPOINT_DISPLAY)
@@ -36,31 +36,33 @@ case class CosmosDBConfig() {
         .define(CosmosDBConfigConstants.TOPIC_CONFIG, Type.STRING, Importance.HIGH,
             CosmosDBConfigConstants.TOPIC_CONFIG_DOC, "Topic", 1, Width.MEDIUM,
             CosmosDBConfigConstants.TOPIC_CONFIG_DISPLAY)
+
+
+    /**
+      * Holds the extra configurations for the source on top of
+      * the base.
+      **/
+
+    lazy val sourceConfigDef: ConfigDef = ConnectorConfig.baseConfigDef
+//        .define(CosmosDBConfigConstants.EXTRA_SOURCE_CONFIG_01, Type.STRING, Importance.HIGH,
+//          CosmosDBConfigConstants.EXTRA_SOURCE_CONFIG_01_DOC, "Source", 1, Width.MEDIUM,
+//          CosmosDBConfigConstants.EXTRA_SOURCE_CONFIG_01_DISPLAY)
+//        .define(CosmosDBConfigConstants.EXTRA_SOURCE_CONFIG_02, Type.STRING, Importance.HIGH,
+//          CosmosDBConfigConstants.EXTRA_SOURCE_CONFIG_02_DOC, "Source", 2, Width.MEDIUM,
+//          CosmosDBConfigConstants.EXTRA_SOURCE_CONFIG_02_DISPLAY)
+
+    /**
+      * Holds the extra configurations for the sink on top of
+      * the base.
+      **/
+    lazy val sinkConfigDef: ConfigDef = ConnectorConfig.baseConfigDef
+//        .define(CosmosDBConfigConstants.EXTRA_SINK_CONFIG_01, Type.STRING, Importance.HIGH,
+//          CosmosDBConfigConstants.EXTRA_SINK_CONFIG_01_DOC, "Sink", 1, Width.MEDIUM,
+//          CosmosDBConfigConstants.EXTRA_SINK_CONFIG_01_DISPLAY)
+//        .define(CosmosDBConfigConstants.EXTRA_SINK_CONFIG_02, Type.STRING, Importance.HIGH,
+//          CosmosDBConfigConstants.EXTRA_SINK_CONFIG_02_DOC, "Sink", 2, Width.MEDIUM,
+//          CosmosDBConfigConstants.EXTRA_SINK_CONFIG_02_DISPLAY)
 }
 
-/**
-  * Holds the extra configurations for the source on top of
-  * the base.
-  **/
-object CosmosDBConfigSource {
-  val base: ConfigDef = CosmosDBConfig().configDef
-  val sourceConfig: ConfigDef = base
-}
-
-case class CosmosDBConfigSource(props: util.Map[String, String])
-  extends BaseConfig(CosmosDBConfigConstants.CONNECTOR_PREFIX, CosmosDBConfigSource.sourceConfig, props)
-
-/**
-  * Holds the extra configurations for the sink on top of
-  * the base.
-  **/
-object CosmosDBConfigSink {
-  val base: ConfigDef = CosmosDBConfig().configDef
-  val sinkConfig: ConfigDef = base
-}
-
-case class CosmosDBConfigSink(props: util.Map[String, String])
-  extends BaseConfig(CosmosDBConfigConstants.CONNECTOR_PREFIX, CosmosDBConfigSink.sinkConfig, props)
-
-
-
+case class CosmosDBConfig(config: ConfigDef, props: util.Map[String, String])
+  extends AbstractConfig(config, props)
