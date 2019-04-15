@@ -9,12 +9,10 @@ import kafka.zk.EmbeddedZookeeper
 import org.apache.kafka.common.security.auth.SecurityProtocol
 import org.apache.kafka.common.utils.SystemTime
 
-import org.apache.kafka.connect.util.TopicAdmin
-
 import scala.collection.immutable.IndexedSeq
 
 
-sealed class KCluster(brokersNumber: Int = 1) extends AutoCloseable {
+sealed class KafkaCluster(brokersNumber: Int = 1) extends AutoCloseable {
 
   private val Zookeeper = new EmbeddedZookeeper
   val ZookeeperConnection = s"localhost:${Zookeeper.port}"
@@ -24,9 +22,6 @@ sealed class KCluster(brokersNumber: Int = 1) extends AutoCloseable {
   val Brokers: IndexedSeq[KafkaServer] = BrokersConfig.map(TestUtils.createServer(_, new SystemTime()))
   val BrokersList: String = TestUtils.getBrokerListStrFromServers(Brokers, SecurityProtocol.PLAINTEXT)
 
-  def createTopic(topicName: String, partitions: Int = 1, replication: Int = 1): Unit = {
-    TopicAdmin.defineTopic(topicName).partitions(partitions).replicationFactor(1).compacted().build()
-  }
 
   def startEmbeddedConnect(workerConfig: Properties, connectorConfigs: List[Properties]): Unit = {
     kafkaConnectEnabled = true
@@ -49,7 +44,7 @@ sealed class KCluster(brokersNumber: Int = 1) extends AutoCloseable {
       TestUtils.RandomPort,
       interBrokerSecurityProtocol = None,
       trustStoreFile = None,
-      KCluster.EMPTY_SASL_PROPERTIES,
+      KafkaCluster.EMPTY_SASL_PROPERTIES,
       enablePlaintext = true,
       enableSaslPlaintext = false,
       TestUtils.RandomPort,
@@ -75,7 +70,7 @@ sealed class KCluster(brokersNumber: Int = 1) extends AutoCloseable {
 }
 
 
-object KCluster {
+object KafkaCluster {
   val EMPTY_SASL_PROPERTIES: Option[Properties] = None
   System.setProperty("http.nonProxyHosts", "localhost|0.0.0.0|127.0.0.1")
 

@@ -82,7 +82,7 @@ case class EmbeddedConnect(workerConfig: Properties, connectorConfigs: List[Prop
       case e: InterruptedException => logger.error("Starting interrupted ", e)
       case e: ExecutionException => logger.error("Submitting connector config failed", e.getCause)
       case e: TimeoutException => logger.error("Submitting connector config timed out", e)
-      case e: Exception => logger.error("Submitting connector config timed out", e)
+      case e: Exception => logger.error("Starting failed", e)
     } finally {
       startLatch.countDown()
     }

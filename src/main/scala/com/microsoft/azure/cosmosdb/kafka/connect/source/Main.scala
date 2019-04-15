@@ -2,25 +2,21 @@ package com.microsoft.azure.cosmosdb.kafka.connect.source
 
 import java.util.Properties
 
-import com.microsoft.azure.cosmosdb.kafka.connect.kafka.KCluster
+import com.microsoft.azure.cosmosdb.kafka.connect.kafka.KafkaCluster
 import org.apache.kafka.connect.runtime.WorkerConfig
 import org.apache.kafka.connect.runtime.ConnectorConfig
 import org.apache.kafka.connect.runtime.distributed.DistributedConfig
 
 object Main {
 
+  var COSMOSDB_TOPIC: String = "cosmosdb-topic"
 
   def main(args: Array[String]): Unit = {
 
-    val kafkaCluster: KCluster = new KCluster()
+    val kafkaCluster: KafkaCluster = new KafkaCluster()
 
     val workerProperties: Properties = getWorkerProperties(kafkaCluster.BrokersList.toString)
     val connectorProperties: Properties = getConnectorProperties()
-
-
-    kafkaCluster.createTopic("cosmosdb-config", 1, 1)
-    kafkaCluster.createTopic("cosmosdb-offset", 1, 1)
-    kafkaCluster.createTopic("cosmosdb-status", 1, 1)
 
     workerProperties.put(DistributedConfig.CONFIG_TOPIC_CONFIG, "cosmosdb-config")
     workerProperties.put(DistributedConfig.CONFIG_STORAGE_REPLICATION_FACTOR_CONFIG, "1")
@@ -70,52 +66,9 @@ object Main {
     connectorProperties.put("connect.cosmosdb.master.key", "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==")
     connectorProperties.put("connect.cosmosdb.database" , "database")
     connectorProperties.put("connect.cosmosdb.collection" , "collection1")
-    connectorProperties.put("connect.cosmosdb.topic.name" , "test")
+    connectorProperties.put("connect.cosmosdb.topic.name" , COSMOSDB_TOPIC)
 
     return connectorProperties
   }
-
-
-  //  class SampleObserver extends ChangeFeedObserver {
-//    override def processChanges(documentList: List[String]): Unit = {
-//      if (documentList.nonEmpty) {
-//        println("Documents to process:" + documentList.length)
-//        documentList.foreach {
-//          println
-//        }
-//      } else {
-//        println("No documents to process.")
-//      }
-//    }
-//  }
-
-//  def main(args: Array[String]) {
-//    val uri = sys.env("COSMOS_SERVICE_ENDPOINT")
-//    val masterKey = sys.env("COSMOS_KEY")
-//    val databaseName = "database"
-//    val feedCollectionName = "collection1"
-//    val leaseCollectionName = "collectionAux1"
-//
-//    val feedCollectionInfo = new DocumentCollectionInfo(uri, masterKey, databaseName, feedCollectionName)
-//    val leaseCollectionInfo = new DocumentCollectionInfo(uri, masterKey, databaseName, leaseCollectionName)
-//    val changeFeedProcessorOptions = new ChangeFeedProcessorOptions(queryPartitionsMaxBatchSize = 100, defaultFeedPollDelay = 3000)
-//    val sampleObserver = new SampleObserver()
-//
-//    val builder = new ChangeFeedProcessorBuilder()
-//    val processor =
-//      builder
-//        .withFeedCollection(feedCollectionInfo)
-//        .withLeaseCollection(leaseCollectionInfo)
-//        .withProcessorOptions(changeFeedProcessorOptions)
-//        .withObserver(sampleObserver)
-//        .build()
-//
-//    processor.start()
-//
-//    //processor.stop()
-//    //System.exit(0)
-//  }
-
-
 
 }
