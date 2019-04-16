@@ -1,20 +1,21 @@
-package com.microsoft.azure.cosmosdb.kafka.connect.sink
-
+package com.microsoft.azure.cosmosdb.kafka.connect
 
 import com.microsoft.azure.cosmosdb.kafka.connect.config.{CosmosDBConfig, CosmosDBConfigConstants}
+import com.microsoft.azure.cosmosdb.{ConnectionPolicy, ConsistencyLevel}
 
-case class CosmosDBSinkSettings(endpoint: String,
-                                masterKey: String,
-                                database: String,
-                                collection: String,
-                                createDatabase: Boolean,
-                                createCollection: Boolean,
-                                topicName: String,
-                               ) {
-}
+case class CosmosDBClientSettings(
+                                   endpoint:String,
+                                   masterkey:String,
+                                   database:String,
+                                   collection:String,
+                                   createDatabase: Boolean,
+                                   createCollection: Boolean,
+                                   connectionPolicy:ConnectionPolicy,
+                                   consistencyLevel:ConsistencyLevel
+                                 )
 
-object CosmosDBSinkSettings{
-  def apply(config: CosmosDBConfig): CosmosDBSinkSettings = {
+object CosmosDBClientSettings{
+  def apply(config: CosmosDBConfig): CosmosDBClientSettings = {
     val endpoint:String = config.getString(CosmosDBConfigConstants.CONNECTION_ENDPOINT_CONFIG)
     require(endpoint.trim.nonEmpty, s"Invalid value for ${CosmosDBConfigConstants.CONNECTION_ENDPOINT_CONFIG}")
     require(endpoint.startsWith("https://"), s"""Invalid value for ${CosmosDBConfigConstants.CONNECTION_ENDPOINT_CONFIG} - endpoint must start with "https://"""")
@@ -32,15 +33,19 @@ object CosmosDBSinkSettings{
 
     val createCollection:Boolean = config.getBoolean(CosmosDBConfigConstants.CREATE_COLLECTION_CONFIG)
 
-    val topicName:String = config.getString(CosmosDBConfigConstants.TOPIC_CONFIG)
-    require(topicName.trim.nonEmpty, s"Invalid value for ${CosmosDBConfigConstants.TOPIC_CONFIG}")
+    //TODO: make this configurable
+    val connectionPolicy = ConnectionPolicy.GetDefault()
 
-    new CosmosDBSinkSettings(endpoint,
+    //TODO: make this configurable
+    val consistencyLevel = ConsistencyLevel.Session
+
+    new CosmosDBClientSettings(endpoint,
       masterKey,
       database,
       collection,
       createDatabase,
       createCollection,
-      topicName)
+      connectionPolicy,
+      consistencyLevel)
   }
 }
