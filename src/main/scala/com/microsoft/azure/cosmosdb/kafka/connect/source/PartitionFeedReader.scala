@@ -33,15 +33,15 @@ class PartitionFeedReader(asyncClient: AsyncDocumentClient, databaseName: String
     changeFeedObservable
       // Process documents
       .doOnNext(feedResponse => {
-      val documents = feedResponse.getResults().map(d => d.toJson())
-      documentProcessor(documents.toList)
+      val documents = feedResponse.getResults().map(d => d.toJson()) // ready to send to Kafka
+      documentProcessor(documents.toList) // callback passing the list of documents
     })
       // Logging
       .doOnNext(feedResponse => {
       println("Count: " + feedResponse.getResults().length)
       println("ResponseContinuation: " + feedResponse.getResponseContinuation())
     })
-      // Save state
+      // Save state ... save offset
       .flatMap(feedResponse => {
       println("Saving State!")
       val continuationToken = feedResponse.getResponseContinuation().replaceAll("^\"|\"$", "")
@@ -49,8 +49,8 @@ class PartitionFeedReader(asyncClient: AsyncDocumentClient, databaseName: String
       partitionFeedStateManager.save(partitionFeedState)
     })
       .subscribe(
-        v => {},
-        e => completionLatch.countDown(),
-        () => completionLatch.countDown())
+        v => {}, // Every response - can have multiple documents
+        e => completionLatch.countDown(), // when error
+        () => completionLatch.countDown()) // final execution
   }
 }
