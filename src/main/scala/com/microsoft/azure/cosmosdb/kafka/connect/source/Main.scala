@@ -9,56 +9,41 @@ import org.apache.kafka.connect.runtime.distributed.DistributedConfig
 
 object Main {
 
-  var COSMOSDB_TOPIC: String = "cosmosdb-topic"
+  var COSMOSDB_TOPIC: String = "cosmosdb-source-topic"
 
   def main(args: Array[String]): Unit = {
-
     val kafkaCluster: KafkaCluster = new KafkaCluster()
-
     val workerProperties: Properties = getWorkerProperties(kafkaCluster.BrokersList.toString)
     val connectorProperties: Properties = getConnectorProperties()
-
-    workerProperties.put(DistributedConfig.CONFIG_TOPIC_CONFIG, "cosmosdb-config")
-    workerProperties.put(DistributedConfig.CONFIG_STORAGE_REPLICATION_FACTOR_CONFIG, "1")
-
-    workerProperties.put(DistributedConfig.OFFSET_STORAGE_TOPIC_CONFIG, "cosmosdb-offset")
-    workerProperties.put(DistributedConfig.OFFSET_STORAGE_PARTITIONS_CONFIG, "1")
-    workerProperties.put(DistributedConfig.OFFSET_STORAGE_REPLICATION_FACTOR_CONFIG, "1")
-
-    workerProperties.put(DistributedConfig.STATUS_STORAGE_TOPIC_CONFIG, "cosmosdb-status")
-    workerProperties.put(DistributedConfig.STATUS_STORAGE_PARTITIONS_CONFIG, "1")
-    workerProperties.put(DistributedConfig.STATUS_STORAGE_REPLICATION_FACTOR_CONFIG, "1")
-
     kafkaCluster.startEmbeddedConnect(workerProperties, List(connectorProperties))
-
     if (kafkaCluster.kafkaConnectEnabled) {
       println("Kafka Connector Enabled")
     }
-
   }
 
   def getWorkerProperties(bootstrapServers: String): Properties = {
-
     val workerProperties: Properties = new Properties()
-
     workerProperties.put(WorkerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers)
-
     workerProperties.put(DistributedConfig.GROUP_ID_CONFIG, "cosmosdb")
     workerProperties.put(DistributedConfig.CONFIG_TOPIC_CONFIG, "cosmosdb-config")
     workerProperties.put(DistributedConfig.OFFSET_STORAGE_TOPIC_CONFIG, "cosmosdb-offset")
     workerProperties.put(DistributedConfig.STATUS_STORAGE_TOPIC_CONFIG, "cosmosdb-status")
-
     workerProperties.put(WorkerConfig.KEY_CONVERTER_CLASS_CONFIG, "org.apache.kafka.connect.json.JsonConverter")
     workerProperties.put(WorkerConfig.VALUE_CONVERTER_CLASS_CONFIG, "org.apache.kafka.connect.json.JsonConverter")
     workerProperties.put(WorkerConfig.OFFSET_COMMIT_INTERVAL_MS_CONFIG, "30000")
-
+    workerProperties.put(DistributedConfig.CONFIG_TOPIC_CONFIG, "cosmosdb-config")
+    workerProperties.put(DistributedConfig.CONFIG_STORAGE_REPLICATION_FACTOR_CONFIG, "1")
+    workerProperties.put(DistributedConfig.OFFSET_STORAGE_TOPIC_CONFIG, "cosmosdb-offset")
+    workerProperties.put(DistributedConfig.OFFSET_STORAGE_PARTITIONS_CONFIG, "1")
+    workerProperties.put(DistributedConfig.OFFSET_STORAGE_REPLICATION_FACTOR_CONFIG, "1")
+    workerProperties.put(DistributedConfig.STATUS_STORAGE_TOPIC_CONFIG, "cosmosdb-status")
+    workerProperties.put(DistributedConfig.STATUS_STORAGE_PARTITIONS_CONFIG, "1")
+    workerProperties.put(DistributedConfig.STATUS_STORAGE_REPLICATION_FACTOR_CONFIG, "1")
     return workerProperties
   }
 
   def getConnectorProperties(): Properties = {
-
     val connectorProperties: Properties = new Properties()
-
     connectorProperties.put(ConnectorConfig.NAME_CONFIG, "CosmosDBSourceConnector")
     connectorProperties.put(ConnectorConfig.CONNECTOR_CLASS_CONFIG , "com.microsoft.azure.cosmosdb.kafka.connect.source.CosmosDBSourceConnector")
     connectorProperties.put(ConnectorConfig.TASKS_MAX_CONFIG , "1")
@@ -67,8 +52,6 @@ object Main {
     connectorProperties.put("connect.cosmosdb.database" , "database")
     connectorProperties.put("connect.cosmosdb.collection" , "collection1")
     connectorProperties.put("connect.cosmosdb.topic.name" , COSMOSDB_TOPIC)
-
     return connectorProperties
   }
-
 }

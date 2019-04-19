@@ -44,12 +44,15 @@ object ConnectorConfig {
     **/
 
   lazy val sourceConfigDef: ConfigDef = ConnectorConfig.baseConfigDef
-  //        .define(CosmosDBConfigConstants.EXTRA_SOURCE_CONFIG_01, Type.STRING, Importance.HIGH,
-  //          CosmosDBConfigConstants.EXTRA_SOURCE_CONFIG_01_DOC, "Source", 1, Width.MEDIUM,
-  //          CosmosDBConfigConstants.EXTRA_SOURCE_CONFIG_01_DISPLAY)
-  //        .define(CosmosDBConfigConstants.EXTRA_SOURCE_CONFIG_02, Type.STRING, Importance.HIGH,
-  //          CosmosDBConfigConstants.EXTRA_SOURCE_CONFIG_02_DOC, "Source", 2, Width.MEDIUM,
-  //          CosmosDBConfigConstants.EXTRA_SOURCE_CONFIG_02_DISPLAY)
+          .define(CosmosDBConfigConstants.ASSIGNED_PARTITIONS, Type.STRING, "", Importance.HIGH,
+            CosmosDBConfigConstants.ASSIGNED_PARTITIONS_DOC, "Source", 1, Width.MEDIUM,
+            CosmosDBConfigConstants.ASSIGNED_PARTITIONS_DISPLAY)
+          .define(CosmosDBConfigConstants.READER_BUFFER_SIZE, Type.INT, CosmosDBConfigConstants.READER_BUFFER_SIZE_DEFAULT, Importance.MEDIUM,
+            CosmosDBConfigConstants.READER_BUFFER_SIZE_DOC, "Source", 2, Width.LONG,
+            CosmosDBConfigConstants.READER_BUFFER_SIZE_DISPLAY)
+          .define(CosmosDBConfigConstants.BATCH_SIZE, Type.INT, CosmosDBConfigConstants.BATCH_SIZE_DEFAULT, Importance.MEDIUM,
+            CosmosDBConfigConstants.BATCH_SIZE_DOC, "Source", 3, Width.LONG,
+            CosmosDBConfigConstants.BATCH_SIZE_DISPLAY)
 
   /**
     * Holds the extra configurations for the sink on top of
