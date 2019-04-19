@@ -29,6 +29,8 @@ object CosmosDBProvider extends LazyLogging {
     client
   }
 
+  def getCollectionLink(databaseName: String, collectionName: String) = "/dbs/%s/colls/%s".format(databaseName, collectionName)
+
   def createDatabaseIfNotExists(databaseName:String): Unit = {
 
     if(!isDatabaseExists(databaseName)) {
