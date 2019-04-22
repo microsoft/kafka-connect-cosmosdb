@@ -10,12 +10,13 @@ import com.microsoft.azure.cosmosdb._
 import com.microsoft.azure.cosmosdb.kafka.connect.CosmosDBProvider
 
 class CosmosDBReader(private val client: AsyncDocumentClient,
-                     private val setting: CosmosDBSourceSettings,
+                     val setting: CosmosDBSourceSettings,
                      private val context: SourceTaskContext) extends StrictLogging {
 
 
   private val SOURCE_PARTITION_FIELD = "partition"
   private val SOURCE_OFFSET_FIELD = "continuationToken"
+  private var continuationToken: String = ""
 
   def processChanges(): util.List[SourceRecord] = {
 
@@ -30,8 +31,11 @@ class CosmosDBReader(private val client: AsyncDocumentClient,
 
     changeFeedResultList.forEach(
       feedResponse => {
+        val tid: Long = Thread.currentThread().getId()
+
+
         val documents = feedResponse.getResults().map(d => d.toJson())
-        val continuationToken = feedResponse.getResponseContinuation().replaceAll("^\"|\"$", "")
+        continuationToken = feedResponse.getResponseContinuation().replaceAll("^\"|\"$", "")
         documents.toList.foreach(doc =>
         {
           records.add(new SourceRecord(
@@ -65,7 +69,7 @@ class CosmosDBReader(private val client: AsyncDocumentClient,
     changeFeedOptions.setMaxItemCount(setting.batchSize)
     val offset = context.offsetStorageReader.offset(sourcePartition(setting.assignedPartition))
     if (offset != null) {
-      val continuationToken: String = offset.get(SOURCE_OFFSET_FIELD).toString()
+      continuationToken = offset.get(SOURCE_OFFSET_FIELD).toString()
       continuationToken match {
         case null => changeFeedOptions.setStartFromBeginning(true)
         case "" => changeFeedOptions.setStartFromBeginning(true)
@@ -74,7 +78,11 @@ class CosmosDBReader(private val client: AsyncDocumentClient,
     }
     else
     {
-      changeFeedOptions.setStartFromBeginning(true)
+      continuationToken match {
+        case null => changeFeedOptions.setStartFromBeginning(true)
+        case "" => changeFeedOptions.setStartFromBeginning(true)
+        case t => changeFeedOptions.setRequestContinuation(t)
+      }
     }
     return changeFeedOptions
   }
