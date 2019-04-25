@@ -5,6 +5,10 @@
 
 .idea/**
 
+### mac ##
+.DS_Store
+C:/
+
 # User-specific stuff
 .idea/**/workspace.xml
 .idea/**/tasks.xml

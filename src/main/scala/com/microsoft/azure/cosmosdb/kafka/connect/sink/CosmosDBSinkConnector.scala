@@ -3,44 +3,48 @@ package com.microsoft.azure.cosmosdb.kafka.connect.sink
 import java.util
 
 import com.microsoft.azure.cosmosdb.kafka.connect.config.{ConnectorConfig, CosmosDBConfig}
-
-import scala.util.{Failure, Success, Try}
-import scala.collection.JavaConverters._
 import com.typesafe.scalalogging.LazyLogging
 import org.apache.kafka.common.config.ConfigDef
 import org.apache.kafka.connect.connector.Task
-import org.apache.kafka.connect.sink.SinkConnector
 import org.apache.kafka.connect.errors.ConnectException
+import org.apache.kafka.connect.sink.SinkConnector
 
+import scala.collection.JavaConverters._
+import scala.util.{Failure, Success, Try}
 
 
 class CosmosDBSinkConnector extends SinkConnector with LazyLogging {
-    private var configProps: util.Map[String, String] = _
 
-    override def version(): String = getClass.getPackage.getImplementationVersion
+  private var configProps: util.Map[String, String] = _
 
-    override def start(props: util.Map[String, String]): Unit = {
-        logger.info("Starting CosmosDBSinkConnector")
+  override def version(): String = getClass.getPackage.getImplementationVersion
 
-        val config = Try(CosmosDBConfig(ConnectorConfig.sinkConfigDef, props)) match {
-            case Failure(f) => throw new ConnectException(s"Couldn't start Cosmos DB Sink due to configuration error: ${f.getMessage}", f)
-            case Success(c) => c
-        }
+  override def start(props: util.Map[String, String]): Unit = {
+    logger.info("Starting CosmosDBSinkConnector")
 
-        configProps = props
+    val config = Try(CosmosDBConfig(ConnectorConfig.sinkConfigDef, props)) match {
+      case Failure(f) => throw new ConnectException(s"Couldn't start Cosmos DB Sink due to configuration error: ${f.getMessage}", f)
+      case Success(c) => c
     }
 
-    override def stop(): Unit = {
-        logger.info("Stopping CosmosDBSinkConnector")
-    }
+    configProps = props
 
-    override def taskClass(): Class[_ <: Task] = classOf[CosmosDBSinkTask]
+  }
 
-    override def taskConfigs(maxTasks: Int): util.List[util.Map[String, String]] = {
-        (1 to maxTasks).map(_ => this.configProps).toList.asJava
-    }
+  override def stop(): Unit = {
+    logger.info("Stopping CosmosDBSinkConnector")
+  }
 
-    override def config(): ConfigDef = ConnectorConfig.sinkConfigDef
+  override def taskClass(): Class[_ <: Task] = classOf[CosmosDBSinkTask]
 
+  override def taskConfigs(maxTasks: Int): util.List[util.Map[String, String]] = {
+    logger.info(s"Setting task configurations for $maxTasks workers with properties $this.configProps")
+    println(this.configProps)
+
+    (1 to maxTasks).map(_ => this.configProps).toList.asJava
+
+  }
+
+  override def config(): ConfigDef = ConnectorConfig.sinkConfigDef
 
 }
