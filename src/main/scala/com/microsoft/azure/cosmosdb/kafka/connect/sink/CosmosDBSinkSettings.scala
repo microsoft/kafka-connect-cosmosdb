@@ -3,6 +3,8 @@ package com.microsoft.azure.cosmosdb.kafka.connect.sink
 
 import com.microsoft.azure.cosmosdb.kafka.connect.config.{CosmosDBConfig, CosmosDBConfigConstants}
 
+
+
 case class CosmosDBSinkSettings(endpoint: String,
                                 masterKey: String,
                                 database: String,
