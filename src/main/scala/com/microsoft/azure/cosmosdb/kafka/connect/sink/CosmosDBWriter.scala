@@ -16,27 +16,23 @@ class CosmosDBWriter(val settings: CosmosDBSinkSettings, private val documentCli
 
   def write(records: Seq[SinkRecord]): Unit = {
     if (records.isEmpty) {
-      logger.debug("No records received.")
+      logger.info("No records received.")
     } else {
-      logger.debug(s"Received ${records.size} records.")
+      logger.info(s"Received ${records.size} records.")
       insert(records)
     }
   }
-
-
 
   private def insert(records: Seq[SinkRecord]) = {
     try {
       records.groupBy(_.topic()).foreach { case (_, groupedRecords) =>
         groupedRecords.foreach { record =>
-         logger.info(record.toString);
-         logger.info(record.topic())
-          //How to convert the SinkRecord to a CosmosDB Document?
-          val jsonMap = NoSchemaConnectCosmosConverter.toJsonMap(record.value())
-          val dbObj = new Document(jsonMap.toString())
-          logger.debug("Document object " + dbObj.get("id"));
+
+          val document = new Document(record.value().toString)
+
+          logger.info("Inserting Document object id " + document.get("id") +" into collection "+settings.collection);
           val client= CosmosDBProvider.getClient(cosmosDBClientSettings)
-          client.createDocument("destColl", dbObj, new RequestOptions, true )
+          client.createDocument(settings.collection, document, new RequestOptions, true )
         }
       }
     }
@@ -51,7 +47,7 @@ class CosmosDBWriter(val settings: CosmosDBSinkSettings, private val documentCli
 
 
   def close(): Unit = {
-    logger.info("Shutting down Document DB writer.")
+    logger.info("Shutting down CosmosDBWriter.")
   }
 }
 

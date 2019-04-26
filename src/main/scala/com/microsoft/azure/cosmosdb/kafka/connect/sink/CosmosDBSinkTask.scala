@@ -24,8 +24,6 @@ class CosmosDBSinkTask extends SinkTask with LazyLogging {
     private var database: String = ""
     private var collection: String = ""
     private var taskConfig: Option[CosmosDBConfig] = None
-    private var bufferSize: Option[Int] = None
-    private var batchSize: Option[Int] = None
     private var topicName: String = ""
 
 
@@ -67,17 +65,10 @@ class CosmosDBSinkTask extends SinkTask with LazyLogging {
             case Failure(f) => throw new ConnectException(s"Couldn't connect to CosmosDB.", f)
         }
 
-        // Get bufferSize and batchSize
-        bufferSize = Some(taskConfig.get.getInt(CosmosDBConfigConstants.READER_BUFFER_SIZE))
-        batchSize = Some(taskConfig.get.getInt(CosmosDBConfigConstants.BATCH_SIZE))
 
         // Get Topic
         topicName = taskConfig.get.getString(CosmosDBConfigConstants.TOPIC_CONFIG)
-
-        logger.info(topicName)
-
         // Set up Writer
-
         val setting = new CosmosDBSinkSettings(endpoint, masterKey, database, collection, createDatabase, createCollection, topicName)
         writer = Option(new CosmosDBWriter(setting, client))
 

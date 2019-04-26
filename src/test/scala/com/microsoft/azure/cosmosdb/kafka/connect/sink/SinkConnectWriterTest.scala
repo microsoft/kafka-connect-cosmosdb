@@ -3,10 +3,10 @@ package com.microsoft.azure.cosmosdb.kafka.connect.sink
 import java.util.Properties
 
 import com.microsoft.azure.cosmosdb.kafka.connect.kafka.KafkaCluster
-import org.apache.kafka.connect.runtime.{ConnectorConfig, WorkerConfig}
 import org.apache.kafka.connect.runtime.distributed.DistributedConfig
+import org.apache.kafka.connect.runtime.{ConnectorConfig, WorkerConfig}
 
-object SinkConnectWriter {
+object SinkConnectWriterTest {
 
   var COSMOSDB_TOPIC: String = "cosmosdb-source-topic"
 
@@ -19,6 +19,7 @@ object SinkConnectWriter {
       println("Kafka Connector Enabled")
     }
   }
+
 
   def getWorkerProperties(bootstrapServers: String): Properties = {
     val workerProperties: Properties = new Properties()
@@ -38,6 +39,7 @@ object SinkConnectWriter {
     return workerProperties
   }
 
+
   def getConnectorProperties(): Properties = {
     val connectorProperties: Properties = new Properties()
     connectorProperties.put(ConnectorConfig.NAME_CONFIG, "CosmosDBSinkConnector")
@@ -47,9 +49,12 @@ object SinkConnectWriter {
     connectorProperties.put("connect.cosmosdb.master.key", "g4IdYgy1BLfwSiR7voaVPOAxrXvNICiYlwvmZcXkiIlBinVzMEWgoDDclXbiSXDyFMeEVxJ5ZLV1vO2wTYMUlA==")
     connectorProperties.put("connect.cosmosdb.database" , "test-kcdb")
     connectorProperties.put("connect.cosmosdb.collection" , "destColl")
-    connectorProperties.put("connect.cosmosdb.topics" , COSMOSDB_TOPIC)
+    connectorProperties.put("topics" , COSMOSDB_TOPIC)
+    connectorProperties.put("connect.cosmosdb.topic.name" , COSMOSDB_TOPIC)
+
+
     return connectorProperties
   }
+
+
 }
-
-
