@@ -32,7 +32,8 @@ class CosmosDBWriter(val settings: CosmosDBSinkSettings, private val documentCli
 
           logger.info("Inserting Document object id " + document.get("id") +" into collection "+settings.collection);
           val client= CosmosDBProvider.getClient(cosmosDBClientSettings)
-          client.createDocument(settings.collection, document, new RequestOptions, true )
+          val collectionLink = String.format("/dbs/%s/colls/%s", settings.database, settings.collection)
+          client.createDocument(collectionLink, document, null, true).toCompletable.await
         }
       }
     }
