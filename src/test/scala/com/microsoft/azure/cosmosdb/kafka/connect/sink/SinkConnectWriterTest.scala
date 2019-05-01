@@ -48,7 +48,7 @@ object SinkConnectWriterTest {
     connectorProperties.put("connect.cosmosdb.connection.endpoint" , "https://test-kafkaconnect.documents.azure.com:443/")
     connectorProperties.put("connect.cosmosdb.master.key", "g4IdYgy1BLfwSiR7voaVPOAxrXvNICiYlwvmZcXkiIlBinVzMEWgoDDclXbiSXDyFMeEVxJ5ZLV1vO2wTYMUlA==")
     connectorProperties.put("connect.cosmosdb.database" , "test-kcdb")
-    connectorProperties.put("connect.cosmosdb.collection" , "destColl")
+    connectorProperties.put("connect.cosmosdb.collection" , "destinationCollection")
     connectorProperties.put("topics" , COSMOSDB_TOPIC)
     connectorProperties.put("connect.cosmosdb.topic.name" , COSMOSDB_TOPIC)
 

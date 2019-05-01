@@ -1,9 +1,10 @@
 
 package com.microsoft.azure.cosmosdb.kafka.connect.sink
 
+import java.util.concurrent.CountDownLatch
+
 import com.microsoft.azure.cosmosdb._
 import com.microsoft.azure.cosmosdb.kafka.connect.CosmosDBProvider
-import com.microsoft.azure.cosmosdb.kafka.connect.Runner.cosmosDBClientSettings
 import com.microsoft.azure.cosmosdb.rx.AsyncDocumentClient
 import com.typesafe.scalalogging.StrictLogging
 import org.apache.kafka.connect.sink.SinkRecord
@@ -25,17 +26,18 @@ class CosmosDBWriter(val settings: CosmosDBSinkSettings, private val documentCli
 
   private def insert(records: Seq[SinkRecord]) = {
     try {
+
+      var docs = List.empty[Document]
+
       records.groupBy(_.topic()).foreach { case (_, groupedRecords) =>
         groupedRecords.foreach { record =>
-
           val document = new Document(record.value().toString)
-
-          logger.info("Inserting Document object id " + document.get("id") +" into collection "+settings.collection);
-          val client= CosmosDBProvider.getClient(cosmosDBClientSettings)
-          val collectionLink = String.format("/dbs/%s/colls/%s", settings.database, settings.collection)
-          client.createDocument(collectionLink, document, null, true).toCompletable.await
+          logger.info("Upserting Document object id " + document.get("id") + " into collection " + settings.collection)
+          docs = docs :+ document
         }
       }
+      CosmosDBProvider.upsertDocuments[Document](docs,settings.database,settings.collection, new CountDownLatch(1))
+
     }
     catch {
       case t: Throwable =>
