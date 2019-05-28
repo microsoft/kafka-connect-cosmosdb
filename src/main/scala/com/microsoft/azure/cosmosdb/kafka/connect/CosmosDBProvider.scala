@@ -6,13 +6,14 @@ import java.util.concurrent.CountDownLatch
 
 import _root_.rx.Observable
 import _root_.rx.lang.scala.JavaConversions._
-
 import com.microsoft.azure.cosmosdb._
 import com.microsoft.azure.cosmosdb.rx.AsyncDocumentClient
-
 import com.typesafe.scalalogging.LazyLogging
 
 object CosmosDBProvider extends LazyLogging {
+
+  private val requestOptionsInsert = new RequestOptions
+  requestOptionsInsert.setConsistencyLevel(ConsistencyLevel.Session)
 
   var client: AsyncDocumentClient = _
 
@@ -31,9 +32,9 @@ object CosmosDBProvider extends LazyLogging {
 
   def getCollectionLink(databaseName: String, collectionName: String) = "/dbs/%s/colls/%s".format(databaseName, collectionName)
 
-  def createDatabaseIfNotExists(databaseName:String): Unit = {
+  def createDatabaseIfNotExists(databaseName: String): Unit = {
 
-    if(!isDatabaseExists(databaseName)) {
+    if (!isDatabaseExists(databaseName)) {
       val dbDefinition = new Database()
       dbDefinition.setId(databaseName)
 
@@ -43,9 +44,8 @@ object CosmosDBProvider extends LazyLogging {
     }
   }
 
-  def createCollectionIfNotExists(databaseName:String, collectionName:String): Unit = {
-    if(!isCollectionExists(databaseName, collectionName))
-    {
+  def createCollectionIfNotExists(databaseName: String, collectionName: String): Unit = {
+    if (!isCollectionExists(databaseName, collectionName)) {
       val dbLnk = String.format("/dbs/%s", databaseName)
       val collDefinition = new DocumentCollection
       collDefinition.setId(collectionName)
@@ -59,23 +59,24 @@ object CosmosDBProvider extends LazyLogging {
   def isDatabaseExists(databaseName: String): Boolean = {
     val databaseLink = s"/dbs/$databaseName"
     val databaseReadObs = client.readDatabase(databaseLink, null)
-    var isDatabaseExists=false
+    var isDatabaseExists = false
 
     val db = databaseReadObs
       .doOnNext((x: ResourceResponse[Database]) => {
         def foundDataBase(x: ResourceResponse[Database]): Unit = {
           logger.info(s"Database $databaseName already exists.")
-          isDatabaseExists=true
+          isDatabaseExists = true
         }
 
-        foundDataBase(x)})
+        foundDataBase(x)
+      })
       .onErrorResumeNext((e: Throwable) => {
         def tryCreateDatabaseOnError(e: Throwable) = {
           e match {
-            case de:DocumentClientException =>
+            case de: DocumentClientException =>
               if (de.getStatusCode == 404) {
                 logger.info(s"Database $databaseName does not exist")
-                isDatabaseExists=false
+                isDatabaseExists = false
               }
           }
           Observable.empty()
@@ -84,22 +85,22 @@ object CosmosDBProvider extends LazyLogging {
         tryCreateDatabaseOnError(e)
       })
 
-      db.toCompletable.await()
+    db.toCompletable.await()
 
-      isDatabaseExists
+    isDatabaseExists
   }
 
-  def isCollectionExists(databaseName:String, collectionName:String): Boolean={
+  def isCollectionExists(databaseName: String, collectionName: String): Boolean = {
 
-    var isCollectionExists=false
+    var isCollectionExists = false
     val dbLnk = s"/dbs/$databaseName"
     val params = new SqlParameterCollection(new SqlParameter("@id", collectionName))
 
-    val qry = new SqlQuerySpec ("SELECT * FROM r where r.id = @id", params)
+    val qry = new SqlQuerySpec("SELECT * FROM r where r.id = @id", params)
 
-    client.queryCollections(dbLnk, qry,null).single.flatMap(page => {
-      def foundCollection(page: FeedResponse[DocumentCollection]) ={
-        isCollectionExists= !page.getResults.isEmpty
+    client.queryCollections(dbLnk, qry, null).single.flatMap(page => {
+      def foundCollection(page: FeedResponse[DocumentCollection]) = {
+        isCollectionExists = !page.getResults.isEmpty
         Observable.empty
       }
 
@@ -113,12 +114,12 @@ object CosmosDBProvider extends LazyLogging {
     client.close()
   }
 
-  def readChangeFeed(databaseName:String, collectionName:String): Unit ={
+  def readChangeFeed(databaseName: String, collectionName: String): Unit = {
     //TODO: call Allan's ChangeFeedProcessor here
     //TODO: ultimately replace Allan's ChangeFeedProcessor with the PG one
   }
 
-  def createDocuments[T](docs:scala.List[T], databaseName:String, collectionName:String, completionLatch:CountDownLatch): Unit = {
+  def createDocuments[T](docs: scala.List[T], databaseName: String, collectionName: String, completionLatch: CountDownLatch): Unit = {
     val colLnk = s"/dbs/$databaseName/colls/$collectionName"
     val createDocumentsOBs: List[Observable[ResourceResponse[Document]]] = new util.ArrayList[Observable[ResourceResponse[Document]]]
 
@@ -143,4 +144,34 @@ object CosmosDBProvider extends LazyLogging {
           completionLatch.countDown()
         })
   }
+
+
+  def upsertDocuments[T](docs: scala.List[T], databaseName: String, collectionName: String, completionLatch: CountDownLatch): Unit = {
+    val colLnk = s"/dbs/$databaseName/colls/$collectionName"
+    val upsertDocumentsOBs: List[Observable[ResourceResponse[Document]]] = new util.ArrayList[Observable[ResourceResponse[Document]]]
+
+    docs.foreach(f = t => {
+      val obs = client.upsertDocument(colLnk, t, null, false)
+      upsertDocumentsOBs.add(obs)
+    })
+
+    val forcedScalaObservable: _root_.rx.lang.scala.Observable[ResourceResponse[Document]] = Observable.merge(upsertDocumentsOBs)
+
+    forcedScalaObservable
+      .map(r => r.getRequestCharge)
+      .reduce((sum, value) => sum + value)
+      .subscribe(
+        t => logger.info(s"upsertDocuments total RU charge is $t"),
+        e => {
+          logger.error(s"error upserting documents e:${e.getMessage()} stack:${e.getStackTrace().toString()}")
+          completionLatch.countDown()
+        },
+        () => {
+          logger.info("upsertDocuments completed")
+          completionLatch.countDown()
+        })
+  }
+
+
+
 }
