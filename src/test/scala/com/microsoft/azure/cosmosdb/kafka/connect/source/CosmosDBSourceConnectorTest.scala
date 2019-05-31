@@ -1,6 +1,7 @@
 package com.microsoft.azure.cosmosdb.kafka.connect.source
 
-import com.microsoft.azure.cosmosdb.kafka.connect.config.CosmosDBConfigConstants
+import com.google.common.collect.Maps
+import com.microsoft.azure.cosmosdb.kafka.connect.config.{CosmosDBConfigConstants, TestConfigurations}
 import org.apache.kafka.connect.runtime.ConnectorConfig
 import org.scalatest.{FlatSpec, GivenWhenThen}
 
@@ -8,11 +9,11 @@ class CosmosDBSourceConnectorTest extends FlatSpec with GivenWhenThen {
 
   "CosmosDBSourceConnector" should "validate all input properties and generate right set of task config properties" in {
     Given("Valid set of input properties")
-    val inputProperties = CosmosDBSourceConnectorConfigTest.sourceConnectorTestProps
+    val props = TestConfigurations.getSourceConnectorProperties()
     val connector = new CosmosDBSourceConnector
 
     When("Start and TaskConfig are called in right order")
-    connector.start(inputProperties)
+    connector.start(Maps.fromProperties(props))
     val taskConfigs = connector.taskConfigs(3)
     val numWorkers = connector.getNumberOfWorkers
     Then("The TaskConfigs have all the expected properties")

@@ -1,23 +1,23 @@
 package com.microsoft.azure.cosmosdb.kafka.connect.source
 
-import java.util
 import java.util.Properties
 
+import com.google.common.collect.Maps
+import com.microsoft.azure.cosmosdb.kafka.connect.config.{CosmosDBConfigConstants, TestConfigurations}
 import com.microsoft.azure.cosmosdb.kafka.connect.kafka.KafkaCluster
 import org.scalatest.{FlatSpec, GivenWhenThen}
-import com.microsoft.azure.cosmosdb.kafka.connect.config.{CosmosDBConfigConstants, TestConfigurations}
 
 class CosmosDBSourceTaskTest extends FlatSpec with GivenWhenThen {
 
   "CosmosDBSourceTask start" should "initialize all properties" in {
     Given("A list of properties for CosmosSourceTask")
-    val props: util.Map[String, String] = CosmosDBSourceConnectorConfigTest.sourceConnectorTestProps
+    val props = TestConfigurations.getSourceConnectorProperties()
     // Add the assigned partitions
     props.put(CosmosDBConfigConstants.ASSIGNED_PARTITIONS, "0,1")
 
     When("CosmosSourceTask is started")
     val task = new CosmosDBSourceTask
-    task.start(props)
+    task.start(Maps.fromProperties(props))
 
     Then("CosmosSourceTask should properly initialized the readers")
     val readers = task.getReaders()
@@ -30,13 +30,12 @@ class CosmosDBSourceTaskTest extends FlatSpec with GivenWhenThen {
 
     val kafkaCluster: KafkaCluster = new KafkaCluster()
     val workerProperties: Properties = TestConfigurations.getWorkerProperties(kafkaCluster.BrokersList.toString)
-    val connectorProperties: Properties = TestConfigurations.getConnectorProperties()
-    kafkaCluster.startEmbeddedConnect(workerProperties, List(connectorProperties))
+    val props: Properties = TestConfigurations.getSourceConnectorProperties()
+    kafkaCluster.startEmbeddedConnect(workerProperties, List(props))
 
-    val props: util.Map[String, String] = CosmosDBSourceConnectorConfigTest.sourceConnectorTestProps
     val connector = new CosmosDBSourceConnector
 
-    connector.start(props)
+    connector.start(Maps.fromProperties(props))
     val taskConfigs = connector.taskConfigs(2)
 
     taskConfigs.forEach(config => {

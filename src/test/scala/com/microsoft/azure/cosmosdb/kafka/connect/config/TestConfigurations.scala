@@ -2,16 +2,13 @@ package com.microsoft.azure.cosmosdb.kafka.connect.config
 
 import java.util.Properties
 
-
-import com.microsoft.azure.cosmosdb.kafka.connect.kafka.KafkaCluster
-
 import com.google.common.base.Strings
-import com.microsoft.azure.cosmosdb.kafka.connect.source.Main.COSMOSDB_TOPIC
 import org.apache.commons.lang3.StringUtils
-import org.apache.kafka.connect.runtime.{ConnectorConfig, WorkerConfig}
+import org.apache.kafka.connect.runtime.WorkerConfig
 import org.apache.kafka.connect.runtime.distributed.DistributedConfig
 
 object TestConfigurations {
+
   // Replace ENDPOINT and MASTER_KEY with values from your Azure Cosmos DB account.
   // The default values are credentials of the local emulator, which are not used in any production environment.
   var ENDPOINT : String = System.getProperty("COSMOS_SERVICE_ENDPOINT", StringUtils.defaultString(Strings.emptyToNull(System.getenv.get("COSMOS_SERVICE_ENDPOINT")), "https://localhost:8081/"))
@@ -42,16 +39,16 @@ object TestConfigurations {
     return workerProperties
   }
 
-  def getConnectorProperties(): Properties = {
+  def getSourceConnectorProperties(): Properties = {
     val connectorProperties: Properties = new Properties()
     connectorProperties.put(org.apache.kafka.connect.runtime.ConnectorConfig.NAME_CONFIG, "CosmosDBSourceConnector")
     connectorProperties.put(org.apache.kafka.connect.runtime.ConnectorConfig.CONNECTOR_CLASS_CONFIG , "com.microsoft.azure.cosmosdb.kafka.connect.source.CosmosDBSourceConnector")
     connectorProperties.put(org.apache.kafka.connect.runtime.ConnectorConfig.TASKS_MAX_CONFIG , "1")
-    connectorProperties.put("connect.cosmosdb.connection.endpoint" , "https://localhost:8888")
-    connectorProperties.put("connect.cosmosdb.master.key", "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==")
-    connectorProperties.put("connect.cosmosdb.database" , "database")
-    connectorProperties.put("connect.cosmosdb.collection" , "collection1")
-    connectorProperties.put("connect.cosmosdb.topic.name" , COSMOSDB_TOPIC)
+    connectorProperties.put(CosmosDBConfigConstants.CONNECTION_ENDPOINT_CONFIG, ENDPOINT)
+    connectorProperties.put(CosmosDBConfigConstants.CONNECTION_MASTERKEY_CONFIG, MASTER_KEY)
+    connectorProperties.put(CosmosDBConfigConstants.DATABASE_CONFIG, DATABASE)
+    connectorProperties.put(CosmosDBConfigConstants.COLLECTION_CONFIG, COLLECTION)
+    connectorProperties.put(CosmosDBConfigConstants.TOPIC_CONFIG, TOPIC)
     return connectorProperties
   }
 }
