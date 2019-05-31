@@ -19,6 +19,7 @@ import scala.collection.JavaConverters._
 class CosmosDBSourceConnector extends SourceConnector with LazyLogging {
 
   private var configProps: util.Map[String, String] = _
+  private var numWorkers: Int = 0
 
   override def version(): String = getClass.getPackage.getImplementationVersion
 
@@ -50,8 +51,8 @@ class CosmosDBSourceConnector extends SourceConnector with LazyLogging {
       var results = List[PartitionKeyRange]()
       changeFeedObservable.toBlocking().forEach(x => results = results ++ x.getResults())
       val numberOfPartitions = results.map(p => p.getId)
-      val numGroups = Math.min(numberOfPartitions.size(), maxTasks)
-      logger.info(s"Setting task configurations for $numGroups workers.")
+      numWorkers = Math.min(numberOfPartitions.size(), maxTasks)
+      logger.info(s"Setting task configurations for $numWorkers workers.")
       val groups = ConnectorUtils.groupPartitions(numberOfPartitions, maxTasks)
       groups
         .withFilter(g => g.nonEmpty)
@@ -74,5 +75,7 @@ class CosmosDBSourceConnector extends SourceConnector with LazyLogging {
   override def stop(): Unit = {
     logger.info("Stopping CosmosDBSourceConnector")
   }
+
+  def getNumberOfWorkers(): Int = numWorkers
 
 }

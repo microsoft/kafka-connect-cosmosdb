@@ -13,11 +13,11 @@ class CosmosDBSourceConnectorTest extends FlatSpec with GivenWhenThen {
 
     When("Start and TaskConfig are called in right order")
     connector.start(inputProperties)
-    val taskConfigs = connector.taskConfigs(2)
-
+    val taskConfigs = connector.taskConfigs(3)
+    val numWorkers = connector.getNumberOfWorkers
     Then("The TaskConfigs have all the expected properties")
-    assert(taskConfigs.size() == 2)
-    for (i <- 0 until 2) {
+    assert(taskConfigs.size() == numWorkers)
+    for (i <- 0 until numWorkers) {
       val taskConfig: java.util.Map[String, String] = taskConfigs.get(i)
 
       assert(taskConfig.containsKey(ConnectorConfig.NAME_CONFIG))

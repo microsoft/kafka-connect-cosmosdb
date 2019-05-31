@@ -26,7 +26,14 @@ class CosmosDBSourceTask extends SourceTask with LazyLogging {
   override def start(props: util.Map[String, String]): Unit = {
     logger.info("Starting CosmosDBSourceTask")
 
-    val config = if (context.configs().isEmpty) props else context.configs()
+    var config: util.Map[String, String] = null
+
+    if (context != null) {
+      config = if (context.configs().isEmpty) props else context.configs()
+    }
+    else {
+      config = props
+    }
 
     // Get Configuration for this Task
     taskConfig = Try(CosmosDBConfig(ConnectorConfig.sourceConfigDef, config)) match {
@@ -87,4 +94,6 @@ class CosmosDBSourceTask extends SourceTask with LazyLogging {
   }
 
   override def version(): String = getClass.getPackage.getImplementationVersion
+
+  def getReaders(): mutable.Map[String, CosmosDBReader] = readers
 }

@@ -67,22 +67,27 @@ class CosmosDBReader(private val client: AsyncDocumentClient,
     val changeFeedOptions = new ChangeFeedOptions()
     changeFeedOptions.setPartitionKeyRangeId(setting.assignedPartition)
     changeFeedOptions.setMaxItemCount(setting.batchSize)
-    val offset = context.offsetStorageReader.offset(sourcePartition(setting.assignedPartition))
-    if (offset != null) {
-      continuationToken = offset.get(SOURCE_OFFSET_FIELD).toString()
-      continuationToken match {
-        case null => changeFeedOptions.setStartFromBeginning(true)
-        case "" => changeFeedOptions.setStartFromBeginning(true)
-        case t => changeFeedOptions.setRequestContinuation(t)
+    if (context != null) {
+      val offset = context.offsetStorageReader.offset(sourcePartition(setting.assignedPartition))
+      if (offset != null) {
+        continuationToken = offset.get(SOURCE_OFFSET_FIELD).toString()
+        continuationToken match {
+          case null => changeFeedOptions.setStartFromBeginning(true)
+          case "" => changeFeedOptions.setStartFromBeginning(true)
+          case t => changeFeedOptions.setRequestContinuation(t)
+        }
+      }
+      else {
+        continuationToken match {
+          case null => changeFeedOptions.setStartFromBeginning(true)
+          case "" => changeFeedOptions.setStartFromBeginning(true)
+          case t => changeFeedOptions.setRequestContinuation(t)
+        }
       }
     }
     else
     {
-      continuationToken match {
-        case null => changeFeedOptions.setStartFromBeginning(true)
-        case "" => changeFeedOptions.setStartFromBeginning(true)
-        case t => changeFeedOptions.setRequestContinuation(t)
-      }
+      changeFeedOptions.setStartFromBeginning(true)
     }
     return changeFeedOptions
   }
