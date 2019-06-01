@@ -46,6 +46,12 @@ class CosmosDBSourceConnector extends SourceConnector with LazyLogging {
         ConsistencyLevel.Session
       )
       val client = CosmosDBProvider.getClient(settings)
+      if (settings.createDatabase) {
+        CosmosDBProvider.createDatabaseIfNotExists(database)
+      }
+      if (settings.createCollection) {
+        CosmosDBProvider.createCollectionIfNotExists(database, collection)
+      }
       val collectionLink = CosmosDBProvider.getCollectionLink(database, collection)
       val changeFeedObservable = client.readPartitionKeyRanges(collectionLink, null)
       var results = List[PartitionKeyRange]()

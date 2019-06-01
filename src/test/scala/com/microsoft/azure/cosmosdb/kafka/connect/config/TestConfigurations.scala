@@ -3,20 +3,23 @@ package com.microsoft.azure.cosmosdb.kafka.connect.config
 import java.util.Properties
 
 import com.google.common.base.Strings
+import com.typesafe.config.ConfigFactory
 import org.apache.commons.lang3.StringUtils
 import org.apache.kafka.connect.runtime.WorkerConfig
 import org.apache.kafka.connect.runtime.distributed.DistributedConfig
 
 object TestConfigurations {
 
+  lazy private val config = ConfigFactory.load()
+  lazy private val CosmosDBConfig = config.getConfig("CosmosDB")
+
   // Replace ENDPOINT and MASTER_KEY with values from your Azure Cosmos DB account.
   // The default values are credentials of the local emulator, which are not used in any production environment.
-  var ENDPOINT : String = System.getProperty("COSMOS_SERVICE_ENDPOINT", StringUtils.defaultString(Strings.emptyToNull(System.getenv.get("COSMOS_SERVICE_ENDPOINT")), "https://localhost:8081/"))
-  var MASTER_KEY: String = System.getProperty("COSMOS_KEY", StringUtils.defaultString(Strings.emptyToNull(System.getenv.get("COSMOS_KEY")), "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw=="))
-  var DATABASE : String = System.getProperty("COSMOS_DATABASE", StringUtils.defaultString(Strings.emptyToNull(System.getenv.get("COSMOS_DATABASE")), "database"))
-  var COLLECTION : String = System.getProperty("COSMOS_COLLECTION", StringUtils.defaultString(Strings.emptyToNull(System.getenv.get("COSMOS_COLLECTION")), "collection1"))
-  var TOPIC : String = System.getProperty("COSMOS_TOPIC", StringUtils.defaultString(Strings.emptyToNull(System.getenv.get("COSMOS_TOPIC")), "topic_test"))
-
+  var ENDPOINT : String = StringUtils.defaultString(Strings.emptyToNull(CosmosDBConfig.getString("endpoint")), "https://localhost:8081/")
+  var MASTER_KEY: String = StringUtils.defaultString(Strings.emptyToNull(CosmosDBConfig.getString("masterKey")), "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==")
+  var DATABASE : String = StringUtils.defaultString(Strings.emptyToNull(CosmosDBConfig.getString("database")), "database")
+  var COLLECTION : String = StringUtils.defaultString(Strings.emptyToNull(CosmosDBConfig.getString("collection")), "collection1")
+  var TOPIC : String = StringUtils.defaultString(Strings.emptyToNull(CosmosDBConfig.getString("topic")), "topic_test")
 
   def getWorkerProperties(bootstrapServers: String): Properties = {
     val workerProperties: Properties = new Properties()
@@ -47,7 +50,9 @@ object TestConfigurations {
     connectorProperties.put(CosmosDBConfigConstants.CONNECTION_ENDPOINT_CONFIG, ENDPOINT)
     connectorProperties.put(CosmosDBConfigConstants.CONNECTION_MASTERKEY_CONFIG, MASTER_KEY)
     connectorProperties.put(CosmosDBConfigConstants.DATABASE_CONFIG, DATABASE)
+    connectorProperties.put(CosmosDBConfigConstants.CREATE_DATABASE_CONFIG, "true")
     connectorProperties.put(CosmosDBConfigConstants.COLLECTION_CONFIG, COLLECTION)
+    connectorProperties.put(CosmosDBConfigConstants.CREATE_COLLECTION_CONFIG, "true")
     connectorProperties.put(CosmosDBConfigConstants.TOPIC_CONFIG, TOPIC)
     return connectorProperties
   }
