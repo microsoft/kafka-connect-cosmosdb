@@ -2,7 +2,7 @@ package com.microsoft.azure.cosmosdb.kafka.connect.source
 
 import java.util
 import java.util.UUID._
-import java.util.concurrent.CountDownLatch
+import java.util.concurrent.{CountDownLatch, TimeUnit}
 import java.util.{ArrayList, Properties, UUID}
 
 import _root_.rx.Observable
@@ -53,6 +53,11 @@ class CosmosDBSourceTaskTest extends FlatSpec with GivenWhenThen with LazyLoggin
 
     Then(s"Insert ${NUM_DOCS} documents in the test collection")
     insertDocuments()
+
+    // Wait for change feed to process all sent messages
+    Then(s"Waiting 5 seconds for change feed to get changes")
+    TimeUnit.SECONDS.sleep(5)
+
     // Declare a collection to store the messages from SourceRecord
     val kafkaMessages = new util.ArrayList[KafkaPayloadTest]
 
