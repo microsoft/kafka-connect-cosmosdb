@@ -11,6 +11,7 @@ import com.microsoft.azure.cosmosdb.kafka.connect.config.{ConnectorConfig, Cosmo
 import com.microsoft.azure.cosmosdb.rx.AsyncDocumentClient
 import org.apache.kafka.connect.errors.ConnectException
 import org.apache.kafka.connect.source.{SourceRecord, SourceTask}
+import com.microsoft.azure.cosmosdb.kafka.connect.processor._
 
 class CosmosDBSourceTask extends SourceTask with LazyLogging {
 
@@ -22,11 +23,17 @@ class CosmosDBSourceTask extends SourceTask with LazyLogging {
   private var bufferSize: Option[Int] = None
   private var batchSize: Option[Int] = None
   private var topicName: String = ""
+  private val postProcessors = mutable.MutableList.empty[PostProcessor]
 
   override def start(props: util.Map[String, String]): Unit = {
     logger.info("Starting CosmosDBSourceTask")
 
     var config: util.Map[String, String] = null
+
+    // Manually adding post processors at the moment
+    postProcessors += new DocumentIdPostProcessor()
+    postProcessors += new DocumentCleanerPostProcessor()
+    postProcessors += new SampleConsoleWriterPostProcessor()
 
     if (context != null) {
       config = if (context.configs().isEmpty) props else context.configs()
@@ -90,10 +97,16 @@ class CosmosDBSourceTask extends SourceTask with LazyLogging {
   }
 
   override def poll(): util.List[SourceRecord] = {
-    return readers.flatten(r => r._2.processChanges()).toList
+    return readers.flatten(r => r._2.processChanges()).toList.map(sr => applyPostProcessing(sr))
   }
 
   override def version(): String = getClass.getPackage.getImplementationVersion
 
   def getReaders(): mutable.Map[String, CosmosDBReader] = readers
+
+  def applyPostProcessing(sourceRecord: SourceRecord): SourceRecord = {
+    var processedSourceRecord = sourceRecord
+    postProcessors.foreach(p => { processedSourceRecord = p.runPostProcess(processedSourceRecord) })
+    processedSourceRecord
+  }
 }

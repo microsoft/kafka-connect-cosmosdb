@@ -1,16 +1,20 @@
-package com.microsoft.azure.cosmosdb.kafka.connect.sink
+package com.microsoft.azure.cosmosdb.kafka.connect.source
 
 import java.util.Properties
 
+import com.microsoft.azure.cosmosdb.kafka.connect.config.{CosmosDBConfigConstants, TestConfigurations}
 import com.microsoft.azure.cosmosdb.kafka.connect.kafka.KafkaCluster
+import com.typesafe.scalalogging.LazyLogging
+import org.apache.kafka.connect.runtime.WorkerConfig
 import org.apache.kafka.connect.runtime.distributed.DistributedConfig
-import org.apache.kafka.connect.runtime.{ConnectorConfig, WorkerConfig}
+import org.scalatest.{FlatSpec, GivenWhenThen}
 
-object SourceConnectReaderTest {
+object CosmosDBSourceConnectorReaderTest {
 
   var COSMOSDB_TOPIC: String = "cosmosdb-source-topic"
 
   def main(args: Array[String]): Unit = {
+
     val kafkaCluster: KafkaCluster = new KafkaCluster()
     val workerProperties: Properties = getWorkerProperties(kafkaCluster.BrokersList.toString)
     val connectorProperties: Properties = getConnectorProperties()
@@ -42,17 +46,11 @@ object SourceConnectReaderTest {
   }
 
   def getConnectorProperties(): Properties = {
-    val connectorProperties: Properties = new Properties()
-    connectorProperties.put(ConnectorConfig.NAME_CONFIG, "CosmosDBSourceConnector")
-    connectorProperties.put(ConnectorConfig.CONNECTOR_CLASS_CONFIG , "com.microsoft.azure.cosmosdb.kafka.connect.source.CosmosDBSourceConnector")
-    connectorProperties.put(ConnectorConfig.TASKS_MAX_CONFIG , "1")
-    connectorProperties.put("connect.cosmosdb.connection.endpoint" , "https://test-kafkaconnect.documents.azure.com:443/")
-    connectorProperties.put("connect.cosmosdb.master.key", "g4IdYgy1BLfwSiR7voaVPOAxrXvNICiYlwvmZcXkiIlBinVzMEWgoDDclXbiSXDyFMeEVxJ5ZLV1vO2wTYMUlA==")
-    connectorProperties.put("connect.cosmosdb.database" , "test-kcdb")
-    connectorProperties.put("connect.cosmosdb.collection" , "sourceColl")
-    connectorProperties.put("topics" , COSMOSDB_TOPIC)
-    connectorProperties.put("connect.cosmosdb.topic.name" , COSMOSDB_TOPIC)
+    val connectorProperties = TestConfigurations.getSourceConnectorProperties()
 
+    connectorProperties.put(CosmosDBConfigConstants.COLLECTION_CONFIG, "source")
+    connectorProperties.put(CosmosDBConfigConstants.TOPIC_CONFIG, COSMOSDB_TOPIC)
+    connectorProperties.put("topics", COSMOSDB_TOPIC)
 
     return connectorProperties
   }
