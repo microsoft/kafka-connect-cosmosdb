@@ -106,7 +106,10 @@ class CosmosDBSourceTask extends SourceTask with LazyLogging {
 
   def applyPostProcessing(sourceRecord: SourceRecord): SourceRecord = {
     var processedSourceRecord = sourceRecord
-    postProcessors.foreach(p => { processedSourceRecord = p.runPostProcess(processedSourceRecord) })
+    postProcessors.foreach(p => {
+      logger.info(p.getClass.toString)
+      processedSourceRecord = p.runPostProcess(processedSourceRecord)
+    })
     processedSourceRecord
   }
 }

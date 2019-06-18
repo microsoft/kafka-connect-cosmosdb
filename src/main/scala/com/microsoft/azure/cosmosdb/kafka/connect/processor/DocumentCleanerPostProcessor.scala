@@ -1,34 +1,17 @@
 package com.microsoft.azure.cosmosdb.kafka.connect.processor
 
 import com.google.gson._
-import org.apache.kafka.connect.source.SourceRecord
 
-class DocumentCleanerPostProcessor extends PostProcessor {
+class DocumentCleanerPostProcessor extends JsonPostProcessor {
 
-  override def runPostProcess(sourceRecord: SourceRecord): SourceRecord =
-  {
-    println(this.getClass)
+  override def runJsonPostProcess(json: JsonObject): JsonObject = {
 
-    val jsonParser = new JsonParser()
-    val json: JsonObject = jsonParser.parse(sourceRecord.value().toString).getAsJsonObject()
+    val toRemove = Seq("_rid", "_self", "_etag", "_attachments", "_ts", "_lsn", "_metadata")
 
-    json.remove("_rid")
-    json.remove("_self")
-    json.remove("_etag")
-    json.remove("_attachments")
-    json.remove("_ts")
-    json.remove("_lsn")
-    json.remove("_metadata")
+    toRemove.foreach(e => json.remove(e))
 
-    val result = new SourceRecord(
-      sourceRecord.sourcePartition(),
-      sourceRecord.sourceOffset(),
-      sourceRecord.topic(),
-      null,
-      json.toString
-    )
+    json
 
-    result
   }
 
 }
