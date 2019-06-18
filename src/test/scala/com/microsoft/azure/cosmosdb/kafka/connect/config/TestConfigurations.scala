@@ -54,6 +54,8 @@ object TestConfigurations {
     connectorProperties.put(CosmosDBConfigConstants.COLLECTION_CONFIG, COLLECTION)
     connectorProperties.put(CosmosDBConfigConstants.CREATE_COLLECTION_CONFIG, "true")
     connectorProperties.put(CosmosDBConfigConstants.TOPIC_CONFIG, TOPIC)
+    connectorProperties.put(CosmosDBConfigConstants.BATCH_SIZE, "10")
+    connectorProperties.put(CosmosDBConfigConstants.READER_BUFFER_SIZE, "1000")
     return connectorProperties
   }
 }

@@ -2,12 +2,13 @@ package com.microsoft.azure.cosmosdb.kafka.connect.source
 
 import java.util
 
-import scala.collection.JavaConversions._
-import com.typesafe.scalalogging.StrictLogging
-import org.apache.kafka.connect.source.{SourceRecord, SourceTaskContext}
-import com.microsoft.azure.cosmosdb.rx._
 import com.microsoft.azure.cosmosdb._
 import com.microsoft.azure.cosmosdb.kafka.connect.CosmosDBProvider
+import com.microsoft.azure.cosmosdb.rx._
+import com.typesafe.scalalogging.StrictLogging
+import org.apache.kafka.connect.source.{SourceRecord, SourceTaskContext}
+
+import scala.collection.JavaConversions._
 
 class CosmosDBReader(private val client: AsyncDocumentClient,
                      val setting: CosmosDBSourceSettings,
@@ -21,6 +22,7 @@ class CosmosDBReader(private val client: AsyncDocumentClient,
   def processChanges(): util.List[SourceRecord] = {
 
     val records = new util.ArrayList[SourceRecord]
+    var bufferSize = 0
 
     val collectionLink = CosmosDBProvider.getCollectionLink(setting.database, setting.collection)
     val changeFeedOptions = createChangeFeedOptionsFromState()
@@ -31,13 +33,11 @@ class CosmosDBReader(private val client: AsyncDocumentClient,
 
     changeFeedResultList.forEach(
       feedResponse => {
-        val tid: Long = Thread.currentThread().getId()
-
-
         val documents = feedResponse.getResults().map(d => d.toJson())
         continuationToken = feedResponse.getResponseContinuation().replaceAll("^\"|\"$", "")
         documents.toList.foreach(doc =>
         {
+          bufferSize = bufferSize + doc.getBytes().length
           records.add(new SourceRecord(
             sourcePartition(setting.assignedPartition),
             sourceOffset(continuationToken),
@@ -45,6 +45,11 @@ class CosmosDBReader(private val client: AsyncDocumentClient,
             null,
             doc
           ))
+
+          if (records.size >= setting.batchSize || bufferSize >= setting.bufferSize) {
+            return records
+          }
+
         })
       }
     )
