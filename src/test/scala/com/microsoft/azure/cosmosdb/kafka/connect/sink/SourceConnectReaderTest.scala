@@ -47,12 +47,13 @@ object SourceConnectReaderTest {
     connectorProperties.put(ConnectorConfig.CONNECTOR_CLASS_CONFIG , "com.microsoft.azure.cosmosdb.kafka.connect.source.CosmosDBSourceConnector")
     connectorProperties.put(ConnectorConfig.TASKS_MAX_CONFIG , "1")
     connectorProperties.put("connect.cosmosdb.connection.endpoint" , "https://test-kafkaconnect.documents.azure.com:443/")
-    connectorProperties.put("connect.cosmosdb.master.key", "g4IdYgy1BLfwSiR7voaVPOAxrXvNICiYlwvmZcXkiIlBinVzMEWgoDDclXbiSXDyFMeEVxJ5ZLV1vO2wTYMUlA==")
+    connectorProperties.put("connect.cosmosdb.master.key", "5QGyQRtl4fEYT7seSBUiD2Sr0Upgvxm4KrkmeWbVavWAvyM3GQ03esjr8Qixul4MmohdAxAA35PLKpmF5vBvbQ==")
     connectorProperties.put("connect.cosmosdb.database" , "test-kcdb")
-    connectorProperties.put("connect.cosmosdb.collection" , "sourceColl")
+    connectorProperties.put("connect.cosmosdb.collection" , "destCollection1")
     connectorProperties.put("topics" , COSMOSDB_TOPIC)
     connectorProperties.put("connect.cosmosdb.topic.name" , COSMOSDB_TOPIC)
-
+    //  connectorProperties.put("connect.cosmosdb.max_retries" , "10")
+    //  connectorProperties.put("connect.cosmosdb.retry.timeout" , "3000")
 
     return connectorProperties
   }
