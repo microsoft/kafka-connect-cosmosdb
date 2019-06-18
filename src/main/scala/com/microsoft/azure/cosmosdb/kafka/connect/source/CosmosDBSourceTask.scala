@@ -79,7 +79,7 @@ class CosmosDBSourceTask extends SourceTask with LazyLogging {
 
     // Set up Readers
     assigned.map(partition => {
-      val setting = new CosmosDBSourceSettings(database, collection, partition, batchSize.get, CosmosDBConfigConstants.DEFAULT_POLL_INTERVAL, topicName)
+      val setting = new CosmosDBSourceSettings(database, collection, partition, batchSize.get, bufferSize.get, CosmosDBConfigConstants.DEFAULT_POLL_INTERVAL, topicName)
       readers += partition -> new CosmosDBReader(client, setting, context)
     })
 
