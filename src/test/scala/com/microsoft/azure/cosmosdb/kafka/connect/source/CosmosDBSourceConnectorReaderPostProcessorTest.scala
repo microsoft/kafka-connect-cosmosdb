@@ -7,7 +7,7 @@ import com.microsoft.azure.cosmosdb.kafka.connect.kafka.KafkaCluster
 import org.apache.kafka.connect.runtime.WorkerConfig
 import org.apache.kafka.connect.runtime.distributed.DistributedConfig
 
-object CosmosDBSourceConnectorReaderTest {
+object CosmosDBSourceConnectorReaderPostProcessorTest {
 
   var COSMOSDB_TOPIC: String = "cosmosdb-source-topic"
 
