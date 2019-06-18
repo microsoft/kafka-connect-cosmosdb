@@ -3,20 +3,18 @@ package com.microsoft.azure.cosmosdb.kafka.connect.source
 import java.util.Properties
 
 import com.microsoft.azure.cosmosdb.kafka.connect.kafka.KafkaCluster
-import org.apache.kafka.connect.runtime.WorkerConfig
-import org.apache.kafka.connect.runtime.ConnectorConfig
 import org.apache.kafka.connect.runtime.distributed.DistributedConfig
+import org.apache.kafka.connect.runtime.{ConnectorConfig, WorkerConfig}
 
 object Main {
 
   var COSMOSDB_TOPIC: String = "cosmosdb-source-topic"
 
   def main(args: Array[String]): Unit = {
-    val kafkaCluster: KafkaCluster = new KafkaCluster()
-    val workerProperties: Properties = getWorkerProperties(kafkaCluster.BrokersList.toString)
+    val workerProperties: Properties = getWorkerProperties(KafkaCluster.BrokersList.toString)
     val connectorProperties: Properties = getConnectorProperties()
-    kafkaCluster.startEmbeddedConnect(workerProperties, List(connectorProperties))
-    if (kafkaCluster.kafkaConnectEnabled) {
+    KafkaCluster.startEmbeddedConnect(workerProperties, List(connectorProperties))
+    if (KafkaCluster.kafkaConnectEnabled) {
       println("Kafka Connector Enabled")
     }
   }

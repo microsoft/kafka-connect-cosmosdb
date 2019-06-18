@@ -11,11 +11,10 @@ object SourceConnectReaderTest {
   var COSMOSDB_TOPIC: String = "cosmosdb-source-topic"
 
   def main(args: Array[String]): Unit = {
-    val kafkaCluster: KafkaCluster = new KafkaCluster()
-    val workerProperties: Properties = getWorkerProperties(kafkaCluster.BrokersList.toString)
+    val workerProperties: Properties = getWorkerProperties(KafkaCluster.BrokersList.toString)
     val connectorProperties: Properties = getConnectorProperties()
-    kafkaCluster.startEmbeddedConnect(workerProperties, List(connectorProperties))
-    if (kafkaCluster.kafkaConnectEnabled) {
+    KafkaCluster.startEmbeddedConnect(workerProperties, List(connectorProperties))
+    if (KafkaCluster.kafkaConnectEnabled) {
       println("Kafka Connector Enabled")
     }
   }
