@@ -16,6 +16,9 @@ object CosmosDBSourceConnectorReaderPostProcessorTest {
     val kafkaCluster: KafkaCluster = new KafkaCluster()
     val workerProperties: Properties = getWorkerProperties(kafkaCluster.BrokersList.toString)
     val connectorProperties: Properties = getConnectorProperties()
+
+    // TODO: Add PostProcessing
+
     kafkaCluster.startEmbeddedConnect(workerProperties, List(connectorProperties))
     if (kafkaCluster.kafkaConnectEnabled) {
       println("Kafka Connector Enabled")
@@ -24,6 +27,7 @@ object CosmosDBSourceConnectorReaderPostProcessorTest {
 
   def getWorkerProperties(bootstrapServers: String): Properties = {
     val workerProperties: Properties = new Properties()
+
     workerProperties.put(WorkerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers)
     workerProperties.put(DistributedConfig.GROUP_ID_CONFIG, "cosmosdb")
     workerProperties.put(DistributedConfig.CONFIG_TOPIC_CONFIG, "cosmosdb-config")
@@ -40,7 +44,8 @@ object CosmosDBSourceConnectorReaderPostProcessorTest {
     workerProperties.put(DistributedConfig.STATUS_STORAGE_TOPIC_CONFIG, "cosmosdb-status")
     workerProperties.put(DistributedConfig.STATUS_STORAGE_PARTITIONS_CONFIG, "1")
     workerProperties.put(DistributedConfig.STATUS_STORAGE_REPLICATION_FACTOR_CONFIG, "1")
-    return workerProperties
+
+    workerProperties
   }
 
   def getConnectorProperties(): Properties = {
@@ -50,6 +55,6 @@ object CosmosDBSourceConnectorReaderPostProcessorTest {
     connectorProperties.put(CosmosDBConfigConstants.TOPIC_CONFIG, COSMOSDB_TOPIC)
     connectorProperties.put("topics", COSMOSDB_TOPIC)
 
-    return connectorProperties
+    connectorProperties
   }
 }
