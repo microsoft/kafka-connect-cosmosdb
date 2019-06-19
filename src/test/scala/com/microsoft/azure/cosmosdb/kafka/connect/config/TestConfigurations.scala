@@ -18,7 +18,8 @@ object TestConfigurations {
   var ENDPOINT : String = StringUtils.defaultString(Strings.emptyToNull(CosmosDBConfig.getString("endpoint")), "https://localhost:8081/")
   var MASTER_KEY: String = StringUtils.defaultString(Strings.emptyToNull(CosmosDBConfig.getString("masterKey")), "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==")
   var DATABASE : String = StringUtils.defaultString(Strings.emptyToNull(CosmosDBConfig.getString("database")), "database")
-  var COLLECTION : String = StringUtils.defaultString(Strings.emptyToNull(CosmosDBConfig.getString("collection")), "collection1")
+  var SOURCE_COLLECTION : String = StringUtils.defaultString(Strings.emptyToNull(CosmosDBConfig.getString("collection")), "collection1")
+  var SINK_COLLECTION : String = StringUtils.defaultString(Strings.emptyToNull(CosmosDBConfig.getString("collection")), "collection2")
   var TOPIC : String = StringUtils.defaultString(Strings.emptyToNull(CosmosDBConfig.getString("topic")), "topic_test")
 
   def getWorkerProperties(bootstrapServers: String): Properties = {
@@ -33,10 +34,8 @@ object TestConfigurations {
     workerProperties.put(WorkerConfig.OFFSET_COMMIT_INTERVAL_MS_CONFIG, "30000")
     workerProperties.put(DistributedConfig.CONFIG_TOPIC_CONFIG, "cosmosdb-config")
     workerProperties.put(DistributedConfig.CONFIG_STORAGE_REPLICATION_FACTOR_CONFIG, "1")
-    workerProperties.put(DistributedConfig.OFFSET_STORAGE_TOPIC_CONFIG, "cosmosdb-offset")
     workerProperties.put(DistributedConfig.OFFSET_STORAGE_PARTITIONS_CONFIG, "1")
     workerProperties.put(DistributedConfig.OFFSET_STORAGE_REPLICATION_FACTOR_CONFIG, "1")
-    workerProperties.put(DistributedConfig.STATUS_STORAGE_TOPIC_CONFIG, "cosmosdb-status")
     workerProperties.put(DistributedConfig.STATUS_STORAGE_PARTITIONS_CONFIG, "1")
     workerProperties.put(DistributedConfig.STATUS_STORAGE_REPLICATION_FACTOR_CONFIG, "1")
     return workerProperties
@@ -51,9 +50,36 @@ object TestConfigurations {
     connectorProperties.put(CosmosDBConfigConstants.CONNECTION_MASTERKEY_CONFIG, MASTER_KEY)
     connectorProperties.put(CosmosDBConfigConstants.DATABASE_CONFIG, DATABASE)
     connectorProperties.put(CosmosDBConfigConstants.CREATE_DATABASE_CONFIG, "true")
-    connectorProperties.put(CosmosDBConfigConstants.COLLECTION_CONFIG, COLLECTION)
+    connectorProperties.put(CosmosDBConfigConstants.COLLECTION_CONFIG, SOURCE_COLLECTION)
     connectorProperties.put(CosmosDBConfigConstants.CREATE_COLLECTION_CONFIG, "true")
     connectorProperties.put(CosmosDBConfigConstants.TOPIC_CONFIG, TOPIC)
     return connectorProperties
+  }
+
+  def getSinkConnectorProperties(): Properties = {
+    val connectorProperties: Properties = new Properties()
+    connectorProperties.put(org.apache.kafka.connect.runtime.ConnectorConfig.NAME_CONFIG, "CosmosDBSinkConnector")
+    connectorProperties.put(org.apache.kafka.connect.runtime.ConnectorConfig.CONNECTOR_CLASS_CONFIG , "com.microsoft.azure.cosmosdb.kafka.connect.sink.CosmosDBSinkConnector")
+    connectorProperties.put(org.apache.kafka.connect.runtime.ConnectorConfig.TASKS_MAX_CONFIG , "1")
+    connectorProperties.put(CosmosDBConfigConstants.CONNECTION_ENDPOINT_CONFIG , ENDPOINT)
+    connectorProperties.put(CosmosDBConfigConstants.CONNECTION_MASTERKEY_CONFIG, MASTER_KEY)
+    connectorProperties.put(CosmosDBConfigConstants.DATABASE_CONFIG, DATABASE)
+    connectorProperties.put(CosmosDBConfigConstants.COLLECTION_CONFIG, SINK_COLLECTION)
+    connectorProperties.put("topics" , TOPIC)
+    connectorProperties.put(CosmosDBConfigConstants.TOPIC_CONFIG, TOPIC)
+    return connectorProperties
+  }
+
+  def getProducerProperties(bootstrapServers: String): Properties = {
+    val producerProperties: Properties = new Properties()
+    producerProperties.put("bootstrap.servers", bootstrapServers)
+    producerProperties.put("acks", "all")
+    producerProperties.put("retries", "3")
+    producerProperties.put("batch.size", "10")
+    producerProperties.put("linger.ms", "1")
+    producerProperties.put("buffer.memory", "33554432")
+    producerProperties.put("key.serializer", "org.springframework.kafka.support.serializer.JsonSerializer")
+    producerProperties.put("value.serializer", "org.springframework.kafka.support.serializer.JsonSerializer")
+    return producerProperties
   }
 }

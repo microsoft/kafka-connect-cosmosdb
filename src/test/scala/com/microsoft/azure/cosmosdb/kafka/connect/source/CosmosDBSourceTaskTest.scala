@@ -88,7 +88,7 @@ class CosmosDBSourceTaskTest extends FlatSpec with GivenWhenThen with LazyLoggin
     testUUID = randomUUID()
 
     for (i <- 1 to NUM_DOCS) {
-      val doc = CosmosDBDocumentTest(i.toString, s"Message ${i}", testUUID)
+      val doc = new CosmosDBDocumentTest(i.toString, s"Message ${i}", testUUID)
       documents.add(doc)
     }
     return documents
@@ -101,7 +101,7 @@ class CosmosDBSourceTaskTest extends FlatSpec with GivenWhenThen with LazyLoggin
       TestConfigurations.ENDPOINT,
       TestConfigurations.MASTER_KEY,
       TestConfigurations.DATABASE,
-      TestConfigurations.COLLECTION,
+      TestConfigurations.SOURCE_COLLECTION,
       true,
       true,
       ConnectionPolicy.GetDefault(),
@@ -121,7 +121,7 @@ class CosmosDBSourceTaskTest extends FlatSpec with GivenWhenThen with LazyLoggin
     mockDocuments().forEach(record => {
       val json = gson.toJson(record)
       val document = new Document(json)
-      val obs = client.upsertDocument(CosmosDBProvider.getCollectionLink(TestConfigurations.DATABASE, TestConfigurations.COLLECTION), document, null, false)
+      val obs = client.upsertDocument(CosmosDBProvider.getCollectionLink(TestConfigurations.DATABASE, TestConfigurations.SOURCE_COLLECTION), document, null, false)
       upsertDocumentsOBs.add(obs)
     })
 
