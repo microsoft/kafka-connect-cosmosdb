@@ -2,6 +2,8 @@ package com.microsoft.azure.cosmosdb.kafka.connect.sink
 
 import java.util
 
+import com.microsoft.azure.cosmosdb.kafka.connect.common.ErrorHandling.ErrorHandler
+
 import com.microsoft.azure.cosmosdb.kafka.connect.config.{ConnectorConfig, CosmosDBConfig}
 import com.typesafe.scalalogging.LazyLogging
 import org.apache.kafka.common.config.ConfigDef
@@ -13,7 +15,7 @@ import scala.collection.JavaConverters._
 import scala.util.{Failure, Success, Try}
 
 
-class CosmosDBSinkConnector extends SinkConnector with LazyLogging {
+class CosmosDBSinkConnector extends SinkConnector with LazyLogging with ErrorHandler {
 
   private var configProps: util.Map[String, String] = _
 
@@ -22,9 +24,20 @@ class CosmosDBSinkConnector extends SinkConnector with LazyLogging {
   override def start(props: util.Map[String, String]): Unit = {
     logger.info("Starting CosmosDBSinkConnector")
 
-    val config = Try(CosmosDBConfig(ConnectorConfig.sinkConfigDef, props)) match {
-      case Failure(f) => throw new ConnectException(s"Couldn't start Cosmos DB Sink due to configuration error: ${f.getMessage}", f)
-      case Success(c) => c
+    //TODO change maxRetires number to the right one
+    //initialize error handler
+  initializeErrorHandler(2)
+
+    try {
+
+      val config = Try(CosmosDBConfig(ConnectorConfig.sinkConfigDef, props))
+      HandleError(Success(config))
+    }
+    catch{
+      case f: Throwable =>
+        logger.error(s"Couldn't start Cosmos DB Sink due to configuration error: ${f.getMessage}", f)
+        HandleError(Failure(f))
+
     }
 
     configProps = props
