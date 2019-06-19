@@ -58,4 +58,20 @@ object TestConfigurations {
     connectorProperties.put(CosmosDBConfigConstants.READER_BUFFER_SIZE, "1000")
     return connectorProperties
   }
+
+  def getSinkConnectorProperties(): Properties = {
+    val connectorProperties: Properties = new Properties()
+    connectorProperties.put(org.apache.kafka.connect.runtime.ConnectorConfig.NAME_CONFIG, "CosmosDBSinkConnector")
+    connectorProperties.put(org.apache.kafka.connect.runtime.ConnectorConfig.CONNECTOR_CLASS_CONFIG , "com.microsoft.azure.cosmosdb.kafka.connect.source.CosmosDBSinkConnector")
+    connectorProperties.put(org.apache.kafka.connect.runtime.ConnectorConfig.TASKS_MAX_CONFIG , "1")
+    connectorProperties.put(CosmosDBConfigConstants.CONNECTION_ENDPOINT_CONFIG, ENDPOINT)
+    connectorProperties.put(CosmosDBConfigConstants.CONNECTION_MASTERKEY_CONFIG, MASTER_KEY)
+    connectorProperties.put(CosmosDBConfigConstants.DATABASE_CONFIG, DATABASE)
+    connectorProperties.put(CosmosDBConfigConstants.CREATE_DATABASE_CONFIG, "true")
+    connectorProperties.put(CosmosDBConfigConstants.COLLECTION_CONFIG, COLLECTION)
+    connectorProperties.put(CosmosDBConfigConstants.CREATE_COLLECTION_CONFIG, "true")
+    connectorProperties.put(CosmosDBConfigConstants.TOPIC_CONFIG, TOPIC)
+    return connectorProperties
+  }
+
 }
