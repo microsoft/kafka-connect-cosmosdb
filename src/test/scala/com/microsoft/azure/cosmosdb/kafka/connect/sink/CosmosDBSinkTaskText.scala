@@ -17,20 +17,6 @@ class CosmosDBSinkTaskText extends FlatSpec with GivenWhenThen with LazyLogging 
   private var kafkaCluster: KafkaCluster = null
   private var testUUID: UUID = null
 
-  "CosmosDBSinkTask start" should "Initialize all properties" in {
-    Given("A list of properties for CosmosSinkTask")
-    val props = TestConfigurations.getSinkConnectorProperties()
-
-    When("CosmosDBSinkTask is started")
-    val task = new CosmosDBSinkTask
-    task.start(Maps.fromProperties(props))
-
-    Then("CosmosDBSinkTask should properly initialized the readers")
-  }
-
-
-
-
 
   "CosmosDBSinkTask put" should "Return a list of SinkRecords with the right format" in {
     Given("A Kafka Broker with an Embedded Connect and a CosmosSinkConnector instance")
@@ -40,7 +26,8 @@ class CosmosDBSinkTaskText extends FlatSpec with GivenWhenThen with LazyLogging 
     val props: Properties = TestConfigurations.getSourceConnectorProperties()
     kafkaCluster.startEmbeddedConnect(workerProperties, List(props))
 
-    Then(s"Insert ${NUM_DOCS} documents in the test collection")
+
+    When(s"Insert ${NUM_DOCS} documents in the test collection")
 
    val json = scala.io.Source.fromFile(getClass.getResource(s"/test1.json").toURI.getPath).mkString
 
@@ -61,7 +48,11 @@ class CosmosDBSinkTaskText extends FlatSpec with GivenWhenThen with LazyLogging 
 
       task.put(scala.collection.JavaConversions.seqAsJavaList(records))
     })
+
+    Then("Verify records inserted into Cosmos ")
+
   }
+
 
 
 }

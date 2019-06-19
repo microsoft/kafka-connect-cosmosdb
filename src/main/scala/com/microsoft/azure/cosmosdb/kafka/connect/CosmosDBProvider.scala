@@ -174,4 +174,62 @@ object CosmosDBProvider extends LazyLogging {
 
 
 
+  def readCollection(databaseName: String, collectionName: String, completionLatch: CountDownLatch): _root_.rx.lang.scala.Observable[ResourceResponse[DocumentCollection]]= { // Create a Collection
+    val colLnk = s"/dbs/$databaseName/colls/$collectionName"
+    logger.info("reading collection " + colLnk)
+
+    val readDocumentsOBs = client.readCollection(colLnk, null)
+
+
+    val forcedScalaObservable: _root_.rx.lang.scala.Observable[ResourceResponse[DocumentCollection]] = readDocumentsOBs
+
+    forcedScalaObservable
+      .subscribe(
+        t => {
+          logger.info(s"activityId" + t.getActivityId + s"id" + t.getResource.getId)
+        },
+        e => {
+          logger.error(s"error reading document collection e:${e.getMessage()} stack:${e.getStackTrace().toString()}")
+          completionLatch.countDown()
+        },
+        () => {
+          logger.info("readDocuments completed")
+          completionLatch.countDown()
+        })
+    return forcedScalaObservable
+
+  }
+
+
+  def queryCollection(databaseName: String, collectionName: String, completionLatch: CountDownLatch): _root_.rx.lang.scala.Observable[FeedResponse[DocumentCollection]]= { // Create a Collection
+    val colLnk = s"/dbs/$databaseName/colls/$collectionName"
+    val dbLink = s"/dbs/$databaseName"
+    logger.info("reading collection " + colLnk)
+
+    //val query = "SELECT * from c"
+    val query = String.format("SELECT * from c where c.id = '%s'", collectionName)
+    val options = new FeedOptions
+    options.setMaxItemCount(2)
+
+    val queryCollectionObservable = client.queryCollections(dbLink, query, options)
+
+    val forcedScalaObservable: _root_.rx.lang.scala.Observable[FeedResponse[DocumentCollection]] = queryCollectionObservable
+
+    forcedScalaObservable
+      .subscribe(
+        t => {
+          logger.info(s"activityId" + t.getActivityId + s"id" + t.getResults.toString)
+        },
+        e => {
+          logger.error(s"error reading document collection e:${e.getMessage()} stack:${e.getStackTrace().toString()}")
+          completionLatch.countDown()
+        },
+        () => {
+          logger.info("readDocuments completed")
+          completionLatch.countDown()
+        })
+    return forcedScalaObservable
+
+  }
+
 }
