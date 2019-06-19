@@ -48,7 +48,7 @@ object SourceConnectReaderTest {
     connectorProperties.put("connect.cosmosdb.connection.endpoint" , "https://test-kafkaconnect.documents.azure.com:443/")
     connectorProperties.put("connect.cosmosdb.master.key", "5QGyQRtl4fEYT7seSBUiD2Sr0Upgvxm4KrkmeWbVavWAvyM3GQ03esjr8Qixul4MmohdAxAA35PLKpmF5vBvbQ==")
     connectorProperties.put("connect.cosmosdb.database" , "test-kcdb")
-    connectorProperties.put("connect.cosmosdb.collection" , "destCollection1")
+    connectorProperties.put("connect.cosmosdb.collection" , "sourceCollection")
     connectorProperties.put("topics" , COSMOSDB_TOPIC)
     connectorProperties.put("connect.cosmosdb.topic.name" , COSMOSDB_TOPIC)
     //  connectorProperties.put("connect.cosmosdb.max_retries" , "10")

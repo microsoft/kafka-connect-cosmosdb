@@ -7,13 +7,19 @@ import java.util.concurrent.CountDownLatch
 import _root_.rx.Observable
 import _root_.rx.lang.scala.JavaConversions._
 import com.microsoft.azure.cosmosdb._
+import com.microsoft.azure.cosmosdb.kafka.connect.common.ErrorHandling.ErrorHandler
 import com.microsoft.azure.cosmosdb.rx.AsyncDocumentClient
-import com.typesafe.scalalogging.LazyLogging
 
-object CosmosDBProvider extends LazyLogging {
+import scala.util.{Failure, Success}
+
+object CosmosDBProvider extends ErrorHandler{
 
   private val requestOptionsInsert = new RequestOptions
   requestOptionsInsert.setConsistencyLevel(ConsistencyLevel.Session)
+
+  initializeErrorHandler(2)
+
+
 
   var client: AsyncDocumentClient = _
 
@@ -161,9 +167,14 @@ object CosmosDBProvider extends LazyLogging {
       .map(r => r.getRequestCharge)
       .reduce((sum, value) => sum + value)
       .subscribe(
-        t => logger.info(s"upsertDocuments total RU charge is $t"),
+        t => {
+          logger.info(s"upsertDocuments total RU charge is $t")
+          HandleError(Success())
+        },
         e => {
           logger.error(s"error upserting documents e:${e.getMessage()} stack:${e.getStackTrace().toString()}")
+          HandleError(Failure(e))
+
           completionLatch.countDown()
         },
         () => {
