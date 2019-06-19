@@ -25,13 +25,14 @@ stages:
       inputs:
         targetType: 'inline'
         script: 'docker build --target=unittest -t $(appName)acr.azurecr.io/$(appname):canary .'
+        
     - task: Bash@3
       inputs:
         targetType: 'inline'
-        script: 'docker cp ......'
+        script: 'docker cp app/cosmosdbkafkaconnector.jar $(Build.ArtifactStagingDirectory)'
 
     - task: PublishBuildArtifacts@1
       inputs:
-        PathtoPublish: '$(Build.ArtifactStagingDirectory).jar'
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
         ArtifactName: 'drop'
         publishLocation: 'Container'
