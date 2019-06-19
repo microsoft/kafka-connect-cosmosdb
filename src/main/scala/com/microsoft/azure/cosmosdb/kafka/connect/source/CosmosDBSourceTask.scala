@@ -23,7 +23,7 @@ class CosmosDBSourceTask extends SourceTask with LazyLogging {
   private var bufferSize: Option[Int] = None
   private var batchSize: Option[Int] = None
   private var topicName: String = ""
-  private val postProcessors = mutable.MutableList.empty[PostProcessor]
+  private var postProcessors  = List.empty[PostProcessor]
 
   override def start(props: util.Map[String, String]): Unit = {
     logger.info("Starting CosmosDBSourceTask")
@@ -45,11 +45,7 @@ class CosmosDBSourceTask extends SourceTask with LazyLogging {
 
     // Add configured Post-Processors
     val processorClassNames = taskConfig.get.getString(CosmosDBConfigConstants.SOURCE_POST_PROCESSOR)
-    for (pcn <- processorClassNames.split(','))
-    {
-      logger.info(s"Adding ${pcn} as Source Post-Processor")
-      postProcessors += Class.forName(pcn).newInstance().asInstanceOf[PostProcessor]
-    }
+    postProcessors = PostProcessor.createPostProcessorList(processorClassNames)
 
     // Get CosmosDB Connection
     val endpoint: String = taskConfig.get.getString(CosmosDBConfigConstants.CONNECTION_ENDPOINT_CONFIG)
@@ -109,7 +105,7 @@ class CosmosDBSourceTask extends SourceTask with LazyLogging {
 
   private def applyPostProcessing(sourceRecord: SourceRecord): SourceRecord =
     postProcessors.foldLeft(sourceRecord)((r, p) => {
-      println(p.getClass.toString)
+      //println(p.getClass.toString)
       p.runPostProcess(r)
     })
 

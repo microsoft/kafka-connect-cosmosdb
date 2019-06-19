@@ -18,8 +18,8 @@ object CosmosDBSourceConnectorReaderPostProcessorTest {
     val connectorProperties: Properties = getConnectorProperties()
 
     val postProcessors =
-      "com.microsoft.azure.cosmosdb.kafka.connect.processor.source.SelectorSource" ::
-        "com.microsoft.azure.cosmosdb.kafka.connect.processor.SampleConsoleWriter" ::
+      "com.microsoft.azure.cosmosdb.kafka.connect.processor.source.SelectorSourcePostProcessor" ::
+        "com.microsoft.azure.cosmosdb.kafka.connect.processor.SampleConsoleWriterPostProcessor" ::
         Nil
     connectorProperties.put(CosmosDBConfigConstants.SOURCE_POST_PROCESSOR, postProcessors.mkString(","))
 
