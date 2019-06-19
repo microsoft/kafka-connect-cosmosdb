@@ -17,7 +17,7 @@ class CosmosDBReader(private val client: AsyncDocumentClient,
 
   private val SOURCE_PARTITION_FIELD = "partition"
   private val SOURCE_OFFSET_FIELD = "continuationToken"
-  private var continuationToken: String = ""
+  private var continuationToken: String = getContinuationTokenSeed(setting.assignedPartition)
 
   def processChanges(): util.List[SourceRecord] = {
 
@@ -25,7 +25,7 @@ class CosmosDBReader(private val client: AsyncDocumentClient,
     var bufferSize = 0
 
     val collectionLink = CosmosDBProvider.getCollectionLink(setting.database, setting.collection)
-    val changeFeedOptions = createChangeFeedOptionsFromState()
+    val changeFeedOptions = createChangeFeedOptions()
     val changeFeedResultList = client.queryDocumentChangeFeed(collectionLink, changeFeedOptions)
         .toList()
         .toBlocking()
@@ -37,7 +37,12 @@ class CosmosDBReader(private val client: AsyncDocumentClient,
         continuationToken = feedResponse.getResponseContinuation().replaceAll("^\"|\"$", "")
         documents.toList.foreach(doc =>
         {
+
+          logger.debug(s"Sending document ${doc} to the Kafka topic ${setting.topicName}")
+          logger.debug(s"Partition: ${setting.assignedPartition}, continuationToken: ${continuationToken}")
+
           bufferSize = bufferSize + doc.getBytes().length
+
           records.add(new SourceRecord(
             sourcePartition(setting.assignedPartition),
             sourceOffset(continuationToken),
@@ -56,6 +61,29 @@ class CosmosDBReader(private val client: AsyncDocumentClient,
     return records
   }
 
+  private def createChangeFeedOptions(): ChangeFeedOptions = {
+    val changeFeedOptions = new ChangeFeedOptions()
+    changeFeedOptions.setPartitionKeyRangeId(setting.assignedPartition)
+    changeFeedOptions.setMaxItemCount(setting.batchSize)
+    continuationToken match {
+      case null => changeFeedOptions.setStartFromBeginning(true)
+      case "" => changeFeedOptions.setStartFromBeginning(true)
+      case t => changeFeedOptions.setRequestContinuation(t)
+    }
+    return changeFeedOptions
+  }
+
+  private def getContinuationTokenSeed(partition: String): String = {
+    var continuationToken: String = null
+    if (context != null) {
+      val offset = context.offsetStorageReader.offset(sourcePartition(partition))
+      if (offset != null) {
+        continuationToken = offset.get(SOURCE_OFFSET_FIELD).toString()
+      }
+    }
+    return continuationToken
+  }
+
   private def sourcePartition(partition: String): util.Map[String, String] = {
     val map = new java.util.HashMap[String,String]
     map.put(SOURCE_PARTITION_FIELD, partition)
@@ -66,34 +94,5 @@ class CosmosDBReader(private val client: AsyncDocumentClient,
     val map = new java.util.HashMap[String,String]
     map.put(SOURCE_OFFSET_FIELD, offset)
     return map
-  }
-
-  private def createChangeFeedOptionsFromState(): ChangeFeedOptions = {
-    val changeFeedOptions = new ChangeFeedOptions()
-    changeFeedOptions.setPartitionKeyRangeId(setting.assignedPartition)
-    changeFeedOptions.setMaxItemCount(setting.batchSize)
-    if (context != null) {
-      val offset = context.offsetStorageReader.offset(sourcePartition(setting.assignedPartition))
-      if (offset != null) {
-        continuationToken = offset.get(SOURCE_OFFSET_FIELD).toString()
-        continuationToken match {
-          case null => changeFeedOptions.setStartFromBeginning(true)
-          case "" => changeFeedOptions.setStartFromBeginning(true)
-          case t => changeFeedOptions.setRequestContinuation(t)
-        }
-      }
-      else {
-        continuationToken match {
-          case null => changeFeedOptions.setStartFromBeginning(true)
-          case "" => changeFeedOptions.setStartFromBeginning(true)
-          case t => changeFeedOptions.setRequestContinuation(t)
-        }
-      }
-    }
-    else
-    {
-      changeFeedOptions.setStartFromBeginning(true)
-    }
-    return changeFeedOptions
   }
 }
