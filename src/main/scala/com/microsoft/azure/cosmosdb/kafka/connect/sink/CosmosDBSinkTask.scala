@@ -35,7 +35,6 @@ class CosmosDBSinkTask extends SinkTask with LazyLogging {
     val config = if (context.configs().isEmpty) props else context.configs()
 
     // Manually adding post processors at the moment
-    postProcessors += new SampleSinkPostProcessor()
     postProcessors += new SampleConsoleWriterPostProcessor()
 
     // Get Configuration for this Task

@@ -49,6 +49,16 @@ object CosmosDBConfigConstants {
     val READER_BUFFER_SIZE_DOC = "The size of the queue as read writes to."
     val READER_BUFFER_SIZE_DEFAULT = 10000
 
+    val SOURCE_POST_PROCESSOR = s"$CONNECTOR_PREFIX.source.post-processor"
+    val SOURCE_POST_PROCESSOR_DISPLAY = "Source Post-Processor List"
+    val SOURCE_POST_PROCESSOR_DOC = "Comma-separated list of Source Post-Processor class names to use for post-processing"
+    val SOURCE_POST_PROCESSOR_DEFAULT = ""
+
+    val SINK_POST_PROCESSOR = s"$CONNECTOR_PREFIX.sink.post-processor"
+    val SINK_POST_PROCESSOR_DISPLAY = "Sink Post-Processor List"
+    val SINK_POST_PROCESSOR_DOC = "Comma-separated list of Source Post-Processor class names to use for post-processing"
+    val SINK_POST_PROCESSOR_DEFAULT = ""
+
     val DEFAULT_POLL_INTERVAL = 1000
 }
 

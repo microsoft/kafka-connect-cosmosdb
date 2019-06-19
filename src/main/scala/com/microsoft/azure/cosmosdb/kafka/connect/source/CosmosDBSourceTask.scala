@@ -30,11 +30,6 @@ class CosmosDBSourceTask extends SourceTask with LazyLogging {
 
     var config: util.Map[String, String] = null
 
-    // Manually adding post processors at the moment
-    postProcessors += new DocumentIdPostProcessor()
-    postProcessors += new DocumentCleanerPostProcessor()
-    postProcessors += new SampleConsoleWriterPostProcessor()
-
     if (context != null) {
       config = if (context.configs().isEmpty) props else context.configs()
     }
@@ -46,6 +41,14 @@ class CosmosDBSourceTask extends SourceTask with LazyLogging {
     taskConfig = Try(CosmosDBConfig(ConnectorConfig.sourceConfigDef, config)) match {
       case Failure(f) => throw new ConnectException("Couldn't start CosmosDBSource due to configuration error.", f)
       case Success(s) => Some(s)
+    }
+
+    // Add configured Post-Processors
+    val processorClassNames = taskConfig.get.getString(CosmosDBConfigConstants.SOURCE_POST_PROCESSOR)
+    for (pcn <- processorClassNames.split(','))
+    {
+      logger.info(s"Adding ${pcn} as Source Post-Processor")
+      postProcessors += Class.forName(pcn).newInstance().asInstanceOf[PostProcessor]
     }
 
     // Get CosmosDB Connection
