@@ -3,7 +3,7 @@ package com.microsoft.azure.cosmosdb.kafka.connect.sink
 import java.util
 
 import com.microsoft.azure.cosmosdb.kafka.connect.config.{ConnectorConfig, CosmosDBConfig, CosmosDBConfigConstants}
-import com.microsoft.azure.cosmosdb.kafka.connect.processor.{DocumentCleanerPostProcessor, DocumentIdPostProcessor, PostProcessor, SampleConsoleWriterPostProcessor}
+import com.microsoft.azure.cosmosdb.kafka.connect.processor._
 import com.microsoft.azure.cosmosdb.kafka.connect.{CosmosDBClientSettings, CosmosDBProvider}
 import com.microsoft.azure.cosmosdb.rx.AsyncDocumentClient
 import com.microsoft.azure.cosmosdb.{ConnectionPolicy, ConsistencyLevel}
@@ -12,7 +12,6 @@ import org.apache.kafka.clients.consumer.OffsetAndMetadata
 import org.apache.kafka.common.TopicPartition
 import org.apache.kafka.connect.errors.ConnectException
 import org.apache.kafka.connect.sink.{SinkRecord, SinkTask}
-import org.apache.kafka.connect.source.SourceRecord
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
@@ -36,8 +35,7 @@ class CosmosDBSinkTask extends SinkTask with LazyLogging {
         val config = if (context.configs().isEmpty) props else context.configs()
 
         // Manually adding post processors at the moment
-        postProcessors += new DocumentIdPostProcessor()
-        postProcessors += new DocumentCleanerPostProcessor()
+        postProcessors += new SampleSinkPostProcessor()
         postProcessors += new SampleConsoleWriterPostProcessor()
 
         // Get Configuration for this Task
@@ -82,10 +80,11 @@ class CosmosDBSinkTask extends SinkTask with LazyLogging {
         val seq = records.asScala.toList
         logger.info(s"Sending ${seq.length} records to writer to be written")
 
-        seq.map(sr => applyPostProcessing(sr))
+        // Execute PostProcessing
+        val postProcessed = seq.map(sr => applyPostProcessing(sr))
 
         // Currently only built for messages with JSON payload without schema
-        writer.foreach(w => w.write(seq))
+        writer.foreach(w => w.write(postProcessed))
     }
 
     override def stop(): Unit = {
@@ -97,12 +96,12 @@ class CosmosDBSinkTask extends SinkTask with LazyLogging {
     override def version(): String = getClass.getPackage.getImplementationVersion
 
     def applyPostProcessing(sinkRecord: SinkRecord): SinkRecord = {
-        var processedSourceRecord = sinkRecord.
+        var processedSinkRecord = sinkRecord
         postProcessors.foreach(p => {
             logger.info(p.getClass.toString)
-            processedSourceRecord = p.runPostProcess(processedSourceRecord)
+            processedSinkRecord = p.runPostProcess(processedSinkRecord)
         })
-        processedSourceRecord
+        processedSinkRecord
     }
 }
 

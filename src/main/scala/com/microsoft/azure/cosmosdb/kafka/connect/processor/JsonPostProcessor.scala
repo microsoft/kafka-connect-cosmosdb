@@ -8,7 +8,7 @@ abstract class JsonPostProcessor extends PostProcessor {
 
   override final def runPostProcess(sourceRecord: SourceRecord): SourceRecord = {
     val jsonParser = new JsonParser()
-    val json: JsonObject = jsonParser.parse(sourceRecord.value().toString).getAsJsonObject()
+    val json: JsonObject = jsonParser.parse(sourceRecord.value().toString).getAsJsonObject
 
     val processedJson = runJsonPostProcess(json)
 
@@ -25,16 +25,18 @@ abstract class JsonPostProcessor extends PostProcessor {
 
   override def runPostProcess(sinkRecord: SinkRecord): SinkRecord = {
     val jsonParser = new JsonParser()
-    val json: JsonObject = jsonParser.parse(sinkRecord.value().toString).getAsJsonObject()
+    val json: JsonObject = jsonParser.parse(sinkRecord.value().toString).getAsJsonObject
 
     val processedJson = runJsonPostProcess(json)
 
     val result = new SinkRecord(
-      sinkRecord.kafkaPartition(),
-      sinkRecord.kafkaOffset(),
       sinkRecord.topic,
-      null,
-      processedJson.toString
+      sinkRecord.kafkaPartition,
+      sinkRecord.keySchema,
+      sinkRecord.key,
+      sinkRecord.valueSchema,
+      processedJson.toString,
+      sinkRecord.kafkaOffset
     )
 
     result
