@@ -4,7 +4,6 @@ import java.util.Properties
 
 import com.microsoft.azure.cosmosdb.kafka.connect.config.{CosmosDBConfigConstants, TestConfigurations}
 import com.microsoft.azure.cosmosdb.kafka.connect.kafka.KafkaCluster
-import com.microsoft.azure.cosmosdb.kafka.connect.sink.CosmosDBSinkConnectorWriterTest.COSMOSDB_TOPIC
 import org.apache.kafka.connect.runtime.{ConnectorConfig, WorkerConfig}
 import org.apache.kafka.connect.runtime.distributed.DistributedConfig
 
