@@ -1,18 +1,20 @@
 package com.microsoft.azure.cosmosdb.kafka.connect.source
 
 import java.util
-import com.typesafe.scalalogging.LazyLogging
-import scala.collection.mutable
-import scala.collection.JavaConversions._
-import scala.util.{Failure, Success, Try}
-import com.microsoft.azure.cosmosdb.{ConnectionPolicy, ConsistencyLevel}
-import com.microsoft.azure.cosmosdb.kafka.connect.{CosmosDBClientSettings, CosmosDBProvider}
+
 import com.microsoft.azure.cosmosdb.kafka.connect.config.{ConnectorConfig, CosmosDBConfig, CosmosDBConfigConstants}
+import com.microsoft.azure.cosmosdb.kafka.connect.{CosmosDBClientSettings, CosmosDBProvider}
 import com.microsoft.azure.cosmosdb.rx.AsyncDocumentClient
+import com.microsoft.azure.cosmosdb.{ConnectionPolicy, ConsistencyLevel}
+import com.typesafe.scalalogging.StrictLogging
 import org.apache.kafka.connect.errors.ConnectException
 import org.apache.kafka.connect.source.{SourceRecord, SourceTask}
 
-class CosmosDBSourceTask extends SourceTask with LazyLogging {
+import scala.collection.JavaConversions._
+import scala.collection.mutable
+import scala.util.{Failure, Success, Try}
+
+class CosmosDBSourceTask extends SourceTask with StrictLogging {
 
   private var readers = mutable.Map.empty[String, CosmosDBReader]
   private var client: AsyncDocumentClient = null
@@ -90,10 +92,11 @@ class CosmosDBSourceTask extends SourceTask with LazyLogging {
   }
 
   override def poll(): util.List[SourceRecord] = {
-    return readers.flatten(r => r._2.processChanges()).toList
+    return readers.flatten(reader => reader._2.processChanges()).toList
   }
 
   override def version(): String = getClass.getPackage.getImplementationVersion
 
   def getReaders(): mutable.Map[String, CosmosDBReader] = readers
+
 }
