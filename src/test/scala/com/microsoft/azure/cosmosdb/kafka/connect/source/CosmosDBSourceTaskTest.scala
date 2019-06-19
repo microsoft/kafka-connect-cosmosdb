@@ -10,7 +10,6 @@ import _root_.rx.lang.scala.JavaConversions._
 import com.google.common.collect.Maps
 import com.google.gson.Gson
 import com.microsoft.azure.cosmosdb.kafka.connect.config.{CosmosDBConfigConstants, TestConfigurations}
-import com.microsoft.azure.cosmosdb.kafka.connect.kafka.KafkaCluster
 import com.microsoft.azure.cosmosdb.kafka.connect.model.{CosmosDBDocumentTest, KafkaPayloadTest}
 import com.microsoft.azure.cosmosdb.kafka.connect.{CosmosDBClientSettings, CosmosDBProvider}
 import com.microsoft.azure.cosmosdb.{ConnectionPolicy, ConsistencyLevel, Document, ResourceResponse}
@@ -24,8 +23,10 @@ import scala.util.{Failure, Success, Try}
 class CosmosDBSourceTaskTest extends FlatSpec with GivenWhenThen with LazyLogging {
 
   private val NUM_DOCS: Int = 20
-  private var kafkaCluster: KafkaCluster = null
+  private val DOC_SIZE: Int = 313
   private var testUUID: UUID = null
+  private var batchSize = NUM_DOCS
+  private var bufferSize = batchSize * DOC_SIZE
 
   "CosmosDBSourceTask start" should "Initialize all properties" in {
     Given("A list of properties for CosmosSourceTask")
@@ -44,12 +45,10 @@ class CosmosDBSourceTaskTest extends FlatSpec with GivenWhenThen with LazyLoggin
   }
 
   "CosmosDBSourceTask poll" should "Return a list of SourceRecords with the right format" in {
-    Given("A Kafka Broker with an Embedded Connect and a CosmosSourceConnector instance")
-    // Start cluster and Connect
-    kafkaCluster = new KafkaCluster()
-    val workerProperties: Properties = TestConfigurations.getWorkerProperties(kafkaCluster.BrokersList.toString)
+    Given("A set of SourceConnector properties")
     val props: Properties = TestConfigurations.getSourceConnectorProperties()
-    kafkaCluster.startEmbeddedConnect(workerProperties, List(props))
+    props.setProperty(CosmosDBConfigConstants.BATCH_SIZE, NUM_DOCS.toString)
+    props.setProperty(CosmosDBConfigConstants.READER_BUFFER_SIZE, "10000")
 
     Then(s"Insert ${NUM_DOCS} documents in the test collection")
     insertDocuments()
@@ -58,6 +57,7 @@ class CosmosDBSourceTaskTest extends FlatSpec with GivenWhenThen with LazyLoggin
     Then(s"Waiting 5 seconds for change feed to get changes")
     TimeUnit.SECONDS.sleep(5)
 
+    Then(s"Start the SourceConnector and return the taskConfigs")
     // Declare a collection to store the messages from SourceRecord
     val kafkaMessages = new util.ArrayList[KafkaPayloadTest]
 
@@ -70,11 +70,12 @@ class CosmosDBSourceTaskTest extends FlatSpec with GivenWhenThen with LazyLoggin
       When("CosmosSourceTask is started and poll is called")
       val task = new CosmosDBSourceTask
       task.start(config)
+
       val sourceRecords = task.poll()
 
       Then("It returns a list of SourceRecords")
       assert(sourceRecords != null)
-      val gson: Gson = new Gson()
+      val gson = new Gson()
       sourceRecords.forEach(r => {
         val message = gson.fromJson(r.value().toString, classOf[KafkaPayloadTest])
         if (message.testID == testUUID) {
@@ -85,6 +86,95 @@ class CosmosDBSourceTaskTest extends FlatSpec with GivenWhenThen with LazyLoggin
 
     Then(s"Make sure collection of messages is equal to ${NUM_DOCS}")
     assert(kafkaMessages.size() == NUM_DOCS)
+
+  }
+
+  "CosmosDBSourceTask poll" should "Return a list of SourceRecords based on the batchSize" in {
+    Given("A set of SourceConnector properties")
+    val props: Properties = TestConfigurations.getSourceConnectorProperties()
+    props.setProperty(CosmosDBConfigConstants.READER_BUFFER_SIZE, "10000")
+
+    Then(s"Insert ${NUM_DOCS} documents in the test collection")
+    insertDocuments()
+
+    // Wait for change feed to process all sent messages
+    Then(s"Waiting 5 seconds for change feed to get changes")
+    TimeUnit.SECONDS.sleep(5)
+
+    Then(s"Start the SourceConnector and return the taskConfigs")
+    // Declare a collection to store the messages from SourceRecord
+    val kafkaMessages = new util.ArrayList[KafkaPayloadTest]
+
+    // Start CosmosDBSourceConnector and return the taskConfigs
+    val connector = new CosmosDBSourceConnector
+    connector.start(Maps.fromProperties(props))
+    val taskConfigs = connector.taskConfigs(2)
+    val numWorkers = connector.getNumberOfWorkers()
+    taskConfigs.forEach(config => {
+      When("CosmosSourceTask is started and poll is called")
+      val task = new CosmosDBSourceTask
+      task.start(config)
+      batchSize = config.get(CosmosDBConfigConstants.BATCH_SIZE).toInt
+      val sourceRecords = task.poll()
+      Then("It returns a list of SourceRecords")
+      assert(sourceRecords != null)
+      val gson = new Gson()
+      sourceRecords.forEach(r => {
+        val message = gson.fromJson(r.value().toString, classOf[KafkaPayloadTest])
+        if (message.testID == testUUID) {
+          kafkaMessages.add(message)
+        }
+      })
+    })
+
+    Then(s"Make sure collection of messages is equal to ${batchSize * numWorkers}")
+    assert(kafkaMessages.size() == batchSize * numWorkers)
+
+  }
+
+
+  "CosmosDBSourceTask poll" should "Return a list of SourceRecords based on the bufferSize" in {
+    Given("A set of SourceConnector properties")
+    val props: Properties = TestConfigurations.getSourceConnectorProperties()
+    props.setProperty(CosmosDBConfigConstants.BATCH_SIZE, NUM_DOCS.toString)
+
+    Then(s"Insert ${NUM_DOCS} documents in the test collection")
+    insertDocuments()
+
+    // Wait for change feed to process all sent messages
+    Then(s"Waiting 5 seconds for change feed to get changes")
+    TimeUnit.SECONDS.sleep(5)
+
+    Then(s"Start the SourceConnector and return the taskConfigs")
+    // Declare a collection to store the messages from SourceRecord
+    val kafkaMessages = new util.ArrayList[KafkaPayloadTest]
+
+    // Start CosmosDBSourceConnector and return the taskConfigs
+    val connector = new CosmosDBSourceConnector
+    connector.start(Maps.fromProperties(props))
+    val taskConfigs = connector.taskConfigs(2)
+    val numWorkers = connector.getNumberOfWorkers()
+    taskConfigs.forEach(config => {
+      When("CosmosSourceTask is started and poll is called")
+      val task = new CosmosDBSourceTask
+      task.start(config)
+      bufferSize = config.get(CosmosDBConfigConstants.READER_BUFFER_SIZE).toInt
+      val sourceRecords = task.poll()
+      Then("It returns a list of SourceRecords")
+      assert(sourceRecords != null)
+      val gson = new Gson()
+      sourceRecords.forEach(r => {
+        val message = gson.fromJson(r.value().toString, classOf[KafkaPayloadTest])
+        if (message.testID == testUUID) {
+          kafkaMessages.add(message)
+        }
+      })
+    })
+
+    val minSize = (bufferSize * numWorkers)
+    val maxSize = ((bufferSize + DOC_SIZE) * numWorkers)
+    Then(s"Make sure number of bytes in the collection of messages is between ${minSize} and ${maxSize}")
+    assert(kafkaMessages.size() * DOC_SIZE >= minSize && kafkaMessages.size() * DOC_SIZE <= maxSize)
 
   }
 
@@ -146,4 +236,3 @@ class CosmosDBSourceTaskTest extends FlatSpec with GivenWhenThen with LazyLoggin
       )
   }
 }
-
