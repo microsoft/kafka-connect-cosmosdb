@@ -140,9 +140,13 @@ object CosmosDBProvider extends ErrorHandler{
       .map(r => r.getRequestCharge)
       .reduce((sum, value) => sum + value)
       .subscribe(
-        t => logger.info(s"createDocuments total RU charge is $t"),
+        t => {
+          logger.debug(s"createDocuments total RU charge is $t")
+          HandleError(Success())
+        },
         e => {
-          logger.error(s"error creating documents e:${e.getMessage()} stack:${e.getStackTrace().toString()}")
+          logger.debug(s"error creating documents e:${e.getMessage()} stack:${e.getStackTrace().toString()}")
+          HandleError(Failure(e))
           completionLatch.countDown()
         },
         () => {
@@ -168,13 +172,12 @@ object CosmosDBProvider extends ErrorHandler{
       .reduce((sum, value) => sum + value)
       .subscribe(
         t => {
-          logger.info(s"upsertDocuments total RU charge is $t")
+          logger.debug(s"upsertDocuments total RU charge is $t")
           HandleError(Success())
         },
         e => {
-          logger.error(s"error upserting documents e:${e.getMessage()} stack:${e.getStackTrace().toString()}")
+          logger.debug(s"error upserting documents e:${e.getMessage()} stack:${e.getStackTrace().toString()}")
           HandleError(Failure(e))
-
           completionLatch.countDown()
         },
         () => {
@@ -190,17 +193,17 @@ object CosmosDBProvider extends ErrorHandler{
     logger.info("reading collection " + colLnk)
 
     val readDocumentsOBs = client.readCollection(colLnk, null)
-
-
     val forcedScalaObservable: _root_.rx.lang.scala.Observable[ResourceResponse[DocumentCollection]] = readDocumentsOBs
 
     forcedScalaObservable
       .subscribe(
         t => {
-          logger.info(s"activityId" + t.getActivityId + s"id" + t.getResource.getId)
+          logger.debug(s"activityId" + t.getActivityId + s"id" + t.getResource.getId)
+          HandleError(Success())
         },
         e => {
-          logger.error(s"error reading document collection e:${e.getMessage()} stack:${e.getStackTrace().toString()}")
+          logger.debug(s"error reading document collection e:${e.getMessage()} stack:${e.getStackTrace().toString()}")
+          HandleError(Failure(e))
           completionLatch.countDown()
         },
         () => {
@@ -229,14 +232,16 @@ object CosmosDBProvider extends ErrorHandler{
     forcedScalaObservable
       .subscribe(
         t => {
-          logger.info(s"activityId" + t.getActivityId + s"id" + t.getResults.toString)
+          logger.debug(s"activityId" + t.getActivityId + s"id" + t.getResults.toString)
+          HandleError(Success())
         },
         e => {
-          logger.error(s"error reading document collection e:${e.getMessage()} stack:${e.getStackTrace().toString()}")
+          logger.debug(s"error reading document collection e:${e.getMessage()} stack:${e.getStackTrace().toString()}")
+          HandleError(Failure(e))
           completionLatch.countDown()
         },
         () => {
-          logger.info("readDocuments completed")
+          logger.debug("readDocuments completed")
           completionLatch.countDown()
         })
     return forcedScalaObservable
