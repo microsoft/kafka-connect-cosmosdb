@@ -6,14 +6,33 @@
 trigger:
 - master
 
-pool:
-  vmImage: 'ubuntu-latest'
+variables:      # pipeline-level
+  projName: 'kafka-connect-cosmosdb'
+  topicName: '$(Build.SourceBranchName)'
+  releaseversion: '$(Build.BuildNumber)'
+  appName: 'kafkaconnectcosmosdb'
 
-steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+stages:
+- stage: Build_Container
+  displayName: Build the App and publish it in Azure Container Registry
+  jobs:
+  - job: BuildJob
+    pool:
+      vmImage: 'ubuntu-latest'
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+    steps:
+    - task: Bash@3
+      inputs:
+        targetType: 'inline'
+        script: 'docker build --target=unittest -t $(appName)acr.azurecr.io/$(appname):canary .'
+        
+    - task: Bash@3
+      inputs:
+        targetType: 'inline'
+        script: 'docker cp app/cosmosdbkafkaconnector.jar $(Build.ArtifactStagingDirectory)'
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'drop'
+        publishLocation: 'Container'
