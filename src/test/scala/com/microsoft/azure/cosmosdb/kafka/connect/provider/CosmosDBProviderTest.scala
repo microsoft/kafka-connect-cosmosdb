@@ -19,7 +19,7 @@ class CosmosDBProviderTest extends FlatSpec with GivenWhenThen with LazyLogging 
       TestConfigurations.ENDPOINT,
       TestConfigurations.MASTER_KEY,
       TestConfigurations.DATABASE,
-      TestConfigurations.COLLECTION,
+      TestConfigurations.SOURCE_COLLECTION,
       true,
       true,
       ConnectionPolicy.GetDefault(),
@@ -35,7 +35,7 @@ class CosmosDBProviderTest extends FlatSpec with GivenWhenThen with LazyLogging 
     When("Call CosmosDB readcollection")
     logger.info("readCollection in CosmosDB .")
 
-    val docCollQry = CosmosDBProvider.queryCollection(TestConfigurations.DATABASE, TestConfigurations.COLLECTION, new CountDownLatch(1)).toBlocking.single
+    val docCollQry = CosmosDBProvider.queryCollection(TestConfigurations.DATABASE, TestConfigurations.SOURCE_COLLECTION, new CountDownLatch(1)).toBlocking.single
     logger.info(docCollQry.getResults.size.toString)
 
     Then(s"Verify collection of messages is equal to inserted")

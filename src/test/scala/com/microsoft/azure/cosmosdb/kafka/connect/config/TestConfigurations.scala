@@ -67,7 +67,7 @@ object TestConfigurations {
     connectorProperties.put(CosmosDBConfigConstants.CONNECTION_MASTERKEY_CONFIG, MASTER_KEY)
     connectorProperties.put(CosmosDBConfigConstants.DATABASE_CONFIG, DATABASE)
     connectorProperties.put(CosmosDBConfigConstants.CREATE_DATABASE_CONFIG, "true")
-    connectorProperties.put(CosmosDBConfigConstants.COLLECTION_CONFIG, COLLECTION)
+    connectorProperties.put(CosmosDBConfigConstants.COLLECTION_CONFIG, SINK_COLLECTION)
     connectorProperties.put(CosmosDBConfigConstants.CREATE_COLLECTION_CONFIG, "true")
     connectorProperties.put(CosmosDBConfigConstants.TOPIC_CONFIG, TOPIC)
     return connectorProperties

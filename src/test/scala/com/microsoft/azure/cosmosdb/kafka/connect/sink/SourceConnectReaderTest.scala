@@ -29,7 +29,7 @@ object SourceConnectReaderTest {
     }
 
     //  When("Write 20 messages to the kafka topic to be consumed")
-    val producerProps: Properties = getProducerProperties(kafkaCluster.BrokersList.toString)
+    val producerProps: Properties = getProducerProperties(KafkaCluster.BrokersList.toString)
     val producer = new KafkaProducer[Nothing, JsonNode](producerProps)
     val testUUID = randomUUID()
 
