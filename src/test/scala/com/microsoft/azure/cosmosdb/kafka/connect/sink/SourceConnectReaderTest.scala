@@ -21,11 +21,10 @@ object SourceConnectReaderTest {
   var COSMOSDB_TOPIC: String = "cosmosdb-source-topic"
 
   def main(args: Array[String]): Unit = {
-    val kafkaCluster: KafkaCluster = new KafkaCluster()
-    val workerProperties: Properties = getWorkerProperties(kafkaCluster.BrokersList.toString)
+    val workerProperties: Properties = getWorkerProperties(KafkaCluster.BrokersList.toString)
     val connectorProperties: Properties = getConnectorProperties()
-    kafkaCluster.startEmbeddedConnect(workerProperties, List(connectorProperties))
-    if (kafkaCluster.kafkaConnectEnabled) {
+    KafkaCluster.startEmbeddedConnect(workerProperties, List(connectorProperties))
+    if (KafkaCluster.kafkaConnectEnabled) {
       println("Kafka Connector Enabled")
     }
 
@@ -79,7 +78,6 @@ object SourceConnectReaderTest {
     connectorProperties.put("connect.cosmosdb.collection" , "collection")
     connectorProperties.put("topics" , COSMOSDB_TOPIC)
     connectorProperties.put("connect.cosmosdb.topic.name" , COSMOSDB_TOPIC)
-
 
     return connectorProperties
   }

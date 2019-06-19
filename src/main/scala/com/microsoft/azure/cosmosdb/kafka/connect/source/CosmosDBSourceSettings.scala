@@ -8,6 +8,7 @@ case class CosmosDBSourceSettings(
                                 collection: String,
                                 assignedPartition: String,
                                 batchSize: Int,
+                                bufferSize: Int,
                                 pollInterval: Long = CosmosDBConfigConstants.DEFAULT_POLL_INTERVAL,
                                 topicName: String,
                                ) {
