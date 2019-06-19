@@ -50,9 +50,6 @@ object SinkConnectWriterTest {
     connectorProperties.put("connect.cosmosdb.collection" , "destCollection1")
     connectorProperties.put("topics" , COSMOSDB_TOPIC)
     connectorProperties.put("connect.cosmosdb.topic.name" , COSMOSDB_TOPIC)
-    //  connectorProperties.put("connect.cosmosdb.max_retries" , "10")
-    //  connectorProperties.put("connect.cosmosdb.retry.timeout" , "3000")
-
     return connectorProperties
   }
 
