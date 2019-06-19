@@ -104,12 +104,10 @@ class CosmosDBSourceTask extends SourceTask with LazyLogging {
 
   def getReaders(): mutable.Map[String, CosmosDBReader] = readers
 
-  def applyPostProcessing(sourceRecord: SourceRecord): SourceRecord = {
-    var processedSourceRecord = sourceRecord
-    postProcessors.foreach(p => {
-      logger.info(p.getClass.toString)
-      processedSourceRecord = p.runPostProcess(processedSourceRecord)
+  private def applyPostProcessing(sourceRecord: SourceRecord): SourceRecord =
+    postProcessors.foldLeft(sourceRecord)((r, p) => {
+      println(p.getClass.toString)
+      p.runPostProcess(r)
     })
-    processedSourceRecord
-  }
+
 }
