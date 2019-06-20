@@ -88,6 +88,29 @@ object ConnectorConfig {
           .define(CosmosDBConfigConstants.SINK_POST_PROCESSOR, Type.STRING, CosmosDBConfigConstants.SINK_POST_PROCESSOR_DEFAULT, Importance.MEDIUM,
             CosmosDBConfigConstants.SINK_POST_PROCESSOR_DOC, "Sink", 1, Width.LONG,
             CosmosDBConfigConstants.SINK_POST_PROCESSOR_DISPLAY)
+    .define(
+      "connect.cosmosdb.sink.post-processor.selector.fields",
+      Type.STRING,
+      "",
+      Importance.HIGH,
+      "List of fields to be incluced or excluded",
+      "Sink.Selector",
+      1,
+      Width.LONG,
+      "List of fields"
+    )
+    .define(
+      "connect.cosmosdb.sink.post-processor.selector.type",
+      Type.STRING,
+      "",
+      Importance.HIGH,
+      "Type of selector: Include or Exclude",
+      "Sink.Selector",
+      2,
+      Width.LONG,
+      "Type of selector"
+    )
+
   //        .define(CosmosDBConfigConstants.EXTRA_SINK_CONFIG_01, Type.STRING, Importance.HIGH,
   //          CosmosDBConfigConstants.EXTRA_SINK_CONFIG_01_DOC, "Sink", 1, Width.MEDIUM,
   //          CosmosDBConfigConstants.EXTRA_SINK_CONFIG_01_DISPLAY)

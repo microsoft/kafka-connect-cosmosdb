@@ -25,11 +25,11 @@ object CosmosDBSourceConnectorReaderPostProcessorTest {
     connectorProperties.put(CosmosDBConfigConstants.SOURCE_POST_PROCESSOR, postProcessors.mkString(","))
 
     // Configure Source Post Processor
-    //connectorProperties.put("connect.cosmosdb.source.post-processor.selector.type", "Exclude")
-    //connectorProperties.put("connect.cosmosdb.source.post-processor.selector.fields", "_rid, _self, _etag, _attachments, _ts, _lsn, _metadata")
+    connectorProperties.put("connect.cosmosdb.source.post-processor.selector.type", "Exclude")
+    connectorProperties.put("connect.cosmosdb.source.post-processor.selector.fields", "_rid, _self, _etag, _attachments, _ts, _lsn, _metadata")
 
-    connectorProperties.put("connect.cosmosdb.source.post-processor.selector.type", "Include")
-    connectorProperties.put("connect.cosmosdb.source.post-processor.selector.fields", "id, firstName, lastName, age")
+    //connectorProperties.put("connect.cosmosdb.source.post-processor.selector.type", "Include")
+    //connectorProperties.put("connect.cosmosdb.source.post-processor.selector.fields", "id, firstName, lastName, age")
 
     // Run Embedded Kafka Cluster
     kafkaCluster.startEmbeddedConnect(workerProperties, List(connectorProperties))

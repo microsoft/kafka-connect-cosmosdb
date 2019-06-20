@@ -19,10 +19,12 @@ trait Selector extends PostProcessor {
   var selectorType: SelectorType = SelectorType.Include
   var processor: JsonObject => JsonObject = includeFields
 
+  def pipelineStage: String
+
   override def configure(config: CosmosDBConfig): Unit = {
 
-    selectorFields = config.getString("connect.cosmosdb.source.post-processor.selector.fields").split(',').map(e => e.trim).toSeq
-    selectorType = SelectorType.fromString(config.getString("connect.cosmosdb.source.post-processor.selector.type"))
+    selectorFields = config.getString(s"connect.cosmosdb.${pipelineStage}.post-processor.selector.fields").split(',').map(e => e.trim).toSeq
+    selectorType = SelectorType.fromString(config.getString(s"connect.cosmosdb.${pipelineStage}.post-processor.selector.type"))
 
     processor = selectorType match {
       case Include => includeFields

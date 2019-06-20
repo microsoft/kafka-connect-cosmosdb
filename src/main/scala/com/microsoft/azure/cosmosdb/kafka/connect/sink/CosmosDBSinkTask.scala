@@ -12,11 +12,9 @@ import org.apache.kafka.clients.consumer.OffsetAndMetadata
 import org.apache.kafka.common.TopicPartition
 import org.apache.kafka.connect.errors.ConnectException
 import org.apache.kafka.connect.sink.{SinkRecord, SinkTask}
-
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.util.{Failure, Success, Try}
-
 
 class CosmosDBSinkTask extends SinkTask with LazyLogging {
 
@@ -27,21 +25,22 @@ class CosmosDBSinkTask extends SinkTask with LazyLogging {
   private var collection: String = ""
   private var taskConfig: Option[CosmosDBConfig] = None
   private var topicName: String = ""
-  private val postProcessors = mutable.MutableList.empty[PostProcessor]
+  private var postProcessors  = List.empty[PostProcessor]
 
   override def start(props: util.Map[String, String]): Unit = {
     logger.info("Starting CosmosDBSinkTask")
 
     val config = if (context.configs().isEmpty) props else context.configs()
 
-    // Manually adding post processors at the moment
-    postProcessors += new SampleConsoleWriterPostProcessor()
-
     // Get Configuration for this Task
     taskConfig = Try(CosmosDBConfig(ConnectorConfig.sinkConfigDef, config)) match {
       case Failure(f) => throw new ConnectException("Couldn't start CosmosDBSink due to configuration error.", f)
       case Success(s) => Some(s)
     }
+
+    // Add configured Post-Processors
+    val processorClassNames = taskConfig.get.getString(CosmosDBConfigConstants.SINK_POST_PROCESSOR)
+    postProcessors = PostProcessor.createPostProcessorList(processorClassNames, taskConfig.get)
 
     // Get CosmosDB Connection
     val endpoint: String = taskConfig.get.getString(CosmosDBConfigConstants.CONNECTION_ENDPOINT_CONFIG)
@@ -96,7 +95,7 @@ class CosmosDBSinkTask extends SinkTask with LazyLogging {
 
   private def applyPostProcessing(sinkRecord: SinkRecord): SinkRecord =
     postProcessors.foldLeft(sinkRecord)((r, p) => {
-      println(p.getClass.toString)
+      //println(p.getClass.toString)
       p.runPostProcess(r)
     })
 

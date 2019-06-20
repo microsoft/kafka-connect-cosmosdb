@@ -6,6 +6,8 @@ import com.microsoft.azure.cosmosdb.kafka.connect.processor.`trait`._
 
 class SelectorSinkPostProcessor extends JsonPostProcessor with Selector {
 
+  override def pipelineStage = "sink"
+
   override def runJsonPostProcess(json: JsonObject): JsonObject = processor(json)
 
 }
