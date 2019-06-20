@@ -2,6 +2,7 @@ package com.microsoft.azure.cosmosdb.kafka.connect.source
 
 import java.util
 
+import com.microsoft.azure.cosmosdb.kafka.connect.common.ErrorHandling.ErrorHandler
 import com.microsoft.azure.cosmosdb.kafka.connect.config.{ConnectorConfig, CosmosDBConfig, CosmosDBConfigConstants}
 import com.microsoft.azure.cosmosdb.kafka.connect.{CosmosDBClientSettings, CosmosDBProvider}
 import com.microsoft.azure.cosmosdb.rx.AsyncDocumentClient
@@ -14,7 +15,7 @@ import scala.collection.JavaConversions._
 import scala.collection.mutable
 import scala.util.{Failure, Success, Try}
 
-class CosmosDBSourceTask extends SourceTask with StrictLogging {
+class CosmosDBSourceTask extends SourceTask with StrictLogging with ErrorHandler{
 
   private var readers = mutable.Map.empty[String, CosmosDBReader]
   private var client: AsyncDocumentClient = null
@@ -38,10 +39,21 @@ class CosmosDBSourceTask extends SourceTask with StrictLogging {
     }
 
     // Get Configuration for this Task
-    taskConfig = Try(CosmosDBConfig(ConnectorConfig.sourceConfigDef, config)) match {
+    initializeErrorHandler(2)
+    try{
+      taskConfig = Some(CosmosDBConfig(ConnectorConfig.sourceConfigDef, config))
+      //HandleError(Success(config))
+    }
+    catch{
+      case f: Throwable =>
+        logger.error(s"Couldn't start Cosmos DB Source due to configuration error: ${f.getMessage}", f)
+        HandleError(Failure(f))
+    }
+
+    /*taskConfig = Try(CosmosDBConfig(ConnectorConfig.sourceConfigDef, config)) match {
       case Failure(f) => throw new ConnectException("Couldn't start CosmosDBSource due to configuration error.", f)
       case Success(s) => Some(s)
-    }
+    }*/
 
     // Get CosmosDB Connection
     val endpoint: String = taskConfig.get.getString(CosmosDBConfigConstants.CONNECTION_ENDPOINT_CONFIG)
@@ -62,12 +74,23 @@ class CosmosDBSourceTask extends SourceTask with StrictLogging {
         ConnectionPolicy.GetDefault(),
         ConsistencyLevel.Session
     )
-    client = Try(CosmosDBProvider.getClient(clientSettings)) match {
+
+    try{
+      client = CosmosDBProvider.getClient(clientSettings)
+      logger.info("Connection to CosmosDB established.")
+    }catch{
+      case f: Throwable =>
+        logger.error(s"Couldn't connect to CosmosDB.: ${f.getMessage}", f)
+        HandleError(Failure(f))
+    }
+
+
+    /*client = Try(CosmosDBProvider.getClient(clientSettings)) match {
       case Success(conn) =>
         logger.info("Connection to CosmosDB established.")
         conn
       case Failure(f) => throw new ConnectException(s"Couldn't connect to CosmosDB.", f)
-    }
+    }*/
 
     // Get bufferSize and batchSize
     bufferSize = Some(taskConfig.get.getInt(CosmosDBConfigConstants.READER_BUFFER_SIZE))

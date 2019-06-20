@@ -4,15 +4,16 @@ import java.util
 
 import com.microsoft.azure.cosmosdb._
 import com.microsoft.azure.cosmosdb.kafka.connect.CosmosDBProvider
+import com.microsoft.azure.cosmosdb.kafka.connect.common.ErrorHandling.ErrorHandler
 import com.microsoft.azure.cosmosdb.rx._
 import com.typesafe.scalalogging.StrictLogging
 import org.apache.kafka.connect.source.{SourceRecord, SourceTaskContext}
-
+import scala.util.{Failure, Success, Try}
 import scala.collection.JavaConversions._
 
 class CosmosDBReader(private val client: AsyncDocumentClient,
                      val setting: CosmosDBSourceSettings,
-                     private val context: SourceTaskContext) extends StrictLogging {
+                     private val context: SourceTaskContext) extends StrictLogging with ErrorHandler {
 
 
   private val SOURCE_PARTITION_FIELD = "partition"
@@ -26,12 +27,15 @@ class CosmosDBReader(private val client: AsyncDocumentClient,
 
     val collectionLink = CosmosDBProvider.getCollectionLink(setting.database, setting.collection)
     val changeFeedOptions = createChangeFeedOptions()
-    val changeFeedResultList = client.queryDocumentChangeFeed(collectionLink, changeFeedOptions)
+
+    initializeErrorHandler(2)
+    try{
+      val changeFeedResultList = client.queryDocumentChangeFeed(collectionLink, changeFeedOptions)
         .toList()
         .toBlocking()
         .single()
 
-    changeFeedResultList.forEach(
+      changeFeedResultList.forEach(
       feedResponse => {
         val documents = feedResponse.getResults().map(d => d.toJson())
         continuationToken = feedResponse.getResponseContinuation().replaceAll("^\"|\"$", "")
@@ -57,7 +61,16 @@ class CosmosDBReader(private val client: AsyncDocumentClient,
 
         })
       }
+
     )
+    }catch{
+      case f: Throwable =>
+        logger.error(s"Couldn't add documents to the kafka topic: ${f.getMessage}", f)
+        logger.error("Collection link", collectionLink)
+        logger.error("Change feed options", changeFeedOptions)
+        //HandleError(Failure(f))
+
+    }
     return records
   }
 
