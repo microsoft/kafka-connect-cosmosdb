@@ -1,23 +1,11 @@
 package com.microsoft.azure.cosmosdb.kafka.connect.processor.sink
 
 import com.google.gson._
-import com.microsoft.azure.cosmosdb.kafka.connect.config.CosmosDBConfig
 import com.microsoft.azure.cosmosdb.kafka.connect.processor.JsonPostProcessor
+import com.microsoft.azure.cosmosdb.kafka.connect.processor.`trait`._
 
-class SelectorSinkPostProcessor extends JsonPostProcessor {
+class SelectorSinkPostProcessor extends JsonPostProcessor with Selector {
 
-  override def configure(config: CosmosDBConfig): Unit = {
-
-  }
-
-  override def runJsonPostProcess(json: JsonObject): JsonObject = {
-
-    val toRemove = Seq("_rid", "_self", "_etag", "_attachments", "_ts", "_lsn", "_metadata")
-
-    toRemove.foreach(e => json.remove(e))
-
-    json
-
-  }
+  override def runJsonPostProcess(json: JsonObject): JsonObject = processor(json)
 
 }
