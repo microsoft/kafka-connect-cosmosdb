@@ -4,16 +4,17 @@ import java.util
 
 import com.microsoft.azure.cosmosdb._
 import com.microsoft.azure.cosmosdb.kafka.connect.CosmosDBProvider
-import com.microsoft.azure.cosmosdb.kafka.connect.common.ErrorHandling.ErrorHandler
+import com.microsoft.azure.cosmosdb.kafka.connect.common.ErrorHandler.HandleRetriableError
 import com.microsoft.azure.cosmosdb.rx._
 import com.typesafe.scalalogging.StrictLogging
 import org.apache.kafka.connect.source.{SourceRecord, SourceTaskContext}
+
 import scala.util.{Failure, Success, Try}
 import scala.collection.JavaConversions._
 
 class CosmosDBReader(private val client: AsyncDocumentClient,
                      val setting: CosmosDBSourceSettings,
-                     private val context: SourceTaskContext) extends StrictLogging with ErrorHandler {
+                     private val context: SourceTaskContext) extends HandleRetriableError {
 
 
   private val SOURCE_PARTITION_FIELD = "partition"
@@ -29,7 +30,6 @@ class CosmosDBReader(private val client: AsyncDocumentClient,
     val collectionLink = CosmosDBProvider.getCollectionLink(setting.database, setting.collection)
     val changeFeedOptions = createChangeFeedOptions()
 
-    initializeErrorHandler(2)
     try{
       val changeFeedResultList = client.queryDocumentChangeFeed(collectionLink, changeFeedOptions)
         .toList()

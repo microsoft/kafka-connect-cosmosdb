@@ -1,12 +1,13 @@
 package com.microsoft.azure.cosmosdb.kafka.connect.source
 
-import com.microsoft.azure.cosmosdb.kafka.connect.common.ErrorHandling.ErrorHandler
+import com.microsoft.azure.cosmosdb.kafka.connect.common.ErrorHandler.HandleRetriableError
 import com.typesafe.scalalogging.StrictLogging
+
 import scala.util.{Failure, Success, Try}
 import scala.reflect._
 
 
-class ChangeFeedProcessorBuilder(feedCollectionInfo: DocumentCollectionInfo, leaseCollectionInfo: DocumentCollectionInfo, changeFeedProcessorOptions: ChangeFeedProcessorOptions, changeFeedObserver: ChangeFeedObserver)extends StrictLogging with ErrorHandler {
+class ChangeFeedProcessorBuilder(feedCollectionInfo: DocumentCollectionInfo, leaseCollectionInfo: DocumentCollectionInfo, changeFeedProcessorOptions: ChangeFeedProcessorOptions, changeFeedObserver: ChangeFeedObserver)extends HandleRetriableError {
 
   def this() = this(null, null, new ChangeFeedProcessorOptions(), null)
 
@@ -40,7 +41,6 @@ class ChangeFeedProcessorBuilder(feedCollectionInfo: DocumentCollectionInfo, lea
   }
 
   private def guardAgainstNull[T: ClassTag](objectToCheck: T): Unit = {
-    initializeErrorHandler(0)
     try{
       val className = classTag[T].runtimeClass.getSimpleName()
       val messageIfNull = "%s can't be null!".format(className)
@@ -50,7 +50,7 @@ class ChangeFeedProcessorBuilder(feedCollectionInfo: DocumentCollectionInfo, lea
     }catch{
       case f: Throwable =>
         logger.error("%s can't be null!".format(classTag[T].runtimeClass.getSimpleName()), f)
-        HandleError(Failure(f))
+        HandleRetriableError(Failure(f))
     }
 
   }

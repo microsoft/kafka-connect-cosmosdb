@@ -2,7 +2,7 @@ package com.microsoft.azure.cosmosdb.kafka.connect.source
 
 import java.util
 
-import com.microsoft.azure.cosmosdb.kafka.connect.common.ErrorHandling.ErrorHandler
+import com.microsoft.azure.cosmosdb.kafka.connect.common.ErrorHandler.HandleRetriableError
 import com.microsoft.azure.cosmosdb.kafka.connect.config.{ConnectorConfig, CosmosDBConfig, CosmosDBConfigConstants}
 import com.microsoft.azure.cosmosdb.kafka.connect.{CosmosDBClientSettings, CosmosDBProvider}
 import com.microsoft.azure.cosmosdb.rx.AsyncDocumentClient
@@ -15,7 +15,7 @@ import scala.collection.JavaConversions._
 import scala.collection.mutable
 import scala.util.{Failure, Success, Try}
 
-class CosmosDBSourceTask extends SourceTask with StrictLogging with ErrorHandler{
+class CosmosDBSourceTask extends SourceTask with StrictLogging with HandleRetriableError{
 
   private var readers = mutable.Map.empty[String, CosmosDBReader]
   private var client: AsyncDocumentClient = null
@@ -40,7 +40,6 @@ class CosmosDBSourceTask extends SourceTask with StrictLogging with ErrorHandler
     }
 
     // Get Configuration for this Task
-    initializeErrorHandler(2)
     try{
       taskConfig = Some(CosmosDBConfig(ConnectorConfig.sourceConfigDef, config))
       //HandleError(Success(config))
@@ -48,7 +47,7 @@ class CosmosDBSourceTask extends SourceTask with StrictLogging with ErrorHandler
     catch{
       case f: Throwable =>
         logger.error(s"Couldn't start Cosmos DB Source due to configuration error: ${f.getMessage}", f)
-        HandleError(Failure(f))
+        HandleRetriableError(Failure(f))
     }
 
     /*taskConfig = Try(CosmosDBConfig(ConnectorConfig.sourceConfigDef, config)) match {
@@ -82,7 +81,7 @@ class CosmosDBSourceTask extends SourceTask with StrictLogging with ErrorHandler
     }catch{
       case f: Throwable =>
         logger.error(s"Couldn't connect to CosmosDB.: ${f.getMessage}", f)
-        HandleError(Failure(f))
+        HandleRetriableError(Failure(f))
     }
 
 

@@ -38,7 +38,6 @@ class CosmosDBSourceConnector extends SourceConnector with HandleRetriableError 
   override def taskClass(): Class[_ <: Task] = classOf[CosmosDBSourceTask]
 
   override def taskConfigs(maxTasks: Int): util.List[util.Map[String, String]] = {
-    initializeErrorHandler(2)
     try {
       val config: CosmosDBConfig = CosmosDBConfig(ConnectorConfig.sourceConfigDef, configProps)
       val database: String = config.getString(CosmosDBConfigConstants.DATABASE_CONFIG)
