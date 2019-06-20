@@ -1,8 +1,12 @@
 package com.microsoft.azure.cosmosdb.kafka.connect.processor.`trait`
 
+import java.util
+
 import com.google.gson._
-import com.microsoft.azure.cosmosdb.kafka.connect.config.CosmosDBConfig
+import com.microsoft.azure.cosmosdb.kafka.connect.config.CosmosDBConfigConstants.CONNECTOR_PREFIX
+import com.microsoft.azure.cosmosdb.kafka.connect.config.{ConnectorConfig, CosmosDBConfig, CosmosDBConfigConstants}
 import com.microsoft.azure.cosmosdb.kafka.connect.processor.PostProcessor
+import org.apache.kafka.common.config.ConfigDef.{Importance, Type, Width}
 
 object SelectorType extends Enumeration {
   type SelectorType = Value
@@ -23,8 +27,9 @@ trait Selector extends PostProcessor {
 
   override def configure(config: CosmosDBConfig): Unit = {
 
-    selectorFields = config.getString(s"connect.cosmosdb.${pipelineStage}.post-processor.selector.fields").split(',').map(e => e.trim).toSeq
-    selectorType = SelectorType.fromString(config.getString(s"connect.cosmosdb.${pipelineStage}.post-processor.selector.type"))
+    val configValues = getPostProcessorConfiguration(config)
+    selectorFields = configValues._1
+    selectorType = configValues._2
 
     processor = selectorType match {
       case Include => includeFields
@@ -59,6 +64,37 @@ trait Selector extends PostProcessor {
 
     json
 
+  }
+
+  private def getPostProcessorConfiguration(config: CosmosDBConfig): (Seq[String], SelectorType) =
+  {
+    val FIELD_CONFIG = s"${CosmosDBConfigConstants.CONNECTOR_PREFIX}.${pipelineStage}.post-processor.selector.fields"
+    val FIELD_DOC = "List of fields to be included or excluded in the generated JSON"
+    val FIELD_DISPLAY = "List of fields"
+    val FIELD_DEFAULT = ""
+
+    val TYPE_CONFIG = s"${CosmosDBConfigConstants.CONNECTOR_PREFIX}.${pipelineStage}.post-processor.selector.type"
+    val TYPE_DOC = "How the selector should behave: Include or Exclude specified fields in the processed JSON"
+    val TYPE_DISPLAY = "Selector behaviour: Include or Exclued"
+    val TYPE_DEFAULT = ""
+
+    val postProcessorConfigDef = ConnectorConfig.baseConfigDef
+      .define(
+        FIELD_CONFIG, Type.STRING, FIELD_DEFAULT, Importance.MEDIUM,
+        FIELD_DOC, s"Selector: ${pipelineStage}",
+        1, Width.LONG, FIELD_DISPLAY
+      ).define(
+        TYPE_CONFIG, Type.STRING, TYPE_DEFAULT, Importance.MEDIUM,
+        TYPE_DOC, s"Selector: ${pipelineStage}",
+        2, Width.LONG, TYPE_DISPLAY
+        )
+
+    val postProcessorConfig: CosmosDBConfig = CosmosDBConfig(postProcessorConfigDef, config.props)
+
+    selectorFields = postProcessorConfig.getString(FIELD_CONFIG).split(',').map(e => e.trim).toSeq
+    selectorType = SelectorType.fromString(postProcessorConfig.getString(TYPE_CONFIG))
+
+    (selectorFields, selectorType)
   }
 
 }

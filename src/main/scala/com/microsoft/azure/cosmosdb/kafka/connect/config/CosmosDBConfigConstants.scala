@@ -1,7 +1,7 @@
 package com.microsoft.azure.cosmosdb.kafka.connect.config
 
 object CosmosDBConfigConstants {
-    val CONNECTOR_PREFIX= "connect.cosmosdb"
+    val CONNECTOR_PREFIX = "connect.cosmosdb"
 
     val CONNECTION_ENDPOINT_CONFIG = s"$CONNECTOR_PREFIX.connection.endpoint"
     val CONNECTION_ENDPOINT_DOC = "The Cosmos DB endpoint."
