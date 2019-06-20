@@ -3,14 +3,9 @@ package com.microsoft.azure.cosmosdb.kafka.connect.sink
 import java.util.Properties
 import java.util.UUID.randomUUID
 
-import com.google.gson.Gson
-import com.microsoft.azure.cosmosdb.kafka.connect.config.{CosmosDBConfigTest, TestConfigurations}
 import com.microsoft.azure.cosmosdb.kafka.connect.kafka.KafkaCluster
-import com.microsoft.azure.cosmosdb.kafka.connect.model.{CosmosDBDocumentTest, KafkaPayloadTest}
-import com.microsoft.azure.cosmosdb.kafka.connect.sink.SinkConnectWriterTest.COSMOSDB_TOPIC
-import kafka.utils.json.JsonObject
+import com.microsoft.azure.cosmosdb.kafka.connect.model.CosmosDBDocumentTest
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord, ProducerConfig}
-import org.apache.kafka.connect.json.JsonConverter
 import org.apache.kafka.connect.runtime.distributed.DistributedConfig
 import org.apache.kafka.connect.runtime.{ConnectorConfig, WorkerConfig}
 import com.fasterxml.jackson.databind.JsonNode
@@ -75,7 +70,7 @@ object SourceConnectReaderTest {
     connectorProperties.put("connect.cosmosdb.connection.endpoint" , "https://localhost:8081/")
     connectorProperties.put("connect.cosmosdb.master.key", "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==")
     connectorProperties.put("connect.cosmosdb.database" , "database")
-    connectorProperties.put("connect.cosmosdb.collection" , "collection")
+    connectorProperties.put("connect.cosmosdb.collection" , "collection1")
     connectorProperties.put("topics" , COSMOSDB_TOPIC)
     connectorProperties.put("connect.cosmosdb.topic.name" , COSMOSDB_TOPIC)
 
