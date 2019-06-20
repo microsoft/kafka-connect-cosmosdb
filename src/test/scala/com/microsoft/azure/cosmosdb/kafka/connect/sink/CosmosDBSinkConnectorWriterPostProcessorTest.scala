@@ -25,7 +25,7 @@ object CosmosDBSinkConnectorWriterPostProcessorTest {
 
     // Configure Sink Post Processor
     connectorProperties.put("connect.cosmosdb.sink.post-processor.selector.type", "Include")
-    connectorProperties.put("connect.cosmosdb.sink.post-processor.selector.fields", "id, firstName, lastName, age")
+    connectorProperties.put("connect.cosmosdb.sink.post-processor.selector.fields", "id, firstName, lastName, age, address, children, spouse")
 
     kafkaCluster.startEmbeddedConnect(workerProperties, List(connectorProperties))
     if (kafkaCluster.kafkaConnectEnabled) {
