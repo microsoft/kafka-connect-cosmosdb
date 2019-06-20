@@ -1,13 +1,17 @@
 
 package com.microsoft.azure.cosmosdb.kafka.connect.sink
 
+import java.util.HashMap
 import java.util.concurrent.CountDownLatch
 
+import com.google.gson.Gson
 import com.microsoft.azure.cosmosdb._
 import com.microsoft.azure.cosmosdb.kafka.connect.CosmosDBProvider
 import com.microsoft.azure.cosmosdb.rx.AsyncDocumentClient
 import com.typesafe.scalalogging.StrictLogging
 import org.apache.kafka.connect.sink.SinkRecord
+
+import scala.collection.mutable
 
 
 class CosmosDBWriter(val settings: CosmosDBSinkSettings, private val documentClient: AsyncDocumentClient) extends StrictLogging
@@ -31,7 +35,18 @@ class CosmosDBWriter(val settings: CosmosDBSinkSettings, private val documentCli
 
       records.groupBy(_.topic()).foreach { case (_, groupedRecords) =>
         groupedRecords.foreach { record =>
-          val document = new Document(record.value().toString)
+          val value = record.value()
+          var content: String = null
+          if(value.isInstanceOf[HashMap[Any, Any]]){ // TODO: figure how this will work with avro messages
+            val gson = new Gson()
+            content = gson.toJson(value)
+          }
+          else {
+            content = value.toString
+          }
+
+          val document = new Document(content)
+
           logger.info("Upserting Document object id " + document.get("id") + " into collection " + settings.collection)
           docs = docs :+ document
         }
