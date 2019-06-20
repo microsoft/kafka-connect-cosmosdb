@@ -22,6 +22,7 @@ class CosmosDBReader(private val client: AsyncDocumentClient,
 
   def processChanges(): util.List[SourceRecord] = {
 
+    val processingStartTime = System.currentTimeMillis()
     val records = new util.ArrayList[SourceRecord]
     var bufferSize = 0
 
@@ -55,7 +56,9 @@ class CosmosDBReader(private val client: AsyncDocumentClient,
             doc
           ))
 
-          if (records.size >= setting.batchSize || bufferSize >= setting.bufferSize) {
+          val processingElapsedTime = System.currentTimeMillis() - processingStartTime
+
+          if (records.size >= setting.batchSize || bufferSize >= setting.bufferSize || processingElapsedTime >= setting.timeout) {
             return records
           }
 

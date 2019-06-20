@@ -49,6 +49,7 @@ object Main {
     connectorProperties.put("connect.cosmosdb.collection" , "collection1")
     connectorProperties.put("connect.cosmosdb.topic.name" , COSMOSDB_TOPIC)
     connectorProperties.put(CosmosDBConfigConstants.BATCH_SIZE, "10")
+    connectorProperties.put(CosmosDBConfigConstants.TIMEOUT, "1")
 
     return connectorProperties
   }

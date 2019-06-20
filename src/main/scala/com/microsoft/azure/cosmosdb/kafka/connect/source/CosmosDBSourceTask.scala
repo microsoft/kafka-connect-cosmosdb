@@ -24,6 +24,7 @@ class CosmosDBSourceTask extends SourceTask with StrictLogging with ErrorHandler
   private var taskConfig: Option[CosmosDBConfig] = None
   private var bufferSize: Option[Int] = None
   private var batchSize: Option[Int] = None
+  private var timeout: Option[Int] = None
   private var topicName: String = ""
 
   override def start(props: util.Map[String, String]): Unit = {
@@ -95,6 +96,7 @@ class CosmosDBSourceTask extends SourceTask with StrictLogging with ErrorHandler
     // Get bufferSize and batchSize
     bufferSize = Some(taskConfig.get.getInt(CosmosDBConfigConstants.READER_BUFFER_SIZE))
     batchSize = Some(taskConfig.get.getInt(CosmosDBConfigConstants.BATCH_SIZE))
+    timeout = Some(taskConfig.get.getInt(CosmosDBConfigConstants.TIMEOUT))
 
     // Get Topic
     topicName = taskConfig.get.getString(CosmosDBConfigConstants.TOPIC_CONFIG)
@@ -104,7 +106,7 @@ class CosmosDBSourceTask extends SourceTask with StrictLogging with ErrorHandler
 
     // Set up Readers
     assigned.map(partition => {
-      val setting = new CosmosDBSourceSettings(database, collection, partition, batchSize.get, bufferSize.get, CosmosDBConfigConstants.DEFAULT_POLL_INTERVAL, topicName)
+      val setting = new CosmosDBSourceSettings(database, collection, partition, batchSize.get, bufferSize.get, timeout.get, topicName)
       readers += partition -> new CosmosDBReader(client, setting, context)
     })
 
