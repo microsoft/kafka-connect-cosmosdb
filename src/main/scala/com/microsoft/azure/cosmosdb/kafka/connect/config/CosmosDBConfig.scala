@@ -57,6 +57,28 @@ object ConnectorConfig {
           .define(CosmosDBConfigConstants.SOURCE_POST_PROCESSOR, Type.STRING, CosmosDBConfigConstants.SOURCE_POST_PROCESSOR_DEFAULT, Importance.MEDIUM,
             CosmosDBConfigConstants.SOURCE_POST_PROCESSOR_DOC, "Source", 4, Width.LONG,
             CosmosDBConfigConstants.SOURCE_POST_PROCESSOR_DISPLAY)
+  .define(
+    "connect.cosmosdb.source.post-processor.selector.fields",
+    Type.STRING,
+    "",
+    Importance.HIGH,
+    "List of fields to be incluced or excluded",
+    "Source.Selector",
+    1,
+    Width.LONG,
+    "List of fields"
+  )
+  .define(
+    "connect.cosmosdb.source.post-processor.selector.type",
+    Type.STRING,
+    "",
+    Importance.HIGH,
+    "Type of selector: Include or Exclude",
+    "Source.Selector",
+    2,
+    Width.LONG,
+    "Type of selector"
+  )
 
   /**
     * Holds the extra configurations for the sink on top of

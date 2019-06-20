@@ -17,12 +17,18 @@ object CosmosDBSourceConnectorReaderPostProcessorTest {
     val workerProperties: Properties = getWorkerProperties(kafkaCluster.BrokersList.toString)
     val connectorProperties: Properties = getConnectorProperties()
 
+    // Add Source Post Processors
     val postProcessors =
       "com.microsoft.azure.cosmosdb.kafka.connect.processor.source.SelectorSourcePostProcessor" ::
         "com.microsoft.azure.cosmosdb.kafka.connect.processor.SampleConsoleWriterPostProcessor" ::
         Nil
     connectorProperties.put(CosmosDBConfigConstants.SOURCE_POST_PROCESSOR, postProcessors.mkString(","))
 
+    // Configure Source Post Processor
+    connectorProperties.put("connect.cosmosdb.source.post-processor.selector.type", "Include")
+    connectorProperties.put("connect.cosmosdb.source.post-processor.selector.fields", "_rid, _self, _etag, _attachments, _ts, _lsn, _metadata")
+
+    // Run Embedded Kafka Cluster
     kafkaCluster.startEmbeddedConnect(workerProperties, List(connectorProperties))
     if (kafkaCluster.kafkaConnectEnabled) {
       println("Kafka Connector Enabled")

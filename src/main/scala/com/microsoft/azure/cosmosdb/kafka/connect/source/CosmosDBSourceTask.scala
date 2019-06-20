@@ -45,7 +45,7 @@ class CosmosDBSourceTask extends SourceTask with LazyLogging {
 
     // Add configured Post-Processors
     val processorClassNames = taskConfig.get.getString(CosmosDBConfigConstants.SOURCE_POST_PROCESSOR)
-    postProcessors = PostProcessor.createPostProcessorList(processorClassNames)
+    postProcessors = PostProcessor.createPostProcessorList(processorClassNames, taskConfig.get)
 
     // Get CosmosDB Connection
     val endpoint: String = taskConfig.get.getString(CosmosDBConfigConstants.CONNECTION_ENDPOINT_CONFIG)
