@@ -7,19 +7,15 @@ import java.util.concurrent.CountDownLatch
 import _root_.rx.Observable
 import _root_.rx.lang.scala.JavaConversions._
 import com.microsoft.azure.cosmosdb._
-import com.microsoft.azure.cosmosdb.kafka.connect.common.ErrorHandling.ErrorHandler
+import com.microsoft.azure.cosmosdb.kafka.connect.common.ErrorHandler.HandleRetriableError
 import com.microsoft.azure.cosmosdb.rx.AsyncDocumentClient
 
 import scala.util.{Failure, Success}
 
-object CosmosDBProvider extends ErrorHandler{
+object CosmosDBProvider extends HandleRetriableError{
 
   private val requestOptionsInsert = new RequestOptions
   requestOptionsInsert.setConsistencyLevel(ConsistencyLevel.Session)
-
-  initializeErrorHandler(2)
-
-
 
   var client: AsyncDocumentClient = _
 
@@ -142,11 +138,11 @@ object CosmosDBProvider extends ErrorHandler{
       .subscribe(
         t => {
           logger.debug(s"createDocuments total RU charge is $t")
-          HandleError(Success())
+          HandleRetriableError(Success())
         },
         e => {
           logger.debug(s"error creating documents e:${e.getMessage()} stack:${e.getStackTrace().toString()}")
-          HandleError(Failure(e))
+          HandleRetriableError(Failure(e))
           completionLatch.countDown()
         },
         () => {
@@ -173,11 +169,11 @@ object CosmosDBProvider extends ErrorHandler{
       .subscribe(
         t => {
           logger.debug(s"upsertDocuments total RU charge is $t")
-          HandleError(Success())
+          HandleRetriableError(Success())
         },
         e => {
           logger.debug(s"error upserting documents e:${e.getMessage()} stack:${e.getStackTrace().toString()}")
-          HandleError(Failure(e))
+          HandleRetriableError(Failure(e))
           completionLatch.countDown()
         },
         () => {
@@ -199,11 +195,11 @@ object CosmosDBProvider extends ErrorHandler{
       .subscribe(
         t => {
           logger.debug(s"activityId" + t.getActivityId + s"id" + t.getResource.getId)
-          HandleError(Success())
+          HandleRetriableError(Success())
         },
         e => {
           logger.debug(s"error reading document collection e:${e.getMessage()} stack:${e.getStackTrace().toString()}")
-          HandleError(Failure(e))
+          HandleRetriableError(Failure(e))
           completionLatch.countDown()
         },
         () => {
@@ -233,11 +229,11 @@ object CosmosDBProvider extends ErrorHandler{
       .subscribe(
         t => {
           logger.debug(s"activityId" + t.getActivityId + s"id" + t.getResults.toString)
-          HandleError(Success())
+          HandleRetriableError(Success())
         },
         e => {
           logger.debug(s"error reading document collection e:${e.getMessage()} stack:${e.getStackTrace().toString()}")
-          HandleError(Failure(e))
+          HandleRetriableError(Failure(e))
           completionLatch.countDown()
         },
         () => {

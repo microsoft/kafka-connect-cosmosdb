@@ -2,35 +2,42 @@ package com.microsoft.azure.cosmosdb.kafka.connect.sink
 
 import java.util
 
-import com.microsoft.azure.cosmosdb.kafka.connect.common.ErrorHandling.ErrorHandler
-import com.microsoft.azure.cosmosdb.kafka.connect.config.{ConnectorConfig, CosmosDBConfig}
+import com.microsoft.azure.cosmosdb.kafka.connect.common.ErrorHandler.HandleRetriableError
+import com.microsoft.azure.cosmosdb.kafka.connect.config.{ConnectorConfig, CosmosDBConfig, CosmosDBConfigConstants}
 import org.apache.kafka.common.config.ConfigDef
 import org.apache.kafka.connect.connector.Task
 import org.apache.kafka.connect.sink.SinkConnector
-import scala.collection.JavaConverters._
 
+import scala.collection.JavaConverters._
 import scala.util.{Failure, Success, Try}
 
-class CosmosDBSinkConnector extends SinkConnector with ErrorHandler{
+class CosmosDBSinkConnector extends SinkConnector with HandleRetriableError{
 
 
   private var configProps: util.Map[String, String] = _
+  private var baseConfigProps : util.Map[String, String] = _
+  private var maxRetries = CosmosDBConfigConstants.ERROR_MAX_RETRIES_DEFAULT
+
 
   override def version(): String = getClass.getPackage.getImplementationVersion
 
   override def start(props: util.Map[String, String]): Unit = {
     logger.info("Starting CosmosDBSinkConnector")
+
+    val errorHandlerConfig: CosmosDBConfig = CosmosDBConfig(ConnectorConfig.baseConfigDef, baseConfigProps)
+    maxRetries = errorHandlerConfig.getInt(CosmosDBConfigConstants.ERRORS_RETRY_TIMEOUT_CONFIG)
     //initialize error handler
-    initializeErrorHandler(2)
+
+    initializeErrorHandler(maxRetries)
 
     try {
       val config = Try(CosmosDBConfig(ConnectorConfig.sinkConfigDef, props))
-      HandleError(Success(config))
+      HandleRetriableError(Success(config))
     }
     catch{
       case f: Throwable =>
         logger.error(s"Couldn't start Cosmos DB Sink due to configuration error: ${f.getMessage}", f)
-        HandleError(Failure(f))
+        HandleRetriableError(Failure(f))
     }
 
     configProps = props
