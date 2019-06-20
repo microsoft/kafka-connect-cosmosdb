@@ -2,13 +2,14 @@ package com.microsoft.azure.cosmosdb.kafka.connect.source
 
 import java.util.Properties
 
+import com.microsoft.azure.cosmosdb.kafka.connect.config.CosmosDBConfigConstants
 import com.microsoft.azure.cosmosdb.kafka.connect.kafka.KafkaCluster
 import org.apache.kafka.connect.runtime.distributed.DistributedConfig
 import org.apache.kafka.connect.runtime.{ConnectorConfig, WorkerConfig}
 
 object Main {
 
-  var COSMOSDB_TOPIC: String = "cosmosdb-source-topic"
+  var COSMOSDB_TOPIC: String = "test_topic_issue49"
 
   def main(args: Array[String]): Unit = {
     val workerProperties: Properties = getWorkerProperties(KafkaCluster.BrokersList.toString)
@@ -29,12 +30,9 @@ object Main {
     workerProperties.put(WorkerConfig.KEY_CONVERTER_CLASS_CONFIG, "org.apache.kafka.connect.json.JsonConverter")
     workerProperties.put(WorkerConfig.VALUE_CONVERTER_CLASS_CONFIG, "org.apache.kafka.connect.json.JsonConverter")
     workerProperties.put(WorkerConfig.OFFSET_COMMIT_INTERVAL_MS_CONFIG, "30000")
-    workerProperties.put(DistributedConfig.CONFIG_TOPIC_CONFIG, "cosmosdb-config")
     workerProperties.put(DistributedConfig.CONFIG_STORAGE_REPLICATION_FACTOR_CONFIG, "1")
-    workerProperties.put(DistributedConfig.OFFSET_STORAGE_TOPIC_CONFIG, "cosmosdb-offset")
     workerProperties.put(DistributedConfig.OFFSET_STORAGE_PARTITIONS_CONFIG, "1")
     workerProperties.put(DistributedConfig.OFFSET_STORAGE_REPLICATION_FACTOR_CONFIG, "1")
-    workerProperties.put(DistributedConfig.STATUS_STORAGE_TOPIC_CONFIG, "cosmosdb-status")
     workerProperties.put(DistributedConfig.STATUS_STORAGE_PARTITIONS_CONFIG, "1")
     workerProperties.put(DistributedConfig.STATUS_STORAGE_REPLICATION_FACTOR_CONFIG, "1")
     return workerProperties
@@ -50,6 +48,9 @@ object Main {
     connectorProperties.put("connect.cosmosdb.database" , "database")
     connectorProperties.put("connect.cosmosdb.collection" , "collection1")
     connectorProperties.put("connect.cosmosdb.topic.name" , COSMOSDB_TOPIC)
+    connectorProperties.put(CosmosDBConfigConstants.BATCH_SIZE, "10")
+    connectorProperties.put(CosmosDBConfigConstants.TIMEOUT, "1")
+
     return connectorProperties
   }
 }

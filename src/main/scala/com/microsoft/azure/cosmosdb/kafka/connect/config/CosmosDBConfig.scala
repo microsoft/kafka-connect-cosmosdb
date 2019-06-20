@@ -57,6 +57,9 @@ object ConnectorConfig {
           .define(CosmosDBConfigConstants.BATCH_SIZE, Type.INT, CosmosDBConfigConstants.BATCH_SIZE_DEFAULT, Importance.MEDIUM,
             CosmosDBConfigConstants.BATCH_SIZE_DOC, "Source", 3, Width.LONG,
             CosmosDBConfigConstants.BATCH_SIZE_DISPLAY)
+          .define(CosmosDBConfigConstants.TIMEOUT, Type.INT, CosmosDBConfigConstants.TIMEOUT_DEFAULT, Importance.MEDIUM,
+            CosmosDBConfigConstants.TIMEOUT_DOC, "Source", 4, Width.LONG,
+            CosmosDBConfigConstants.TIMEOUT_DISPLAY)
 
   /**
     * Holds the extra configurations for the sink on top of
