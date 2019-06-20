@@ -48,10 +48,20 @@ object CosmosDBConfigConstants {
     val READER_BUFFER_SIZE_DOC = "The max size the collection of documents the source task will buffer before send them to Kafka."
     val READER_BUFFER_SIZE_DEFAULT = 10000
 
+    val DEFAULT_POLL_INTERVAL = 1000
+
+    val ERRORS_RETRY_TIMEOUT_CONFIG = "errors.retry.timeout"
+    val ERROR_MAX_RETRIES_DEFAULT = 3
+    val ERRORS_RETRY_TIMEOUT_DISPLAY = "Retry Timeout for Errors"
+    val ERROR_GROUP = "Error Handling"
+    val ERRORS_RETRY_TIMEOUT_DOC = "The maximum duration in milliseconds that a failed operation " +
+                    "will be reattempted. The default is 0, which means no retries will be attempted. Use -1 for infinite retries.";
+
     val TIMEOUT = s"$CONNECTOR_PREFIX.task.timeout"
     val TIMEOUT_DISPLAY = "Timeout."
     val TIMEOUT_DOC = "The max number of milliseconds the source task will use to read documents before send them to Kafka."
     val TIMEOUT_DEFAULT = 5000
+
 }
 
 

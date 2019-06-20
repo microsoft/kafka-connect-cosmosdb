@@ -73,6 +73,8 @@ object SourceConnectReaderTest {
     connectorProperties.put("connect.cosmosdb.collection" , "collection1")
     connectorProperties.put("topics" , COSMOSDB_TOPIC)
     connectorProperties.put("connect.cosmosdb.topic.name" , COSMOSDB_TOPIC)
+    //add default max retires for RetriableException
+    connectorProperties.put(ConnectorConfig.ERRORS_RETRY_TIMEOUT_CONFIG, "3")
 
     return connectorProperties
   }

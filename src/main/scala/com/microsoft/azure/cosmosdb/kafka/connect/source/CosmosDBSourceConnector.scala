@@ -1,15 +1,15 @@
 package com.microsoft.azure.cosmosdb.kafka.connect.source
 
 import java.util
+import com.microsoft.azure.cosmosdb.kafka.connect.common.ErrorHandler.HandleRetriableError
 
 import com.microsoft.azure.cosmosdb._
-import com.microsoft.azure.cosmosdb.kafka.connect.common.ErrorHandling.ErrorHandler
 
 import scala.collection.JavaConversions._
 import com.microsoft.azure.cosmosdb.{ConnectionPolicy, ConsistencyLevel}
 import com.microsoft.azure.cosmosdb.kafka.connect.{CosmosDBClientSettings, CosmosDBProvider}
 import com.microsoft.azure.cosmosdb.kafka.connect.config.{ConnectorConfig, CosmosDBConfig, CosmosDBConfigConstants}
-import com.typesafe.scalalogging.{LazyLogging, StrictLogging}
+
 import org.apache.kafka.common.config.ConfigDef
 import org.apache.kafka.connect.connector.Task
 import org.apache.kafka.connect.source.SourceConnector
@@ -17,16 +17,22 @@ import org.apache.kafka.connect.util.ConnectorUtils
 import scala.util.{Failure, Success, Try}
 import scala.collection.JavaConverters._
 
-class CosmosDBSourceConnector extends SourceConnector with StrictLogging with ErrorHandler {
+class CosmosDBSourceConnector extends SourceConnector with HandleRetriableError {
+
 
   private var configProps: util.Map[String, String] = _
   private var numWorkers: Int = 0
+  private var baseConfigProps : util.Map[String, String] = _
+  private var maxRetries = CosmosDBConfigConstants.ERROR_MAX_RETRIES_DEFAULT
 
   override def version(): String = getClass.getPackage.getImplementationVersion
 
   override def start(props: util.Map[String, String]): Unit = {
     logger.info("Starting CosmosDBSourceConnector")
     configProps = props
+    val errorHandlerConfig: CosmosDBConfig = CosmosDBConfig(ConnectorConfig.baseConfigDef, baseConfigProps)
+    maxRetries = errorHandlerConfig.getInt(CosmosDBConfigConstants.ERRORS_RETRY_TIMEOUT_CONFIG)
+    initializeErrorHandler(maxRetries)
   }
 
   override def taskClass(): Class[_ <: Task] = classOf[CosmosDBSourceTask]

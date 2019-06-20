@@ -1,4 +1,4 @@
-package com.microsoft.azure.cosmosdb.kafka.connect.common.ErrorHandling
+package com.microsoft.azure.cosmosdb.kafka.connect.common.ErrorHandler
 
 import com.typesafe.scalalogging.StrictLogging
 import java.util.Date
@@ -9,7 +9,7 @@ import scala.util.{Failure, Success, Try}
 case class ErrorHandlerObj(remainingRetries: Int, maxRetries: Int, errorMessage: String, lastErrorTimestamp: Date)
 
 
-trait ErrorHandler extends StrictLogging{
+trait HandleRetriableError extends StrictLogging{
 
   var errorHandlerObj: Option[ErrorHandlerObj] = None
 
@@ -17,7 +17,7 @@ trait ErrorHandler extends StrictLogging{
     errorHandlerObj = Some(ErrorHandlerObj(maxRetries, maxRetries, "", new Date()))
   }
 
-  def HandleError[A](t : Try[A]) : Option[A] = {
+  def HandleRetriableError[A](t : Try[A]) : Option[A] = {
     require(errorHandlerObj.isDefined, "ErrorHandler is not set call. Please call initializeErrorHandler first.")
     t
     match {
