@@ -1,16 +1,12 @@
 package com.microsoft.azure.cosmosdb.kafka.connect.processor
 
-import java.util
 import scala.collection.JavaConverters._
 import com.google.gson._
-import com.microsoft.azure.cosmosdb.kafka.connect.config.{ConnectorConfig, CosmosDBConfig, CosmosDBConfigConstants, TestConfigurations}
+import com.microsoft.azure.cosmosdb.kafka.connect.config.{ConnectorConfig, CosmosDBConfig, TestConfigurations}
 import com.microsoft.azure.cosmosdb.kafka.connect.processor.source.SelectorSourcePostProcessor
-import org.apache.kafka.connect.errors.ConnectException
 import org.scalatest.{FlatSpec, GivenWhenThen}
 
-import scala.util.{Failure, Success, Try}
-
-class SelectorSourcePostProcessorTest extends FlatSpec with GivenWhenThen {
+class SelectorPostProcessorTest extends FlatSpec with GivenWhenThen {
 
   val sourceRecord: String =
     """

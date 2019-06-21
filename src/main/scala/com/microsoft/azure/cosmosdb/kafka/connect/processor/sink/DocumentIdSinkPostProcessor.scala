@@ -12,17 +12,17 @@ class DocumentIdSinkPostProcessor extends JsonPostProcessor {
   override def configure(config: CosmosDBConfig): Unit = {
 
     val field = getPostProcessorConfiguration(config)
-    if (!field.isEmpty) documentIdField = field.get
+    if (field.isDefined) documentIdField = field.get
 
   }
 
   override def runJsonPostProcess(json: JsonObject): JsonObject = {
 
     if (!json.has("id")) {
-      if (documentIdField != "")
-        {
-          json.addProperty("id", json.get(documentIdField).getAsString)
-        }
+      if (json.has(documentIdField))
+        json.addProperty("id", json.get(documentIdField).getAsString)
+      else
+        json.add("id", JsonNull.INSTANCE)
     }
 
     json
@@ -36,13 +36,16 @@ class DocumentIdSinkPostProcessor extends JsonPostProcessor {
     val DEFAULT = ""
 
     val postProcessorConfigDef = ConnectorConfig.baseConfigDef
-    if (!postProcessorConfigDef.configKeys().containsKey(CONFIG)) {
-      postProcessorConfigDef.define(
-        CONFIG, Type.STRING, DEFAULT, Importance.MEDIUM,
-        DOC, s"PostProcessor:DocumentId",
-        1, Width.LONG, DISPLAY
-      )
+
+    if(ConnectorConfig.baseConfigDef.configKeys().containsKey(CONFIG)) {
+      ConnectorConfig.baseConfigDef.configKeys().remove(CONFIG)
     }
+
+    postProcessorConfigDef.define(
+      CONFIG, Type.STRING, DEFAULT, Importance.MEDIUM,
+      DOC, s"PostProcessor:DocumentId",
+      1, Width.LONG, DISPLAY
+    )
 
     val postProcessorConfig: CosmosDBConfig = CosmosDBConfig(postProcessorConfigDef, config.props)
 

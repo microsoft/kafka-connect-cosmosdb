@@ -1,9 +1,6 @@
 package com.microsoft.azure.cosmosdb.kafka.connect.processor.`trait`
 
-import java.util
-
 import com.google.gson._
-import com.microsoft.azure.cosmosdb.kafka.connect.config.CosmosDBConfigConstants.CONNECTOR_PREFIX
 import com.microsoft.azure.cosmosdb.kafka.connect.config.{ConnectorConfig, CosmosDBConfig, CosmosDBConfigConstants}
 import com.microsoft.azure.cosmosdb.kafka.connect.processor.PostProcessor
 import org.apache.kafka.common.config.ConfigDef.{Importance, Type, Width}
@@ -68,12 +65,12 @@ trait Selector extends PostProcessor {
 
   private def getPostProcessorConfiguration(config: CosmosDBConfig): (Seq[String], SelectorType) =
   {
-    val FIELD_CONFIG = s"${CosmosDBConfigConstants.CONNECTOR_PREFIX}.${pipelineStage}.post-processor.selector.fields"
+    val FIELD_CONFIG = s"${CosmosDBConfigConstants.CONNECTOR_PREFIX}.$pipelineStage.post-processor.selector.fields"
     val FIELD_DOC = "List of fields to be included or excluded in the generated JSON"
     val FIELD_DISPLAY = "List of fields"
     val FIELD_DEFAULT = ""
 
-    val TYPE_CONFIG = s"${CosmosDBConfigConstants.CONNECTOR_PREFIX}.${pipelineStage}.post-processor.selector.type"
+    val TYPE_CONFIG = s"${CosmosDBConfigConstants.CONNECTOR_PREFIX}.$pipelineStage.post-processor.selector.type"
     val TYPE_DOC = "How the selector should behave: Include or Exclude specified fields in the processed JSON"
     val TYPE_DISPLAY = "Selector behaviour: Include or Exclued"
     val TYPE_DEFAULT = ""
