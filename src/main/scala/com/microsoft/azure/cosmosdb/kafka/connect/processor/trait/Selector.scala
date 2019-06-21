@@ -78,6 +78,14 @@ trait Selector extends PostProcessor {
     val TYPE_DISPLAY = "Selector behaviour: Include or Exclued"
     val TYPE_DEFAULT = ""
 
+    if(ConnectorConfig.baseConfigDef.configKeys().containsKey(FIELD_CONFIG)) {
+      ConnectorConfig.baseConfigDef.configKeys().remove(FIELD_CONFIG)
+    }
+
+    if(ConnectorConfig.baseConfigDef.configKeys().containsKey(TYPE_CONFIG)) {
+      ConnectorConfig.baseConfigDef.configKeys().remove(TYPE_CONFIG)
+    }
+
     val postProcessorConfigDef = ConnectorConfig.baseConfigDef
       .define(
         FIELD_CONFIG, Type.STRING, FIELD_DEFAULT, Importance.MEDIUM,

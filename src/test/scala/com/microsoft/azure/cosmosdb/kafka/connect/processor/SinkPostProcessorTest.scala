@@ -1,13 +1,14 @@
-package com.microsoft.azure.cosmosdb.kafka.connect.sink
+package com.microsoft.azure.cosmosdb.kafka.connect.processor
 
 import java.util.Properties
 
 import com.microsoft.azure.cosmosdb.kafka.connect.config.{CosmosDBConfigConstants, TestConfigurations}
 import com.microsoft.azure.cosmosdb.kafka.connect.kafka.KafkaCluster
-import org.apache.kafka.connect.runtime.{ConnectorConfig, WorkerConfig}
+import org.apache.kafka.connect.runtime.WorkerConfig
 import org.apache.kafka.connect.runtime.distributed.DistributedConfig
+import org.scalatest.{FlatSpec, GivenWhenThen}
 
-object CosmosDBSinkConnectorWriterPostProcessorTest {
+class SinkPostProcessorTest extends FlatSpec with GivenWhenThen {
 
   var COSMOSDB_TOPIC: String = "cosmosdb-source-topic"
 
