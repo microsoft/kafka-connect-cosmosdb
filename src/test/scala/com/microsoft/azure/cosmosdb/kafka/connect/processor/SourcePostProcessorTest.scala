@@ -8,7 +8,9 @@ import org.apache.kafka.connect.runtime.WorkerConfig
 import org.apache.kafka.connect.runtime.distributed.DistributedConfig
 import org.scalatest.{FlatSpec, GivenWhenThen}
 
-class SourcePostProcessorTest extends FlatSpec with GivenWhenThen {
+// TODO: This should be removed from here and refactored into an Integration Test
+
+object SourcePostProcessorTest {
 
   var COSMOSDB_TOPIC: String = "cosmosdb-source-topic"
 
