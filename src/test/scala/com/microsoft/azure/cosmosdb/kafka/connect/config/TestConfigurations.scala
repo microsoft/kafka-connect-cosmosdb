@@ -86,6 +86,7 @@ object TestConfigurations {
     connectorProperties.put(CosmosDBConfigConstants.CONNECTION_MASTERKEY_CONFIG, MASTER_KEY)
     connectorProperties.put(CosmosDBConfigConstants.DATABASE_CONFIG, DATABASE)
     connectorProperties.put(CosmosDBConfigConstants.COLLECTION_CONFIG, SINK_COLLECTION)
+    connectorProperties.put(CosmosDBConfigConstants.COLLECTION_TOPIC_MAP_CONFIG, "collection2#topic2,collection3#topic3,collection4#topic3")
     connectorProperties.put("topics", TOPIC) // constant required by sink connector
     connectorProperties.put(CosmosDBConfigConstants.TOPIC_CONFIG, TOPIC)
     return connectorProperties

@@ -1,6 +1,7 @@
 package com.microsoft.azure.cosmosdb.kafka.connect.sink
 
 import java.util
+import scala.collection.mutable.HashMap
 
 import com.microsoft.azure.cosmosdb.kafka.connect.config.{ConnectorConfig, CosmosDBConfig, CosmosDBConfigConstants}
 import com.microsoft.azure.cosmosdb.kafka.connect.{CosmosDBClientSettings, CosmosDBProvider}
@@ -22,9 +23,9 @@ class CosmosDBSinkTask extends SinkTask with LazyLogging {
 
     private var client: AsyncDocumentClient = null
     private var database: String = ""
-    private var collection: String = ""
     private var taskConfig: Option[CosmosDBConfig] = None
-    private var topicName: String = ""
+    private var topicNames: Array[String] = null
+    private val collectionTopicMap: HashMap[String, String] = HashMap.empty[String, String]
 
 
     override def start(props: util.Map[String, String]): Unit = {
@@ -45,19 +46,33 @@ class CosmosDBSinkTask extends SinkTask with LazyLogging {
             case Success(s) => Some(s)
         }
 
-
         // Get CosmosDB Connection
         val endpoint: String = taskConfig.get.getString(CosmosDBConfigConstants.CONNECTION_ENDPOINT_CONFIG)
         val masterKey: String = taskConfig.get.getPassword(CosmosDBConfigConstants.CONNECTION_MASTERKEY_CONFIG).value()
         database = taskConfig.get.getString(CosmosDBConfigConstants.DATABASE_CONFIG)
-        collection = taskConfig.get.getString(CosmosDBConfigConstants.COLLECTION_CONFIG)
 
+        // Populate collection topic map
+        // TODO: add support for many to many mapping, this only assumes each topic writes to one collection
+        taskConfig.get.getString(CosmosDBConfigConstants.COLLECTION_TOPIC_MAP_CONFIG).split(",").map(_.trim).foreach(
+            m => {
+                val map = m.split("#").map(_.trim)
+                collectionTopicMap.put(map(1), map(0)) // topic, collection
+            })
+
+        // If there are topics with no mapping, add them to the map with topic name as collection name
+        topicNames = taskConfig.get.getString(CosmosDBConfigConstants.TOPIC_CONFIG).split(",").map(_.trim)
+        topicNames.foreach(
+            t => {
+                if (!collectionTopicMap.contains(t)) {
+                    collectionTopicMap.put(t, t) // topic, collection
+                }
+            })
 
         val clientSettings = CosmosDBClientSettings(
             endpoint,
             masterKey,
             database,
-            collection,
+            null,   // Don't pass a collection because our client is potentially for multiple collections
             ConnectionPolicy.GetDefault(),
             ConsistencyLevel.Session
         )
@@ -68,15 +83,9 @@ class CosmosDBSinkTask extends SinkTask with LazyLogging {
             case Failure(f) => throw new ConnectException(s"Couldn't connect to CosmosDB.", f)
         }
 
-
-        // Get Topic
-        topicName = taskConfig.get.getString(CosmosDBConfigConstants.TOPIC_CONFIG)
         // Set up Writer
-        val setting = new CosmosDBSinkSettings(endpoint, masterKey, database, collection, topicName)
+        val setting = new CosmosDBSinkSettings(endpoint, masterKey, database, null, null) // TODO: validate passing null is okay here
         writer = Option(new CosmosDBWriter(setting, client))
-
-
-
     }
 
     override def put(records: util.Collection[SinkRecord]): Unit = {

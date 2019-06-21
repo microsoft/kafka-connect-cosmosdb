@@ -32,7 +32,6 @@ object ConnectorConfig {
     * Holds the extra configurations for the source on top of
     * the base.
     **/
-
   lazy val sourceConfigDef: ConfigDef = ConnectorConfig.baseConfigDef
           .define(CosmosDBConfigConstants.ASSIGNED_PARTITIONS, Type.STRING, "", Importance.HIGH,
             CosmosDBConfigConstants.ASSIGNED_PARTITIONS_DOC, "Source", 1, Width.MEDIUM,
@@ -49,6 +48,9 @@ object ConnectorConfig {
     * the base.
     **/
   lazy val sinkConfigDef: ConfigDef = ConnectorConfig.baseConfigDef
+          .define(CosmosDBConfigConstants.COLLECTION_TOPIC_MAP_CONFIG, Type.STRING, Importance.HIGH,
+            CosmosDBConfigConstants.COLLECTION_TOPIC_MAP_CONFIG_DOC, "Map", 1, Width.MEDIUM,
+            CosmosDBConfigConstants.COLLECTION_TOPIC_MAP_CONFIG_DISPLAY)
   //        .define(CosmosDBConfigConstants.EXTRA_SINK_CONFIG_01, Type.STRING, Importance.HIGH,
   //          CosmosDBConfigConstants.EXTRA_SINK_CONFIG_01_DOC, "Sink", 1, Width.MEDIUM,
   //          CosmosDBConfigConstants.EXTRA_SINK_CONFIG_01_DISPLAY)
