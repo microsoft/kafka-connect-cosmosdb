@@ -53,7 +53,6 @@ object CosmosDBConfigConstants {
     val ERRORS_RETRY_TIMEOUT_CONFIG = "errors.retry.timeout"
     val ERROR_MAX_RETRIES_DEFAULT = 3
     val ERRORS_RETRY_TIMEOUT_DISPLAY = "Retry Timeout for Errors"
-    val ERROR_GROUP = "Error Handling"
     val ERRORS_RETRY_TIMEOUT_DOC = "The maximum duration in milliseconds that a failed operation " +
                     "will be reattempted. The default is 0, which means no retries will be attempted. Use -1 for infinite retries.";
 

@@ -22,17 +22,12 @@ class CosmosDBSourceConnector extends SourceConnector with HandleRetriableError 
 
   private var configProps: util.Map[String, String] = _
   private var numWorkers: Int = 0
-  private var baseConfigProps : util.Map[String, String] = _
-  private var maxRetries = CosmosDBConfigConstants.ERROR_MAX_RETRIES_DEFAULT
 
   override def version(): String = getClass.getPackage.getImplementationVersion
 
   override def start(props: util.Map[String, String]): Unit = {
     logger.info("Starting CosmosDBSourceConnector")
     configProps = props
-    val errorHandlerConfig: CosmosDBConfig = CosmosDBConfig(ConnectorConfig.baseConfigDef, baseConfigProps)
-    maxRetries = errorHandlerConfig.getInt(CosmosDBConfigConstants.ERRORS_RETRY_TIMEOUT_CONFIG)
-    initializeErrorHandler(maxRetries)
   }
 
   override def taskClass(): Class[_ <: Task] = classOf[CosmosDBSourceTask]

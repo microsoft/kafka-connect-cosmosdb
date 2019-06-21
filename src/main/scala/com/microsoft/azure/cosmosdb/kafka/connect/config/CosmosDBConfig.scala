@@ -37,11 +37,6 @@ object ConnectorConfig {
     .define(CosmosDBConfigConstants.TOPIC_CONFIG, Type.STRING, Importance.HIGH,
       CosmosDBConfigConstants.TOPIC_CONFIG_DOC, "Topic", 1, Width.MEDIUM,
       CosmosDBConfigConstants.TOPIC_CONFIG_DISPLAY)
-
-    .define(CosmosDBConfigConstants.ERRORS_RETRY_TIMEOUT_CONFIG, Type.INT, Importance.HIGH,
-      CosmosDBConfigConstants.ERRORS_RETRY_TIMEOUT_DOC, CosmosDBConfigConstants.ERROR_GROUP, 0
-      , Width.MEDIUM , CosmosDBConfigConstants.ERRORS_RETRY_TIMEOUT_DISPLAY)
-
   /**
     * Holds the extra configurations for the source on top of
     * the base.
@@ -72,6 +67,12 @@ object ConnectorConfig {
   //        .define(CosmosDBConfigConstants.EXTRA_SINK_CONFIG_02, Type.STRING, Importance.HIGH,
   //          CosmosDBConfigConstants.EXTRA_SINK_CONFIG_02_DOC, "Sink", 2, Width.MEDIUM,
   //          CosmosDBConfigConstants.EXTRA_SINK_CONFIG_02_DISPLAY)
+
+  lazy val commonConfigDef: ConfigDef = ConnectorConfig.baseConfigDef
+    .define(CosmosDBConfigConstants.ERRORS_RETRY_TIMEOUT_CONFIG, Type.INT, CosmosDBConfigConstants.ERROR_MAX_RETRIES_DEFAULT, Importance.MEDIUM,
+      CosmosDBConfigConstants.ERRORS_RETRY_TIMEOUT_DOC, "Common", 1,
+      Width.MEDIUM , CosmosDBConfigConstants.ERRORS_RETRY_TIMEOUT_DISPLAY)
+
 }
 
 case class CosmosDBConfig(config: ConfigDef, props: util.Map[String, String])
