@@ -7,10 +7,12 @@ import java.util.concurrent.CountDownLatch
 import _root_.rx.Observable
 import _root_.rx.lang.scala.JavaConversions._
 import com.microsoft.azure.cosmosdb._
+import com.microsoft.azure.cosmosdb.kafka.connect.common.ErrorHandler.HandleRetriableError
 import com.microsoft.azure.cosmosdb.rx.AsyncDocumentClient
-import com.typesafe.scalalogging.LazyLogging
 
-object CosmosDBProvider extends LazyLogging {
+import scala.util.{Failure, Success}
+
+object CosmosDBProvider extends HandleRetriableError{
 
   private val requestOptionsInsert = new RequestOptions
   requestOptionsInsert.setConsistencyLevel(ConsistencyLevel.Session)
@@ -134,9 +136,13 @@ object CosmosDBProvider extends LazyLogging {
       .map(r => r.getRequestCharge)
       .reduce((sum, value) => sum + value)
       .subscribe(
-        t => logger.info(s"createDocuments total RU charge is $t"),
+        t => {
+          logger.debug(s"createDocuments total RU charge is $t")
+          HandleRetriableError(Success())
+        },
         e => {
-          logger.error(s"error creating documents e:${e.getMessage()} stack:${e.getStackTrace().toString()}")
+          logger.debug(s"error creating documents e:${e.getMessage()} stack:${e.getStackTrace().toString()}")
+          HandleRetriableError(Failure(e))
           completionLatch.countDown()
         },
         () => {
@@ -161,9 +167,13 @@ object CosmosDBProvider extends LazyLogging {
       .map(r => r.getRequestCharge)
       .reduce((sum, value) => sum + value)
       .subscribe(
-        t => logger.info(s"upsertDocuments total RU charge is $t"),
+        t => {
+          logger.debug(s"upsertDocuments total RU charge is $t")
+          HandleRetriableError(Success())
+        },
         e => {
-          logger.error(s"error upserting documents e:${e.getMessage()} stack:${e.getStackTrace().toString()}")
+          logger.debug(s"error upserting documents e:${e.getMessage()} stack:${e.getStackTrace().toString()}")
+          HandleRetriableError(Failure(e))
           completionLatch.countDown()
         },
         () => {
@@ -173,5 +183,65 @@ object CosmosDBProvider extends LazyLogging {
   }
 
 
+
+  def readCollection(databaseName: String, collectionName: String, completionLatch: CountDownLatch): _root_.rx.lang.scala.Observable[ResourceResponse[DocumentCollection]]= { // Create a Collection
+    val colLnk = s"/dbs/$databaseName/colls/$collectionName"
+    logger.info("reading collection " + colLnk)
+
+    val readDocumentsOBs = client.readCollection(colLnk, null)
+    val forcedScalaObservable: _root_.rx.lang.scala.Observable[ResourceResponse[DocumentCollection]] = readDocumentsOBs
+
+    forcedScalaObservable
+      .subscribe(
+        t => {
+          logger.debug(s"activityId" + t.getActivityId + s"id" + t.getResource.getId)
+          HandleRetriableError(Success())
+        },
+        e => {
+          logger.debug(s"error reading document collection e:${e.getMessage()} stack:${e.getStackTrace().toString()}")
+          HandleRetriableError(Failure(e))
+          completionLatch.countDown()
+        },
+        () => {
+          logger.info("readDocuments completed")
+          completionLatch.countDown()
+        })
+    return forcedScalaObservable
+
+  }
+
+
+  def queryCollection(databaseName: String, collectionName: String, completionLatch: CountDownLatch): _root_.rx.lang.scala.Observable[FeedResponse[DocumentCollection]]= { // Create a Collection
+    val colLnk = s"/dbs/$databaseName/colls/$collectionName"
+    val dbLink = s"/dbs/$databaseName"
+    logger.info("reading collection " + colLnk)
+
+    //val query = "SELECT * from c"
+    val query = String.format("SELECT * from c where c.id = '%s'", collectionName)
+    val options = new FeedOptions
+    options.setMaxItemCount(2)
+
+    val queryCollectionObservable = client.queryCollections(dbLink, query, options)
+
+    val forcedScalaObservable: _root_.rx.lang.scala.Observable[FeedResponse[DocumentCollection]] = queryCollectionObservable
+
+    forcedScalaObservable
+      .subscribe(
+        t => {
+          logger.debug(s"activityId" + t.getActivityId + s"id" + t.getResults.toString)
+          HandleRetriableError(Success())
+        },
+        e => {
+          logger.debug(s"error reading document collection e:${e.getMessage()} stack:${e.getStackTrace().toString()}")
+          HandleRetriableError(Failure(e))
+          completionLatch.countDown()
+        },
+        () => {
+          logger.debug("readDocuments completed")
+          completionLatch.countDown()
+        })
+    return forcedScalaObservable
+
+  }
 
 }

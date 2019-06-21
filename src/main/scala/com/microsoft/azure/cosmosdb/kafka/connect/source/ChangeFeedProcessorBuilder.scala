@@ -1,9 +1,13 @@
 package com.microsoft.azure.cosmosdb.kafka.connect.source
 
+import org.apache.kafka.connect.errors.ConnectException
+
+import com.microsoft.azure.cosmosdb.kafka.connect.common.ErrorHandler.HandleRetriableError
+
 import scala.reflect._
 
 
-class ChangeFeedProcessorBuilder(feedCollectionInfo: DocumentCollectionInfo, leaseCollectionInfo: DocumentCollectionInfo, changeFeedProcessorOptions: ChangeFeedProcessorOptions, changeFeedObserver: ChangeFeedObserver) {
+class ChangeFeedProcessorBuilder(feedCollectionInfo: DocumentCollectionInfo, leaseCollectionInfo: DocumentCollectionInfo, changeFeedProcessorOptions: ChangeFeedProcessorOptions, changeFeedObserver: ChangeFeedObserver)extends HandleRetriableError {
 
   def this() = this(null, null, new ChangeFeedProcessorOptions(), null)
 
@@ -37,9 +41,17 @@ class ChangeFeedProcessorBuilder(feedCollectionInfo: DocumentCollectionInfo, lea
   }
 
   private def guardAgainstNull[T: ClassTag](objectToCheck: T): Unit = {
-    val className = classTag[T].runtimeClass.getSimpleName()
-    val messageIfNull = "%s can't be null!".format(className)
-    if (objectToCheck == null) throw new NullPointerException(messageIfNull)
+    try{
+      val className = classTag[T].runtimeClass.getSimpleName()
+      val messageIfNull = "%s can't be null!".format(className)
+      if (objectToCheck == null) throw new NullPointerException(messageIfNull)
+
+      logger.debug("%s Object initialized".format(className))
+    }catch{
+      case f: Throwable =>
+        throw new ConnectException("%s can't be null!".format(classTag[T].runtimeClass.getSimpleName()), f)
+    }
+
   }
 
 }

@@ -15,8 +15,7 @@ object SinkPostProcessorTest {
   var COSMOSDB_TOPIC: String = "cosmosdb-source-topic"
 
   def main(args: Array[String]): Unit = {
-    val kafkaCluster: KafkaCluster = new KafkaCluster()
-    val workerProperties: Properties = getWorkerProperties(kafkaCluster.BrokersList.toString)
+    val workerProperties: Properties = getWorkerProperties(KafkaCluster.BrokersList.toString)
     val connectorProperties: Properties = getConnectorProperties()
 
     // Add Sink Post Processors
@@ -32,12 +31,11 @@ object SinkPostProcessorTest {
     connectorProperties.put("connect.cosmosdb.sink.post-processor.selector.fields", "id, firstName, lastName, age, address, children, spouse")
     connectorProperties.put("connect.cosmosdb.sink.post-processor.documentId.field", "lastName")
 
-    kafkaCluster.startEmbeddedConnect(workerProperties, List(connectorProperties))
-    if (kafkaCluster.kafkaConnectEnabled) {
+    KafkaCluster.startEmbeddedConnect(workerProperties, List(connectorProperties))
+    if (KafkaCluster.kafkaConnectEnabled) {
       println("Kafka Connector Enabled")
     }
   }
-
 
   def getWorkerProperties(bootstrapServers: String): Properties = {
     val workerProperties: Properties = new Properties()
@@ -58,7 +56,6 @@ object SinkPostProcessorTest {
 
     workerProperties
   }
-
 
   def getConnectorProperties(): Properties = {
     val connectorProperties = TestConfigurations.getSinkConnectorProperties()

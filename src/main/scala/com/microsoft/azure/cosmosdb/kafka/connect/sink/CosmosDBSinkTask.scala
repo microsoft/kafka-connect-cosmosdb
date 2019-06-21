@@ -30,7 +30,14 @@ class CosmosDBSinkTask extends SinkTask with LazyLogging {
   override def start(props: util.Map[String, String]): Unit = {
     logger.info("Starting CosmosDBSinkTask")
 
-    val config = if (context.configs().isEmpty) props else context.configs()
+        var config: util.Map[String, String] = null
+
+        if (context != null) {
+            config = if (context.configs().isEmpty) props else context.configs()
+        }
+        else {
+            config = props
+        }
 
     // Get Configuration for this Task
     taskConfig = Try(CosmosDBConfig(ConnectorConfig.sinkConfigDef, config)) match {

@@ -16,8 +16,7 @@ object SourcePostProcessorTest {
 
   def main(args: Array[String]): Unit = {
 
-    val kafkaCluster: KafkaCluster = new KafkaCluster()
-    val workerProperties: Properties = getWorkerProperties(kafkaCluster.BrokersList.toString)
+    val workerProperties: Properties = getWorkerProperties(KafkaCluster.BrokersList.toString)
     val connectorProperties: Properties = getConnectorProperties()
 
     // Add Source Post Processors
@@ -35,8 +34,8 @@ object SourcePostProcessorTest {
     //connectorProperties.put("connect.cosmosdb.source.post-processor.selector.fields", "id, firstName, lastName, age")
 
     // Run Embedded Kafka Cluster
-    kafkaCluster.startEmbeddedConnect(workerProperties, List(connectorProperties))
-    if (kafkaCluster.kafkaConnectEnabled) {
+    KafkaCluster.startEmbeddedConnect(workerProperties, List(connectorProperties))
+    if (KafkaCluster.kafkaConnectEnabled) {
       println("Kafka Connector Enabled")
     }
   }

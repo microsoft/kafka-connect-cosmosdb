@@ -6,7 +6,6 @@ import java.util.{Collections, Properties}
 import com.microsoft.azure.cosmosdb.kafka.connect.kafka.KafkaCluster
 import org.apache.kafka.clients.consumer.{ConsumerConfig, KafkaConsumer}
 import org.apache.kafka.common.serialization.StringDeserializer
-import org.apache.kafka.connect.source.SourceRecord
 
 object SampleConsumer {
 
@@ -15,10 +14,9 @@ object SampleConsumer {
   def main(args: Array[String]): Unit = {
 
     try {
-      val kafkaCluster: KafkaCluster = new KafkaCluster()
 
       val properties = new Properties()
-      properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaCluster.BrokersList)
+      properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, KafkaCluster.BrokersList)
       properties.put(ConsumerConfig.CLIENT_ID_CONFIG, "sample_debugger_consumer-01")
       properties.put(ConsumerConfig.GROUP_ID_CONFIG, "debugger_consumergroup")
       properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true")
