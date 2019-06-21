@@ -60,8 +60,6 @@ class CosmosDBSourceTask extends SourceTask with StrictLogging with ErrorHandler
     val masterKey: String = taskConfig.get.getPassword(CosmosDBConfigConstants.CONNECTION_MASTERKEY_CONFIG).value()
     database = taskConfig.get.getString(CosmosDBConfigConstants.DATABASE_CONFIG)
     collection = taskConfig.get.getString(CosmosDBConfigConstants.COLLECTION_CONFIG)
-    val createDatabase: Boolean = taskConfig.get.getBoolean(CosmosDBConfigConstants.CREATE_DATABASE_CONFIG)
-    val createCollection: Boolean = taskConfig.get.getBoolean(CosmosDBConfigConstants.CREATE_COLLECTION_CONFIG)
 
     // Source Collection
     val clientSettings = CosmosDBClientSettings(
@@ -69,8 +67,6 @@ class CosmosDBSourceTask extends SourceTask with StrictLogging with ErrorHandler
         masterKey,
         database,
         collection,
-        createDatabase,
-        createCollection,
         ConnectionPolicy.GetDefault(),
         ConsistencyLevel.Session
     )

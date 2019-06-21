@@ -9,8 +9,6 @@ case class CosmosDBSinkSettings(endpoint: String,
                                 masterKey: String,
                                 database: String,
                                 collection: String,
-                                createDatabase: Boolean,
-                                createCollection: Boolean,
                                 topicName: String,
                                ) {
 }
@@ -30,10 +28,6 @@ object CosmosDBSinkSettings{
     val collection:String = config.getString(CosmosDBConfigConstants.COLLECTION_CONFIG)
     require(collection.trim.nonEmpty, s"Invalid value for ${CosmosDBConfigConstants.COLLECTION_CONFIG}")
 
-    val createDatabase:Boolean = config.getBoolean(CosmosDBConfigConstants.CREATE_DATABASE_CONFIG)
-
-    val createCollection:Boolean = config.getBoolean(CosmosDBConfigConstants.CREATE_COLLECTION_CONFIG)
-
     val topicName:String = config.getString(CosmosDBConfigConstants.TOPIC_CONFIG)
     require(topicName.trim.nonEmpty, s"Invalid value for ${CosmosDBConfigConstants.TOPIC_CONFIG}")
 
@@ -41,8 +35,6 @@ object CosmosDBSinkSettings{
       masterKey,
       database,
       collection,
-      createDatabase,
-      createCollection,
       topicName)
   }
 }

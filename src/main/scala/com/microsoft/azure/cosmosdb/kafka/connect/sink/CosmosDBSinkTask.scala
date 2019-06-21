@@ -51,8 +51,6 @@ class CosmosDBSinkTask extends SinkTask with LazyLogging {
         val masterKey: String = taskConfig.get.getPassword(CosmosDBConfigConstants.CONNECTION_MASTERKEY_CONFIG).value()
         database = taskConfig.get.getString(CosmosDBConfigConstants.DATABASE_CONFIG)
         collection = taskConfig.get.getString(CosmosDBConfigConstants.COLLECTION_CONFIG)
-        val createDatabase: Boolean = taskConfig.get.getBoolean(CosmosDBConfigConstants.CREATE_DATABASE_CONFIG)
-        val createCollection: Boolean = taskConfig.get.getBoolean(CosmosDBConfigConstants.CREATE_COLLECTION_CONFIG)
 
 
         val clientSettings = CosmosDBClientSettings(
@@ -60,8 +58,6 @@ class CosmosDBSinkTask extends SinkTask with LazyLogging {
             masterKey,
             database,
             collection,
-            createDatabase,
-            createCollection,
             ConnectionPolicy.GetDefault(),
             ConsistencyLevel.Session
         )
@@ -76,7 +72,7 @@ class CosmosDBSinkTask extends SinkTask with LazyLogging {
         // Get Topic
         topicName = taskConfig.get.getString(CosmosDBConfigConstants.TOPIC_CONFIG)
         // Set up Writer
-        val setting = new CosmosDBSinkSettings(endpoint, masterKey, database, collection, createDatabase, createCollection, topicName)
+        val setting = new CosmosDBSinkSettings(endpoint, masterKey, database, collection, topicName)
         writer = Option(new CosmosDBWriter(setting, client))
 
 

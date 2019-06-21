@@ -27,8 +27,6 @@ object Runner extends App{
     masterkey = "test",
     database = "test",
     collection = "test",
-    createDatabase = false,
-    createCollection = false,
     connectionPolicy = connectionPolicy,
     consistencyLevel = consistencyLevel)
 

@@ -42,22 +42,13 @@ class CosmosDBSourceConnector extends SourceConnector with StrictLogging with Er
         config.getPassword(CosmosDBConfigConstants.CONNECTION_MASTERKEY_CONFIG).value(),
         database,
         collection,
-        config.getBoolean(CosmosDBConfigConstants.CREATE_DATABASE_CONFIG),
-        config.getBoolean(CosmosDBConfigConstants.CREATE_COLLECTION_CONFIG),
         ConnectionPolicy.GetDefault(),
         ConsistencyLevel.Session
       )
       logger.debug("Settings for Cosmos Db connection: ", settings)
 
       val client = CosmosDBProvider.getClient(settings)
-      if (settings.createDatabase) {
-        CosmosDBProvider.createDatabaseIfNotExists(database)
-        logger.debug("Creating database: ", database)
-      }
-      if (settings.createCollection) {
-        CosmosDBProvider.createCollectionIfNotExists(database, collection)
-        logger.debug("Creating collection: ", collection)
-      }
+
       val collectionLink = CosmosDBProvider.getCollectionLink(database, collection)
       val changeFeedObservable = client.readPartitionKeyRanges(collectionLink, null)
       var results = List[PartitionKeyRange]()

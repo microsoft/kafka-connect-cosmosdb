@@ -197,8 +197,6 @@ class CosmosDBSourceTaskTest extends FlatSpec with GivenWhenThen with LazyLoggin
       TestConfigurations.MASTER_KEY,
       TestConfigurations.DATABASE,
       TestConfigurations.SOURCE_COLLECTION,
-      true,
-      true,
       ConnectionPolicy.GetDefault(),
       ConsistencyLevel.Session
     )

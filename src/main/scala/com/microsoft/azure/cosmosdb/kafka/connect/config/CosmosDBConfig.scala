@@ -19,19 +19,9 @@ object ConnectorConfig {
       CosmosDBConfigConstants.DATABASE_CONFIG_DOC, "Database", 1, Width.MEDIUM,
       CosmosDBConfigConstants.DATABASE_CONFIG_DISPLAY)
 
-    .define(CosmosDBConfigConstants.CREATE_DATABASE_CONFIG, Type.BOOLEAN,
-      CosmosDBConfigConstants.CREATE_DATABASE_DEFAULT, Importance.MEDIUM,
-      CosmosDBConfigConstants.CREATE_DATABASE_DOC, "Database", 2, Width.MEDIUM,
-      CosmosDBConfigConstants.CREATE_DATABASE_DISPLAY)
-
     .define(CosmosDBConfigConstants.COLLECTION_CONFIG, Type.STRING, Importance.HIGH,
       CosmosDBConfigConstants.COLLECTION_CONFIG_DOC, "Collection", 1, Width.MEDIUM,
       CosmosDBConfigConstants.COLLECTION_CONFIG_DISPLAY)
-
-    .define(CosmosDBConfigConstants.CREATE_COLLECTION_CONFIG, Type.BOOLEAN,
-      CosmosDBConfigConstants.CREATE_COLLECTION_DEFAULT, Importance.MEDIUM,
-      CosmosDBConfigConstants.CREATE_COLLECTION_DOC, "Collection", 2, Width.MEDIUM,
-      CosmosDBConfigConstants.CREATE_COLLECTION_DISPLAY)
 
     .define(CosmosDBConfigConstants.TOPIC_CONFIG, Type.STRING, Importance.HIGH,
       CosmosDBConfigConstants.TOPIC_CONFIG_DOC, "Topic", 1, Width.MEDIUM,

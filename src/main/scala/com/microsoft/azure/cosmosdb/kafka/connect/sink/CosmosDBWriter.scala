@@ -11,8 +11,6 @@ import com.microsoft.azure.cosmosdb.rx.AsyncDocumentClient
 import com.typesafe.scalalogging.StrictLogging
 import org.apache.kafka.connect.sink.SinkRecord
 
-import scala.collection.mutable
-
 
 class CosmosDBWriter(val settings: CosmosDBSinkSettings, private val documentClient: AsyncDocumentClient) extends StrictLogging
 {
@@ -60,9 +58,6 @@ class CosmosDBWriter(val settings: CosmosDBSinkSettings, private val documentCli
 
     }
   }
-
-
-
 
   def close(): Unit = {
     logger.info("Shutting down CosmosDBWriter.")
