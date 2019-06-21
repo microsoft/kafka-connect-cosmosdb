@@ -81,11 +81,11 @@ trait Selector extends PostProcessor {
     val postProcessorConfigDef = ConnectorConfig.baseConfigDef
       .define(
         FIELD_CONFIG, Type.STRING, FIELD_DEFAULT, Importance.MEDIUM,
-        FIELD_DOC, s"Selector: ${pipelineStage}",
+        FIELD_DOC, s"PostProcessor:Selector:${pipelineStage}",
         1, Width.LONG, FIELD_DISPLAY
       ).define(
         TYPE_CONFIG, Type.STRING, TYPE_DEFAULT, Importance.MEDIUM,
-        TYPE_DOC, s"Selector: ${pipelineStage}",
+        TYPE_DOC, s"PostProcessor:Selector:${pipelineStage}",
         2, Width.LONG, TYPE_DISPLAY
         )
 

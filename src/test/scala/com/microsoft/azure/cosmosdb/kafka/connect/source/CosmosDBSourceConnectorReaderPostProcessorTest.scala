@@ -26,7 +26,7 @@ object CosmosDBSourceConnectorReaderPostProcessorTest {
 
     // Configure Source Post Processor
     connectorProperties.put("connect.cosmosdb.source.post-processor.selector.type", "Exclude")
-    connectorProperties.put("connect.cosmosdb.source.post-processor.selector.fields", "_rid, _self, _etag, _attachments, _ts, _lsn, _metadata")
+    connectorProperties.put("connect.cosmosdb.source.post-processor.selector.fields", "id, _rid, _self, _etag, _attachments, _ts, _lsn, _metadata")
 
     //connectorProperties.put("connect.cosmosdb.source.post-processor.selector.type", "Include")
     //connectorProperties.put("connect.cosmosdb.source.post-processor.selector.fields", "id, firstName, lastName, age")

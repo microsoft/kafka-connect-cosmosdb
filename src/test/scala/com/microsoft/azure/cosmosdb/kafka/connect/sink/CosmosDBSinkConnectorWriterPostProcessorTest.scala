@@ -18,7 +18,8 @@ object CosmosDBSinkConnectorWriterPostProcessorTest {
 
     // Add Sink Post Processors
     val postProcessors =
-      "com.microsoft.azure.cosmosdb.kafka.connect.processor.sink.SelectorSinkPostProcessor" ::
+      "com.microsoft.azure.cosmosdb.kafka.connect.processor.sink.DocumentIdSinkPostProcessor" ::
+        "com.microsoft.azure.cosmosdb.kafka.connect.processor.sink.SelectorSinkPostProcessor" ::
         "com.microsoft.azure.cosmosdb.kafka.connect.processor.SampleConsoleWriterPostProcessor" ::
         Nil
     connectorProperties.put(CosmosDBConfigConstants.SINK_POST_PROCESSOR, postProcessors.mkString(","))
@@ -26,6 +27,7 @@ object CosmosDBSinkConnectorWriterPostProcessorTest {
     // Configure Sink Post Processor
     connectorProperties.put("connect.cosmosdb.sink.post-processor.selector.type", "Include")
     connectorProperties.put("connect.cosmosdb.sink.post-processor.selector.fields", "id, firstName, lastName, age, address, children, spouse")
+    connectorProperties.put("connect.cosmosdb.sink.post-processor.documentId.field", "lastName")
 
     kafkaCluster.startEmbeddedConnect(workerProperties, List(connectorProperties))
     if (kafkaCluster.kafkaConnectEnabled) {
