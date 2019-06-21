@@ -1,9 +1,9 @@
 package com.microsoft.azure.cosmosdb.kafka.connect.source
 
-import com.microsoft.azure.cosmosdb.kafka.connect.common.ErrorHandler.HandleRetriableError
-import com.typesafe.scalalogging.StrictLogging
+import org.apache.kafka.connect.errors.ConnectException
 
-import scala.util.{Failure, Success, Try}
+import com.microsoft.azure.cosmosdb.kafka.connect.common.ErrorHandler.HandleRetriableError
+
 import scala.reflect._
 
 
@@ -49,8 +49,7 @@ class ChangeFeedProcessorBuilder(feedCollectionInfo: DocumentCollectionInfo, lea
       logger.debug("%s Object initialized".format(className))
     }catch{
       case f: Throwable =>
-        logger.error("%s can't be null!".format(classTag[T].runtimeClass.getSimpleName()), f)
-        HandleRetriableError(Failure(f))
+        throw new ConnectException("%s can't be null!".format(classTag[T].runtimeClass.getSimpleName()), f)
     }
 
   }
