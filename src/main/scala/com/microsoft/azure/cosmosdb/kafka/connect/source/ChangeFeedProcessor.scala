@@ -4,7 +4,6 @@ import com.microsoft.azure.cosmosdb._
 import java.util.concurrent.CountDownLatch
 
 import com.microsoft.azure.cosmosdb.kafka.connect.common.ErrorHandler.HandleRetriableError
-import com.typesafe.scalalogging.StrictLogging
 
 import scala.collection.JavaConversions._
 
