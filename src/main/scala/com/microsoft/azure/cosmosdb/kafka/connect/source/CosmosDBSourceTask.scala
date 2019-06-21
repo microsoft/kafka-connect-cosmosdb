@@ -10,6 +10,7 @@ import com.microsoft.azure.cosmosdb.{ConnectionPolicy, ConsistencyLevel}
 import com.typesafe.scalalogging.StrictLogging
 import org.apache.kafka.connect.errors.ConnectException
 import org.apache.kafka.connect.source.{SourceRecord, SourceTask}
+import com.microsoft.azure.cosmosdb.kafka.connect.processor._
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable
@@ -26,6 +27,7 @@ class CosmosDBSourceTask extends SourceTask with StrictLogging with HandleRetria
   private var batchSize: Option[Int] = None
   private var timeout: Option[Int] = None
   private var topicName: String = ""
+  private var postProcessors  = List.empty[PostProcessor]
 
   override def start(props: util.Map[String, String]): Unit = {
     logger.info("Starting CosmosDBSourceTask")
@@ -54,6 +56,10 @@ class CosmosDBSourceTask extends SourceTask with StrictLogging with HandleRetria
       case Failure(f) => throw new ConnectException("Couldn't start CosmosDBSource due to configuration error.", f)
       case Success(s) => Some(s)
     }*/
+
+    // Add configured Post-Processors
+    val processorClassNames = taskConfig.get.getString(CosmosDBConfigConstants.SOURCE_POST_PROCESSOR)
+    postProcessors = PostProcessor.createPostProcessorList(processorClassNames, taskConfig.get)
 
     // Get CosmosDB Connection
     val endpoint: String = taskConfig.get.getString(CosmosDBConfigConstants.CONNECTION_ENDPOINT_CONFIG)
@@ -116,11 +122,17 @@ class CosmosDBSourceTask extends SourceTask with StrictLogging with HandleRetria
   }
 
   override def poll(): util.List[SourceRecord] = {
-    return readers.flatten(reader => reader._2.processChanges()).toList
+    return readers.flatten(reader => reader._2.processChanges()).toList.map(sr => applyPostProcessing(sr))
   }
 
   override def version(): String = getClass.getPackage.getImplementationVersion
 
   def getReaders(): mutable.Map[String, CosmosDBReader] = readers
+
+  private def applyPostProcessing(sourceRecord: SourceRecord): SourceRecord =
+    postProcessors.foldLeft(sourceRecord)((r, p) => {
+      //println(p.getClass.toString)
+      p.runPostProcess(r)
+    })
 
 }

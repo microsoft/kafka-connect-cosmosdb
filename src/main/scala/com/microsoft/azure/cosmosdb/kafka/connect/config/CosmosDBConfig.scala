@@ -37,6 +37,7 @@ object ConnectorConfig {
     .define(CosmosDBConfigConstants.TOPIC_CONFIG, Type.STRING, Importance.HIGH,
       CosmosDBConfigConstants.TOPIC_CONFIG_DOC, "Topic", 1, Width.MEDIUM,
       CosmosDBConfigConstants.TOPIC_CONFIG_DISPLAY)
+
   /**
     * Holds the extra configurations for the source on top of
     * the base.
@@ -52,6 +53,9 @@ object ConnectorConfig {
           .define(CosmosDBConfigConstants.BATCH_SIZE, Type.INT, CosmosDBConfigConstants.BATCH_SIZE_DEFAULT, Importance.MEDIUM,
             CosmosDBConfigConstants.BATCH_SIZE_DOC, "Source", 3, Width.LONG,
             CosmosDBConfigConstants.BATCH_SIZE_DISPLAY)
+          .define(CosmosDBConfigConstants.SOURCE_POST_PROCESSOR, Type.STRING, CosmosDBConfigConstants.SOURCE_POST_PROCESSOR_DEFAULT, Importance.MEDIUM,
+            CosmosDBConfigConstants.SOURCE_POST_PROCESSOR_DOC, "Source", 4, Width.LONG,
+            CosmosDBConfigConstants.SOURCE_POST_PROCESSOR_DISPLAY)
           .define(CosmosDBConfigConstants.TIMEOUT, Type.INT, CosmosDBConfigConstants.TIMEOUT_DEFAULT, Importance.MEDIUM,
             CosmosDBConfigConstants.TIMEOUT_DOC, "Source", 4, Width.LONG,
             CosmosDBConfigConstants.TIMEOUT_DISPLAY)
@@ -60,7 +64,12 @@ object ConnectorConfig {
     * Holds the extra configurations for the sink on top of
     * the base.
     **/
+
   lazy val sinkConfigDef: ConfigDef = ConnectorConfig.baseConfigDef
+          .define(CosmosDBConfigConstants.SINK_POST_PROCESSOR, Type.STRING, CosmosDBConfigConstants.SINK_POST_PROCESSOR_DEFAULT, Importance.MEDIUM,
+            CosmosDBConfigConstants.SINK_POST_PROCESSOR_DOC, "Sink", 1, Width.LONG,
+            CosmosDBConfigConstants.SINK_POST_PROCESSOR_DISPLAY)
+
   //        .define(CosmosDBConfigConstants.EXTRA_SINK_CONFIG_01, Type.STRING, Importance.HIGH,
   //          CosmosDBConfigConstants.EXTRA_SINK_CONFIG_01_DOC, "Sink", 1, Width.MEDIUM,
   //          CosmosDBConfigConstants.EXTRA_SINK_CONFIG_01_DISPLAY)

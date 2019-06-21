@@ -70,6 +70,7 @@ object TestConfigurations {
     connectorProperties.put(CosmosDBConfigConstants.COLLECTION_CONFIG, SINK_COLLECTION)
     connectorProperties.put(CosmosDBConfigConstants.CREATE_COLLECTION_CONFIG, "true")
     connectorProperties.put(CosmosDBConfigConstants.TOPIC_CONFIG, TOPIC)
+
     return connectorProperties
   }
 
