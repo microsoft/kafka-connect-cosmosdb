@@ -15,8 +15,6 @@ class CosmosDBSinkConnector extends SinkConnector with HandleRetriableError{
 
 
   private var configProps: util.Map[String, String] = _
-  private var baseConfigProps : util.Map[String, String] = _
-  private var maxRetries = CosmosDBConfigConstants.ERROR_MAX_RETRIES_DEFAULT
 
 
   override def version(): String = getClass.getPackage.getImplementationVersion
@@ -24,11 +22,6 @@ class CosmosDBSinkConnector extends SinkConnector with HandleRetriableError{
   override def start(props: util.Map[String, String]): Unit = {
     logger.info("Starting CosmosDBSinkConnector")
 
-    val errorHandlerConfig: CosmosDBConfig = CosmosDBConfig(ConnectorConfig.baseConfigDef, baseConfigProps)
-    maxRetries = errorHandlerConfig.getInt(CosmosDBConfigConstants.ERRORS_RETRY_TIMEOUT_CONFIG)
-    //initialize error handler
-
-    initializeErrorHandler(maxRetries)
 
     try {
       val config = Try(CosmosDBConfig(ConnectorConfig.sinkConfigDef, props))
