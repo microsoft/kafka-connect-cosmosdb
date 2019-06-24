@@ -30,9 +30,16 @@ class CosmosDBWriter(val settings: CosmosDBSinkSettings, private val documentCli
     try {
 
       var docs = List.empty[Document]
+      var collection: String = ""
 
       records.groupBy(_.topic()).foreach { case (_, groupedRecords) =>
         groupedRecords.foreach { record =>
+          // Determine which collection to write to
+          if (settings.collectionTopicMap.contains(record.topic))
+            collection = settings.collectionTopicMap(record.topic)
+          else
+            throw new Exception("No sink collection specified for this topic.") // TODO: tie this in with the exception handler
+
           val value = record.value()
           var content: String = null
           if(value.isInstanceOf[HashMap[Any, Any]]){ // TODO: figure how this will work with avro messages
@@ -45,11 +52,13 @@ class CosmosDBWriter(val settings: CosmosDBSinkSettings, private val documentCli
 
           val document = new Document(content)
 
-          logger.info("Upserting Document object id " + document.get("id") + " into collection " + settings.collection)
+          logger.info("Upserting Document object id " + document.get("id") + " into collection " + collection)
           docs = docs :+ document
         }
+        // Send current batch of documents and reset the list for the next topic's documents
+        CosmosDBProvider.upsertDocuments[Document](docs, settings.database, collection, new CountDownLatch(1))
+        docs = List.empty[Document]
       }
-      CosmosDBProvider.upsertDocuments[Document](docs,settings.database,settings.collection, new CountDownLatch(1))
 
     }
     catch {

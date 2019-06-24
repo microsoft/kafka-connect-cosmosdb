@@ -84,7 +84,7 @@ class CosmosDBSinkTask extends SinkTask with LazyLogging {
         }
 
         // Set up Writer
-        val setting = new CosmosDBSinkSettings(endpoint, masterKey, database, null, null) // TODO: validate passing null is okay here
+        val setting = new CosmosDBSinkSettings(endpoint, masterKey, database, collectionTopicMap) // null, null) // TODO: validate passing null is okay here
         writer = Option(new CosmosDBWriter(setting, client))
     }
 
@@ -94,13 +94,10 @@ class CosmosDBSinkTask extends SinkTask with LazyLogging {
 
         // Currently only built for messages with JSON payload without schema
         writer.foreach(w => w.write(seq))
-
-
     }
 
     override def stop(): Unit = {
         logger.info("Stopping CosmosDBSinkTask")
-
     }
 
     override def flush(map: util.Map[TopicPartition, OffsetAndMetadata]): Unit = {}

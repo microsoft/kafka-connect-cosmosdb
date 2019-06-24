@@ -71,7 +71,7 @@ object TestConfigurations {
     connectorProperties.put(CosmosDBConfigConstants.CONNECTION_MASTERKEY_CONFIG, MASTER_KEY)
     connectorProperties.put(CosmosDBConfigConstants.DATABASE_CONFIG, DATABASE)
     connectorProperties.put(CosmosDBConfigConstants.COLLECTION_CONFIG, SOURCE_COLLECTION)
-    connectorProperties.put(CosmosDBConfigConstants.TOPIC_CONFIG, TOPIC)
+    connectorProperties.put(CosmosDBConfigConstants.TOPIC_CONFIG, "topic1_test1")
     connectorProperties.put(CosmosDBConfigConstants.BATCH_SIZE, "10")
     connectorProperties.put(CosmosDBConfigConstants.READER_BUFFER_SIZE, "1000")
     return connectorProperties
@@ -86,9 +86,9 @@ object TestConfigurations {
     connectorProperties.put(CosmosDBConfigConstants.CONNECTION_MASTERKEY_CONFIG, MASTER_KEY)
     connectorProperties.put(CosmosDBConfigConstants.DATABASE_CONFIG, DATABASE)
     connectorProperties.put(CosmosDBConfigConstants.COLLECTION_CONFIG, SINK_COLLECTION)
-    connectorProperties.put(CosmosDBConfigConstants.COLLECTION_TOPIC_MAP_CONFIG, "collection2#topic2,collection3#topic3,collection4#topic3")
-    connectorProperties.put("topics", TOPIC) // constant required by sink connector
-    connectorProperties.put(CosmosDBConfigConstants.TOPIC_CONFIG, TOPIC)
+    connectorProperties.put(CosmosDBConfigConstants.COLLECTION_TOPIC_MAP_CONFIG, "collection2#topic_test,collection3#topic1_test1")
+    connectorProperties.put("topics", "topic_test,topic1_test1") // constant required by sink connector
+    connectorProperties.put(CosmosDBConfigConstants.TOPIC_CONFIG, "topic_test,topic1_test1")
     return connectorProperties
   }
 
