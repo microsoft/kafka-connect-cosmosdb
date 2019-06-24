@@ -37,15 +37,16 @@ class CosmosDBReader(private val client: AsyncDocumentClient,
 
       changeFeedResultList.forEach(
       feedResponse => {
-        val documents = feedResponse.getResults().map(d => d.toJson())
-        continuationToken = feedResponse.getResponseContinuation().replaceAll("^\"|\"$", "")
+        val documents = feedResponse.getResults().map(d => d)
         documents.toList.foreach(doc =>
         {
+
+          continuationToken = doc.get("_lsn").toString
 
           logger.debug(s"Sending document ${doc} to the Kafka topic ${setting.topicName}")
           logger.debug(s"Partition: ${setting.assignedPartition}, continuationToken: ${continuationToken}")
 
-          bufferSize = bufferSize + doc.getBytes().length
+          bufferSize = bufferSize + doc.toJson().getBytes().length
 
           records.add(new SourceRecord(
             sourcePartition(setting.assignedPartition),
