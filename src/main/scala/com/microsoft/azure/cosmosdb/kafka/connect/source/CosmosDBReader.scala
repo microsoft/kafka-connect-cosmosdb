@@ -53,7 +53,7 @@ class CosmosDBReader(private val client: AsyncDocumentClient,
             sourceOffset(continuationToken),
             setting.topicName,
             null,
-            doc
+            doc.toJson()
           ))
 
           val processingElapsedTime = System.currentTimeMillis() - processingStartTime
