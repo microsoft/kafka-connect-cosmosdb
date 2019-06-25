@@ -52,7 +52,7 @@ class CosmosDBSinkTask extends SinkTask with LazyLogging {
         database = taskConfig.get.getString(CosmosDBConfigConstants.DATABASE_CONFIG)
 
         // Populate collection topic map
-        // TODO: add support for many to many mapping, this only assumes each topic writes to one collection
+        // TODO: add support for many to many mapping, this only assumes each topic writes to one collection and multiple topics can write to the same collection
         taskConfig.get.getString(CosmosDBConfigConstants.COLLECTION_TOPIC_MAP_CONFIG).split(",").map(_.trim).foreach(
             m => {
                 val map = m.split("#").map(_.trim)

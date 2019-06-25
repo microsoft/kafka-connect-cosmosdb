@@ -12,7 +12,7 @@ import com.microsoft.azure.cosmosdb.rx.AsyncDocumentClient
 
 import scala.util.{Failure, Success}
 
-object CosmosDBProvider extends ErrorHandler{
+object CosmosDBProvider extends ErrorHandler with CosmosDBProviderTrait {
 
   private val requestOptionsInsert = new RequestOptions
   requestOptionsInsert.setConsistencyLevel(ConsistencyLevel.Session)
