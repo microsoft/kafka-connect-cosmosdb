@@ -47,9 +47,18 @@ object Main {
     connectorProperties.put("connect.cosmosdb.master.key", "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==")
     connectorProperties.put("connect.cosmosdb.database" , "database")
     connectorProperties.put("connect.cosmosdb.collection" , "collection1")
+
+//    connectorProperties.put("connect.cosmosdb.connection.endpoint" , "https://dmcosmos.documents.azure.com:443")
+//    connectorProperties.put("connect.cosmosdb.master.key", "YAopQ0edHWK9v8yV7IpCU1WzvFQkPvpHWDGmjhpXC0swlmibZgHkgqVDiTRG3abFM2PfYoWKPOVFjL7OTJOPsA==")
+//    connectorProperties.put("connect.cosmosdb.database" , "kafka-connector")
+//    connectorProperties.put("connect.cosmosdb.collection" , "source")
+
     connectorProperties.put("connect.cosmosdb.topic.name" , COSMOSDB_TOPIC)
-    connectorProperties.put(CosmosDBConfigConstants.BATCH_SIZE, "10")
+    connectorProperties.put(CosmosDBConfigConstants.BATCH_SIZE, "100")
     connectorProperties.put(CosmosDBConfigConstants.TIMEOUT, "1")
+    connectorProperties.put(CosmosDBConfigConstants.SOURCE_POST_PROCESSOR, "com.microsoft.azure.cosmosdb.kafka.connect.processor.source.SelectorSourcePostProcessor")
+
+
 
     return connectorProperties
   }
