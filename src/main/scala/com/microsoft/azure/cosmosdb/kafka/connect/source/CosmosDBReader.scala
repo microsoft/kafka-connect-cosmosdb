@@ -74,8 +74,8 @@ class CosmosDBReader(private val client: AsyncDocumentClient,
 
             // Process new document
 
-            println(s"Sending document ${doc} to the Kafka topic ${setting.topicName}")
-            println(s"Current State => Partition: ${currentState.partition}, " +
+            logger.debug(s"Sending document ${doc} to the Kafka topic ${setting.topicName}")
+            logger.debug(s"Current State => Partition: ${currentState.partition}, " +
               s"ContinuationToken: ${currentState.continuationToken}, " +
               s"LSN: ${currentState.lsn}")
 

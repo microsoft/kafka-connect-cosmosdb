@@ -55,6 +55,7 @@ object TestConfigurations {
     connectorProperties.put(CosmosDBConfigConstants.TOPIC_CONFIG, TOPIC)
     connectorProperties.put(CosmosDBConfigConstants.BATCH_SIZE, "10")
     connectorProperties.put(CosmosDBConfigConstants.READER_BUFFER_SIZE, "1000")
+    connectorProperties.put(CosmosDBConfigConstants.SOURCE_POST_PROCESSOR, "com.microsoft.azure.cosmosdb.kafka.connect.processor.source.SelectorSourcePostProcessor")
     return connectorProperties
   }
 
