@@ -111,8 +111,6 @@ class CosmosDBReader(private val client: AsyncDocumentClient,
     {
       case f: Throwable =>
         logger.error(s"Couldn't add documents to the kafka topic: ${f.getMessage}", f)
-        logger.error("Collection link", collectionLink)
-        logger.error("Change feed options", changeFeedOptions)
     }
 
     return records

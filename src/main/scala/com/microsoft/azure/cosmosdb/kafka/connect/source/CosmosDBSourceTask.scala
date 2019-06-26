@@ -122,7 +122,16 @@ class CosmosDBSourceTask extends SourceTask with StrictLogging with HandleRetria
   }
 
   override def poll(): util.List[SourceRecord] = {
-    return readers.flatten(reader => reader._2.processChanges()).toList.map(sr => applyPostProcessing(sr))
+    try{
+      val sourceRecords= readers.flatten(reader => reader._2.processChanges()).toList.map(sr => applyPostProcessing(sr))
+      return sourceRecords
+    }catch{
+      case f: Exception =>
+        logger.debug(s"Couldn't create a list of source records ${f.getMessage}", f)
+        HandleRetriableError(Failure(f))
+        return null
+    }
+    return null
   }
 
   override def version(): String = getClass.getPackage.getImplementationVersion
