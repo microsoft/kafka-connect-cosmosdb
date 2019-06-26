@@ -1,10 +1,21 @@
 
-  {
+{
+  "schema": {
+    "type": "struct",
+    "fields": [{
+      "type": "string",
+      "optional": true,
+      "field": "id"
+    }, {
+      "type": "string",
+      "optional": true,
+      "field": "label"
+    }],
+    "optional": false,
+    "name": "label.coll"
+  },
+  "payload": {
     "id": "1",
-    "name": "jyo",
-    "_rid": "fQwhAKAVvqwBAAAAAAAAAA==",
-    "_self": "dbs/fQwhAA==/colls/fQwhAKAVvqw=/docs/fQwhAKAVvqwBAAAAAAAAAA==/",
-    "_etag": "\"30007041-0000-0800-0000-5d07de930000\"",
-    "_attachments": "attachments/",
-    "_ts": 1560796819
+    "label": "red"
   }
+}

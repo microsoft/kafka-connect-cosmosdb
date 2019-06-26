@@ -3,13 +3,13 @@ package com.microsoft.azure.cosmosdb.kafka.connect.sink
 import java.util
 
 import com.microsoft.azure.cosmosdb.kafka.connect.common.ErrorHandler.HandleRetriableError
-import com.microsoft.azure.cosmosdb.kafka.connect.config.{ConnectorConfig, CosmosDBConfig, CosmosDBConfigConstants}
+import com.microsoft.azure.cosmosdb.kafka.connect.config.{ConnectorConfig, CosmosDBConfig}
 import org.apache.kafka.common.config.ConfigDef
 import org.apache.kafka.connect.connector.Task
 import org.apache.kafka.connect.sink.SinkConnector
 
 import scala.collection.JavaConverters._
-import scala.util.{Failure, Success, Try}
+import scala.util.{Failure, Success}
 
 class CosmosDBSinkConnector extends SinkConnector with HandleRetriableError{
 
@@ -24,7 +24,7 @@ class CosmosDBSinkConnector extends SinkConnector with HandleRetriableError{
 
 
     try {
-      val config = Try(CosmosDBConfig(ConnectorConfig.sinkConfigDef, props))
+      val config = CosmosDBConfig(ConnectorConfig.sinkConfigDef, props)
       HandleRetriableError(Success(config))
     }
     catch{

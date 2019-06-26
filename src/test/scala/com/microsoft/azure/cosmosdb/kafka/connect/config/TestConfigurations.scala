@@ -55,6 +55,8 @@ object TestConfigurations {
     connectorProperties.put(CosmosDBConfigConstants.TOPIC_CONFIG, TOPIC)
     connectorProperties.put(CosmosDBConfigConstants.BATCH_SIZE, "10")
     connectorProperties.put(CosmosDBConfigConstants.READER_BUFFER_SIZE, "1000")
+    connectorProperties.put(CosmosDBConfigConstants.ERRORS_RETRY_TIMEOUT_CONFIG, "3")
+    connectorProperties.put(CosmosDBConfigConstants.SOURCE_POST_PROCESSOR, "com.microsoft.azure.cosmosdb.kafka.connect.processor.source.SelectorSourcePostProcessor")
     return connectorProperties
   }
 
@@ -70,7 +72,8 @@ object TestConfigurations {
     connectorProperties.put(CosmosDBConfigConstants.COLLECTION_CONFIG, SINK_COLLECTION)
     connectorProperties.put(CosmosDBConfigConstants.CREATE_COLLECTION_CONFIG, "true")
     connectorProperties.put(CosmosDBConfigConstants.TOPIC_CONFIG, TOPIC)
-
+    connectorProperties.put(CosmosDBConfigConstants.ERRORS_RETRY_TIMEOUT_CONFIG, "3")
+    //connectorProperties.put(CosmosDBConfigConstants.SINK_POST_PROCESSOR, "com.microsoft.azure.cosmosdb.kafka.connect.processor.sink.SelectorSinkPostProcessor")
     return connectorProperties
   }
 
