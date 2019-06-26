@@ -29,14 +29,24 @@ object SourceConnectReaderTest {
 
     val objectMapper: ObjectMapper = new ObjectMapper
 
-    //schema and schema-less JSON test
-    for (i <- 1 to 10)  {
+    //schema-less JSON test
+    for (i <- 5 to 8)  {
       val json = scala.io.Source.fromFile(getClass.getResource(s"/test$i.json").toURI.getPath).mkString
       val mapper = new ObjectMapper
       val jsonNode: JsonNode =  mapper.readTree(json)
       producer.send(new ProducerRecord[Nothing, JsonNode](COSMOSDB_TOPIC, jsonNode))
 
     }
+
+
+    //schema JSON test
+    /*for (i <- 1 to 4)  {
+      val json = scala.io.Source.fromFile(getClass.getResource(s"/test$i.json").toURI.getPath).mkString
+      val mapper = new ObjectMapper
+      val jsonNode: JsonNode =  mapper.readTree(json)
+      producer.send(new ProducerRecord[Nothing, JsonNode](COSMOSDB_TOPIC, jsonNode))
+
+    }*/
 
     // nested json test
     /*val address = new Address(s"city_$i", s"state_$i")
@@ -89,7 +99,7 @@ object SourceConnectReaderTest {
     connectorProperties.put("connect.cosmosdb.connection.endpoint" , "https://test-kafkaconnect.documents.azure.com:443/")
     connectorProperties.put("connect.cosmosdb.master.key", "5QGyQRtl4fEYT7seSBUiD2Sr0Upgvxm4KrkmeWbVavWAvyM3GQ03esjr8Qixul4MmohdAxAA35PLKpmF5vBvbQ==")
     connectorProperties.put("connect.cosmosdb.database" , "test-kcdb")
-    connectorProperties.put("connect.cosmosdb.collection" , "sourceCollection")
+    connectorProperties.put("connect.cosmosdb.collection" , "sourceCollection1")
     connectorProperties.put("topics" , COSMOSDB_TOPIC)
     connectorProperties.put("connect.cosmosdb.topic.name" , COSMOSDB_TOPIC)
     connectorProperties.put(CosmosDBConfigConstants.ERRORS_RETRY_TIMEOUT_CONFIG, "3")

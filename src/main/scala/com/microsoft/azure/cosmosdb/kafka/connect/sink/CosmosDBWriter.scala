@@ -39,16 +39,6 @@ class CosmosDBWriter(val settings: CosmosDBSinkSettings, private val documentCli
           if(content.contains("payload")){
             content = gson.toJsonTree(value).getAsJsonObject.get("payload").toString
           }
-         /* if(value.isInstanceOf[util.HashMap[Any, Any]]){ // TODO: figure how this will work with avro messages
-            content = gson.toJsonTree(value).toString
-            if(content.contains("payload")){
-              content = gson.toJsonTree(value).getAsJsonObject.get("payload").toString
-            }
-          }
-          else {
-
-            content = value.toString
-          }*/
           val document = new Document(content)
          logger.info("Upserting Document object id " + document.get("id") + " into collection " + settings.collection)
           docs = docs :+ document
