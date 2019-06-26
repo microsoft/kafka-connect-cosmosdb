@@ -1,10 +1,10 @@
 package com.microsoft.azure.cosmosdb.kafka.connect.sink
 
 import java.util
-import scala.collection.mutable.HashMap
 
+import scala.collection.mutable.HashMap
 import com.microsoft.azure.cosmosdb.kafka.connect.config.{ConnectorConfig, CosmosDBConfig, CosmosDBConfigConstants}
-import com.microsoft.azure.cosmosdb.kafka.connect.{CosmosDBClientSettings, CosmosDBProvider}
+import com.microsoft.azure.cosmosdb.kafka.connect.{CosmosDBClientSettings, CosmosDBProvider, CosmosDBProviderTrait}
 import com.microsoft.azure.cosmosdb.rx.AsyncDocumentClient
 import com.microsoft.azure.cosmosdb.{ConnectionPolicy, ConsistencyLevel}
 import com.typesafe.scalalogging.LazyLogging
@@ -27,6 +27,7 @@ class CosmosDBSinkTask extends SinkTask with LazyLogging {
     private var topicNames: Array[String] = null
     private val collectionTopicMap: HashMap[String, String] = HashMap.empty[String, String]
 
+    val cosmosDBProvider: CosmosDBProviderTrait = CosmosDBProvider
 
     override def start(props: util.Map[String, String]): Unit = {
         logger.info("Starting CosmosDBSinkTask")
@@ -76,7 +77,7 @@ class CosmosDBSinkTask extends SinkTask with LazyLogging {
             ConnectionPolicy.GetDefault(),
             ConsistencyLevel.Session
         )
-        client = Try(CosmosDBProvider.getClient(clientSettings)) match {
+        client = Try(cosmosDBProvider.getClient(clientSettings)) match {
             case Success(conn) =>
                 logger.info("Connection to CosmosDB established.")
                 conn
@@ -85,7 +86,7 @@ class CosmosDBSinkTask extends SinkTask with LazyLogging {
 
         // Set up Writer
         val setting = new CosmosDBSinkSettings(endpoint, masterKey, database, collectionTopicMap) // null, null) // TODO: validate passing null is okay here
-        writer = Option(new CosmosDBWriter(setting, client))
+        writer = Option(new CosmosDBWriter(setting, client, cosmosDBProvider))
     }
 
     override def put(records: util.Collection[SinkRecord]): Unit = {

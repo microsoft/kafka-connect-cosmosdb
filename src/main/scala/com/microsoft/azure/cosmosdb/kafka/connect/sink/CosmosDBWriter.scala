@@ -6,13 +6,13 @@ import java.util.concurrent.CountDownLatch
 
 import com.google.gson.Gson
 import com.microsoft.azure.cosmosdb._
-import com.microsoft.azure.cosmosdb.kafka.connect.CosmosDBProvider
+import com.microsoft.azure.cosmosdb.kafka.connect.{CosmosDBProvider, CosmosDBProviderTrait}
 import com.microsoft.azure.cosmosdb.rx.AsyncDocumentClient
 import com.typesafe.scalalogging.StrictLogging
 import org.apache.kafka.connect.sink.SinkRecord
 
 
-class CosmosDBWriter(val settings: CosmosDBSinkSettings, private val documentClient: AsyncDocumentClient) extends StrictLogging
+class CosmosDBWriter(val settings: CosmosDBSinkSettings, private val documentClient: AsyncDocumentClient, val cosmosDBProvider: CosmosDBProviderTrait) extends StrictLogging
 {
   private val requestOptionsInsert = new RequestOptions
   requestOptionsInsert.setConsistencyLevel(ConsistencyLevel.Session)
@@ -56,7 +56,7 @@ class CosmosDBWriter(val settings: CosmosDBSinkSettings, private val documentCli
           docs = docs :+ document
         }
         // Send current batch of documents and reset the list for the next topic's documents
-        CosmosDBProvider.upsertDocuments[Document](docs, settings.database, collection, new CountDownLatch(1))
+        cosmosDBProvider.upsertDocuments[Document](docs, settings.database, collection, new CountDownLatch(1))
         docs = List.empty[Document]
       }
 
