@@ -25,7 +25,7 @@ class CosmosDBSinkTask extends SinkTask with LazyLogging {
     private var database: String = ""
     private var taskConfig: Option[CosmosDBConfig] = None
     private var topicNames: Array[String] = null
-    private val collectionTopicMap: HashMap[String, String] = HashMap.empty[String, String]
+    val collectionTopicMap: HashMap[String, String] = HashMap.empty[String, String] // Public to allow for testing
 
     val cosmosDBProvider: CosmosDBProvider = CosmosDBProviderImpl
 
@@ -86,7 +86,7 @@ class CosmosDBSinkTask extends SinkTask with LazyLogging {
 
         // Set up Writer
         val setting = new CosmosDBSinkSettings(endpoint, masterKey, database, collectionTopicMap)
-        writer = Option(new CosmosDBWriter(setting, client, cosmosDBProvider))
+        writer = Option(new CosmosDBWriter(setting, cosmosDBProvider))
     }
 
     override def put(records: util.Collection[SinkRecord]): Unit = {

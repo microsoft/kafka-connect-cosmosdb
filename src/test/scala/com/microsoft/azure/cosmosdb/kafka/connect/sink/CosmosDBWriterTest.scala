@@ -39,7 +39,7 @@ class CosmosDBWriterTest extends FlatSpec with GivenWhenThen {
 
     // Set up Writer
     val setting = new CosmosDBSinkSettings(ENDPOINT, MASTER_KEY, DATABASE, collectionTopicMap)
-    val writer = new CosmosDBWriter(setting, client, mockCosmosProvider)
+    val writer = new CosmosDBWriter(setting, mockCosmosProvider)
 
     // Create sample SinkRecords
     val record1 = new SinkRecord(TOPIC, PARTITION, Schema.STRING_SCHEMA, null, Schema.STRING_SCHEMA, "{\"message\": \"message1 payload\"}", 0)
