@@ -49,6 +49,7 @@ class CosmosDBSourceTaskTest extends FlatSpec with GivenWhenThen with LazyLoggin
     val props: Properties = TestConfigurations.getSourceConnectorProperties()
     props.setProperty(CosmosDBConfigConstants.BATCH_SIZE, NUM_DOCS.toString)
     props.setProperty(CosmosDBConfigConstants.READER_BUFFER_SIZE, "10000")
+    props.setProperty(CosmosDBConfigConstants.TIMEOUT, "10000")
 
     Then(s"Insert ${NUM_DOCS} documents in the test collection")
     insertDocuments()
@@ -93,6 +94,7 @@ class CosmosDBSourceTaskTest extends FlatSpec with GivenWhenThen with LazyLoggin
     Given("A set of SourceConnector properties")
     val props: Properties = TestConfigurations.getSourceConnectorProperties()
     props.setProperty(CosmosDBConfigConstants.READER_BUFFER_SIZE, "10000")
+    props.setProperty(CosmosDBConfigConstants.TIMEOUT, "10000")
 
     Then(s"Insert ${NUM_DOCS} documents in the test collection")
     insertDocuments()
@@ -137,6 +139,7 @@ class CosmosDBSourceTaskTest extends FlatSpec with GivenWhenThen with LazyLoggin
     Given("A set of SourceConnector properties")
     val props: Properties = TestConfigurations.getSourceConnectorProperties()
     props.setProperty(CosmosDBConfigConstants.BATCH_SIZE, NUM_DOCS.toString)
+    props.setProperty(CosmosDBConfigConstants.TIMEOUT, "10000")
 
     Then(s"Insert ${NUM_DOCS} documents in the test collection")
     insertDocuments()
