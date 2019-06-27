@@ -3,7 +3,7 @@ package com.microsoft.azure.cosmosdb.kafka.connect.source
 import java.util
 
 import com.microsoft.azure.cosmosdb._
-import com.microsoft.azure.cosmosdb.kafka.connect.CosmosDBProvider
+import com.microsoft.azure.cosmosdb.kafka.connect.CosmosDBProviderImpl
 import com.microsoft.azure.cosmosdb.kafka.connect.common.ErrorHandling.ErrorHandler
 import com.microsoft.azure.cosmosdb.rx._
 import com.typesafe.scalalogging.StrictLogging
@@ -25,7 +25,7 @@ class CosmosDBReader(private val client: AsyncDocumentClient,
     val records = new util.ArrayList[SourceRecord]
     var bufferSize = 0
 
-    val collectionLink = CosmosDBProvider.getCollectionLink(setting.database, setting.collection)
+    val collectionLink = CosmosDBProviderImpl.getCollectionLink(setting.database, setting.collection)
     val changeFeedOptions = createChangeFeedOptions()
 
     initializeErrorHandler(2)

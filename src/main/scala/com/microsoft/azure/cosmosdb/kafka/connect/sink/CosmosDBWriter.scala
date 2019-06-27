@@ -6,13 +6,12 @@ import java.util.concurrent.CountDownLatch
 
 import com.google.gson.Gson
 import com.microsoft.azure.cosmosdb._
-import com.microsoft.azure.cosmosdb.kafka.connect.{CosmosDBProvider, CosmosDBProviderTrait}
-import com.microsoft.azure.cosmosdb.rx.AsyncDocumentClient
+import com.microsoft.azure.cosmosdb.kafka.connect.CosmosDBProvider
 import com.typesafe.scalalogging.StrictLogging
 import org.apache.kafka.connect.sink.SinkRecord
 
 
-class CosmosDBWriter(val settings: CosmosDBSinkSettings, private val documentClient: AsyncDocumentClient, val cosmosDBProvider: CosmosDBProviderTrait) extends StrictLogging
+class CosmosDBWriter(val settings: CosmosDBSinkSettings, val cosmosDBProvider: CosmosDBProvider) extends StrictLogging
 {
   private val requestOptionsInsert = new RequestOptions
   requestOptionsInsert.setConsistencyLevel(ConsistencyLevel.Session)

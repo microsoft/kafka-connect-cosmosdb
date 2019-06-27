@@ -7,7 +7,7 @@ import com.microsoft.azure.cosmosdb.kafka.connect.common.ErrorHandling.ErrorHand
 
 import scala.collection.JavaConversions._
 import com.microsoft.azure.cosmosdb.{ConnectionPolicy, ConsistencyLevel}
-import com.microsoft.azure.cosmosdb.kafka.connect.{CosmosDBClientSettings, CosmosDBProvider}
+import com.microsoft.azure.cosmosdb.kafka.connect.{CosmosDBClientSettings, CosmosDBProviderImpl}
 import com.microsoft.azure.cosmosdb.kafka.connect.config.{ConnectorConfig, CosmosDBConfig, CosmosDBConfigConstants}
 import com.typesafe.scalalogging.{LazyLogging, StrictLogging}
 import org.apache.kafka.common.config.ConfigDef
@@ -47,9 +47,9 @@ class CosmosDBSourceConnector extends SourceConnector with StrictLogging with Er
       )
       logger.debug("Settings for Cosmos Db connection: ", settings)
 
-      val client = CosmosDBProvider.getClient(settings)
+      val client = CosmosDBProviderImpl.getClient(settings)
 
-      val collectionLink = CosmosDBProvider.getCollectionLink(database, collection)
+      val collectionLink = CosmosDBProviderImpl.getCollectionLink(database, collection)
       val changeFeedObservable = client.readPartitionKeyRanges(collectionLink, null)
       var results = List[PartitionKeyRange]()
       changeFeedObservable.toBlocking().forEach(x => results = results ++ x.getResults())

@@ -4,7 +4,7 @@ import java.util
 
 import com.microsoft.azure.cosmosdb.kafka.connect.common.ErrorHandling.ErrorHandler
 import com.microsoft.azure.cosmosdb.kafka.connect.config.{ConnectorConfig, CosmosDBConfig, CosmosDBConfigConstants}
-import com.microsoft.azure.cosmosdb.kafka.connect.{CosmosDBClientSettings, CosmosDBProvider}
+import com.microsoft.azure.cosmosdb.kafka.connect.{CosmosDBClientSettings, CosmosDBProviderImpl}
 import com.microsoft.azure.cosmosdb.rx.AsyncDocumentClient
 import com.microsoft.azure.cosmosdb.{ConnectionPolicy, ConsistencyLevel}
 import com.typesafe.scalalogging.StrictLogging
@@ -72,7 +72,7 @@ class CosmosDBSourceTask extends SourceTask with StrictLogging with ErrorHandler
     )
 
     try{
-      client = CosmosDBProvider.getClient(clientSettings)
+      client = CosmosDBProviderImpl.getClient(clientSettings)
       logger.info("Connection to CosmosDB established.")
     }catch{
       case f: Throwable =>

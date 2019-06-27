@@ -11,7 +11,7 @@ import com.google.common.collect.Maps
 import com.google.gson.Gson
 import com.microsoft.azure.cosmosdb.kafka.connect.config.{CosmosDBConfigConstants, TestConfigurations}
 import com.microsoft.azure.cosmosdb.kafka.connect.model.{CosmosDBDocumentTest, KafkaPayloadTest}
-import com.microsoft.azure.cosmosdb.kafka.connect.{CosmosDBClientSettings, CosmosDBProvider}
+import com.microsoft.azure.cosmosdb.kafka.connect.{CosmosDBClientSettings, CosmosDBProviderImpl}
 import com.microsoft.azure.cosmosdb.{ConnectionPolicy, ConsistencyLevel, Document, ResourceResponse}
 import com.typesafe.scalalogging.LazyLogging
 import org.apache.kafka.connect.errors.ConnectException
@@ -200,7 +200,7 @@ class CosmosDBSourceTaskTest extends FlatSpec with GivenWhenThen with LazyLoggin
       ConnectionPolicy.GetDefault(),
       ConsistencyLevel.Session
     )
-    val client = Try(CosmosDBProvider.getClient(clientSettings)) match {
+    val client = Try(CosmosDBProviderImpl.getClient(clientSettings)) match {
       case Success(conn) =>
         logger.info("Connection to CosmosDB established.")
         conn
@@ -214,7 +214,7 @@ class CosmosDBSourceTaskTest extends FlatSpec with GivenWhenThen with LazyLoggin
     mockDocuments().forEach(record => {
       val json = gson.toJson(record)
       val document = new Document(json)
-      val obs = client.upsertDocument(CosmosDBProvider.getCollectionLink(TestConfigurations.DATABASE, TestConfigurations.SOURCE_COLLECTION), document, null, false)
+      val obs = client.upsertDocument(CosmosDBProviderImpl.getCollectionLink(TestConfigurations.DATABASE, TestConfigurations.SOURCE_COLLECTION), document, null, false)
       upsertDocumentsOBs.add(obs)
     })
 

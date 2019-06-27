@@ -7,7 +7,7 @@ import com.microsoft.azure.cosmosdb.rx.AsyncDocumentClient
 import org.mockito.MockitoSugar.mock
 
 
-object MockCosmosDBProvider extends CosmosDBProviderTrait {
+object MockCosmosDBProvider extends CosmosDBProvider {
 
   var CosmosDBCollections: HashMap[String, List[Any]] = new HashMap[String, List[Any]]
 
