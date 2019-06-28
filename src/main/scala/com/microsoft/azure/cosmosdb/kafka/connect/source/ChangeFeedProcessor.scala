@@ -2,11 +2,12 @@ package com.microsoft.azure.cosmosdb.kafka.connect.source
 
 import com.microsoft.azure.cosmosdb._
 import java.util.concurrent.CountDownLatch
-import com.microsoft.azure.cosmosdb.kafka.connect.common.ErrorHandling.ErrorHandler
-import com.typesafe.scalalogging.StrictLogging
+
+import com.microsoft.azure.cosmosdb.kafka.connect.common.ErrorHandler.HandleRetriableError
+
 import scala.collection.JavaConversions._
 
-class ChangeFeedProcessor(feedCollectionInfo: DocumentCollectionInfo, leaseCollectionInfo: DocumentCollectionInfo, changeFeedProcessorOptions: ChangeFeedProcessorOptions, changeFeedObserver: ChangeFeedObserver)extends StrictLogging with ErrorHandler {
+class ChangeFeedProcessor(feedCollectionInfo: DocumentCollectionInfo, leaseCollectionInfo: DocumentCollectionInfo, changeFeedProcessorOptions: ChangeFeedProcessorOptions, changeFeedObserver: ChangeFeedObserver)extends HandleRetriableError {
 
   val asyncClientFeed = DocumentClientBuilder.buildAsyncDocumentClient(feedCollectionInfo.uri, feedCollectionInfo.masterKey)
   val asyncClientLease = DocumentClientBuilder.buildAsyncDocumentClient(leaseCollectionInfo.uri, leaseCollectionInfo.masterKey)

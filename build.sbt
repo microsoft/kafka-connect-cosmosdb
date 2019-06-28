@@ -5,7 +5,7 @@ scalaVersion := "2.12.8"
 
 libraryDependencies += "com.microsoft.azure" % "azure-cosmosdb" % "2.4.4"
 
-libraryDependencies += "javax.ws.rs" % "javax.ws.rs-api" % "2.1.1" artifacts( Artifact("javax.ws.rs-api", "jar", "jar"))
+libraryDependencies += "javax.ws.rs" % "javax.ws.rs-api" % "2.1.1" artifacts Artifact("javax.ws.rs-api", "jar", "jar")
 libraryDependencies += "com.typesafe.scala-logging" %% "scala-logging" % "3.9.2"
 libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.3"
 libraryDependencies += "com.google.code.gson" % "gson" % "2.8.5"

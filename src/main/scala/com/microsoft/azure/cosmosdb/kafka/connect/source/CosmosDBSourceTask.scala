@@ -2,7 +2,7 @@ package com.microsoft.azure.cosmosdb.kafka.connect.source
 
 import java.util
 
-import com.microsoft.azure.cosmosdb.kafka.connect.common.ErrorHandling.ErrorHandler
+import com.microsoft.azure.cosmosdb.kafka.connect.common.ErrorHandler.HandleRetriableError
 import com.microsoft.azure.cosmosdb.kafka.connect.config.{ConnectorConfig, CosmosDBConfig, CosmosDBConfigConstants}
 import com.microsoft.azure.cosmosdb.kafka.connect.{CosmosDBClientSettings, CosmosDBProviderImpl}
 import com.microsoft.azure.cosmosdb.rx.AsyncDocumentClient
@@ -10,12 +10,13 @@ import com.microsoft.azure.cosmosdb.{ConnectionPolicy, ConsistencyLevel}
 import com.typesafe.scalalogging.StrictLogging
 import org.apache.kafka.connect.errors.ConnectException
 import org.apache.kafka.connect.source.{SourceRecord, SourceTask}
+import com.microsoft.azure.cosmosdb.kafka.connect.processor._
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable
 import scala.util.{Failure, Success, Try}
 
-class CosmosDBSourceTask extends SourceTask with StrictLogging with ErrorHandler{
+class CosmosDBSourceTask extends SourceTask with StrictLogging with HandleRetriableError{
 
   private var readers = mutable.Map.empty[String, CosmosDBReader]
   private var client: AsyncDocumentClient = null
@@ -24,7 +25,9 @@ class CosmosDBSourceTask extends SourceTask with StrictLogging with ErrorHandler
   private var taskConfig: Option[CosmosDBConfig] = None
   private var bufferSize: Option[Int] = None
   private var batchSize: Option[Int] = None
+  private var timeout: Option[Int] = None
   private var topicName: String = ""
+  private var postProcessors  = List.empty[PostProcessor]
 
   override def start(props: util.Map[String, String]): Unit = {
     logger.info("Starting CosmosDBSourceTask")
@@ -39,7 +42,6 @@ class CosmosDBSourceTask extends SourceTask with StrictLogging with ErrorHandler
     }
 
     // Get Configuration for this Task
-    initializeErrorHandler(2)
     try{
       taskConfig = Some(CosmosDBConfig(ConnectorConfig.sourceConfigDef, config))
       //HandleError(Success(config))
@@ -47,13 +49,17 @@ class CosmosDBSourceTask extends SourceTask with StrictLogging with ErrorHandler
     catch{
       case f: Throwable =>
         logger.error(s"Couldn't start Cosmos DB Source due to configuration error: ${f.getMessage}", f)
-        HandleError(Failure(f))
+        HandleRetriableError(Failure(f))
     }
 
     /*taskConfig = Try(CosmosDBConfig(ConnectorConfig.sourceConfigDef, config)) match {
       case Failure(f) => throw new ConnectException("Couldn't start CosmosDBSource due to configuration error.", f)
       case Success(s) => Some(s)
     }*/
+
+    // Add configured Post-Processors
+    val processorClassNames = taskConfig.get.getString(CosmosDBConfigConstants.SOURCE_POST_PROCESSOR)
+    postProcessors = PostProcessor.createPostProcessorList(processorClassNames, taskConfig.get)
 
     // Get CosmosDB Connection
     val endpoint: String = taskConfig.get.getString(CosmosDBConfigConstants.CONNECTION_ENDPOINT_CONFIG)
@@ -77,7 +83,7 @@ class CosmosDBSourceTask extends SourceTask with StrictLogging with ErrorHandler
     }catch{
       case f: Throwable =>
         logger.error(s"Couldn't connect to CosmosDB.: ${f.getMessage}", f)
-        HandleError(Failure(f))
+        HandleRetriableError(Failure(f))
     }
 
 
@@ -91,6 +97,7 @@ class CosmosDBSourceTask extends SourceTask with StrictLogging with ErrorHandler
     // Get bufferSize and batchSize
     bufferSize = Some(taskConfig.get.getInt(CosmosDBConfigConstants.READER_BUFFER_SIZE))
     batchSize = Some(taskConfig.get.getInt(CosmosDBConfigConstants.BATCH_SIZE))
+    timeout = Some(taskConfig.get.getInt(CosmosDBConfigConstants.TIMEOUT))
 
     // Get Topic
     topicName = taskConfig.get.getString(CosmosDBConfigConstants.TOPIC_CONFIG)
@@ -100,7 +107,7 @@ class CosmosDBSourceTask extends SourceTask with StrictLogging with ErrorHandler
 
     // Set up Readers
     assigned.map(partition => {
-      val setting = new CosmosDBSourceSettings(database, collection, partition, batchSize.get, bufferSize.get, CosmosDBConfigConstants.DEFAULT_POLL_INTERVAL, topicName)
+      val setting = new CosmosDBSourceSettings(database, collection, partition, batchSize.get, bufferSize.get, timeout.get, topicName)
       readers += partition -> new CosmosDBReader(client, setting, context)
     })
 
@@ -111,11 +118,17 @@ class CosmosDBSourceTask extends SourceTask with StrictLogging with ErrorHandler
   }
 
   override def poll(): util.List[SourceRecord] = {
-    return readers.flatten(reader => reader._2.processChanges()).toList
+    return readers.flatten(reader => reader._2.processChanges()).toList.map(sr => applyPostProcessing(sr))
   }
 
   override def version(): String = getClass.getPackage.getImplementationVersion
 
   def getReaders(): mutable.Map[String, CosmosDBReader] = readers
+
+  private def applyPostProcessing(sourceRecord: SourceRecord): SourceRecord =
+    postProcessors.foldLeft(sourceRecord)((r, p) => {
+      //println(p.getClass.toString)
+      p.runPostProcess(r)
+    })
 
 }

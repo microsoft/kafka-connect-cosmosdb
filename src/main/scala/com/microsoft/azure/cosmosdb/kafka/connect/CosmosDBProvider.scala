@@ -1,7 +1,6 @@
 package com.microsoft.azure.cosmosdb.kafka.connect
 
 import java.util.concurrent.CountDownLatch
-
 import com.microsoft.azure.cosmosdb.rx.AsyncDocumentClient
 
 trait CosmosDBProvider {

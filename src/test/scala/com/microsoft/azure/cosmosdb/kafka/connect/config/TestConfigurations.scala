@@ -71,9 +71,11 @@ object TestConfigurations {
     connectorProperties.put(CosmosDBConfigConstants.CONNECTION_MASTERKEY_CONFIG, MASTER_KEY)
     connectorProperties.put(CosmosDBConfigConstants.DATABASE_CONFIG, DATABASE)
     connectorProperties.put(CosmosDBConfigConstants.COLLECTION_CONFIG, SOURCE_COLLECTION)
-    connectorProperties.put(CosmosDBConfigConstants.TOPIC_CONFIG, "topic1_test1")
+    connectorProperties.put(CosmosDBConfigConstants.TOPIC_CONFIG, "topic_test")
     connectorProperties.put(CosmosDBConfigConstants.BATCH_SIZE, "10")
     connectorProperties.put(CosmosDBConfigConstants.READER_BUFFER_SIZE, "1000")
+    connectorProperties.put(CosmosDBConfigConstants.SOURCE_POST_PROCESSOR, "com.microsoft.azure.cosmosdb.kafka.connect.processor.source.SelectorSourcePostProcessor")
+    connectorProperties.put(org.apache.kafka.connect.runtime.ConnectorConfig.ERRORS_RETRY_TIMEOUT_CONFIG, "3")
     return connectorProperties
   }
 
@@ -86,9 +88,12 @@ object TestConfigurations {
     connectorProperties.put(CosmosDBConfigConstants.CONNECTION_MASTERKEY_CONFIG, MASTER_KEY)
     connectorProperties.put(CosmosDBConfigConstants.DATABASE_CONFIG, DATABASE)
     connectorProperties.put(CosmosDBConfigConstants.COLLECTION_CONFIG, SINK_COLLECTION)
-    connectorProperties.put(CosmosDBConfigConstants.COLLECTION_TOPIC_MAP_CONFIG, "collection2#topic_test,collection3#topic1_test1")
-    connectorProperties.put("topics", "topic_test,topic1_test1") // constant required by sink connector
-    connectorProperties.put(CosmosDBConfigConstants.TOPIC_CONFIG, "topic_test,topic1_test1")
+    connectorProperties.put(CosmosDBConfigConstants.COLLECTION_TOPIC_MAP_CONFIG, "collection2#topic_test")
+    connectorProperties.put("topics", "topic_test") // constant required by sink connector
+    connectorProperties.put(CosmosDBConfigConstants.TOPIC_CONFIG, "topic_test" )
+    connectorProperties.put(org.apache.kafka.connect.runtime.ConnectorConfig.ERRORS_RETRY_TIMEOUT_CONFIG, "3")
+    connectorProperties.put(CosmosDBConfigConstants.SINK_POST_PROCESSOR, "com.microsoft.azure.cosmosdb.kafka.connect.processor.sink.SelectorSinkPostProcessor")
+
     return connectorProperties
   }
 

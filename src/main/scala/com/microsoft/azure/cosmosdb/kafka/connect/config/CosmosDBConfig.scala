@@ -2,6 +2,7 @@ package com.microsoft.azure.cosmosdb.kafka.connect.config
 
 import java.util
 
+import com.microsoft.azure.cosmosdb.kafka.connect.config
 import org.apache.kafka.common.config.ConfigDef.{Importance, Type, Width}
 import org.apache.kafka.common.config.{AbstractConfig, ConfigDef}
 
@@ -27,7 +28,6 @@ object ConnectorConfig {
       CosmosDBConfigConstants.TOPIC_CONFIG_DOC, "Topic", 1, Width.MEDIUM,
       CosmosDBConfigConstants.TOPIC_CONFIG_DISPLAY)
 
-
   /**
     * Holds the extra configurations for the source on top of
     * the base.
@@ -42,21 +42,37 @@ object ConnectorConfig {
           .define(CosmosDBConfigConstants.BATCH_SIZE, Type.INT, CosmosDBConfigConstants.BATCH_SIZE_DEFAULT, Importance.MEDIUM,
             CosmosDBConfigConstants.BATCH_SIZE_DOC, "Source", 3, Width.LONG,
             CosmosDBConfigConstants.BATCH_SIZE_DISPLAY)
+          .define(CosmosDBConfigConstants.SOURCE_POST_PROCESSOR, Type.STRING, CosmosDBConfigConstants.SOURCE_POST_PROCESSOR_DEFAULT, Importance.MEDIUM,
+            CosmosDBConfigConstants.SOURCE_POST_PROCESSOR_DOC, "Source", 4, Width.LONG,
+            CosmosDBConfigConstants.SOURCE_POST_PROCESSOR_DISPLAY)
+          .define(CosmosDBConfigConstants.TIMEOUT, Type.INT, CosmosDBConfigConstants.TIMEOUT_DEFAULT, Importance.MEDIUM,
+            CosmosDBConfigConstants.TIMEOUT_DOC, "Source", 4, Width.LONG,
+            CosmosDBConfigConstants.TIMEOUT_DISPLAY)
 
   /**
     * Holds the extra configurations for the sink on top of
     * the base.
     **/
+
   lazy val sinkConfigDef: ConfigDef = ConnectorConfig.baseConfigDef
           .define(CosmosDBConfigConstants.COLLECTION_TOPIC_MAP_CONFIG, Type.STRING, Importance.HIGH,
             CosmosDBConfigConstants.COLLECTION_TOPIC_MAP_CONFIG_DOC, "Map", 1, Width.MEDIUM,
             CosmosDBConfigConstants.COLLECTION_TOPIC_MAP_CONFIG_DISPLAY)
+          .define(CosmosDBConfigConstants.SINK_POST_PROCESSOR, Type.STRING, CosmosDBConfigConstants.SINK_POST_PROCESSOR_DEFAULT, Importance.MEDIUM,
+            CosmosDBConfigConstants.SINK_POST_PROCESSOR_DOC, "Sink", 1, Width.LONG,
+            CosmosDBConfigConstants.SINK_POST_PROCESSOR_DISPLAY)
   //        .define(CosmosDBConfigConstants.EXTRA_SINK_CONFIG_01, Type.STRING, Importance.HIGH,
   //          CosmosDBConfigConstants.EXTRA_SINK_CONFIG_01_DOC, "Sink", 1, Width.MEDIUM,
   //          CosmosDBConfigConstants.EXTRA_SINK_CONFIG_01_DISPLAY)
   //        .define(CosmosDBConfigConstants.EXTRA_SINK_CONFIG_02, Type.STRING, Importance.HIGH,
   //          CosmosDBConfigConstants.EXTRA_SINK_CONFIG_02_DOC, "Sink", 2, Width.MEDIUM,
   //          CosmosDBConfigConstants.EXTRA_SINK_CONFIG_02_DISPLAY)
+
+  lazy val commonConfigDef: ConfigDef = ConnectorConfig.baseConfigDef
+    .define(CosmosDBConfigConstants.ERRORS_RETRY_TIMEOUT_CONFIG, Type.INT, CosmosDBConfigConstants.ERROR_MAX_RETRIES_DEFAULT, Importance.MEDIUM,
+      CosmosDBConfigConstants.ERRORS_RETRY_TIMEOUT_DOC, "Common", 1,
+      Width.MEDIUM , CosmosDBConfigConstants.ERRORS_RETRY_TIMEOUT_DISPLAY)
+
 }
 
 case class CosmosDBConfig(config: ConfigDef, props: util.Map[String, String])
