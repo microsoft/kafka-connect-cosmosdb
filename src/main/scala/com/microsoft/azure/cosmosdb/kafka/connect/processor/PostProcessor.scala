@@ -17,20 +17,16 @@ abstract class PostProcessor {
 
 object PostProcessor extends AnyRef with LazyLogging {
 
-  def createPostProcessorList(processorClassNames: String, config: CosmosDBConfig): List[PostProcessor] = {
-
-    if(processorClassNames.size == 0){
-      logger.info(s"No Post-Processors defined")
-      return List()
-    }
-    else {
-      processorClassNames.split(',').map(c => {
-        logger.info(s"Instantiating ${c} as Post-Processor")
+  def createPostProcessorList(processorClassNames: String, config: CosmosDBConfig): List[PostProcessor] =
+    processorClassNames.split(',').map(c => {
+      logger.info(s"Instantiating ${c} as Post-Processor")
+      if (c.isEmpty) {
+        null
+      } else {
         val postProcessor = Class.forName(c).newInstance().asInstanceOf[PostProcessor]
         postProcessor.configure(config)
         postProcessor
-      }).toList
-    }
-  }
+      }
+    }).filter( e => e != null).toList
 
 }
