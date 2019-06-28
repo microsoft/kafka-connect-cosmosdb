@@ -43,7 +43,8 @@ class CosmosDBSinkTaskTest extends FlatSpec with GivenWhenThen {
       CosmosDBConfigConstants.COLLECTION_CONFIG -> s"$COLLECTION",
       CosmosDBConfigConstants.COLLECTION_TOPIC_MAP_CONFIG -> s"$COLLECTION#$TOPIC",
       "topics" -> s"$TOPIC",
-      CosmosDBConfigConstants.TOPIC_CONFIG -> s"$TOPIC"
+      CosmosDBConfigConstants.TOPIC_CONFIG -> s"$TOPIC",
+      CosmosDBConfigConstants.SINK_POST_PROCESSOR -> "com.microsoft.azure.cosmosdb.kafka.connect.processor.sink.SelectorSinkPostProcessor"
     ).asJava
 
     When("The sink task is started")
@@ -71,7 +72,8 @@ class CosmosDBSinkTaskTest extends FlatSpec with GivenWhenThen {
       CosmosDBConfigConstants.COLLECTION_CONFIG -> s"$COLLECTION,$COLLECTION_2,$COLLECTION_3",
       CosmosDBConfigConstants.COLLECTION_TOPIC_MAP_CONFIG -> s"$COLLECTION#$TOPIC,$COLLECTION#$TOPIC_2,$COLLECTION_2#$TOPIC_3,$COLLECTION_3#$TOPIC_4,$COLLECTION_3#$TOPIC_5",
       "topics" -> s"$TOPIC,$TOPIC_2,$TOPIC_3,$TOPIC_4,$TOPIC_5",
-      CosmosDBConfigConstants.TOPIC_CONFIG -> s"$TOPIC,$TOPIC_2,$TOPIC_3,$TOPIC_4,$TOPIC_5"
+      CosmosDBConfigConstants.TOPIC_CONFIG -> s"$TOPIC,$TOPIC_2,$TOPIC_3,$TOPIC_4,$TOPIC_5",
+      CosmosDBConfigConstants.SINK_POST_PROCESSOR -> "com.microsoft.azure.cosmosdb.kafka.connect.processor.sink.SelectorSinkPostProcessor"
     ).asJava
 
     When("The sink task is started")
@@ -103,7 +105,8 @@ class CosmosDBSinkTaskTest extends FlatSpec with GivenWhenThen {
       CosmosDBConfigConstants.COLLECTION_CONFIG -> "",
       CosmosDBConfigConstants.COLLECTION_TOPIC_MAP_CONFIG -> "",
       "topics" -> s"$TOPIC,$TOPIC_2",
-      CosmosDBConfigConstants.TOPIC_CONFIG -> s"$TOPIC,$TOPIC_2"
+      CosmosDBConfigConstants.TOPIC_CONFIG -> s"$TOPIC,$TOPIC_2",
+      CosmosDBConfigConstants.SINK_POST_PROCESSOR -> "com.microsoft.azure.cosmosdb.kafka.connect.processor.sink.SelectorSinkPostProcessor"
     ).asJava
 
     When("The sink task is started")
@@ -138,7 +141,8 @@ class CosmosDBSinkTaskTest extends FlatSpec with GivenWhenThen {
       CosmosDBConfigConstants.COLLECTION_CONFIG -> COLLECTION,
       CosmosDBConfigConstants.COLLECTION_TOPIC_MAP_CONFIG -> s"$COLLECTION#$TOPIC",
       "topics" -> TOPIC,
-      CosmosDBConfigConstants.TOPIC_CONFIG -> TOPIC
+      CosmosDBConfigConstants.TOPIC_CONFIG -> TOPIC,
+      CosmosDBConfigConstants.SINK_POST_PROCESSOR -> "com.microsoft.azure.cosmosdb.kafka.connect.processor.sink.SelectorSinkPostProcessor"
     ).asJava
     sinkTask.start(map)
 
