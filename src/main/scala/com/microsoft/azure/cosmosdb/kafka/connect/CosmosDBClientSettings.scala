@@ -8,8 +8,6 @@ case class CosmosDBClientSettings(
                                    masterkey:String,
                                    database:String,
                                    collection:String,
-                                   createDatabase: Boolean,
-                                   createCollection: Boolean,
                                    connectionPolicy:ConnectionPolicy,
                                    consistencyLevel:ConsistencyLevel
                                  )
@@ -29,10 +27,6 @@ object CosmosDBClientSettings{
     val collection:String = config.getString(CosmosDBConfigConstants.COLLECTION_CONFIG)
     require(collection.trim.nonEmpty, s"Invalid value for ${CosmosDBConfigConstants.COLLECTION_CONFIG}")
 
-    val createDatabase:Boolean = config.getBoolean(CosmosDBConfigConstants.CREATE_DATABASE_CONFIG)
-
-    val createCollection:Boolean = config.getBoolean(CosmosDBConfigConstants.CREATE_COLLECTION_CONFIG)
-
     //TODO: make this configurable
     val connectionPolicy = ConnectionPolicy.GetDefault()
 
@@ -43,8 +37,6 @@ object CosmosDBClientSettings{
       masterKey,
       database,
       collection,
-      createDatabase,
-      createCollection,
       connectionPolicy,
       consistencyLevel)
   }

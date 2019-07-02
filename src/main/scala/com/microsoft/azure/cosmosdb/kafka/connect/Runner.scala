@@ -27,21 +27,19 @@ object Runner extends App{
     masterkey = "test",
     database = "test",
     collection = "test",
-    createDatabase = false,
-    createCollection = false,
     connectionPolicy = connectionPolicy,
     consistencyLevel = consistencyLevel)
 
-  val client=CosmosDBProvider.getClient(cosmosDBClientSettings)
+  val client = CosmosDBProviderImpl.getClient(cosmosDBClientSettings)
 
-  CosmosDBProvider.createDatabaseIfNotExists("test8")
+  CosmosDBProviderImpl.createDatabaseIfNotExists("test8")
 
-  CosmosDBProvider.createCollectionIfNotExists("test8","collection")
+  CosmosDBProviderImpl.createCollectionIfNotExists("test8","collection")
 
   val sampleDoc = new SampleDoc()
   val docs=List[SampleDoc](sampleDoc)
 
-  CosmosDBProvider.createDocuments[SampleDoc](docs,"test8","collection", new CountDownLatch(1))
+  CosmosDBProviderImpl.createDocuments[SampleDoc](docs,"test8","collection", new CountDownLatch(1))
 
   println("End of the Runner.")
 }

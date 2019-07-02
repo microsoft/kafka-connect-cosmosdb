@@ -15,23 +15,17 @@ object CosmosDBConfigConstants {
     val DATABASE_CONFIG_DISPLAY = "Database Name."
     val DATABASE_CONFIG_DOC = "The Cosmos DB target database."
 
-    val COLLECTION_CONFIG = s"$CONNECTOR_PREFIX.collection"
-    val COLLECTION_CONFIG_DISPLAY = "Collection Name."
-    val COLLECTION_CONFIG_DOC = "The Cosmos DB target collection."
-
-    val CREATE_DATABASE_CONFIG = s"$CONNECTOR_PREFIX.database.create"
-    val CREATE_DATABASE_DOC = "If set to true it will create the database if it doesn't exist. If not set to true, an exception will be raised."
-    val CREATE_DATABASE_DISPLAY = "Create Database If Not Exists"
-    val CREATE_DATABASE_DEFAULT: Boolean = false
-
-    val CREATE_COLLECTION_CONFIG = s"$CONNECTOR_PREFIX.collection.create"
-    val CREATE_COLLECTION_DOC = "If set to true it will create the collection if it doesn't exist. If not set to true, an exception will be raised."
-    val CREATE_COLLECTION_DISPLAY = "Create Collection If Not Exists"
-    val CREATE_COLLECTION_DEFAULT: Boolean = false
+    val COLLECTION_CONFIG = s"$CONNECTOR_PREFIX.collections"
+    val COLLECTION_CONFIG_DISPLAY = "Collection Names List."
+    val COLLECTION_CONFIG_DOC = "A comma delimited list of target collection names."
 
     val TOPIC_CONFIG = s"$CONNECTOR_PREFIX.topic.name"
-    val TOPIC_CONFIG_DISPLAY = "Topic Name."
-    val TOPIC_CONFIG_DOC = "The Kafka Topic"
+    val TOPIC_CONFIG_DISPLAY = "Topic Names List."
+    val TOPIC_CONFIG_DOC = "A comma delimited list of target Kafka Topics."
+
+    val COLLECTION_TOPIC_MAP_CONFIG = s"$CONNECTOR_PREFIX.collections.topicmap"
+    val COLLECTION_TOPIC_MAP_CONFIG_DISPLAY = "Collection Topic Map."
+    val COLLECTION_TOPIC_MAP_CONFIG_DOC = "A comma delimited list of collections mapped to their partitions. Formatted coll1#topic1,coll2#topic2."
 
     //for the source task, the connector will set this for the each source task
     val ASSIGNED_PARTITIONS = s"$CONNECTOR_PREFIX.assigned.partitions"

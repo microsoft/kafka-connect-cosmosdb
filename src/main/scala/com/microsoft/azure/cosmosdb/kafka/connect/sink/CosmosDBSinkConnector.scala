@@ -11,7 +11,7 @@ import org.apache.kafka.connect.sink.SinkConnector
 import scala.collection.JavaConverters._
 import scala.util.{Failure, Success}
 
-class CosmosDBSinkConnector extends SinkConnector with HandleRetriableError{
+class CosmosDBSinkConnector extends SinkConnector with HandleRetriableError {
 
 
   private var configProps: util.Map[String, String] = _
@@ -22,8 +22,9 @@ class CosmosDBSinkConnector extends SinkConnector with HandleRetriableError{
   override def start(props: util.Map[String, String]): Unit = {
     logger.info("Starting CosmosDBSinkConnector")
 
-
     try {
+      initializeErrorHandler(props.get(org.apache.kafka.connect.runtime.ConnectorConfig.ERRORS_RETRY_TIMEOUT_CONFIG).toInt) // TODO: test
+
       val config = CosmosDBConfig(ConnectorConfig.sinkConfigDef, props)
       HandleRetriableError(Success(config))
     }
