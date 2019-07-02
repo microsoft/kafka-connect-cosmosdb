@@ -71,9 +71,10 @@ object TestConfigurations {
     connectorProperties.put(CosmosDBConfigConstants.CONNECTION_MASTERKEY_CONFIG, MASTER_KEY)
     connectorProperties.put(CosmosDBConfigConstants.DATABASE_CONFIG, DATABASE)
     connectorProperties.put(CosmosDBConfigConstants.COLLECTION_CONFIG, SOURCE_COLLECTION)
-    connectorProperties.put(CosmosDBConfigConstants.TOPIC_CONFIG, "topic_test")
+    connectorProperties.put(CosmosDBConfigConstants.TOPIC_CONFIG, TOPIC)
     connectorProperties.put(CosmosDBConfigConstants.BATCH_SIZE, "10")
     connectorProperties.put(CosmosDBConfigConstants.READER_BUFFER_SIZE, "1000")
+    connectorProperties.put(CosmosDBConfigConstants.ERRORS_RETRY_TIMEOUT_CONFIG, "3")
     connectorProperties.put(CosmosDBConfigConstants.SOURCE_POST_PROCESSOR, "com.microsoft.azure.cosmosdb.kafka.connect.processor.source.SelectorSourcePostProcessor")
     connectorProperties.put(org.apache.kafka.connect.runtime.ConnectorConfig.ERRORS_RETRY_TIMEOUT_CONFIG, "3")
     return connectorProperties
@@ -88,12 +89,11 @@ object TestConfigurations {
     connectorProperties.put(CosmosDBConfigConstants.CONNECTION_MASTERKEY_CONFIG, MASTER_KEY)
     connectorProperties.put(CosmosDBConfigConstants.DATABASE_CONFIG, DATABASE)
     connectorProperties.put(CosmosDBConfigConstants.COLLECTION_CONFIG, SINK_COLLECTION)
-    connectorProperties.put(CosmosDBConfigConstants.COLLECTION_TOPIC_MAP_CONFIG, "collection2#topic_test")
-    connectorProperties.put("topics", "topic_test") // constant required by sink connector
-    connectorProperties.put(CosmosDBConfigConstants.TOPIC_CONFIG, "topic_test" )
+    connectorProperties.put(CosmosDBConfigConstants.COLLECTION_TOPIC_MAP_CONFIG, s"$SINK_COLLECTION#$TOPIC")
+    connectorProperties.put("topics", TOPIC) // constant required by sink connector
+    connectorProperties.put(CosmosDBConfigConstants.TOPIC_CONFIG, TOPIC )
     connectorProperties.put(org.apache.kafka.connect.runtime.ConnectorConfig.ERRORS_RETRY_TIMEOUT_CONFIG, "3")
     connectorProperties.put(CosmosDBConfigConstants.SINK_POST_PROCESSOR, "com.microsoft.azure.cosmosdb.kafka.connect.processor.sink.SelectorSinkPostProcessor")
-
     return connectorProperties
   }
 
@@ -105,8 +105,8 @@ object TestConfigurations {
     producerProperties.put(ProducerConfig.BATCH_SIZE_CONFIG, "10")
     producerProperties.put(ProducerConfig.LINGER_MS_CONFIG, "1")
     producerProperties.put(ProducerConfig.BUFFER_MEMORY_CONFIG, "33554432")
-    producerProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.springframework.kafka.support.serializer.JsonSerializer")
-    producerProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, "org.springframework.kafka.support.serializer.JsonSerializer")
+    producerProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.connect.json.JsonSerializer")
+    producerProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.connect.json.JsonSerializer")
     return producerProperties
   }
 

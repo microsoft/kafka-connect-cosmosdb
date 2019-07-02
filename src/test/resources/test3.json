@@ -1,10 +1,21 @@
 
-  {
+{
+  "schema": {
+    "type": "struct",
+    "fields": [{
+      "type": "string",
+      "optional": true,
+      "field": "id"
+    }, {
+      "type": "string",
+      "optional": true,
+      "field": "label"
+    }],
+    "optional": false,
+    "name": "label.coll"
+  },
+  "payload": {
     "id": "3",
-    "name": "abc",
-    "_rid": "fQwhAKAVvqwDAAAAAAAAAA==",
-    "_self": "dbs/fQwhAA==/colls/fQwhAKAVvqw=/docs/fQwhAKAVvqwDAAAAAAAAAA==/",
-    "_etag": "\"34002ab5-0000-0800-0000-5d07f9a50000\"",
-    "_attachments": "attachments/",
-    "_ts": 1560803749
+    "label": "green"
   }
+}

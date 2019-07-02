@@ -3,6 +3,7 @@ package com.microsoft.azure.cosmosdb.kafka.connect.sink
 import java.util.Properties
 
 import com.microsoft.azure.cosmosdb.kafka.connect.config.TestConfigurations
+import com.microsoft.azure.cosmosdb.kafka.connect.config.CosmosDBConfigConstants
 import com.microsoft.azure.cosmosdb.kafka.connect.kafka.KafkaCluster
 
 object SinkConnectWriterTest {

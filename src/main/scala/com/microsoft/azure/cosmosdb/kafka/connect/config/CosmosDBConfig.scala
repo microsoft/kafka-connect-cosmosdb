@@ -2,7 +2,6 @@ package com.microsoft.azure.cosmosdb.kafka.connect.config
 
 import java.util
 
-import com.microsoft.azure.cosmosdb.kafka.connect.config
 import org.apache.kafka.common.config.ConfigDef.{Importance, Type, Width}
 import org.apache.kafka.common.config.{AbstractConfig, ConfigDef}
 
@@ -27,6 +26,11 @@ object ConnectorConfig {
     .define(CosmosDBConfigConstants.TOPIC_CONFIG, Type.STRING, Importance.HIGH,
       CosmosDBConfigConstants.TOPIC_CONFIG_DOC, "Topic", 1, Width.MEDIUM,
       CosmosDBConfigConstants.TOPIC_CONFIG_DISPLAY)
+
+    .define(CosmosDBConfigConstants.ERRORS_RETRY_TIMEOUT_CONFIG, Type.INT, CosmosDBConfigConstants.ERROR_MAX_RETRIES_DEFAULT, Importance.MEDIUM,
+      CosmosDBConfigConstants.ERRORS_RETRY_TIMEOUT_DOC, "Common", 1,
+      Width.MEDIUM , CosmosDBConfigConstants.ERRORS_RETRY_TIMEOUT_DISPLAY)
+
 
   /**
     * Holds the extra configurations for the source on top of
