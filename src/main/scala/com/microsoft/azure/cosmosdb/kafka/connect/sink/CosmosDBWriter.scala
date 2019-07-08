@@ -3,7 +3,7 @@ package com.microsoft.azure.cosmosdb.kafka.connect.sink
 
 import java.util.concurrent.CountDownLatch
 
-import com.google.gson.Gson
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.microsoft.azure.cosmosdb._
 import com.microsoft.azure.cosmosdb.kafka.connect.CosmosDBProvider
 import com.typesafe.scalalogging.StrictLogging
@@ -38,13 +38,7 @@ class CosmosDBWriter(val settings: CosmosDBSinkSettings, val cosmosDBProvider: C
           else
             throw new Exception("No sink collection specified for this topic.") // TODO: tie this in with the exception handler
 
-          val value = record.value()
-          var content: String = null
-          val gson = new Gson()
-          content = gson.toJsonTree(value).toString
-          if(content.contains("payload")){
-            content = gson.toJsonTree(value).getAsJsonObject.get("payload").toString
-          }
+          val content: String = serializeValue(record.value())
           val document = new Document(content)
 
           logger.info("Upserting Document object id " + document.get("id") + " into collection " + collection)
@@ -66,5 +60,28 @@ class CosmosDBWriter(val settings: CosmosDBSinkSettings, val cosmosDBProvider: C
   def close(): Unit = {
     logger.info("Shutting down CosmosDBWriter.")
   }
+
+  def serializeValue(value: Any): String = {
+    var content: String = null
+    val om = new ObjectMapper()
+
+    if (!value.isInstanceOf[String]){
+      content = om.writeValueAsString(value)
+    }else {
+      content = value.toString
+    }
+
+    if(om.readTree(content).has("payload")){
+      val temp = om.readTree(content).get("payload")
+      if (temp.isTextual()){ // TextNodes need cannot be directly converted to strings
+        content = temp.asText()
+      } else {
+        content = temp.toString
+      }
+    }
+
+    return content
+  }
+
 }
 

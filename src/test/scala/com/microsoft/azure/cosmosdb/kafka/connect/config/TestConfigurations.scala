@@ -93,7 +93,7 @@ object TestConfigurations {
     connectorProperties.put("topics", TOPIC) // constant required by sink connector
     connectorProperties.put(CosmosDBConfigConstants.TOPIC_CONFIG, TOPIC )
     connectorProperties.put(org.apache.kafka.connect.runtime.ConnectorConfig.ERRORS_RETRY_TIMEOUT_CONFIG, "3")
-    connectorProperties.put(CosmosDBConfigConstants.SINK_POST_PROCESSOR, "com.microsoft.azure.cosmosdb.kafka.connect.processor.sink.SelectorSinkPostProcessor")
+//    connectorProperties.put(CosmosDBConfigConstants.SINK_POST_PROCESSOR, "com.microsoft.azure.cosmosdb.kafka.connect.processor.sink.SelectorSinkPostProcessor")
     return connectorProperties
   }
 

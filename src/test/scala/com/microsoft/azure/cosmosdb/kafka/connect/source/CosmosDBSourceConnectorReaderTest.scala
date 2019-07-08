@@ -41,33 +41,23 @@ object SourceConnectReaderTest {
 
     }
 
-
     //schema JSON test
-    /*for (i <- 1 to 4)  {
+    for (i <- 1 to 4)  {
       val json = scala.io.Source.fromFile(getClass.getResource(s"/test$i.json").toURI.getPath).mkString
       val mapper = new ObjectMapper
       val jsonNode: JsonNode =  mapper.readTree(json)
-      producer.send(new ProducerRecord[Nothing, JsonNode](COSMOSDB_TOPIC, jsonNode))
+      producer.send(new ProducerRecord[Nothing, JsonNode](TestConfigurations.TOPIC, jsonNode))
 
-    }*/
+    }
 
-    // nested json test
-    /*val address = new Address(s"city_$i", s"state_$i")
-    val person = new Person(s"$i", s"name_$i", address)
-    val jsonNode: JsonNode = objectMapper.valueToTree(person) // objectMapper.valueToTree(message)
-    println("sending me   ssage: ", jsonNode.findPath("id"))
-    producer.send(new ProducerRecord[Nothing, JsonNode](COSMOSDB_TOPIC, jsonNode))
-
-     */
-
-    /*
-    for (i <- 0 until 20) {
+    // JSON string test no schema
+    for (i <- 15 until 20) {
       val message = new CosmosDBDocumentTest(s"$i", s"message $i", testUUID)
       val jsonNode: JsonNode = objectMapper.valueToTree(message)
 
       println("sending message: ", jsonNode.findPath("id"))
       producer.send(new ProducerRecord[Nothing, JsonNode](TestConfigurations.TOPIC, jsonNode))
-    } */
+    }
 
     producer.flush()
     producer.close()
