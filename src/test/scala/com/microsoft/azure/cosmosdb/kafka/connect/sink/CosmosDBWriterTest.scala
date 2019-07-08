@@ -8,6 +8,7 @@ import org.apache.kafka.connect.data.Schema
 import org.apache.kafka.connect.sink.SinkRecord
 import org.scalatest.{FlatSpec, GivenWhenThen}
 
+import java.util
 import scala.collection.mutable.HashMap
 
 class CosmosDBWriterTest extends FlatSpec with GivenWhenThen {
@@ -104,8 +105,13 @@ class CosmosDBWriterTest extends FlatSpec with GivenWhenThen {
     val writer = new CosmosDBWriter(setting, mockCosmosProvider)
 
     // Create sample SinkRecords
-    val record1 = new SinkRecord(TOPIC, PARTITION, Schema.STRING_SCHEMA, null, null, HashMap[String, String](("message" -> "message1 payload")), 0)
-    val record2 = new SinkRecord(TOPIC, PARTITION, Schema.STRING_SCHEMA, null, null, HashMap[String, String](("message" -> "message2 payload")), 0)
+    val payload1= new util.HashMap[String, String]()
+    payload1.put("message", "message1 payload")
+    val record1 = new SinkRecord(TOPIC, PARTITION, Schema.STRING_SCHEMA, null, null, payload1, 0)
+
+    val payload2= new util.HashMap[String, String]()
+    payload2.put("message", "message2 payload")
+    val record2 = new SinkRecord(TOPIC, PARTITION, Schema.STRING_SCHEMA, null, null, payload2, 0)
 
     When("Records are passed to the write method")
     writer.write(Seq(record1, record2))
@@ -134,10 +140,19 @@ class CosmosDBWriterTest extends FlatSpec with GivenWhenThen {
     val writer = new CosmosDBWriter(setting, mockCosmosProvider)
 
     // Create sample SinkRecords
-    val payloadMap1 = HashMap[String, String]("message" -> "message1 payload")
-    val payloadMap2 = HashMap[String, String]("message" -> "message1 payload")
-    val record1 = new SinkRecord(TOPIC, PARTITION, Schema.STRING_SCHEMA, null, null, HashMap[String, HashMap[String, String]](("schema" -> null),("payload" -> payloadMap1)), 0)
-    val record2 = new SinkRecord(TOPIC, PARTITION, Schema.STRING_SCHEMA, null, null, HashMap[String, HashMap[String, String]](("schema" -> null),("payload" -> payloadMap2)), 0)
+    val payload1 = new util.HashMap[String, String]()
+    payload1.put("message", "message1 payload")
+    val map1 = new util.HashMap[String, util.HashMap[String, String]]()
+    map1.put("schema", null)
+    map1.put("payload", payload1)
+    val record1 = new SinkRecord(TOPIC, PARTITION, Schema.STRING_SCHEMA, null, null, map1, 0)
+
+    val payload2 = new util.HashMap[String, String]()
+    payload2.put("message", "message2 payload")
+    val map2 = new util.HashMap[String, util.HashMap[String, String]]()
+    map2.put("schema", null)
+    map2.put("payload", payload2)
+    val record2 = new SinkRecord(TOPIC, PARTITION, Schema.STRING_SCHEMA, null, null, map2, 0)
 
     When("Records are passed to the write method")
     writer.write(Seq(record1, record2))
