@@ -73,7 +73,7 @@ class CosmosDBWriter(val settings: CosmosDBSinkSettings, val cosmosDBProvider: C
 
     if(om.readTree(content).has("payload")){
       val temp = om.readTree(content).get("payload")
-      if (temp.isTextual()){ // TextNodes need cannot be directly converted to strings
+      if (temp.isTextual()){ // TextNodes cannot be directly converted to strings
         content = temp.asText()
       } else {
         content = temp.toString

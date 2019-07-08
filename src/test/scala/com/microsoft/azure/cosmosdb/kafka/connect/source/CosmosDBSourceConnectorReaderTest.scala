@@ -32,15 +32,6 @@ object SourceConnectReaderTest {
 
     val objectMapper: ObjectMapper = new ObjectMapper
 
-    //schema-less JSON test
-    for (i <- 5 to 8)  {
-      val json = scala.io.Source.fromFile(getClass.getResource(s"/test$i.json").toURI.getPath).mkString
-      val mapper = new ObjectMapper
-      val jsonNode: JsonNode =  mapper.readTree(json)
-      producer.send(new ProducerRecord[Nothing, JsonNode](TestConfigurations.TOPIC, jsonNode))
-
-    }
-
     //schema JSON test
     for (i <- 1 to 4)  {
       val json = scala.io.Source.fromFile(getClass.getResource(s"/test$i.json").toURI.getPath).mkString
@@ -50,8 +41,17 @@ object SourceConnectReaderTest {
 
     }
 
+    //schema-less JSON test
+    for (i <- 5 to 8)  {
+      val json = scala.io.Source.fromFile(getClass.getResource(s"/test$i.json").toURI.getPath).mkString
+      val mapper = new ObjectMapper
+      val jsonNode: JsonNode =  mapper.readTree(json)
+      producer.send(new ProducerRecord[Nothing, JsonNode](TestConfigurations.TOPIC, jsonNode))
+
+    }
+
     // JSON string test no schema
-    for (i <- 15 until 20) {
+    for (i <- 9 until 15) {
       val message = new CosmosDBDocumentTest(s"$i", s"message $i", testUUID)
       val jsonNode: JsonNode = objectMapper.valueToTree(message)
 
