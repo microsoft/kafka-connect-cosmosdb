@@ -1,20 +1,16 @@
 
 package com.microsoft.azure.cosmosdb.kafka.connect.sink
 
-import java.util.HashMap
 import java.util.concurrent.CountDownLatch
 
-import com.google.gson.Gson
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.microsoft.azure.cosmosdb._
 import com.microsoft.azure.cosmosdb.kafka.connect.CosmosDBProvider
-import com.microsoft.azure.cosmosdb.rx.AsyncDocumentClient
 import com.typesafe.scalalogging.StrictLogging
 import org.apache.kafka.connect.sink.SinkRecord
 
-import scala.collection.mutable
 
-
-class CosmosDBWriter(val settings: CosmosDBSinkSettings, private val documentClient: AsyncDocumentClient) extends StrictLogging
+class CosmosDBWriter(val settings: CosmosDBSinkSettings, val cosmosDBProvider: CosmosDBProvider) extends StrictLogging
 {
   private val requestOptionsInsert = new RequestOptions
   requestOptionsInsert.setConsistencyLevel(ConsistencyLevel.Session)
@@ -32,26 +28,26 @@ class CosmosDBWriter(val settings: CosmosDBSinkSettings, private val documentCli
     try {
 
       var docs = List.empty[Document]
+      var collection: String = ""
 
       records.groupBy(_.topic()).foreach { case (_, groupedRecords) =>
         groupedRecords.foreach { record =>
-          val value = record.value()
-          var content: String = null
-          if(value.isInstanceOf[HashMap[Any, Any]]){ // TODO: figure how this will work with avro messages
-            val gson = new Gson()
-            content = gson.toJson(value)
-          }
-          else {
-            content = value.toString
-          }
+          // Determine which collection to write to
+          if (settings.collectionTopicMap.contains(record.topic))
+            collection = settings.collectionTopicMap(record.topic)
+          else
+            throw new Exception("No sink collection specified for this topic.") // TODO: tie this in with the exception handler
 
+          val content: String = serializeValue(record.value())
           val document = new Document(content)
 
-          logger.info("Upserting Document object id " + document.get("id") + " into collection " + settings.collection)
+          logger.info("Upserting Document object id " + document.get("id") + " into collection " + collection)
           docs = docs :+ document
         }
+        // Send current batch of documents and reset the list for the next topic's documents
+        cosmosDBProvider.upsertDocuments[Document](docs, settings.database, collection, new CountDownLatch(1))
+        docs = List.empty[Document]
       }
-      CosmosDBProvider.upsertDocuments[Document](docs,settings.database,settings.collection, new CountDownLatch(1))
 
     }
     catch {
@@ -61,11 +57,31 @@ class CosmosDBWriter(val settings: CosmosDBSinkSettings, private val documentCli
     }
   }
 
-
-
-
   def close(): Unit = {
     logger.info("Shutting down CosmosDBWriter.")
   }
+
+  def serializeValue(value: Any): String = {
+    var content: String = null
+    val om = new ObjectMapper()
+
+    if (!value.isInstanceOf[String]){
+      content = om.writeValueAsString(value)
+    }else {
+      content = value.toString
+    }
+
+    if(om.readTree(content).has("payload")){
+      val temp = om.readTree(content).get("payload")
+      if (temp.isTextual()){ // TextNodes cannot be directly converted to strings
+        content = temp.asText()
+      } else {
+        content = temp.toString
+      }
+    }
+
+    return content
+  }
+
 }
 

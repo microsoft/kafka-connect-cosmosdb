@@ -4,7 +4,7 @@ import java.util
 
 import com.microsoft.azure.cosmosdb.kafka.connect.common.ErrorHandler.HandleRetriableError
 import com.microsoft.azure.cosmosdb.kafka.connect.config.{ConnectorConfig, CosmosDBConfig, CosmosDBConfigConstants}
-import com.microsoft.azure.cosmosdb.kafka.connect.{CosmosDBClientSettings, CosmosDBProvider}
+import com.microsoft.azure.cosmosdb.kafka.connect.{CosmosDBClientSettings, CosmosDBProviderImpl}
 import com.microsoft.azure.cosmosdb.rx.AsyncDocumentClient
 import com.microsoft.azure.cosmosdb.{ConnectionPolicy, ConsistencyLevel}
 import com.typesafe.scalalogging.StrictLogging
@@ -66,8 +66,6 @@ class CosmosDBSourceTask extends SourceTask with StrictLogging with HandleRetria
     val masterKey: String = taskConfig.get.getPassword(CosmosDBConfigConstants.CONNECTION_MASTERKEY_CONFIG).value()
     database = taskConfig.get.getString(CosmosDBConfigConstants.DATABASE_CONFIG)
     collection = taskConfig.get.getString(CosmosDBConfigConstants.COLLECTION_CONFIG)
-    val createDatabase: Boolean = taskConfig.get.getBoolean(CosmosDBConfigConstants.CREATE_DATABASE_CONFIG)
-    val createCollection: Boolean = taskConfig.get.getBoolean(CosmosDBConfigConstants.CREATE_COLLECTION_CONFIG)
 
     // Source Collection
     val clientSettings = CosmosDBClientSettings(
@@ -75,14 +73,12 @@ class CosmosDBSourceTask extends SourceTask with StrictLogging with HandleRetria
         masterKey,
         database,
         collection,
-        createDatabase,
-        createCollection,
         ConnectionPolicy.GetDefault(),
         ConsistencyLevel.Session
     )
 
     try{
-      client = CosmosDBProvider.getClient(clientSettings)
+      client = CosmosDBProviderImpl.getClient(clientSettings)
       logger.info("Connection to CosmosDB established.")
     }catch{
       case f: Throwable =>

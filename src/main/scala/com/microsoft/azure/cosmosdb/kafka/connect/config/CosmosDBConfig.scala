@@ -2,7 +2,6 @@ package com.microsoft.azure.cosmosdb.kafka.connect.config
 
 import java.util
 
-import com.microsoft.azure.cosmosdb.kafka.connect.config
 import org.apache.kafka.common.config.ConfigDef.{Importance, Type, Width}
 import org.apache.kafka.common.config.{AbstractConfig, ConfigDef}
 
@@ -20,29 +19,23 @@ object ConnectorConfig {
       CosmosDBConfigConstants.DATABASE_CONFIG_DOC, "Database", 1, Width.MEDIUM,
       CosmosDBConfigConstants.DATABASE_CONFIG_DISPLAY)
 
-    .define(CosmosDBConfigConstants.CREATE_DATABASE_CONFIG, Type.BOOLEAN,
-      CosmosDBConfigConstants.CREATE_DATABASE_DEFAULT, Importance.MEDIUM,
-      CosmosDBConfigConstants.CREATE_DATABASE_DOC, "Database", 2, Width.MEDIUM,
-      CosmosDBConfigConstants.CREATE_DATABASE_DISPLAY)
-
     .define(CosmosDBConfigConstants.COLLECTION_CONFIG, Type.STRING, Importance.HIGH,
       CosmosDBConfigConstants.COLLECTION_CONFIG_DOC, "Collection", 1, Width.MEDIUM,
       CosmosDBConfigConstants.COLLECTION_CONFIG_DISPLAY)
-
-    .define(CosmosDBConfigConstants.CREATE_COLLECTION_CONFIG, Type.BOOLEAN,
-      CosmosDBConfigConstants.CREATE_COLLECTION_DEFAULT, Importance.MEDIUM,
-      CosmosDBConfigConstants.CREATE_COLLECTION_DOC, "Collection", 2, Width.MEDIUM,
-      CosmosDBConfigConstants.CREATE_COLLECTION_DISPLAY)
 
     .define(CosmosDBConfigConstants.TOPIC_CONFIG, Type.STRING, Importance.HIGH,
       CosmosDBConfigConstants.TOPIC_CONFIG_DOC, "Topic", 1, Width.MEDIUM,
       CosmosDBConfigConstants.TOPIC_CONFIG_DISPLAY)
 
+    .define(CosmosDBConfigConstants.ERRORS_RETRY_TIMEOUT_CONFIG, Type.INT, CosmosDBConfigConstants.ERROR_MAX_RETRIES_DEFAULT, Importance.MEDIUM,
+      CosmosDBConfigConstants.ERRORS_RETRY_TIMEOUT_DOC, "Common", 1,
+      Width.MEDIUM , CosmosDBConfigConstants.ERRORS_RETRY_TIMEOUT_DISPLAY)
+
+
   /**
     * Holds the extra configurations for the source on top of
     * the base.
     **/
-
   lazy val sourceConfigDef: ConfigDef = ConnectorConfig.baseConfigDef
           .define(CosmosDBConfigConstants.ASSIGNED_PARTITIONS, Type.STRING, "", Importance.HIGH,
             CosmosDBConfigConstants.ASSIGNED_PARTITIONS_DOC, "Source", 1, Width.MEDIUM,
@@ -66,10 +59,12 @@ object ConnectorConfig {
     **/
 
   lazy val sinkConfigDef: ConfigDef = ConnectorConfig.baseConfigDef
+          .define(CosmosDBConfigConstants.COLLECTION_TOPIC_MAP_CONFIG, Type.STRING, Importance.HIGH,
+            CosmosDBConfigConstants.COLLECTION_TOPIC_MAP_CONFIG_DOC, "Map", 1, Width.MEDIUM,
+            CosmosDBConfigConstants.COLLECTION_TOPIC_MAP_CONFIG_DISPLAY)
           .define(CosmosDBConfigConstants.SINK_POST_PROCESSOR, Type.STRING, CosmosDBConfigConstants.SINK_POST_PROCESSOR_DEFAULT, Importance.MEDIUM,
             CosmosDBConfigConstants.SINK_POST_PROCESSOR_DOC, "Sink", 1, Width.LONG,
             CosmosDBConfigConstants.SINK_POST_PROCESSOR_DISPLAY)
-
   //        .define(CosmosDBConfigConstants.EXTRA_SINK_CONFIG_01, Type.STRING, Importance.HIGH,
   //          CosmosDBConfigConstants.EXTRA_SINK_CONFIG_01_DOC, "Sink", 1, Width.MEDIUM,
   //          CosmosDBConfigConstants.EXTRA_SINK_CONFIG_01_DISPLAY)

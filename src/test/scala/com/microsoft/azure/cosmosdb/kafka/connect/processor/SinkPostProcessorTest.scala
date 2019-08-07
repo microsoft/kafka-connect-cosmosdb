@@ -6,7 +6,6 @@ import com.microsoft.azure.cosmosdb.kafka.connect.config.{CosmosDBConfigConstant
 import com.microsoft.azure.cosmosdb.kafka.connect.kafka.KafkaCluster
 import org.apache.kafka.connect.runtime.WorkerConfig
 import org.apache.kafka.connect.runtime.distributed.DistributedConfig
-import org.scalatest.{FlatSpec, GivenWhenThen}
 
 // TODO: This should be removed from here and refactored into an Integration Test
 
@@ -63,6 +62,8 @@ object SinkPostProcessorTest {
     connectorProperties.put(CosmosDBConfigConstants.COLLECTION_CONFIG, "destination")
     connectorProperties.put(CosmosDBConfigConstants.TOPIC_CONFIG, COSMOSDB_TOPIC)
     connectorProperties.put("topics", COSMOSDB_TOPIC)
+    connectorProperties.put(CosmosDBConfigConstants.ERRORS_RETRY_TIMEOUT_CONFIG, "3")
+
 
     connectorProperties
   }

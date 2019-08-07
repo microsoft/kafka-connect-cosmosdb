@@ -4,7 +4,7 @@ import java.util
 
 import com.google.gson.Gson
 import com.microsoft.azure.cosmosdb._
-import com.microsoft.azure.cosmosdb.kafka.connect.CosmosDBProvider
+import com.microsoft.azure.cosmosdb.kafka.connect.CosmosDBProviderImpl
 import com.microsoft.azure.cosmosdb.kafka.connect.common.ErrorHandler.HandleRetriableError
 import com.microsoft.azure.cosmosdb.rx._
 import org.apache.kafka.connect.source.{SourceRecord, SourceTaskContext}
@@ -34,7 +34,8 @@ class CosmosDBReader(private val client: AsyncDocumentClient,
 
     val records = new util.ArrayList[SourceRecord]
     var bufferSize = 0
-    val collectionLink = CosmosDBProvider.getCollectionLink(setting.database, setting.collection)
+
+    val collectionLink = CosmosDBProviderImpl.getCollectionLink(setting.database, setting.collection)
     val changeFeedOptions = createChangeFeedOptions()
 
     try
@@ -74,8 +75,8 @@ class CosmosDBReader(private val client: AsyncDocumentClient,
 
             // Process new document
 
-            println(s"Sending document ${doc} to the Kafka topic ${setting.topicName}")
-            println(s"Current State => Partition: ${currentState.partition}, " +
+            logger.debug(s"Sending document ${doc} to the Kafka topic ${setting.topicName}")
+            logger.debug(s"Current State => Partition: ${currentState.partition}, " +
               s"ContinuationToken: ${currentState.continuationToken}, " +
               s"LSN: ${currentState.lsn}")
 

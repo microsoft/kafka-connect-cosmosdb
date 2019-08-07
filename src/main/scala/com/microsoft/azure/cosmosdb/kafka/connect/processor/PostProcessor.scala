@@ -1,9 +1,9 @@
 package com.microsoft.azure.cosmosdb.kafka.connect.processor
 
 import com.microsoft.azure.cosmosdb.kafka.connect.config.CosmosDBConfig
+import com.typesafe.scalalogging.LazyLogging
 import org.apache.kafka.connect.sink.SinkRecord
 import org.apache.kafka.connect.source.SourceRecord
-import com.typesafe.scalalogging.LazyLogging
 
 abstract class PostProcessor {
 
@@ -20,9 +20,13 @@ object PostProcessor extends AnyRef with LazyLogging {
   def createPostProcessorList(processorClassNames: String, config: CosmosDBConfig): List[PostProcessor] =
     processorClassNames.split(',').map(c => {
       logger.info(s"Instantiating ${c} as Post-Processor")
-      val postProcessor = Class.forName(c).newInstance().asInstanceOf[PostProcessor]
-      postProcessor.configure(config)
-      postProcessor
-    }).toList
+      if (c.isEmpty) {
+        null
+      } else {
+        val postProcessor = Class.forName(c).newInstance().asInstanceOf[PostProcessor]
+        postProcessor.configure(config)
+        postProcessor
+      }
+    }).filter( e => e != null).toList
 
 }
