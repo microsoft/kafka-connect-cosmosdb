@@ -1,6 +1,5 @@
 package com.microsoft.azure.cosmosdb.kafka.connect.common.ErrorHandler
 
-import java.util
 import java.util.Date
 
 import com.microsoft.azure.cosmosdb.kafka.connect.config.CosmosDBConfigConstants
@@ -16,7 +15,6 @@ case class ErrorHandlerObj(remainingRetries: Int, maxRetries: Int, errorMessage:
 trait HandleRetriableError extends StrictLogging{
 
   var errorHandlerObj: Option[ErrorHandlerObj] = None
-  private var commonConfigDef : util.Map[String, String] = _
   private var maxRetriesDefault = CosmosDBConfigConstants.ERROR_MAX_RETRIES_DEFAULT
 
 
@@ -26,9 +24,7 @@ trait HandleRetriableError extends StrictLogging{
 
   def HandleRetriableError[A](t : Try[A]) : Option[A] = {
     if(!errorHandlerObj.isDefined) {
-      logger.info(s"HandleRetriableError not initialized, getting max Retires value")
-      //val errorHandlerConfig: CosmosDBConfig = CosmosDBConfig(ConnectorConfig.commonConfigDef, commonConfigDef)
-      //maxRetriesDefault = errorHandlerConfig.getInt(CosmosDBConfigConstants.ERRORS_RETRY_TIMEOUT_CONFIG)
+      logger.info(s"HandleRetriableError not initialized, getting max retries value")
       maxRetriesDefault = CosmosDBConfigConstants.ERROR_MAX_RETRIES_DEFAULT
       initializeErrorHandler(maxRetriesDefault)
     }
