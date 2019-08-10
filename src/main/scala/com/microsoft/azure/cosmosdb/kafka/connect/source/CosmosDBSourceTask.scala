@@ -58,9 +58,12 @@ class CosmosDBSourceTask extends SourceTask with StrictLogging with HandleRetria
       case Success(s) => Some(s)
     }*/
 
-    // Add configured Post-Processors
-    val processorClassNames = taskConfig.get.getString(CosmosDBConfigConstants.SOURCE_POST_PROCESSOR)
-    postProcessors = PostProcessor.createPostProcessorList(processorClassNames, taskConfig.get)
+    // Add configured Post-Processors if exist in configuration file
+    if(taskConfig.get.getString(CosmosDBConfigConstants.SOURCE_POST_PROCESSOR)!=null){
+      val processorClassNames = taskConfig.get.getString(CosmosDBConfigConstants.SOURCE_POST_PROCESSOR)
+      postProcessors = PostProcessor.createPostProcessorList(processorClassNames, taskConfig.get)
+    }
+
 
     // Get CosmosDB Connection
     val endpoint: String = taskConfig.get.getString(CosmosDBConfigConstants.CONNECTION_ENDPOINT_CONFIG)
@@ -120,8 +123,11 @@ class CosmosDBSourceTask extends SourceTask with StrictLogging with HandleRetria
 
   override def poll(): util.List[SourceRecord] = {
     try{
-      val sourceRecords= readers.flatten(reader => reader._2.processChanges()).toList.map(sr => applyPostProcessing(sr))
-      return sourceRecords
+      if(postProcessors.isEmpty){
+        return readers.flatten(reader => reader._2.processChanges()).toList
+      }else{
+        return readers.flatten(reader => reader._2.processChanges()).toList.map(sr => applyPostProcessing(sr))
+      }
     }catch{
       case f: Exception =>
         logger.debug(s"Couldn't create a list of source records ${f.getMessage}", f)
