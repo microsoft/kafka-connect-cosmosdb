@@ -5,16 +5,25 @@ import java.util.UUID._
 import java.util.concurrent.{CountDownLatch, TimeUnit}
 import java.util.{ArrayList, Properties, UUID}
 
+import com.microsoft.azure.cosmosdb.kafka.connect.{CosmosDBClientSettings, CosmosDBProvider, CosmosDBProviderImpl, MockCosmosDBProvider}
+import com.microsoft.azure.cosmosdb.kafka.connect.config.TestConfigurations.{DATABASE, ENDPOINT, MASTER_KEY}
+import com.microsoft.azure.cosmosdb.kafka.connect.config.CosmosDBConfigConstants
+import org.apache.kafka.connect.data.Schema
+import org.apache.kafka.connect.sink.SinkRecord
+import org.scalatest.{FlatSpec, GivenWhenThen}
+
+import scala.collection.JavaConverters._
+import scala.collection.mutable
 import _root_.rx.Observable
 import _root_.rx.lang.scala.JavaConversions._
 import com.google.common.collect.Maps
 import com.google.gson.Gson
 import com.microsoft.azure.cosmosdb.kafka.connect.config.{CosmosDBConfigConstants, TestConfigurations}
 import com.microsoft.azure.cosmosdb.kafka.connect.model.{CosmosDBDocumentTest, KafkaPayloadTest}
-import com.microsoft.azure.cosmosdb.kafka.connect.{CosmosDBClientSettings, CosmosDBProviderImpl}
 import com.microsoft.azure.cosmosdb.{ConnectionPolicy, ConsistencyLevel, Document, ResourceResponse}
 import com.typesafe.scalalogging.LazyLogging
 import org.apache.kafka.connect.errors.ConnectException
+import org.mockito.MockitoSugar.mock
 import org.scalatest.{FlatSpec, GivenWhenThen}
 
 import scala.util.{Failure, Success, Try}
@@ -35,7 +44,8 @@ class CosmosDBSourceTaskTest extends FlatSpec with GivenWhenThen with LazyLoggin
     props.put(CosmosDBConfigConstants.ASSIGNED_PARTITIONS, "0,1")
 
     When("CosmosSourceTask is started")
-    val task = new CosmosDBSourceTask
+    val mockCosmosProvider = MockCosmosDBProvider
+    val task = new CosmosDBSourceTask { override val cosmosDBProvider = mockCosmosProvider }
     task.start(Maps.fromProperties(props))
 
     Then("CosmosSourceTask should properly initialized the readers")
@@ -51,12 +61,6 @@ class CosmosDBSourceTaskTest extends FlatSpec with GivenWhenThen with LazyLoggin
     props.setProperty(CosmosDBConfigConstants.READER_BUFFER_SIZE, "10000")
     props.setProperty(CosmosDBConfigConstants.TIMEOUT, "10000")
 
-    Then(s"Insert ${NUM_DOCS} documents in the test collection")
-    insertDocuments()
-
-    // Wait for change feed to process all sent messages
-    Then(s"Waiting 5 seconds for change feed to get changes")
-    TimeUnit.SECONDS.sleep(5)
 
     Then(s"Start the SourceConnector and return the taskConfigs")
     // Declare a collection to store the messages from SourceRecord
@@ -69,7 +73,9 @@ class CosmosDBSourceTaskTest extends FlatSpec with GivenWhenThen with LazyLoggin
 
     taskConfigs.forEach(config => {
       When("CosmosSourceTask is started and poll is called")
-      val task = new CosmosDBSourceTask
+
+
+      val task = new CosmosDBSourceTask {override val readers =  mock[mutable.Map[String, CosmosDBReader]]}
       task.start(config)
 
       val sourceRecords = task.poll()
@@ -84,10 +90,6 @@ class CosmosDBSourceTaskTest extends FlatSpec with GivenWhenThen with LazyLoggin
         }
       })
     })
-
-    Then(s"Make sure collection of messages is equal to ${NUM_DOCS}")
-    assert(kafkaMessages.size() == NUM_DOCS)
-
   }
 
   "CosmosDBSourceTask poll" should "Return a list of SourceRecords based on the batchSize" in {
@@ -95,13 +97,6 @@ class CosmosDBSourceTaskTest extends FlatSpec with GivenWhenThen with LazyLoggin
     val props: Properties = TestConfigurations.getSourceConnectorProperties()
     props.setProperty(CosmosDBConfigConstants.READER_BUFFER_SIZE, "10000")
     props.setProperty(CosmosDBConfigConstants.TIMEOUT, "10000")
-
-    Then(s"Insert ${NUM_DOCS} documents in the test collection")
-    insertDocuments()
-
-    // Wait for change feed to process all sent messages
-    Then(s"Waiting 5 seconds for change feed to get changes")
-    TimeUnit.SECONDS.sleep(5)
 
     Then(s"Start the SourceConnector and return the taskConfigs")
     // Declare a collection to store the messages from SourceRecord
@@ -114,7 +109,7 @@ class CosmosDBSourceTaskTest extends FlatSpec with GivenWhenThen with LazyLoggin
     val numWorkers = connector.getNumberOfWorkers()
     taskConfigs.forEach(config => {
       When("CosmosSourceTask is started and poll is called")
-      val task = new CosmosDBSourceTask
+      val task = new CosmosDBSourceTask {override val readers =  mock[mutable.Map[String, CosmosDBReader]]}
       task.start(config)
       batchSize = config.get(CosmosDBConfigConstants.BATCH_SIZE).toInt
       val sourceRecords = task.poll()
@@ -132,21 +127,14 @@ class CosmosDBSourceTaskTest extends FlatSpec with GivenWhenThen with LazyLoggin
     Then(s"Make sure collection of messages is equal to ${batchSize * numWorkers}")
     assert(kafkaMessages.size() == batchSize * numWorkers)
 
-  }
 
+  }
 
   "CosmosDBSourceTask poll" should "Return a list of SourceRecords based on the bufferSize" in {
     Given("A set of SourceConnector properties")
     val props: Properties = TestConfigurations.getSourceConnectorProperties()
     props.setProperty(CosmosDBConfigConstants.BATCH_SIZE, NUM_DOCS.toString)
     props.setProperty(CosmosDBConfigConstants.TIMEOUT, "10000")
-
-    Then(s"Insert ${NUM_DOCS} documents in the test collection")
-    insertDocuments()
-
-    // Wait for change feed to process all sent messages
-    Then(s"Waiting 5 seconds for change feed to get changes")
-    TimeUnit.SECONDS.sleep(5)
 
     Then(s"Start the SourceConnector and return the taskConfigs")
     // Declare a collection to store the messages from SourceRecord
@@ -159,7 +147,7 @@ class CosmosDBSourceTaskTest extends FlatSpec with GivenWhenThen with LazyLoggin
     val numWorkers = connector.getNumberOfWorkers()
     taskConfigs.forEach(config => {
       When("CosmosSourceTask is started and poll is called")
-      val task = new CosmosDBSourceTask
+      val task = new CosmosDBSourceTask {override val readers =  mock[mutable.Map[String, CosmosDBReader]]}
       task.start(config)
       bufferSize = config.get(CosmosDBConfigConstants.READER_BUFFER_SIZE).toInt
       val sourceRecords = task.poll()
@@ -181,6 +169,7 @@ class CosmosDBSourceTaskTest extends FlatSpec with GivenWhenThen with LazyLoggin
 
   }
 
+
   private def mockDocuments(): ArrayList[CosmosDBDocumentTest] = {
     val documents: ArrayList[CosmosDBDocumentTest] = new ArrayList[CosmosDBDocumentTest]
     testUUID = randomUUID()
@@ -192,7 +181,8 @@ class CosmosDBSourceTaskTest extends FlatSpec with GivenWhenThen with LazyLoggin
     return documents
   }
 
-  private def insertDocuments() = {
+
+  private def insertDocuments(cosmosDBProvider: CosmosDBProvider = CosmosDBProviderImpl) = {
 
     // Source Collection
     val clientSettings = CosmosDBClientSettings(
@@ -203,7 +193,8 @@ class CosmosDBSourceTaskTest extends FlatSpec with GivenWhenThen with LazyLoggin
       ConnectionPolicy.GetDefault(),
       ConsistencyLevel.Session
     )
-    val client = Try(CosmosDBProviderImpl.getClient(clientSettings)) match {
+    //logger.info("");
+    val client = Try(cosmosDBProvider.getClient(clientSettings)) match {
       case Success(conn) =>
         logger.info("Connection to CosmosDB established.")
         conn
