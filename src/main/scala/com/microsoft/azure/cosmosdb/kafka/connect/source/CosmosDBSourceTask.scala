@@ -4,21 +4,21 @@ import java.util
 
 import com.microsoft.azure.cosmosdb.kafka.connect.common.ErrorHandler.HandleRetriableError
 import com.microsoft.azure.cosmosdb.kafka.connect.config.{ConnectorConfig, CosmosDBConfig, CosmosDBConfigConstants}
-import com.microsoft.azure.cosmosdb.kafka.connect.{CosmosDBClientSettings, CosmosDBProviderImpl}
+import com.microsoft.azure.cosmosdb.kafka.connect.{CosmosDBClientSettings, CosmosDBProvider, CosmosDBProviderImpl}
 import com.microsoft.azure.cosmosdb.rx.AsyncDocumentClient
 import com.microsoft.azure.cosmosdb.{ConnectionPolicy, ConsistencyLevel}
 import com.typesafe.scalalogging.StrictLogging
 import org.apache.kafka.connect.errors.ConnectException
 import org.apache.kafka.connect.source.{SourceRecord, SourceTask}
 import com.microsoft.azure.cosmosdb.kafka.connect.processor._
-
+import com.microsoft.azure.cosmosdb.kafka.connect.source.CosmosDBReader
 import scala.collection.JavaConversions._
 import scala.collection.mutable
 import scala.util.{Failure, Success, Try}
 
 class CosmosDBSourceTask extends SourceTask with StrictLogging with HandleRetriableError{
 
-  private var readers = mutable.Map.empty[String, CosmosDBReader]
+  val readers = mutable.Map.empty[String, CosmosDBReader]
   private var client: AsyncDocumentClient = null
   private var database: String = ""
   private var collection: String = ""
@@ -28,6 +28,7 @@ class CosmosDBSourceTask extends SourceTask with StrictLogging with HandleRetria
   private var timeout: Option[Int] = None
   private var topicName: String = ""
   private var postProcessors  = List.empty[PostProcessor]
+  val cosmosDBProvider: CosmosDBProvider = CosmosDBProviderImpl
 
   override def start(props: util.Map[String, String]): Unit = {
     logger.info("Starting CosmosDBSourceTask")
@@ -57,9 +58,12 @@ class CosmosDBSourceTask extends SourceTask with StrictLogging with HandleRetria
       case Success(s) => Some(s)
     }*/
 
-    // Add configured Post-Processors
-    val processorClassNames = taskConfig.get.getString(CosmosDBConfigConstants.SOURCE_POST_PROCESSOR)
-    postProcessors = PostProcessor.createPostProcessorList(processorClassNames, taskConfig.get)
+    // Add configured Post-Processors if exist in configuration file
+    if(taskConfig.get.getString(CosmosDBConfigConstants.SOURCE_POST_PROCESSOR)!=null){
+      val processorClassNames = taskConfig.get.getString(CosmosDBConfigConstants.SOURCE_POST_PROCESSOR)
+      postProcessors = PostProcessor.createPostProcessorList(processorClassNames, taskConfig.get)
+    }
+
 
     // Get CosmosDB Connection
     val endpoint: String = taskConfig.get.getString(CosmosDBConfigConstants.CONNECTION_ENDPOINT_CONFIG)
@@ -78,7 +82,7 @@ class CosmosDBSourceTask extends SourceTask with StrictLogging with HandleRetria
     )
 
     try{
-      client = CosmosDBProviderImpl.getClient(clientSettings)
+      client = cosmosDBProvider.getClient(clientSettings)
       logger.info("Connection to CosmosDB established.")
     }catch{
       case f: Throwable =>
@@ -118,7 +122,19 @@ class CosmosDBSourceTask extends SourceTask with StrictLogging with HandleRetria
   }
 
   override def poll(): util.List[SourceRecord] = {
-    return readers.flatten(reader => reader._2.processChanges()).toList.map(sr => applyPostProcessing(sr))
+    try{
+      if(postProcessors.isEmpty){
+        return readers.flatten(reader => reader._2.processChanges()).toList
+      }else{
+        return readers.flatten(reader => reader._2.processChanges()).toList.map(sr => applyPostProcessing(sr))
+      }
+    }catch{
+      case f: Exception =>
+        logger.debug(s"Couldn't create a list of source records ${f.getMessage}", f)
+        HandleRetriableError(Failure(f))
+        return null
+    }
+    return null
   }
 
   override def version(): String = getClass.getPackage.getImplementationVersion

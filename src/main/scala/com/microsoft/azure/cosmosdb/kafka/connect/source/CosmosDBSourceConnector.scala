@@ -1,15 +1,14 @@
 package com.microsoft.azure.cosmosdb.kafka.connect.source
 
 import java.util
-import com.microsoft.azure.cosmosdb.kafka.connect.common.ErrorHandler.HandleRetriableError
 
+import com.microsoft.azure.cosmosdb.kafka.connect.common.ErrorHandler.HandleRetriableError
 import com.microsoft.azure.cosmosdb._
 
 import scala.collection.JavaConversions._
 import com.microsoft.azure.cosmosdb.{ConnectionPolicy, ConsistencyLevel}
-import com.microsoft.azure.cosmosdb.kafka.connect.{CosmosDBClientSettings, CosmosDBProviderImpl}
+import com.microsoft.azure.cosmosdb.kafka.connect.{CosmosDBClientSettings, CosmosDBProvider, CosmosDBProviderImpl}
 import com.microsoft.azure.cosmosdb.kafka.connect.config.{ConnectorConfig, CosmosDBConfig, CosmosDBConfigConstants}
-
 import org.apache.kafka.common.config.ConfigDef
 import org.apache.kafka.connect.connector.Task
 import org.apache.kafka.connect.source.SourceConnector
@@ -22,7 +21,7 @@ class CosmosDBSourceConnector extends SourceConnector with HandleRetriableError 
 
   private var configProps: util.Map[String, String] = _
   private var numWorkers: Int = 0
-
+  val cosmosDBProvider: CosmosDBProvider = CosmosDBProviderImpl
   override def version(): String = getClass.getPackage.getImplementationVersion
 
   override def start(props: util.Map[String, String]): Unit = {
@@ -47,7 +46,7 @@ class CosmosDBSourceConnector extends SourceConnector with HandleRetriableError 
       )
       logger.debug("Settings for Cosmos Db connection: ", settings)
 
-      val client = CosmosDBProviderImpl.getClient(settings)
+      val client = cosmosDBProvider.getClient(settings)
 
       val collectionLink = CosmosDBProviderImpl.getCollectionLink(database, collection)
       val changeFeedObservable = client.readPartitionKeyRanges(collectionLink, null)

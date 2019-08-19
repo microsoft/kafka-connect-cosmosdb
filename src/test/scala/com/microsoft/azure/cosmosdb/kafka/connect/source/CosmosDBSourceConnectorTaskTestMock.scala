@@ -1,35 +1,31 @@
 package com.microsoft.azure.cosmosdb.kafka.connect.source
 
 import java.util
-import java.util.UUID._
+import java.util.UUID.randomUUID
 import java.util.concurrent.{CountDownLatch, TimeUnit}
 import java.util.{ArrayList, Properties, UUID}
 
-import com.microsoft.azure.cosmosdb.kafka.connect.{CosmosDBClientSettings, CosmosDBProvider, CosmosDBProviderImpl, MockCosmosDBProvider}
-import com.microsoft.azure.cosmosdb.kafka.connect.config.TestConfigurations.{DATABASE, ENDPOINT, MASTER_KEY}
-import com.microsoft.azure.cosmosdb.kafka.connect.config.CosmosDBConfigConstants
-import org.apache.kafka.connect.data.Schema
-import org.apache.kafka.connect.sink.SinkRecord
-import org.scalatest.{FlatSpec, GivenWhenThen}
-
-import scala.collection.JavaConverters._
-import scala.collection.mutable
 import _root_.rx.Observable
 import _root_.rx.lang.scala.JavaConversions._
 import com.google.common.collect.Maps
 import com.google.gson.Gson
+import com.microsoft.azure.cosmosdb.{ConnectionPolicy, ConsistencyLevel, Document, ResourceResponse}
+import com.microsoft.azure.cosmosdb.kafka.connect.{CosmosDBClientSettings, CosmosDBProvider, CosmosDBProviderImpl, MockCosmosDBProvider, MockCosmosDBReader}
+import com.microsoft.azure.cosmosdb.kafka.connect.config.TestConfigurations.{DATABASE, ENDPOINT, MASTER_KEY}
 import com.microsoft.azure.cosmosdb.kafka.connect.config.{CosmosDBConfigConstants, TestConfigurations}
 import com.microsoft.azure.cosmosdb.kafka.connect.model.{CosmosDBDocumentTest, KafkaPayloadTest}
-import com.microsoft.azure.cosmosdb.{ConnectionPolicy, ConsistencyLevel, Document, ResourceResponse}
 import com.typesafe.scalalogging.LazyLogging
+import org.apache.kafka.connect.data.Schema
 import org.apache.kafka.connect.errors.ConnectException
-import org.mockito.MockitoSugar.mock
+import org.apache.kafka.connect.sink.SinkRecord
 import org.scalatest.{FlatSpec, GivenWhenThen}
+import org.mockito.MockitoSugar.mock
 
+import scala.collection.JavaConverters._
+import scala.collection.mutable
 import scala.util.{Failure, Success, Try}
 
-
-class CosmosDBSourceTaskTest extends FlatSpec with GivenWhenThen with LazyLogging {
+class CosmosDBSourceConnectorTaskTestMock extends FlatSpec with GivenWhenThen with LazyLogging {
 
   private val NUM_DOCS: Int = 20
   private val DOC_SIZE: Int = 313
