@@ -13,7 +13,6 @@ import org.apache.kafka.common.config.ConfigDef
 import org.apache.kafka.connect.connector.Task
 import org.apache.kafka.connect.source.SourceConnector
 import org.apache.kafka.connect.util.ConnectorUtils
-
 import scala.util.{Failure, Success, Try}
 import scala.collection.JavaConverters._
 
