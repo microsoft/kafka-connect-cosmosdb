@@ -67,9 +67,7 @@ class CosmosDBSourceConnector extends SourceConnector with HandleRetriableError 
     }
     catch {
       case f: Throwable =>
-        logger.error(s"Couldn't initialize CosmosDb wi+++++++++++++++++++++++++++++++++6" +
-          s"+" +
-          s"333333333333333333333333333333333333333333333333333333333333333th settings: ${f.getMessage}", f)
+        logger.error(s"Couldn't initialize CosmosDb with settings: ${f.getMessage}", f)
         HandleRetriableError(Failure(f))
         return null
     }
