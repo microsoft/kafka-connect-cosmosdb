@@ -8,9 +8,9 @@ The Source connector is used to pump data from [Azure Cosmos DB](https://azure.m
 
 For more information on the capabilities of the connectors and how to use them, please refer to the links below -
 
-### [Source Connector](./doc/README_Source.md)
+### [Source Connector](doc/README_Source.md)
 
-### [Sink Connector](./doc/README_Sink.md)
+### [Sink Connector](doc/README_Sink.md)
 
 
 ## Contribute Code
