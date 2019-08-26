@@ -14,4 +14,4 @@ For more information on the capabilities of the connectors and how to use them, 
 
 
 ## Contribute Code
-This project welcomes contributions and suggestions. In order to contribute please refer to our [Contribution Guide](CONTRIBUTING.MD).
+This project welcomes contributions and suggestions. In order to contribute please refer to our [Contribution Guide](CONTRIBUTING.md).
