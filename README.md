@@ -12,7 +12,6 @@ This project welcomes contributions, feedback and suggestions.
 If you would like to become a contributor to this project, please refer to our [Contribution Guide](CONTRIBUTING.MD).
 
 ## Setup
-=========
 
 ### [Source Connector](doc/README_Source.md)
 
