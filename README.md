@@ -28,6 +28,8 @@ It is worth looking through this material to get better understanding of how Kaf
 
 It is also worth understanding how Cosmos DB and its Change Feed works
 
-[Cosmos DB]()
+[Cosmos DB](https://docs.microsoft.com/en-us/azure/cosmos-db/introduction)
+
 [Cosmos DB Change feed](https://docs.microsoft.com/azure/cosmos-db/change-feed)
+
 [Cosmos DB Change feed processor](https://docs.microsoft.com/en-us/azure/cosmos-db/change-feed-processor)
