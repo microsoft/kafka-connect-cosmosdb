@@ -24,7 +24,7 @@ stages:
     - task: Bash@3
       inputs:
         targetType: 'inline'
-        script: 'docker build --target=unittest -t $(appName)acr.azurecr.io/$(appname):canary .'
+        script: 'docker build --target=release -t $(appName)acr.azurecr.io/$(appname):canary .'
         
     - task: Bash@3
       inputs:
