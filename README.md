@@ -3,10 +3,10 @@ ________________________
 
 **Kafka Connect for Azure Cosmos DB** consists of 2 connectors - a [Source Connector](./doc/README_Source.md) and a [Sink Connector](./doc/README_Sink.md). 
 
-The Source Connector is used to pump data from [Azure Cosmos DB](https://azure.microsoft.com/services/cosmos-db//) via its Change Feed to
+The [Source Connector](./doc/README_Source.md) is used to pump data from [Azure Cosmos DB](https://azure.microsoft.com/services/cosmos-db//) via its Change Feed to
 [Apache Kafka](https://kafka.apache.org/). 
 
-The Sink Connector reads messages from Kafka and sends them to Cosmos DB. 
+The [Sink Connector](./doc/README_Sink.md) reads messages from Kafka and sends them to Cosmos DB. 
 
 
 ## Contribute
