@@ -21,13 +21,8 @@ ADD . $HOME
 RUN sbt compile
 
 #
-# ----Run Unit Tests ----
-FROM build AS unittest
-RUN sbt test
-
-#
 # ---- Publish the App ----
-FROM  unittest AS release
+FROM  build AS release
 EXPOSE 8888
 CMD sbt run
 
