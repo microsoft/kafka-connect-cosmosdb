@@ -19,8 +19,11 @@ If you would like to become a contributor to this project, please refer to our [
 It is worth looking through this material to get better understanding of how Kafka Connect and these connectors work and how to use them. 
 
 [Kafka Connect](https://docs.confluent.io/current/connect/index.html)
+
 [Kafka Connect Concepts](https://docs.confluent.io/current/connect/concepts.html)
+
 [Installing and Configuring Kafka Connect](https://docs.confluent.io/current/connect/userguide.html)
+
 [Tutorial: Moving Data In and Out of Kafka](https://docs.confluent.io/current/connect/quickstart.html)
 
 It is also worth understanding how Cosmos DB and its Change Feed works
