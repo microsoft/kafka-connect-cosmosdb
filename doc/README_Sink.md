@@ -1,9 +1,9 @@
 # Kafka Connect Cosmos DB Sink Connector
 
-## Supported Data 
+### Supported Data 
 
-## Configuartion
+### Configuartion
 
-## Post Processors
-### DocumentIdSinkPostProcessor
-### SelectorSinkPostProcessor 
+### Post Processors
+#### DocumentIdSinkPostProcessor
+#### SelectorSinkPostProcessor 
