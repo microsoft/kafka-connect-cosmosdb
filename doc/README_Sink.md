@@ -36,21 +36,28 @@ This post processor can be used to set the value of the *id* field if you want t
 You can use the value of any field from the source by setting the **connect.cosmosdb.sink.post-processor.documentId.field** configuration property.
 If this field exists the value of this field is used. If this field cannot be found, then the value of the new *id* field will be set to 'null'.
 
-##### Example
-source JSON
+Given the following fictional data record:
+```javascript
 {
     "firstName": "John",
     "lastName": "Smith" 
 }
+```
 
+Example configuration:
+```javascript
+connect.cosmosdb.sink.post-processor = 'com.microsoft.azure.cosmosdb.kafka.connect.processor.sink.DocumentIdSinkPostProcessor'
 connect.cosmosdb.sink.post-processor.documentId.field = 'firstName'
+```
 
-output JSON
+will result in:
+```javascript
 {
     "firstName": "John",
     "lastName": "Smith",
     "id": "John"
 }
+```
 
 #### SelectorSinkPostProcessor 
 This post processor can be used to Include or Exclude a set of fields from the source data.
