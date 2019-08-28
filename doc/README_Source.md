@@ -1,8 +1,16 @@
 # Kafka Connect Cosmos DB Source Connector
 
-## Supported Data 
+The Azure Cosmos DB Source connector provides the capability to read data from the Cosmos DB Change Feed and publish this data to a Kafka topic. 
 
-## Configuration
+### Installation
 
-## Post Processors
-### SelectorSourcePostProcessor 
+#### Install Connector Manually
+Download and extrate the ZIP file for your connector and follow the manual connector installation [instructions](https://docs.confluent.io/current/connect/managing/install.html#install-connector-manually)
+
+
+### Supported Data 
+
+### Configuration
+
+### Post Processors
+#### SelectorSourcePostProcessor 
