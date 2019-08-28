@@ -19,6 +19,8 @@ You can apply an optional chain of post processors to modify & transform the JSO
 
 There are currently 2 processors to choose from:
 
+[pookie](#pookie)
+
 [DocumentIdSinkPostProcessor](DocumentIdSinkPostProcessor): uses the configured strategy (explained below) to insert an id field
 
 [SelectorSinkPostProcessor](SelectorSinkPostProcessor): uses the configured strategy (explained below) to either *Include* or *Exclude* a set of fields from the data read from Kafka before being written to the sink. 
@@ -26,6 +28,8 @@ There are currently 2 processors to choose from:
 Further post processors can be implemented based on the provided abstract base class PostPrJsonPostProcessor.
 
 The **connect.cosmosdb.sink.post-processor** configuration property allows you to customize the post processor chain applied to the converted records before they are written to the sink. Set the value of this config property to a comma separated list of fully qualified class names which provide the post processor implementations, either existing ones or new/customized ones, the example below will register both DocumentIdSinkPostProcessor and the SelectorSinkPostProcessor :
+
+<a name="pookie">Foo</A>
 
 connect.cosmosdb.sink.post-processor="com.microsoft.azure.cosmosdb.kafka.connect.processor.sink.DocumentIdSinkPostProcessor,com.microsoft.azure.cosmosdb.kafka.connect.processor.sink.SelectorSinkPostProcessor"
 
