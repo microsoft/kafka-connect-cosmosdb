@@ -25,9 +25,13 @@ There are currently 2 processors to choose from:
 
 Further post processors can be implemented based on the provided abstract base class PostPrJsonPostProcessor.
 
-The **connect.cosmosdb.sink.post-processor** configuration property allows you to customize the post processor chain applied to the converted records before they are written to the sink. Set the value of this config property to a comma separated list of fully qualified class names which provide the post processor implementations, either existing ones or new/customized ones, the example below will register both DocumentIdSinkPostProcessor and the SelectorSinkPostProcessor :
+The **connect.cosmosdb.sink.post-processor** configuration property allows you to customize the post processor chain applied to the converted records before they are written to the sink. Set the value of this config property to a comma separated list of fully qualified class names which provide the post processor implementations, either existing ones or new/customized ones.
 
-connect.cosmosdb.sink.post-processor="com.microsoft.azure.cosmosdb.kafka.connect.processor.sink.DocumentIdSinkPostProcessor,com.microsoft.azure.cosmosdb.kafka.connect.processor.sink.SelectorSinkPostProcessor"
+The example below would register the DocumentIdSinkPostProcessor :
+
+```javascript
+connect.cosmosdb.sink.post-processor="com.microsoft.azure.cosmosdb.kafka.connect.processor.sink.DocumentIdSinkPostProcessor"
+```
 
 #### <a name="DocumentId">DocumentIdSinkPostProcessor</A>
 In Cosmos DB an *id* field, in the root of your JSON document, is a required property for every document. 
