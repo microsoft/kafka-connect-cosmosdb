@@ -60,7 +60,7 @@ Will result in:
 }
 ```
 
-#### <a name="DocumentId">SelectorSinkPostProcessor</A>
+#### <a name="Selector">SelectorSinkPostProcessor</A>
 This post processor can be used to Include or Exclude a set of fields from the source data.
 
 When **connect.cosmosdb.sink.post-processor.selector.type** is set to "Include" then only the fields specified will remain in the document being written to Cosmos DB. 
