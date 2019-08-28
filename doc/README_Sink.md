@@ -50,7 +50,7 @@ connect.cosmosdb.sink.post-processor = 'com.microsoft.azure.cosmosdb.kafka.conne
 connect.cosmosdb.sink.post-processor.documentId.field = 'firstName'
 ```
 
-will result in:
+Will result in:
 ```javascript
 {
     "firstName": "John",
@@ -64,8 +64,8 @@ This post processor can be used to Include or Exclude a set of fields from the s
 
 When **connect.cosmosdb.sink.post-processor.selector.type** is set to "Include" then only the fields specified will remain in the document being written to Cosmos DB. 
 
-#### Example
-source JSON
+Given the following fictional data record:
+```javascript
 {
     "firstName": "John",
     "lastName": "Smith",
@@ -80,21 +80,27 @@ source JSON
         {}
     ]
 }
-
+```
+Example configuration:
+```javascript
+connect.cosmosdb.sink.post-processor = 'com.microsoft.azure.cosmosdb.kafka.connect.processor.sink.SelectorSinkPostProcessor'
 connect.cosmosdb.sink.post-processor.selector.type = "Include"
-connect.cosmosdb.sink.post-processor.selector.fields", "firstName, lastName, age"
+connect.cosmosdb.sink.post-processor.selector.fields = "firstName, lastName, age"
+```
 
-output JSON
+Will result in:
+```javascript
 {
     "firstName": "John",
     "lastName": "Smith",
     "age": 40
 }
+```
 
 When **connect.cosmosdb.sink.post-processor.selector.type** is set to "Exclude" then those fields specified will be removed from the JSON before it is written.
 
-#### Example
-source JSON
+Given the following fictional data record:
+```javascript
 {    
     "firstName": "John",
     "lastName": "Smith",
@@ -109,11 +115,16 @@ source JSON
         {}
     ]
 }
-
+```
+Example configuration:
+```javascript
+connect.cosmosdb.sink.post-processor = 'com.microsoft.azure.cosmosdb.kafka.connect.processor.sink.SelectorSinkPostProcessor'
 connect.cosmosdb.sink.post-processor.selector.type = "Exclude"
-connect.cosmosdb.sink.post-processor.selector.fields", "children"
+connect.cosmosdb.sink.post-processor.selector.fields = "children"
+```
 
-output JSON
+Will result in:
+```javascript
 {
     "firstName": "John",
     "lastName": "Smith",
@@ -124,3 +135,5 @@ output JSON
         "country": "United States"
     }
 }
+```
+
