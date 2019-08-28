@@ -20,7 +20,7 @@ You can apply an optional chain of post processors to modify & transform the JSO
 There are currently 2 processors to choose from:
 
 DocumentIdSinkPostProcessor: uses the configured strategy (explained below) to insert an id field
-SelectorSinkPostProcessor: <<>>
+SelectorSinkPostProcessor: uses the configured strategy (explained below) to either *Include* or *Exclude* a set of fields from the data read from Kafka before being written to the sink. 
 
 Further post processors can be implemented based on the provided abstract base class PostPrJsonPostProcessor.
 
