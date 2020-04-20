@@ -1,4 +1,5 @@
 # Kafka Connect for Azure Cosmos DB
 ________________________
 
-Java version of Kafka Connect connector for Azure Cosmos DB
+This connector is currently undergoing a major refresh. 
+Stay tuned for new Java version targeted at Cosmos DB V4 Java SDK
