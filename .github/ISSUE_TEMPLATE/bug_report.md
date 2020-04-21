@@ -1,24 +1,23 @@
 ---
 name: Bug report
-about: Create a report to help us improve
+about: For reporting an issue in code or documentation for improvement
 title: ''
-labels: ''
+labels: Bug
 assignees: ''
 
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+## Description
+- A clear and concise description of what the bug is
 
-**To Reproduce**
-Describe clearly the Kafka Connect and Connector configuration used. 
-Supply examples of the payload (andor schema) causing the issue. 
+## Expected Behavior
+- A clear and concise description of what you expected to happen.
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+## Reproduce
+1. Go to '...'
+2. Click on '....'
+3. Scroll down to '....'
+4. See error
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
-
-**Additional context**
-Add any other context about the problem here.
+## Additional Context 
+- _(If applicable: Add any other context about the problem here; for example: proposed solution, doc changes, screenshots, logs, links, etc)_
