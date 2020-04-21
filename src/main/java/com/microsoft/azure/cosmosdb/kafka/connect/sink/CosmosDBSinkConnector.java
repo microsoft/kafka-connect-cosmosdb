@@ -36,7 +36,7 @@ public class CosmosDBSinkConnector extends SinkConnector {
 
     @Override
     public String version() {
-        throw new IllegalStateException("Not implemented");
+        return this.getClass().getPackage().getImplementationVersion();
     }
 
 }
