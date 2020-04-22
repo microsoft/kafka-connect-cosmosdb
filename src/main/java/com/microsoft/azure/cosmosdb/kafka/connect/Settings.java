@@ -39,20 +39,36 @@ public class Settings {
 
     private String pollingInterval;
 
+    /**
+     * Gets the CosmosDB polling interval
+     * @return The CosmosDB polling interval
+     */
     public String getPollingInterval(){
         return pollingInterval;
     }
 
+    /**
+     * Sets the CosmosDB polling interval
+     * @param pollingInterval The CosmosDB polling interval
+     */
     public void setPollingInterval(String pollingInterval) {
         this.pollingInterval = pollingInterval;
     }
 
     private String taskTimeout;
 
+    /**
+     * Gets the task timeout
+     * @return The task timeout
+     */
     public String getTaskTimeout() {
         return taskTimeout;
     }
 
+    /**
+     * Sets the task timeout
+     * @param taskTimeout the task timeout
+     */
     public void setTaskTimeout(String taskTimeout) {
         this.taskTimeout = taskTimeout;
     }
