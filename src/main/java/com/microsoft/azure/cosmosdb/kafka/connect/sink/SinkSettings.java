@@ -10,7 +10,7 @@ import java.util.List;
 public class SinkSettings extends Settings {
     private final List<Setting> sinkSettings = Arrays.asList(
             //Add all settings here:
-            new Setting(Settings.PREFIX+".sink.post-processor", this::setPostProcessor, this::getPostProcessor)
+            new Setting(Settings.PREFIX + ".sink.post-processor", this::setPostProcessor, this::getPostProcessor)
     );
 
     @Override
@@ -22,19 +22,21 @@ public class SinkSettings extends Settings {
 
     /**
      * Returns the sink post-processor list
+     *
      * @Return The sink post-processor list
      */
-    
-    public String getPostProcessor(){
+
+    public String getPostProcessor() {
         return this.postProcessor;
     }
 
 
     /**
      * Sets the sink post-processor list
+     *
      * @param postProcessor
      */
-    public void setPostProcessor(String postProcessor){
+    public void setPostProcessor(String postProcessor) {
         this.postProcessor = postProcessor;
     }
 }
