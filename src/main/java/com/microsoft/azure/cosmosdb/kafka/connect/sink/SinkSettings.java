@@ -7,6 +7,9 @@ import org.apache.commons.collections4.ListUtils;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Contains settings for the Kafka ComsosDB Sink Connector
+ */
 public class SinkSettings extends Settings {
     private final List<Setting> sinkSettings = Arrays.asList(
             //Add all settings here:
