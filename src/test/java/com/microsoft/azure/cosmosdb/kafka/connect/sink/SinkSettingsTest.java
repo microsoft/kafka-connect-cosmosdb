@@ -1,5 +1,6 @@
 package com.microsoft.azure.cosmosdb.kafka.connect.sink;
 
+import com.microsoft.azure.cosmosdb.kafka.connect.SettingDefaults;
 import com.microsoft.azure.cosmosdb.kafka.connect.Settings;
 import org.junit.Assert;
 import org.junit.Test;
@@ -42,9 +43,9 @@ public class SinkSettingsTest {
         SinkSettings sinkSettings = new SinkSettings();
         sinkSettings.populate(source);
         assertNull(sinkSettings.getPostProcessor());
-        assertEquals(1000L, (long)sinkSettings.getPollingInterval());
-        assertEquals(10000L, (long)sinkSettings.getTaskBufferSize());
-        assertEquals(5000, (long)sinkSettings.getTaskTimeout());
+        assertEquals(SettingDefaults.POLLING_INTERVAL, sinkSettings.getPollingInterval());
+        assertEquals(SettingDefaults.TASK_BUFFER_SIZE, sinkSettings.getTaskBufferSize());
+        assertEquals(SettingDefaults.TASK_TIMEOUT, sinkSettings.getTaskTimeout());
     }
 
     @Test
