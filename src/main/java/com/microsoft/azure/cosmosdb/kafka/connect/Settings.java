@@ -15,9 +15,9 @@ public class Settings {
 
     private final List<Setting> allSettings = Arrays.asList(
             //Add all settings here:
-            new NumericSetting(PREFIX + ".task.pollinginterval", 1000L, this::setPollingInterval, this::getPollingInterval),
-            new NumericSetting(PREFIX + ".task.timeout", 5000L, this::setTaskTimeout, this::getTaskTimeout),
-            new NumericSetting(PREFIX + ".task.buffer.size", 10000L, this::setTaskBufferSize, this::getTaskBufferSize),
+            new NumericSetting(PREFIX + ".task.pollinginterval", SettingDefaults.POLLING_INTERVAL, this::setPollingInterval, this::getPollingInterval),
+            new NumericSetting(PREFIX + ".task.timeout", SettingDefaults.TASK_TIMEOUT, this::setTaskTimeout, this::getTaskTimeout),
+            new NumericSetting(PREFIX + ".task.buffer.size", SettingDefaults.TASK_BUFFER_SIZE, this::setTaskBufferSize, this::getTaskBufferSize),
             new Setting(PREFIX+".cosmosdb.endpoint", this::setEndpoint, this::getEndpoint),
             new Setting(PREFIX+".cosmosdb.key", this::setKey, this::getKey),
             new Setting(PREFIX+".cosmosdb.databasename", this::setDatabaseName, this::getDatabaseName),
