@@ -3,14 +3,20 @@ package com.microsoft.azure.cosmosdb.kafka.connect.sink;
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.connect.connector.Task;
 import org.apache.kafka.connect.sink.SinkConnector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
 
 public class CosmosDBSinkConnector extends SinkConnector {
 
+    private static Logger logger = LoggerFactory.getLogger(CosmosDBSinkConnector.class);
+
+
     @Override
     public void start(Map<String, String> map) {
+        logger.info("Starting CosmosDB sink connector.");
 
     }
 
