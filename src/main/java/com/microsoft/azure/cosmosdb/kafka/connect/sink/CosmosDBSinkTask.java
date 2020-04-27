@@ -3,14 +3,12 @@ package com.microsoft.azure.cosmosdb.kafka.connect.sink;
 import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.CosmosClientBuilder;
 import com.azure.cosmos.CosmosDatabase;
-import com.azure.cosmos.implementation.Database;
-import com.azure.cosmos.models.CosmosContainerResponse;
 import com.azure.cosmos.models.CosmosDatabaseResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.Functions;
+import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.apache.kafka.connect.sink.SinkTask;
@@ -18,10 +16,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
-import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -54,7 +51,6 @@ public class CosmosDBSinkTask extends SinkTask {
     }
 
 
-
     @Override
     public void put(Collection<SinkRecord> records) {
         if (CollectionUtils.isEmpty(records)) {
@@ -62,19 +58,20 @@ public class CosmosDBSinkTask extends SinkTask {
             return;
         }
 
-        logger.info("Sending "+records.size()+" records to be written");
-        Map<String, SinkRecord> recordsByCollection= records.stream()
-                //Find target collection for each record
-                .map(record -> Pair.of(settings.getTopicCollectionMap().getCollectionForTopic(record.topic()), record))
-                //Build a map by target collection
-                .collect(Collectors.toMap(pair->pair.getKey().get(), Pair::getValue));
+        logger.info("Sending " + records.size() + " records to be written");
 
-        for (String collection : recordsByCollection.keySet()){
-            
+        Map<String, List<SinkRecord>> recordsByContainer = records.stream()
+                //Find target collection for each record
+                .collect(Collectors.groupingBy(record ->
+                        settings.getTopicContainerMap().getContainerForTopic(record.topic()).orElseThrow(
+                                () -> new IllegalStateException("No container defined for topic " + record.topic() + "."))));
+        for (String container : recordsByContainer.keySet()) {
+            recordsByContainer.get(container).stream()
+                    .map(record -> client.getDatabase(settings.getDatabaseName()).getContainer(container).createItem(serializeValue(record)));
         }
     }
 
-    protected String serializeValue(Object sourceObject){
+    protected String serializeValue(Object sourceObject) {
         Objects.requireNonNull(sourceObject);
         try {
             ObjectMapper om = new ObjectMapper();
@@ -84,18 +81,18 @@ public class CosmosDBSinkTask extends SinkTask {
             } else {
                 content = sourceObject.toString();
             }
-            
-            if (om.readTree(content).has("payload")){
+
+            if (om.readTree(content).has("payload")) {
                 JsonNode payload = om.readTree(content).get("payload");
-                if (payload.isTextual()){
+                if (payload.isTextual()) {
                     content = payload.asText();
                 } else {
                     content = payload.toString();
                 }
             }
             return content;
-        } catch (JsonProcessingException jpe){
-            logger.error("Unable to serialize object of type "+sourceObject.getClass().getName()+".", jpe);
+        } catch (JsonProcessingException jpe) {
+            logger.error("Unable to serialize object of type " + sourceObject.getClass().getName() + ".", jpe);
             throw new IllegalStateException(jpe);
         }
     }

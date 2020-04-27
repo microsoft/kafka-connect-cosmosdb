@@ -13,7 +13,7 @@ import java.util.List;
 public class SinkSettings extends Settings {
     private final List<Setting> sinkSettings = Arrays.asList(
             //Add all settings here:
-            new Setting(Settings.PREFIX + ".sink.post-processor", this::setPostProcessor, this::getPostProcessor)
+            new Setting(Settings.PREFIX + ".sink.post-processor", "Sink post-processor", this::setPostProcessor, this::getPostProcessor)
     );
 
     @Override

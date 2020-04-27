@@ -15,13 +15,12 @@ public class Settings {
 
     private final List<Setting> allSettings = Arrays.asList(
             //Add all settings here:
-            new NumericSetting(PREFIX + ".task.pollinginterval", SettingDefaults.POLLING_INTERVAL, this::setPollingInterval, this::getPollingInterval),
-            new NumericSetting(PREFIX + ".task.timeout", SettingDefaults.TASK_TIMEOUT, this::setTaskTimeout, this::getTaskTimeout),
-            new NumericSetting(PREFIX + ".task.buffer.size", SettingDefaults.TASK_BUFFER_SIZE, this::setTaskBufferSize, this::getTaskBufferSize),
-            new Setting(PREFIX+".cosmosdb.endpoint", this::setEndpoint, this::getEndpoint),
-            new Setting(PREFIX+".cosmosdb.key", this::setKey, this::getKey),
-            new Setting(PREFIX+".cosmosdb.databasename", this::setDatabaseName, this::getDatabaseName),
-            new Setting(PREFIX+".collections.topicmap", value -> TopicCollectionMap.deserialize(value), ()->this.getTopicCollectionMap().serialize())
+            new NumericSetting(PREFIX + ".task.timeout", "Task Timeout", SettingDefaults.TASK_TIMEOUT, this::setTaskTimeout, this::getTaskTimeout),
+            new NumericSetting(PREFIX + ".task.buffer.size", "Task buffer size", SettingDefaults.TASK_BUFFER_SIZE, this::setTaskBufferSize, this::getTaskBufferSize),
+            new Setting(PREFIX+".cosmosdb.endpoint", "CosmosDB Endpoint", this::setEndpoint, this::getEndpoint),
+            new Setting(PREFIX+".cosmosdb.key", "CosmosDB Key", this::setKey, this::getKey),
+            new Setting(PREFIX+".cosmosdb.databasename", "CosmosDB Database Name", this::setDatabaseName, this::getDatabaseName),
+            new Setting(PREFIX+".containers.topicmap", "Topic-Container map", value -> TopicContainerMap.deserialize(value), ()->this.getTopicContainerMap().serialize())
     );
 
     /**
@@ -163,40 +162,22 @@ public class Settings {
         this.databaseName = databaseName;
     }
 
-    private String containerName;
-
-    /**
-     * Retrieves the CosmosDB container name
-     * @return The CosmosDB container name
-     */
-    public String getContainerName() {
-        return containerName;
-    }
-
-    /**
-     * Sets the CosmosDB container name
-     * @param containerName The CosmosDB container name
-     */
-    public void setContainerName(String containerName) {
-        this.containerName = containerName;
-    }
-
-    private TopicCollectionMap topicCollectionMap;
+    private TopicContainerMap topicContainerMap;
 
     /**
      * Gets the map of Kafka topics to CosmosDB collections
      * @return
      */
-    public TopicCollectionMap getTopicCollectionMap() {
-        return topicCollectionMap;
+    public TopicContainerMap getTopicContainerMap() {
+        return topicContainerMap;
     }
 
     /**
      * Sets the map of Kafka topics to CosmosDB collections
      * @param topicCollectionMap
      */
-    public void setTopicCollectionMap(TopicCollectionMap topicCollectionMap) {
-        this.topicCollectionMap = topicCollectionMap;
+    public void setTopicContainerMap(TopicContainerMap topicCollectionMap) {
+        this.topicContainerMap = topicCollectionMap;
     }
 }
 

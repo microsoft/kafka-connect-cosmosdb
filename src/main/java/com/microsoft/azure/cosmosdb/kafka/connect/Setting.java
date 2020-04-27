@@ -6,23 +6,26 @@ import java.util.function.Supplier;
 
 public class Setting {
     private final String name;
+    private final String displayName;
     private final Consumer<String> modifier;
     private final Supplier<String> accessor;
     private final Optional<String> defaultValue;
 
 
-    public Setting(String name, Consumer<String> modifier, Supplier<String> accessor) {
+    public Setting(String name, String displayName, Consumer<String> modifier, Supplier<String> accessor) {
         this.name = name;
         this.modifier = modifier;
         this.accessor = accessor;
         this.defaultValue = Optional.empty();
+        this.displayName = displayName;
     }
 
-    public Setting(String name, String defaultValue, Consumer<String> modifier, Supplier<String> accessor) {
+    public Setting(String name, String displayName, String defaultValue, Consumer<String> modifier, Supplier<String> accessor) {
         this.name = name;
         this.modifier = modifier;
         this.accessor = accessor;
         this.defaultValue = Optional.of(defaultValue);
+        this.displayName = displayName;
 
     }
 
@@ -45,4 +48,7 @@ public class Setting {
     public Optional<String> getDefaultValue() {
         return defaultValue;
     }
+
+    /** Gets the display name of the setting */
+    public String getDisplayName(){return displayName;}
 }
