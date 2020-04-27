@@ -47,26 +47,6 @@ public class Settings {
         }
     }
 
-    private Long pollingInterval;
-
-    /**
-     * Gets the CosmosDB polling interval
-     *
-     * @return The CosmosDB polling interval
-     */
-    public Long getPollingInterval() {
-        return pollingInterval;
-    }
-
-    /**
-     * Sets the CosmosDB polling interval
-     *
-     * @param pollingInterval The CosmosDB polling interval
-     */
-    public void setPollingInterval(Long pollingInterval) {
-        this.pollingInterval = pollingInterval;
-    }
-
     private Long taskTimeout;
 
     /**

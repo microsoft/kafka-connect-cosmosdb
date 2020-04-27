@@ -28,7 +28,6 @@ public class SinkSettingsTest {
         sinkSettings.populate(source);
 
         assertEquals("foobar", sinkSettings.getPostProcessor());
-        assertEquals(787L, (long)sinkSettings.getPollingInterval());
         assertEquals(444L,  (long)sinkSettings.getTaskTimeout());
         assertEquals(666L,  (long)sinkSettings.getTaskBufferSize());
     }
@@ -43,7 +42,6 @@ public class SinkSettingsTest {
         SinkSettings sinkSettings = new SinkSettings();
         sinkSettings.populate(source);
         assertNull(sinkSettings.getPostProcessor());
-        assertEquals(SettingDefaults.POLLING_INTERVAL, sinkSettings.getPollingInterval());
         assertEquals(SettingDefaults.TASK_BUFFER_SIZE, sinkSettings.getTaskBufferSize());
         assertEquals(SettingDefaults.TASK_TIMEOUT, sinkSettings.getTaskTimeout());
     }
