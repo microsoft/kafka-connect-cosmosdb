@@ -2,12 +2,13 @@ package com.microsoft.azure.cosmosdb.kafka.connect.sink;
 
 import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.CosmosClientBuilder;
+import com.azure.cosmos.CosmosContainer;
 import com.azure.cosmos.models.CosmosContainerResponse;
 import com.azure.cosmos.models.FeedOptions;
 import com.azure.cosmos.util.CosmosPagedIterable;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.azure.cosmosdb.kafka.connect.IntegrationTest;
 import com.microsoft.azure.cosmosdb.kafka.connect.TopicContainerMap;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.connect.data.Schema;
@@ -19,7 +20,6 @@ import org.junit.experimental.categories.Category;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
@@ -33,10 +33,37 @@ public class SinkTaskWriteTest {
     private String containerName;
     private CosmosClient cosmosClient;
 
+    private static class Person {
+        private final String firstName;
+        private final String lastName;
+        private final String id;
+
+        public static Person newRandom() {
+            return new Person(RandomStringUtils.randomAlphabetic(10), "Mc" + RandomStringUtils.randomAlphabetic(12), Long.toString(RandomUtils.nextLong()));
+        }
+
+        private Person(String firstName, String lastName, String id) {
+            this.firstName = firstName;
+            this.lastName = lastName;
+            this.id = id;
+        }
+
+        public String getFirstName() {
+            return firstName;
+        }
+
+        public String getLastName() {
+            return lastName;
+        }
+
+        public String getId() {
+            return id;
+        }
+    }
+
+
     @Before
     public void setup() {
-        String requiredVariables = "Required environment variables: cosmos_key, cosmos_endpoint, cosmos_database, cosmos_container";
-
         String key = System.getenv("cosmos_key");
         String endpoint = System.getenv("cosmos_endpoint");
         String databaseName = System.getenv("cosmos_database");
@@ -47,10 +74,10 @@ public class SinkTaskWriteTest {
         assertTrue(StringUtils.isNotBlank(databaseName));
 
 
-        cosmosClient = new CosmosClientBuilder().endpoint(endpoint)
+        this.cosmosClient = new CosmosClientBuilder().endpoint(endpoint)
                 .key(key)
                 .buildClient();
-        cosmosClient.getDatabase(databaseName).createContainer(containerName, "/id");
+        this.cosmosClient.getDatabase(databaseName).createContainer(containerName, "/id");
 
         this.settings = new SinkSettings();
         settings.setDatabaseName(databaseName);
@@ -63,8 +90,9 @@ public class SinkTaskWriteTest {
     public void testWrite() {
         CosmosDBSinkTask task = new CosmosDBSinkTask();
         task.start(settings.asMap());
-        SinkRecord record = new SinkRecord(topicName, 0, null, null, Schema.STRING_SCHEMA, "{\"schema\": \"null\", \"payload\": {\"message\": \"message1 payload\"}}", 0);
+        SinkRecord record = new SinkRecord(topicName, 0, Schema.STRING_SCHEMA, null, Schema.STRING_SCHEMA, Person.newRandom(), 0);
         task.put(Arrays.asList(record));
+
 
         CosmosContainerResponse response = cosmosClient.getDatabase(settings.getDatabaseName()).getContainer(containerName).read();
         CosmosPagedIterable<String> pagedItems = response.getContainer().readAllItems(new FeedOptions(), String.class);
@@ -73,7 +101,7 @@ public class SinkTaskWriteTest {
     }
 
     @After
-    public void tearDown(){
+    public void tearDown() {
         cosmosClient.getDatabase(settings.getDatabaseName()).getContainer(containerName).delete();
     }
 

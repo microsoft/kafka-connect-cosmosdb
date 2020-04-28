@@ -38,14 +38,6 @@
             <version>4.0.1-beta.2</version>
         </dependency>
 
-        <!-- Jackson -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>2.10.3</version>
-        </dependency>
-
-
         <!-- Apache commons -->
 
         <dependency>
