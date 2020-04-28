@@ -43,12 +43,22 @@ public class Setting {
 
     /**
      * Returns the default value for the setting, if specified.
+     *
      * @return the default value for the setting, if specified.
      */
     public Optional<String> getDefaultValue() {
         return defaultValue;
     }
 
-    /** Gets the display name of the setting */
-    public String getDisplayName(){return displayName;}
+    /**
+     * Gets the display name of the setting
+     */
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    @Override
+    public String toString() {
+        return getDisplayName() + " [" + getName() + "]";
+    }
 }

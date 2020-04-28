@@ -24,12 +24,15 @@ public class SinkSettingsTest {
         source.put(Settings.PREFIX+".task.buffer.size", "666");
         source.put(Settings.PREFIX+".task.timeout", "444");
         source.put(Settings.PREFIX+".task.pollinginterval","787");
+        source.put(Settings.PREFIX+".containers.topicmap", "mytopic666#mycontainer555");
         SinkSettings sinkSettings = new SinkSettings();
         sinkSettings.populate(source);
 
         assertEquals("foobar", sinkSettings.getPostProcessor());
         assertEquals(444L,  (long)sinkSettings.getTaskTimeout());
         assertEquals(666L,  (long)sinkSettings.getTaskBufferSize());
+        assertEquals("mytopic666", sinkSettings.getTopicContainerMap().getTopicForContainer("mycontainer555").get());
+        assertEquals("mycontainer555", sinkSettings.getTopicContainerMap().getContainerForTopic("mytopic666").get());
     }
 
 
