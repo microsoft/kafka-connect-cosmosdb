@@ -2,6 +2,7 @@ package com.microsoft.azure.cosmosdb.kafka.connect.sink;
 
 import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.CosmosClientBuilder;
+import com.azure.cosmos.CosmosContainer;
 import com.azure.cosmos.CosmosDatabase;
 import com.azure.cosmos.models.CosmosDatabaseResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -65,9 +66,12 @@ public class CosmosDBSinkTask extends SinkTask {
                 .collect(Collectors.groupingBy(record ->
                         settings.getTopicContainerMap().getContainerForTopic(record.topic()).orElseThrow(
                                 () -> new IllegalStateException("No container defined for topic " + record.topic() + "."))));
-        for (String container : recordsByContainer.keySet()) {
-            recordsByContainer.get(container).stream()
-                    .map(record -> client.getDatabase(settings.getDatabaseName()).getContainer(container).createItem(serializeValue(record)));
+        for (String containerName : recordsByContainer.keySet()) {
+            CosmosContainer container = client.getDatabase(settings.getDatabaseName()).getContainer(containerName);
+            for (SinkRecord record : recordsByContainer.get(containerName)){
+                String serializedValue = serializeValue(record.value());
+                container.createItem(serializedValue);
+            }
         }
     }
 

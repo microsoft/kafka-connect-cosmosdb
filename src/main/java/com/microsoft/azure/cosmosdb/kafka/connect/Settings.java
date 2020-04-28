@@ -1,5 +1,6 @@
 package com.microsoft.azure.cosmosdb.kafka.connect;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -7,6 +8,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Settings {
     private static final Logger logger = LoggerFactory.getLogger(Settings.class);
@@ -20,7 +22,7 @@ public class Settings {
             new Setting(PREFIX+".cosmosdb.endpoint", "CosmosDB Endpoint", this::setEndpoint, this::getEndpoint),
             new Setting(PREFIX+".cosmosdb.key", "CosmosDB Key", this::setKey, this::getKey),
             new Setting(PREFIX+".cosmosdb.databasename", "CosmosDB Database Name", this::setDatabaseName, this::getDatabaseName),
-            new Setting(PREFIX+".containers.topicmap", "Topic-Container map", value -> TopicContainerMap.deserialize(value), ()->this.getTopicContainerMap().serialize())
+            new Setting(PREFIX+".containers.topicmap", "Topic-Container map", value -> this.setTopicContainerMap(TopicContainerMap.deserialize(value)), ()->this.getTopicContainerMap().serialize())
     );
 
     /**
@@ -45,6 +47,17 @@ public class Settings {
             }
             setting.getModifier().accept(assignedValue);
         }
+    }
+
+
+    /**
+     * Returns a key-value representation of the settings
+     * @return
+     */
+    public Map<String, String> asMap(){
+        return getAllSettings().stream()
+                .filter(setting -> StringUtils.isNotBlank(setting.getAccessor().get()))
+                .collect(Collectors.toMap(Setting::getName, setting-> setting.getAccessor().get()));
     }
 
     private Long taskTimeout;

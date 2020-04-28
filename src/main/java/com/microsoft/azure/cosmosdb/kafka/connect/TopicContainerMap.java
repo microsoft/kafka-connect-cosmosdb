@@ -77,8 +77,8 @@ public class TopicContainerMap {
         return Optional.ofNullable(map.get(topicName));
     }
 
-    public Optional<String> getTopicForContainer(String collectionName) {
-        return Optional.ofNullable(map.inverseBidiMap().get(collectionName));
+    public Optional<String> getTopicForContainer(String containerName) {
+        return Optional.ofNullable(map.inverseBidiMap().get(containerName));
     }
 
 }
