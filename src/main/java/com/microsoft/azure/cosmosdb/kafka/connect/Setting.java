@@ -6,25 +6,25 @@ import java.util.function.Supplier;
 
 public class Setting {
     private final String name;
-    private final String docName;
+    private final String documentation;
     private final String displayName;
     private final Consumer<String> modifier;
     private final Supplier<String> accessor;
     private final Optional<String> defaultValue;
 
 
-    public Setting(String name, String docName, String displayName, Consumer<String> modifier, Supplier<String> accessor) {
+    public Setting(String name, String documentation, String displayName, Consumer<String> modifier, Supplier<String> accessor) {
         this.name = name;
-        this.docName = docName;
+        this.documentation = documentation;
         this.modifier = modifier;
         this.accessor = accessor;
         this.defaultValue = Optional.empty();
         this.displayName = displayName;
     }
 
-    public Setting(String name, String docName, String displayName, String defaultValue, Consumer<String> modifier, Supplier<String> accessor) {
+    public Setting(String name, String documentation, String displayName, String defaultValue, Consumer<String> modifier, Supplier<String> accessor) {
         this.name = name;
-        this.docName = docName;
+        this.documentation = documentation;
         this.modifier = modifier;
         this.accessor = accessor;
         this.defaultValue = Optional.of(defaultValue);
@@ -64,7 +64,7 @@ public class Setting {
     /**
      * Gets the doc name of the setting
      */
-    public String getDocName() {return docName;}
+    public String getDocumentation() {return documentation;}
 
     @Override
     public String toString() {
