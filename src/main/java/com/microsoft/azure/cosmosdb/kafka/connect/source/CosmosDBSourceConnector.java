@@ -16,7 +16,7 @@ public class CosmosDBSourceConnector extends SourceConnector {
 
     @Override
     public Class<? extends Task> taskClass() {
-        throw new IllegalStateException("Not implemented");
+        return CosmosDBSourceTask.class;
     }
 
     @Override

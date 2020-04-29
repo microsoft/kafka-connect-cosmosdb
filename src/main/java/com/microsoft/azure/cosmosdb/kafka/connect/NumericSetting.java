@@ -7,8 +7,8 @@ import java.util.function.Supplier;
 
 public class NumericSetting extends Setting {
 
-    public NumericSetting(String name, String displayName, Long defaultValue, Consumer<Long> modifier, Supplier<Long> accessor) {
-        super(name, displayName, Long.toString(defaultValue), numericModifier(name, modifier), numericAccessor(accessor));
+    public NumericSetting(String name, String docName, String displayName, Long defaultValue, Consumer<Long> modifier, Supplier<Long> accessor) {
+        super(name, docName, displayName, Long.toString(defaultValue), numericModifier(name, modifier), numericAccessor(accessor));
     }
 
     protected static final Supplier<String> numericAccessor(Supplier<Long> baseMethod) {

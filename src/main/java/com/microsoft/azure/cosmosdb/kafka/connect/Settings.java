@@ -17,12 +17,15 @@ public class Settings {
 
     private final List<Setting> allSettings = Arrays.asList(
             //Add all settings here:
-            new NumericSetting(PREFIX + ".task.timeout", "Task Timeout", SettingDefaults.TASK_TIMEOUT, this::setTaskTimeout, this::getTaskTimeout),
-            new NumericSetting(PREFIX + ".task.buffer.size", "Task buffer size", SettingDefaults.TASK_BUFFER_SIZE, this::setTaskBufferSize, this::getTaskBufferSize),
-            new Setting(PREFIX+".cosmosdb.endpoint", "CosmosDB Endpoint", this::setEndpoint, this::getEndpoint),
-            new Setting(PREFIX+".cosmosdb.key", "CosmosDB Key", this::setKey, this::getKey),
-            new Setting(PREFIX+".cosmosdb.databasename", "CosmosDB Database Name", this::setDatabaseName, this::getDatabaseName),
-            new Setting(PREFIX+".containers.topicmap", "Topic-Container map", value -> this.setTopicContainerMap(TopicContainerMap.deserialize(value)), ()->this.getTopicContainerMap().serialize())
+            new NumericSetting(PREFIX + ".task.timeout", "The max number of milliseconds the source task will use to read documents before send them to Kafka.",
+                    "Task Timeout", SettingDefaults.TASK_TIMEOUT, this::setTaskTimeout, this::getTaskTimeout),
+            new NumericSetting(PREFIX + ".task.buffer.size","The max size the collection of documents the source task will buffer before send them to Kafka.",
+                    "Task reader buffer size", SettingDefaults.TASK_BUFFER_SIZE, this::setTaskBufferSize, this::getTaskBufferSize),
+            new Setting(PREFIX+".connection.endpoint", "The Cosmos DB endpoint.", "CosmosDB Endpoint", this::setEndpoint, this::getEndpoint),
+            new Setting(PREFIX+".master.key", "The connection master key.", "Master Key", this::setKey, this::getKey),
+            new Setting(PREFIX+".cosmosdb.databasename", "The Cosmos DB target database.", "CosmosDB Database Name", this::setDatabaseName, this::getDatabaseName),
+            new Setting(PREFIX+".containers.topicmap", "A comma delimited list of collections mapped to their partitions. Formatted coll1#topic1,coll2#topic2.",
+                    "Topic-Container map", value -> this.setTopicContainerMap(TopicContainerMap.deserialize(value)), ()->this.getTopicContainerMap().serialize())
     );
 
     /**
