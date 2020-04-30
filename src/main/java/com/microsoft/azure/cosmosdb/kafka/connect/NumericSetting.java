@@ -30,4 +30,8 @@ public class NumericSetting extends Setting {
         };
     }
 
+    @Override
+    public boolean isValid(Object value) {
+        return super.isValid(value) && StringUtils.isNumeric((String) value);
+    }
 }
