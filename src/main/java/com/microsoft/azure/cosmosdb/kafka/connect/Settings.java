@@ -46,7 +46,7 @@ public class Settings {
         for (Setting setting : getAllSettings()) {
             String assignedValue = values.get(setting.getName());
             if (assignedValue == null && setting.getDefaultValue().isPresent()) {
-                assignedValue = setting.getDefaultValue().get();
+                assignedValue = setting.getDefaultValue().get().toString();
             }
             setting.getModifier().accept(assignedValue);
         }
