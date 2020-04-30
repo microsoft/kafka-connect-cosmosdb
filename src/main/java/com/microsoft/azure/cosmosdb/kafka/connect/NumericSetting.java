@@ -1,6 +1,7 @@
 package com.microsoft.azure.cosmosdb.kafka.connect;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.kafka.common.config.ConfigDef;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -8,7 +9,7 @@ import java.util.function.Supplier;
 public class NumericSetting extends Setting {
 
     public NumericSetting(String name, String documentation, String displayName, Long defaultValue, Consumer<Long> modifier, Supplier<Long> accessor) {
-        super(name, documentation, displayName, Long.toString(defaultValue), numericModifier(name, modifier), numericAccessor(accessor));
+        super(name, documentation, displayName, defaultValue, numericModifier(name, modifier), numericAccessor(accessor));
     }
 
     protected static final Supplier<String> numericAccessor(Supplier<Long> baseMethod) {
@@ -31,7 +32,13 @@ public class NumericSetting extends Setting {
     }
 
     @Override
+    protected ConfigDef.Type getKafkaConfigType() {
+        return ConfigDef.Type.LONG;
+    }
+
+    @Override
     public boolean isValid(Object value) {
-        return super.isValid(value) && StringUtils.isNumeric((String) value);
+        //Null (unset) is ok
+        return value != null ? super.isValid(value) && StringUtils.isNumeric(value.toString()) : true;
     }
 }

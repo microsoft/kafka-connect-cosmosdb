@@ -40,12 +40,7 @@ public class CosmosDBSinkConnector extends SinkConnector {
     @Override
     public ConfigDef config() {
         ConfigDef configDef = new ConfigDef();
-        new SinkSettings().getAllSettings().stream()
-                .forEach(setting ->
-                        configDef.define(setting.getName(),
-                                ConfigDef.Type.STRING,
-                                setting.getDefaultValue().orElse(null),
-                                (name, value) -> setting.isValid(value), ConfigDef.Importance.MEDIUM, setting.getDocumentation()));
+        new SinkSettings().getAllSettings().stream().forEachOrdered(setting -> setting.toConfigDef(configDef));
         return configDef;
     }
 
