@@ -1,5 +1,7 @@
 package com.microsoft.azure.cosmosdb.kafka.connect;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -69,5 +71,14 @@ public class Setting {
     @Override
     public String toString() {
         return getDisplayName() + " [" + getName() + "]";
+    }
+
+    /**
+     * Determines whether a value is a valid value for this setting
+     * @param value The value to be validated
+     * @return True if, and only if, value is valid.
+     */
+    public boolean isValid(Object value){
+        return value instanceof String && StringUtils.isNotBlank((String)value);
     }
 }

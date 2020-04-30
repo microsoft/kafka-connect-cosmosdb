@@ -1,7 +1,9 @@
 package com.microsoft.azure.cosmosdb.kafka.connect.sink;
 
+import org.apache.kafka.common.config.Config;
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.connect.connector.Task;
+import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.sink.SinkConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +39,14 @@ public class CosmosDBSinkConnector extends SinkConnector {
 
     @Override
     public ConfigDef config() {
-        throw new IllegalStateException("Not implemented");
+        ConfigDef configDef = new ConfigDef();
+        new SinkSettings().getAllSettings().stream()
+                .forEach(setting ->
+                        configDef.define(setting.getName(),
+                                ConfigDef.Type.STRING,
+                                setting.getDefaultValue().orElse(null),
+                                (name, value) -> setting.isValid(value), ConfigDef.Importance.MEDIUM, setting.getDocumentation()));
+        return configDef;
     }
 
     @Override

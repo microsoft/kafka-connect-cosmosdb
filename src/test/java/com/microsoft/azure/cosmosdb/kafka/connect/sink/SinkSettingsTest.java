@@ -76,4 +76,5 @@ public class SinkSettingsTest {
             assertEquals("Incorrect exception type: "+t.getClass().getName(), "IllegalArgumentException", t.getClass().getSimpleName());
         }
     }
+
 }
