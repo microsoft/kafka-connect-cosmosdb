@@ -20,7 +20,7 @@
         <log4j.version>2.13.1</log4j.version>
         <slf4j.version>1.7.30</slf4j.version>
     </properties>
-
+<!-- PR Test -->
     <dependencies>
         <dependency>
             <groupId>org.apache.kafka</groupId>
