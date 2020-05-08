@@ -46,6 +46,19 @@ public class Setting {
         return accessor;
     }
 
+    /**
+     * Returns the assigned value of a setting or its default
+     *
+     * @return
+     */
+    public String getValueOrDefault() {
+        String assignedValue = getAccessor().get();
+        if (StringUtils.isNotBlank(assignedValue))
+            return assignedValue;
+        else
+            return getDefaultValue().isPresent() ? getDefaultValue().get().toString() : "";
+    }
+
     public Consumer<String> getModifier() {
         return modifier;
     }
@@ -70,7 +83,9 @@ public class Setting {
     /**
      * Gets the doc name of the setting
      */
-    public String getDocumentation() {return documentation;}
+    public String getDocumentation() {
+        return documentation;
+    }
 
     @Override
     public String toString() {
@@ -79,39 +94,43 @@ public class Setting {
 
     /**
      * Determines whether a value is a valid value for this setting.
+     *
      * @param value The value to be validated
      * @return True if, and only if, value is valid.
      */
-    public boolean isValid(Object value){
+    public boolean isValid(Object value) {
         return true; //unless overridden
     }
 
     /**
      * Returns the Kafka configuration type
+     *
      * @return
      */
-    protected ConfigDef.Type getKafkaConfigType(){
+    protected ConfigDef.Type getKafkaConfigType() {
         return ConfigDef.Type.STRING;
     }
 
     /**
      * Returns the Kafka configuration importance
+     *
      * @return
      */
-    protected ConfigDef.Importance getKafkaConfigImportance(){
+    protected ConfigDef.Importance getKafkaConfigImportance() {
         return ConfigDef.Importance.MEDIUM;
     }
 
     /**
      * Adds the setting to a Kafka configdef. Does not modify the setting.
+     *
      * @param configDef The configDef to which the setting will be added
      */
-    public void toConfigDef(ConfigDef configDef){
-        ConfigDef.Validator validator = (name, value)->{
-            if (!this.getName().equals(name)){
-                throw new IllegalStateException("Validator from setting" + getName()+" applied to incorrect setting: "+name);
-            } else if (!isValid(value)){
-                throw new ConfigException(name,value );
+    public void toConfigDef(ConfigDef configDef) {
+        ConfigDef.Validator validator = (name, value) -> {
+            if (!this.getName().equals(name)) {
+                throw new IllegalStateException("Validator from setting" + getName() + " applied to incorrect setting: " + name);
+            } else if (!isValid(value)) {
+                throw new ConfigException(name, value);
             }
         };
 
