@@ -12,9 +12,8 @@ import java.util.List;
  */
 public class SourceSettings extends Settings {
     private final List<Setting> sourceSettings = Arrays.asList(
-            //Add all settings here:
             new Setting(Settings.PREFIX + ".source.post-processor", "Comma-separated list of Source Post-Processor class names to use for post-processing",
-                    "Sink post-processor", this::setPostProcessor, this::getPostProcessor),
+                    "Source post-processor", this::setPostProcessor, this::getPostProcessor),
             new Setting(Settings.PREFIX + ".assigned.partitions", "The CosmosDB partitions a task has been assigned",
                     "Assigned Partitions", this::setAssignedPartitions, this::getAssignedPartitions)
 
