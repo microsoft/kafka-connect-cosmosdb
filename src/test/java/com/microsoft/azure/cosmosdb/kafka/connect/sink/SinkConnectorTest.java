@@ -1,5 +1,6 @@
 package com.microsoft.azure.cosmosdb.kafka.connect.sink;
 
+import org.apache.commons.collections4.MapUtils;
 import org.apache.kafka.connect.runtime.SinkConnectorConfig;
 import org.junit.Test;
 
@@ -10,7 +11,9 @@ import static org.junit.Assert.fail;
 public class SinkConnectorTest {
     @Test
     public void ensureGeneratedSettingsPassValidation() {
-        for (Map<String, String> settingMap : new CosmosDBSinkConnector().taskConfigs(12)) {
+        CosmosDBSinkConnector connector = new CosmosDBSinkConnector();
+        connector.start(MapUtils.EMPTY_SORTED_MAP);
+        for (Map<String, String> settingMap : connector.taskConfigs(12)) {
             try{
                 SinkConnectorConfig.validate(settingMap);
             } catch (Exception e){

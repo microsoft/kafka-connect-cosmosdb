@@ -3,11 +3,7 @@ package com.microsoft.azure.cosmosdb.kafka.connect.sink;
 import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.CosmosClientBuilder;
 import com.azure.cosmos.CosmosContainer;
-import com.azure.cosmos.CosmosDatabase;
 import com.azure.cosmos.models.CosmosDatabaseResponse;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.apache.kafka.connect.sink.SinkTask;
@@ -17,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
