@@ -1,6 +1,7 @@
 package com.microsoft.azure.cosmosdb.kafka.connect;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.kafka.common.internals.Topic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,6 +49,11 @@ public class Settings {
      * @param values Map of setting names to values
      */
     public void populate(Map<String, String> values) {
+        logger.debug("Populating settings from map:");
+        if (logger.isDebugEnabled()){
+
+        }
+
         for (Setting setting : getAllSettings()) {
             String assignedValue = values.get(setting.getName());
             if (assignedValue == null && setting.getDefaultValue().isPresent()) {
@@ -63,9 +69,9 @@ public class Settings {
      * @return
      */
     public Map<String, String> asMap(){
+
         return getAllSettings().stream()
-                .filter(setting -> StringUtils.isNotBlank(setting.getAccessor().get()))
-                .collect(Collectors.toMap(Setting::getName, setting-> setting.getAccessor().get()));
+                .collect(Collectors.toMap(Setting::getName, Setting::getValueOrDefault));
     }
 
     private Long taskTimeout;
@@ -163,7 +169,7 @@ public class Settings {
         this.databaseName = databaseName;
     }
 
-    private TopicContainerMap topicContainerMap;
+    private TopicContainerMap topicContainerMap = TopicContainerMap.empty();
 
     /**
      * Gets the map of Kafka topics to CosmosDB collections

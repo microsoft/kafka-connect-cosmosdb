@@ -1,0 +1,8 @@
+{
+  "name": "cosmosdb-sink-connector",
+  "config": {
+    "connector.class": "com.microsoft.azure.cosmosdb.kafka.connect.sink.CosmosDBSinkConnector",
+    "tasks.max": "1",
+    "topics":"connect-test"
+  }
+}
