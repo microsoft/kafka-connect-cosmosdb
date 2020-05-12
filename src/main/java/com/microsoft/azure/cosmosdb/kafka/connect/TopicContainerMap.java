@@ -40,7 +40,7 @@ public class TopicContainerMap {
             BidiMap<String, String> map = new DualHashBidiMap<>();
             keyValuePairs.forEach(pair -> map.put(pair[0], pair[1]));
             return new TopicContainerMap(map);
-        } else throw new IllegalArgumentException("Invalid topic collection map.");
+        } else throw new IllegalArgumentException("Invalid topic container map.");
     }
 
     public String serialize() {
@@ -50,9 +50,9 @@ public class TopicContainerMap {
     }
 
     /**
-     * Creates an empty map of topic collections
+     * Creates an empty map of topic containers
      *
-     * @return
+     * @return Returns a map of Topics assigned to containers.
      */
     public static TopicContainerMap empty() {
         return new TopicContainerMap(new DualHashBidiMap<>());
@@ -62,9 +62,9 @@ public class TopicContainerMap {
     //TODO: eliminate this mutability
 
     /**
-     * Adds topic names, generating default collection names
+     * Adds topic names, generating default container names
      *
-     * @param topicNames
+     * @param topicNames Collection of topic names
      */
     public void addTopics(Collection<String> topicNames) {
         Objects.requireNonNull(topicNames);
