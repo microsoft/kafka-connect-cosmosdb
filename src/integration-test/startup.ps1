@@ -8,5 +8,5 @@ cd $PSScriptRoot/../..
 mvn clean package -DskipTests=true
 copy target\*-jar-with-dependencies.jar $PSScriptRoot/connectors
 cd $PSScriptRoot
-docker-compose -f full-stack.yml up > log.txt *>&1 &
 Write-Host "Starting Docker Compose..."
+docker-compose -f full-stack.yml up -d

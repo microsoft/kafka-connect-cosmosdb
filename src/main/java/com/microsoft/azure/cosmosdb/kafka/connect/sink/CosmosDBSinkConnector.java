@@ -20,9 +20,7 @@ public class CosmosDBSinkConnector extends SinkConnector {
     @Override
     public void start(Map<String, String> props) {
         logger.info("Starting CosmosDB sink connector.");
-        HashMap<String, String> startingSettings = new HashMap<>();
-        startingSettings.putAll(new SinkSettings().asMap());
-        startingSettings.putAll(props);
+        HashMap<String, String> startingSettings = new HashMap<>(props);
         this.config = MapUtils.unmodifiableMap(startingSettings);
     }
 
@@ -33,11 +31,12 @@ public class CosmosDBSinkConnector extends SinkConnector {
 
     @Override
     public List<Map<String, String>> taskConfigs(int maxCount) {
-        List<Map<String,String>> retval = new ArrayList<>(maxCount);
-        for (int i=0;i<maxCount;++i){
-            retval.add(config);
+        logger.info("taskConfigs(" + maxCount + ")");
+        List<Map<String, String>> result = new ArrayList<>(maxCount);
+        for (int i = 0; i < maxCount; ++i) {
+            result.add(config);
         }
-        return retval;
+        return result;
     }
 
 
@@ -48,7 +47,7 @@ public class CosmosDBSinkConnector extends SinkConnector {
 
     @Override
     public ConfigDef config() {
-
+        logger.debug("config() invoked");
         ConfigDef configDef = new ConfigDef();
         new SinkSettings().getAllSettings().stream().forEachOrdered(setting -> setting.toConfigDef(configDef));
         logger.debug("Sink ConfigDef with " + configDef.configKeys().size() + " settings.");
@@ -57,6 +56,7 @@ public class CosmosDBSinkConnector extends SinkConnector {
 
     @Override
     public String version() {
+        logger.debug("version()");
         return this.getClass().getPackage().getImplementationVersion();
     }
 

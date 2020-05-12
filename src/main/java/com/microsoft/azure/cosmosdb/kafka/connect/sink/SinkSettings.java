@@ -25,7 +25,7 @@ public class SinkSettings extends Settings {
                     "Regular expression giving topics to consume. " +
                             "Under the hood, the regex is compiled to a <code>java.util.regex.Pattern</code>. " +
                             "Only one of " + SinkTask.TOPICS_CONFIG + " or " + SinkTask.TOPICS_REGEX_CONFIG + " should be specified.",
-                    "Topics RegEx",".*", s -> {}, ()->"")
+                    "Topics RegEx", s -> {}, ()->"")
     );
 
     @Override
