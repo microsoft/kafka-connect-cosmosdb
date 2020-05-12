@@ -3,6 +3,10 @@
   "config": {
     "connector.class": "com.microsoft.azure.cosmosdb.kafka.connect.sink.CosmosDBSinkConnector",
     "tasks.max": "1",
-    "topics":"connect-test"
+    "topics":"connect-test",
+    "connect.cosmosdb.cosmosdb.databasename": "",
+    "connect.cosmosdb.master.key": "",
+    "connect.cosmosdb.connection.endpoint":"",
+    "connect.cosmosdb.containers.topicmap" : ""
   }
 }
