@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Settings {
     private static final Logger logger = LoggerFactory.getLogger(Settings.class);
@@ -28,7 +29,7 @@ public class Settings {
             new Setting(PREFIX+".cosmosdb.databasename", "The Cosmos DB target database.", "CosmosDB Database Name", this::setDatabaseName, this::getDatabaseName),
             new Setting(PREFIX+".containers.topicmap", "A comma delimited list of collections mapped to their partitions. Formatted coll1#topic1,coll2#topic2.",
                     "Topic-Container map", value -> this.setTopicContainerMap(TopicContainerMap.deserialize(value)), ()->this.getTopicContainerMap().serialize()),
-            new Setting(PREFIX+".collections", "A comma delimited list of source/target container names.",
+            new Setting(PREFIX+".containers", "A comma delimited list of source/target container names.",
                     "Collection Names List", this::setContainerList, this::getContainerList)
             );
 
@@ -194,15 +195,17 @@ public class Settings {
      * @param commaSeparatedContainerList
      */
     public void setContainerList(String commaSeparatedContainerList) {
-        ArrayList<String> containerArrayList = new ArrayList<String>(Arrays.asList(commaSeparatedContainerList.split(",")));
-        this.containerList = containerArrayList;
+        this.containerList = new ArrayList<String>(Optional.ofNullable(StringUtils.split(commaSeparatedContainerList, ","))
+                .map(Arrays::stream)
+                .orElseGet(Stream::empty)
+                .collect(Collectors.toList()));
     }
 
     /**
      * Gets the list of container names in a comma separated string
      */
     public String getContainerList() {
-        return containerList.stream().map(Object::toString).collect(Collectors.joining(", "));
+        return  StringUtils.join(containerList, ",");
     }
 
     private Long taskBatchSize;
