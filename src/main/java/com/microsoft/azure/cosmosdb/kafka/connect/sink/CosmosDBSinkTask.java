@@ -30,6 +30,7 @@ public class CosmosDBSinkTask extends SinkTask {
 
     @Override
     public void start(Map<String, String> map) {
+        logger.trace("Sink task started.");
         this.settings = new SinkSettings();
         this.settings.populate(map);
 
@@ -66,6 +67,7 @@ public class CosmosDBSinkTask extends SinkTask {
 
     @Override
     public void stop() {
+        logger.trace("Stopping sink task");
         try {
             client.close();
         } catch (Throwable t) {
