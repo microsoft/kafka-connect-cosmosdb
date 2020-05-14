@@ -1,6 +1,7 @@
 package com.microsoft.azure.cosmosdb.kafka.connect.source;
 
 import com.azure.cosmos.*;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.connect.connector.Task;
 import org.apache.kafka.connect.source.SourceConnector;
@@ -18,6 +19,7 @@ public class CosmosDBSourceConnector extends SourceConnector {
     @Override
     public void start(Map<String, String> sourceConectorSetttings) {
         logger.info("Starting the Source Connector");
+        this.settings = new SourceSettings();
         this.settings.populate(sourceConectorSetttings);
     }
 
@@ -30,9 +32,13 @@ public class CosmosDBSourceConnector extends SourceConnector {
     @Override
     public List<Map<String, String>> taskConfigs(int maxTasks) {
         logger.info("Creating the task Configs");
-        String[] containerList = this.settings.getContainerList().split(",");
+        String[] containerList = StringUtils.split(settings.getContainerList(),",");
         List<Map<String, String>> taskConfigs = new ArrayList<>(maxTasks);
 
+        if(containerList.length == 0) {
+            logger.debug("Container list is not specified");
+            return taskConfigs;
+        }
         for (int i = 0; i< maxTasks; i++) {
             // Equally distribute workers by assigning workers to containers in round robin fashion.
             this.settings.setAssignedContainer(containerList[i % containerList.length]);

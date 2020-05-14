@@ -45,11 +45,11 @@ public class SourceSettings extends Settings {
 
     private String postProcessor;
 
-    private String getPostProcessor() {
+    public String getPostProcessor() {
         return this.postProcessor;
     }
 
-    private void setPostProcessor(String postProcessor) {
+    public void setPostProcessor(String postProcessor) {
         this.postProcessor = postProcessor;
     }
 

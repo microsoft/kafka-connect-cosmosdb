@@ -1,6 +1,7 @@
 package com.microsoft.azure.cosmosdb.kafka.connect.source;
 
 import com.microsoft.azure.cosmosdb.kafka.connect.Setting;
+import com.microsoft.azure.cosmosdb.kafka.connect.Settings;
 import com.microsoft.azure.cosmosdb.kafka.connect.sink.CosmosDBSinkConnector;
 import com.microsoft.azure.cosmosdb.kafka.connect.sink.SinkSettings;
 import org.apache.kafka.common.config.ConfigDef;
@@ -55,5 +56,32 @@ public class CosmosDBSourceConfigTest {
         List<ConfigValue> postValidation = config.validate(settingAssignment);
         ConfigValue timeoutConfigValue = postValidation.stream().filter(item -> item.name().equals(BATCH_SETTING.getName())).findFirst().get();
         assertEquals("Expected error message when assigning non-numeric value to task timeout", 1, timeoutConfigValue.errorMessages().size());
+    }
+
+    @Test
+    public void testTaskConfigs(){
+        Map<String, String> settingAssignment = new HashMap<>(1);
+        settingAssignment.put(BATCH_SETTING.getName(), "200");
+        CosmosDBSourceConnector sourceConnector = new CosmosDBSourceConnector();
+        sourceConnector.start(settingAssignment);
+        List<Map<String, String>> taskConfigs = sourceConnector.taskConfigs(3);
+        assertEquals(taskConfigs.size(), 0);
+    }
+
+    @Test
+    public void testValidTaskConfigContainerAssignment(){
+        Map<String, String> settingAssignment = new HashMap<>(1);
+        settingAssignment.put(BATCH_SETTING.getName(), "200");
+        settingAssignment.put(Settings.PREFIX + ".containers", "C1,C2,C3,C4");
+        CosmosDBSourceConnector sourceConnector = new CosmosDBSourceConnector();
+        sourceConnector.start(settingAssignment);
+        List<Map<String, String>> taskConfigs = sourceConnector.taskConfigs(6);
+        assertEquals(taskConfigs.size(), 6);
+        assertEquals(taskConfigs.get(0).get(Settings.PREFIX +".assigned.container"),"C1");
+        assertEquals(taskConfigs.get(1).get(Settings.PREFIX +".assigned.container"),"C2");
+        assertEquals(taskConfigs.get(2).get(Settings.PREFIX +".assigned.container"),"C3");
+        assertEquals(taskConfigs.get(3).get(Settings.PREFIX +".assigned.container"),"C4");
+        assertEquals(taskConfigs.get(4).get(Settings.PREFIX +".assigned.container"),"C1");
+        assertEquals(taskConfigs.get(5).get(Settings.PREFIX +".assigned.container"),"C2");
     }
 }
