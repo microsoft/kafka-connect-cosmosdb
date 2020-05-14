@@ -3,8 +3,10 @@ package com.microsoft.azure.cosmosdb.kafka.connect.sink;
 import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.CosmosClientBuilder;
 import com.azure.cosmos.CosmosContainer;
+import com.azure.cosmos.implementation.BadRequestException;
 import com.azure.cosmos.models.CosmosDatabaseResponse;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.kafka.connect.errors.ConnectException;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.apache.kafka.connect.sink.SinkTask;
 import org.slf4j.Logger;
@@ -62,12 +64,15 @@ public class CosmosDBSinkTask extends SinkTask {
             for (SinkRecord record : recordsByContainer.get(containerName)) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Writing record, value type: " + record.value().getClass().getName());
-                    logger.debug("Key Schema: "+record.keySchema());
+                    logger.debug("Key Schema: " + record.keySchema());
                     logger.debug("Value schema:" + record.valueSchema());
                     logger.debug("Value.toString(): " + record.value() != null ? record.value().toString() : "<null>");
                 }
-
-                container.createItem(record.value());
+                try {
+                    container.createItem(record.value());
+                } catch (BadRequestException bre) {
+                    throw new ConnectException("Unable to write to CosmosDB: " + record.key(), bre);
+                }
             }
         }
     }
