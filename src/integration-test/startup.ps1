@@ -3,6 +3,8 @@ $ErrorActionPreference='Stop'
 cd $PSScriptRoot
 Write-Host shutting down Docker Compose orchestration...
 docker-compose down
+Write-Host "Deleting prior Kafka State..."
+Remove-Item -Recurse -Force "full-stack" -Verbose -ErrorAction Continue 2>$null
 mkdir $PSScriptRoot/connectors -Force
 cd $PSScriptRoot/../..
 mvn clean package -DskipTests=true

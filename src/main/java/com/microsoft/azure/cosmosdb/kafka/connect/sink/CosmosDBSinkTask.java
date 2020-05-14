@@ -59,7 +59,14 @@ public class CosmosDBSinkTask extends SinkTask {
                                 () -> new IllegalStateException("No container defined for topic " + record.topic() + "."))));
         for (String containerName : recordsByContainer.keySet()) {
             CosmosContainer container = client.getDatabase(settings.getDatabaseName()).getContainer(containerName);
-            for (SinkRecord record : recordsByContainer.get(containerName)){
+            for (SinkRecord record : recordsByContainer.get(containerName)) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Writing record, value type: " + record.value().getClass().getName());
+                    logger.debug("Key Schema: "+record.keySchema());
+                    logger.debug("Value schema:" + record.valueSchema());
+                    logger.debug("Value.toString(): " + record.value() != null ? record.value().toString() : "<null>");
+                }
+
                 container.createItem(record.value());
             }
         }
