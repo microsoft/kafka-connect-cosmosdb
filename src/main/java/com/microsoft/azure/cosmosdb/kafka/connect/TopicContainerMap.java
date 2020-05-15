@@ -24,7 +24,7 @@ public class TopicContainerMap {
     }
 
     public static TopicContainerMap deserialize(String input) {
-        if (StringUtils.isEmpty(input)){
+        if (StringUtils.isEmpty(input)) {
             return TopicContainerMap.empty();
         }
 
@@ -43,12 +43,6 @@ public class TopicContainerMap {
         } else throw new IllegalArgumentException("Invalid topic collection map.");
     }
 
-    public String serialize() {
-        return map.entrySet().stream()
-                .map(entry -> entry.getKey() + "#" + entry.getValue())
-                .collect(Collectors.joining(","));
-    }
-
     /**
      * Creates an empty map of topic collections
      *
@@ -56,6 +50,12 @@ public class TopicContainerMap {
      */
     public static TopicContainerMap empty() {
         return new TopicContainerMap(new DualHashBidiMap<>());
+    }
+
+    public String serialize() {
+        return map.entrySet().stream()
+                .map(entry -> entry.getKey() + "#" + entry.getValue())
+                .collect(Collectors.joining(","));
     }
 
 

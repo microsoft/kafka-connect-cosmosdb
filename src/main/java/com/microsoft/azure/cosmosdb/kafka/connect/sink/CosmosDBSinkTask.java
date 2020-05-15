@@ -4,7 +4,6 @@ import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.CosmosClientBuilder;
 import com.azure.cosmos.CosmosContainer;
 import com.azure.cosmos.implementation.BadRequestException;
-import com.azure.cosmos.models.CosmosDatabaseResponse;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.kafka.connect.errors.ConnectException;
 import org.apache.kafka.connect.sink.SinkRecord;
@@ -41,7 +40,7 @@ public class CosmosDBSinkTask extends SinkTask {
                 .key(settings.getKey())
                 .buildClient();
 
-        CosmosDatabaseResponse createDbResponse = client.createDatabaseIfNotExists(settings.getDatabaseName());
+        client.createDatabaseIfNotExists(settings.getDatabaseName());
     }
 
 
@@ -59,14 +58,15 @@ public class CosmosDBSinkTask extends SinkTask {
                 .collect(Collectors.groupingBy(record ->
                         settings.getTopicContainerMap().getContainerForTopic(record.topic()).orElseThrow(
                                 () -> new IllegalStateException("No container defined for topic " + record.topic() + "."))));
-        for (String containerName : recordsByContainer.keySet()) {
+        for (Map.Entry<String, List<SinkRecord>> entry : recordsByContainer.entrySet()) {
+            String containerName = entry.getKey();
             CosmosContainer container = client.getDatabase(settings.getDatabaseName()).getContainer(containerName);
-            for (SinkRecord record : recordsByContainer.get(containerName)) {
+            for (SinkRecord record : entry.getValue()) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Writing record, value type: " + record.value().getClass().getName());
                     logger.debug("Key Schema: " + record.keySchema());
                     logger.debug("Value schema:" + record.valueSchema());
-                    logger.debug("Value.toString(): " + record.value() != null ? record.value().toString() : "<null>");
+                    logger.debug("Value.toString(): " + (record.value() != null ? record.value().toString() : "<null>"));
                 }
                 try {
                     container.createItem(record.value());

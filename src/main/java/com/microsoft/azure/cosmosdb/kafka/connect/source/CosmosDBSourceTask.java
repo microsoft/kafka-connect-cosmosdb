@@ -1,8 +1,6 @@
 package com.microsoft.azure.cosmosdb.kafka.connect.source;
 
 import com.azure.cosmos.CosmosClient;
-import com.microsoft.azure.cosmosdb.kafka.connect.sink.CosmosDBSinkTask;
-import com.microsoft.azure.cosmosdb.kafka.connect.sink.SinkSettings;
 import org.apache.kafka.connect.source.SourceRecord;
 import org.apache.kafka.connect.source.SourceTask;
 import org.slf4j.Logger;
@@ -11,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Map;
 
-public class CosmosDBSourceTask  extends SourceTask {
+public class CosmosDBSourceTask extends SourceTask {
     private static final Logger logger = LoggerFactory.getLogger(CosmosDBSourceTask.class);
     private CosmosClient client = null;
     private SourceSettings settings = null;

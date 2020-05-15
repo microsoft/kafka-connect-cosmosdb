@@ -27,12 +27,12 @@ import static junit.framework.TestCase.fail;
 import static org.mockito.Mockito.*;
 
 public class CosmosDBSinkTaskTest {
-    private CosmosDBSinkTask testTask;
-    private CosmosClient mockCosmosClient;
-    private CosmosContainer mockContainer;
     private final String topicName = "testtopic";
     private final String containerName = "container666";
     private final String databaseName = "fakeDatabase312";
+    private CosmosDBSinkTask testTask;
+    private CosmosClient mockCosmosClient;
+    private CosmosContainer mockContainer;
 
     @Before
     public void setup() throws IllegalAccessException {
@@ -77,10 +77,10 @@ public class CosmosDBSinkTaskTest {
         try {
             testTask.put(Arrays.asList(record));
             fail("Expected ConnectException on bad message");
-        } catch (ConnectException ce){
+        } catch (ConnectException ce) {
 
         } catch (Throwable t) {
-            fail("Expected ConnectException, but got: "+t.getClass().getName());
+            fail("Expected ConnectException, but got: " + t.getClass().getName());
         }
 
         verify(mockContainer, times(1)).createItem("foo");

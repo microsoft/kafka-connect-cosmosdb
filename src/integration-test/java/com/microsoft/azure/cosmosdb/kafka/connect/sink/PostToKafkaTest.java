@@ -5,7 +5,6 @@ import com.azure.cosmos.implementation.BadRequestException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.azure.cosmosdb.kafka.connect.IntegrationTest;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -13,7 +12,6 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.connect.json.JsonSerializer;
 import org.junit.Assert;
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -33,28 +31,9 @@ import static org.junit.Assert.assertNotNull;
 @Category(IntegrationTest.class)
 public class PostToKafkaTest {
 
-    static class Person {
-        String name;
-        String id;
-
-        public Person(String name, String id) {
-            this.name = name;
-            this.id = id;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public String getId() {
-            return id;
-        }
-    }
-
     private static Logger logger = LoggerFactory.getLogger(PostToKafkaTest.class);
     private String topic;
     private Properties kafkaProperties;
-
 
     @Before
     public void setUp() {
@@ -72,7 +51,7 @@ public class PostToKafkaTest {
     @Test
     public void postJsonMessage() throws InterruptedException, ExecutionException {
         logger.info("Testing post to " + kafkaProperties.getProperty("bootstrap.servers"));
-        Person person = new Person("`Lucy Ferr", RandomUtils.nextLong(1L, 9999999L)+"");
+        Person person = new Person("`Lucy Ferr", RandomUtils.nextLong(1L, 9999999L) + "");
         ObjectMapper om = new ObjectMapper();
         ProducerRecord<String, JsonNode> personRecord = new ProducerRecord<>(topic, person.getId() + "", om.valueToTree(person));
         try (KafkaProducer<String, JsonNode> producer = new KafkaProducer<>(kafkaProperties)) {
@@ -89,6 +68,24 @@ public class PostToKafkaTest {
             producer.send(record).get();
         } catch (BadRequestException bre) {
             Assert.fail("Connector should not expose CosmosDB internals");
+        }
+    }
+
+    static class Person {
+        String name;
+        String id;
+
+        public Person(String name, String id) {
+            this.name = name;
+            this.id = id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getId() {
+            return id;
         }
     }
 
