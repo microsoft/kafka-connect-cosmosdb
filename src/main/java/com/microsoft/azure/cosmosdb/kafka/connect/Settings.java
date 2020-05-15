@@ -1,7 +1,5 @@
 package com.microsoft.azure.cosmosdb.kafka.connect;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.kafka.common.internals.Topic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,21 +10,25 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class Settings {
-    private static final Logger logger = LoggerFactory.getLogger(Settings.class);
-
     public static final String PREFIX = "connect.cosmosdb";
-
+    private static final Logger logger = LoggerFactory.getLogger(Settings.class);
+    private Long taskTimeout;
+    private Long taskBufferSize;
+    private String endpoint;
+    private String key;
+    private String databaseName;
+    private TopicContainerMap topicContainerMap = TopicContainerMap.empty();
     private final List<Setting> allSettings = Arrays.asList(
             //Add all settings here:
             new NumericSetting(PREFIX + ".task.timeout", "The max number of milliseconds the source task will use to read documents before send them to Kafka.",
                     "Task Timeout", SettingDefaults.TASK_TIMEOUT, this::setTaskTimeout, this::getTaskTimeout),
-            new NumericSetting(PREFIX + ".task.buffer.size","The max size the collection of documents the source task will buffer before send them to Kafka.",
+            new NumericSetting(PREFIX + ".task.buffer.size", "The max size the collection of documents the source task will buffer before send them to Kafka.",
                     "Task reader buffer size", SettingDefaults.TASK_BUFFER_SIZE, this::setTaskBufferSize, this::getTaskBufferSize),
-            new Setting(PREFIX+".connection.endpoint", "The Cosmos DB endpoint.", "CosmosDB Endpoint", this::setEndpoint, this::getEndpoint),
-            new Setting(PREFIX+".master.key", "The connection master key.", "Master Key", this::setKey, this::getKey),
-            new Setting(PREFIX+".cosmosdb.databasename", "The Cosmos DB target database.", "CosmosDB Database Name", this::setDatabaseName, this::getDatabaseName),
-            new Setting(PREFIX+".containers.topicmap", "A comma delimited list of collections mapped to their partitions. Formatted coll1#topic1,coll2#topic2.",
-                    "Topic-Container map", value -> this.setTopicContainerMap(TopicContainerMap.deserialize(value)), ()->this.getTopicContainerMap().serialize())
+            new Setting(PREFIX + ".connection.endpoint", "The Cosmos DB endpoint.", "CosmosDB Endpoint", this::setEndpoint, this::getEndpoint),
+            new Setting(PREFIX + ".master.key", "The connection master key.", "Master Key", this::setKey, this::getKey),
+            new Setting(PREFIX + ".cosmosdb.databasename", "The Cosmos DB target database.", "CosmosDB Database Name", this::setDatabaseName, this::getDatabaseName),
+            new Setting(PREFIX + ".containers.topicmap", "A comma delimited list of collections mapped to their partitions. Formatted coll1#topic1,coll2#topic2.",
+                    "Topic-Container map", value -> this.setTopicContainerMap(TopicContainerMap.deserialize(value)), () -> this.getTopicContainerMap().serialize())
     );
 
     /**
@@ -45,7 +47,7 @@ public class Settings {
      */
     public void populate(Map<String, String> values) {
         logger.debug("Populating settings from map:");
-        if (logger.isDebugEnabled()){
+        if (logger.isDebugEnabled()) {
 
         }
 
@@ -58,18 +60,16 @@ public class Settings {
         }
     }
 
-
     /**
      * Returns a key-value representation of the settings
+     *
      * @return
      */
-    public Map<String, String> asMap(){
+    public Map<String, String> asMap() {
 
         return getAllSettings().stream()
                 .collect(Collectors.toMap(Setting::getName, Setting::getValueOrDefault));
     }
-
-    private Long taskTimeout;
 
     /**
      * Gets the task timeout
@@ -89,8 +89,6 @@ public class Settings {
         this.taskTimeout = taskTimeout;
     }
 
-    private Long taskBufferSize;
-
     /**
      * Gets the task buffer size
      *
@@ -109,11 +107,9 @@ public class Settings {
         this.taskBufferSize = taskBufferSize;
     }
 
-
-    private String endpoint;
-
     /**
      * Returns the CosmosDB Endpoint
+     *
      * @return The CosmosDB Endpoint
      */
     public String getEndpoint() {
@@ -122,16 +118,16 @@ public class Settings {
 
     /**
      * Sets the cosmosDB endpoint
+     *
      * @param endpoint The cosmosDB endpoint
      */
     public void setEndpoint(String endpoint) {
         this.endpoint = endpoint;
     }
 
-    private String key;
-
     /**
      * Returns the CosmosDB Key
+     *
      * @return The CosmosDB Key
      */
     public String getKey() {
@@ -140,16 +136,16 @@ public class Settings {
 
     /**
      * Sets the CosmosDB key
+     *
      * @param key The CosmosDB key
      */
     public void setKey(String key) {
         this.key = key;
     }
 
-    private String databaseName;
-
     /**
      * Retrieves the CosmosDB database name
+     *
      * @return
      */
     public String getDatabaseName() {
@@ -158,16 +154,16 @@ public class Settings {
 
     /**
      * Sets the CosmosDB Database Name
+     *
      * @param databaseName The CosmosDB Database Name
      */
     public void setDatabaseName(String databaseName) {
         this.databaseName = databaseName;
     }
 
-    private TopicContainerMap topicContainerMap = TopicContainerMap.empty();
-
     /**
      * Gets the map of Kafka topics to CosmosDB collections
+     *
      * @return
      */
     public TopicContainerMap getTopicContainerMap() {
@@ -176,6 +172,7 @@ public class Settings {
 
     /**
      * Sets the map of Kafka topics to CosmosDB collections
+     *
      * @param topicCollectionMap
      */
     public void setTopicContainerMap(TopicContainerMap topicCollectionMap) {

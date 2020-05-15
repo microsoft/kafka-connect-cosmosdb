@@ -2,7 +2,6 @@ package com.microsoft.azure.cosmosdb.kafka.connect.sink;
 
 import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.CosmosClientBuilder;
-import com.azure.cosmos.CosmosContainer;
 import com.azure.cosmos.models.CosmosContainerResponse;
 import com.azure.cosmos.models.FeedOptions;
 import com.azure.cosmos.util.CosmosPagedIterable;
@@ -32,35 +31,6 @@ public class SinkTaskWriteTest {
     private SinkSettings settings;
     private String containerName;
     private CosmosClient cosmosClient;
-
-    private static class Person {
-        private final String firstName;
-        private final String lastName;
-        private final String id;
-
-        public static Person newRandom() {
-            return new Person(RandomStringUtils.randomAlphabetic(10), "Mc" + RandomStringUtils.randomAlphabetic(12), Long.toString(RandomUtils.nextLong()));
-        }
-
-        private Person(String firstName, String lastName, String id) {
-            this.firstName = firstName;
-            this.lastName = lastName;
-            this.id = id;
-        }
-
-        public String getFirstName() {
-            return firstName;
-        }
-
-        public String getLastName() {
-            return lastName;
-        }
-
-        public String getId() {
-            return id;
-        }
-    }
-
 
     @Before
     public void setup() {
@@ -103,6 +73,34 @@ public class SinkTaskWriteTest {
     @After
     public void tearDown() {
         cosmosClient.getDatabase(settings.getDatabaseName()).getContainer(containerName).delete();
+    }
+
+    private static class Person {
+        private final String firstName;
+        private final String lastName;
+        private final String id;
+
+        private Person(String firstName, String lastName, String id) {
+            this.firstName = firstName;
+            this.lastName = lastName;
+            this.id = id;
+        }
+
+        public static Person newRandom() {
+            return new Person(RandomStringUtils.randomAlphabetic(10), "Mc" + RandomStringUtils.randomAlphabetic(12), Long.toString(RandomUtils.nextLong()));
+        }
+
+        public String getFirstName() {
+            return firstName;
+        }
+
+        public String getLastName() {
+            return lastName;
+        }
+
+        public String getId() {
+            return id;
+        }
     }
 
 
