@@ -3,14 +3,13 @@
   "config": {
     "connector.class": "com.microsoft.azure.cosmosdb.kafka.connect.sink.CosmosDBSinkConnector",
     "tasks.max": "1",
-    "topics":"connect-test",
-    "value.converter":"JsonConverter",
+    "topics": "connect-test",
+    "value.converter": "JsonConverter",
     "value.converter.schemas.enable": "false",
-
+    "errors.tolerance": "all",
     "connect.cosmosdb.cosmosdb.databasename": "",
     "connect.cosmosdb.master.key": "",
-    "connect.cosmosdb.connection.endpoint":"",
-    "connect.cosmosdb.containers.topicmap" : ""
-
+    "connect.cosmosdb.connection.endpoint": "",
+    "connect.cosmosdb.containers.topicmap": ""
   }
 }
