@@ -2,7 +2,13 @@
   "name": "cosmosdb-source-connector",
   "config": {
     "connector.class": "com.microsoft.azure.cosmosdb.kafka.connect.source.CosmosDBSourceConnector",
-    "tasks.max": "1",
-    "topics":"connect-test"
+    "tasks.max": "3",
+    "topics":"CartContainerByState",
+    "connect.cosmosdb.cosmosdb.databasename": "StoreDatabase",
+    "connect.cosmosdb.master.key": "",
+    "connect.cosmosdb.connection.endpoint":"https://cosmoslab39590.documents.azure.com:443/",
+    "connect.cosmosdb.containers.topicmap" : "CartContainerByState#CartContainer",
+    "connect.cosmosdb.containers" : "CartContainer",
+    "connect.cosmosdb.task.poll.interval" : "10000"
   }
 }
