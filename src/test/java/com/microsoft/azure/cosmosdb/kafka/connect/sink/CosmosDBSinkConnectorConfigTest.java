@@ -17,17 +17,17 @@ import static org.junit.Assert.*;
  * Tests the configuration of Sink Provider
  */
 public class CosmosDBSinkConnectorConfigTest {
-    private static final Setting TIMEOUT_SETTING = new SinkSettings().getAllSettings().stream().filter(s->s.getDisplayName().equals("Task Timeout")).findFirst().orElse(null);
-    private static final Setting COSMOSDB_ENDPOINT_SETTING =  new SinkSettings().getAllSettings().stream().filter(s->s.getDisplayName().equals("CosmosDB Database Name")).findFirst().orElse(null);
+    private static final Setting TIMEOUT_SETTING = new SinkSettings().getAllSettings().stream().filter(s -> s.getDisplayName().equals("Task Timeout")).findFirst().orElse(null);
+    private static final Setting COSMOSDB_ENDPOINT_SETTING = new SinkSettings().getAllSettings().stream().filter(s -> s.getDisplayName().equals("CosmosDB Database Name")).findFirst().orElse(null);
 
-    private Map<String,String> newMapWithMinimalSettings(){
+    private Map<String, String> newMapWithMinimalSettings() {
         HashMap<String, String> minimumSettings = new HashMap<>();
         minimumSettings.put(COSMOSDB_ENDPOINT_SETTING.getName(), "http://example.org/notarealendpoint");
         return minimumSettings;
     }
 
     @Test
-    public void testConfig(){
+    public void testConfig() {
         ConfigDef configDef = new CosmosDBSinkConnector().config();
         assertNotNull(configDef);
 
@@ -38,23 +38,23 @@ public class CosmosDBSinkConnectorConfigTest {
 
 
     @Test
-    public void testAbsentDefaults(){
+    public void testAbsentDefaults() {
         //Database name does not have a default setting. Let's see if the configdef does
 
-        Setting dbNameSetting = new SinkSettings().getAllSettings().stream().filter(s->s.getDisplayName().equals("CosmosDB Database Name")).findFirst().orElse(null);
+        Setting dbNameSetting = new SinkSettings().getAllSettings().stream().filter(s -> s.getDisplayName().equals("CosmosDB Database Name")).findFirst().orElse(null);
         assertNotNull(dbNameSetting);
         assertNull(new CosmosDBSinkConnector().config().defaultValues().get(dbNameSetting.getName()));
     }
 
     @Test
-    public void testPresentDefaults(){
+    public void testPresentDefaults() {
         //The task timeout has a default setting. Let's see if the configdef does
         assertNotNull(TIMEOUT_SETTING.getDefaultValue().get());
         assertEquals(TIMEOUT_SETTING.getDefaultValue().get(), new CosmosDBSinkConnector().config().defaultValues().get(TIMEOUT_SETTING.getName()));
     }
 
     @Test
-    public void testNumericValidation(){
+    public void testNumericValidation() {
         Map<String, String> settingAssignment = newMapWithMinimalSettings();
 
         settingAssignment.put(TIMEOUT_SETTING.getName(), "definitely not a number");

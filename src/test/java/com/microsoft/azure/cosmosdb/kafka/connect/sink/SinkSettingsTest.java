@@ -3,7 +3,6 @@ package com.microsoft.azure.cosmosdb.kafka.connect.sink;
 import com.microsoft.azure.cosmosdb.kafka.connect.Setting;
 import com.microsoft.azure.cosmosdb.kafka.connect.SettingDefaults;
 import com.microsoft.azure.cosmosdb.kafka.connect.Settings;
-import org.apache.kafka.connect.runtime.SinkConnectorConfig;
 import org.apache.kafka.connect.sink.SinkTask;
 import org.junit.Assert;
 import org.junit.Test;

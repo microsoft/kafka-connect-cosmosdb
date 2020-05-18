@@ -11,6 +11,8 @@ import java.util.List;
  * Contains settings for the CosmosDB Kafka Source Connector
  */
 public class SourceSettings extends Settings {
+    private String assignedPartitions;
+    private String postProcessor;
     private final List<Setting> sourceSettings = Arrays.asList(
             new Setting(Settings.PREFIX + ".source.post-processor", "Comma-separated list of Source Post-Processor class names to use for post-processing",
                     "Source post-processor", this::setPostProcessor, this::getPostProcessor),

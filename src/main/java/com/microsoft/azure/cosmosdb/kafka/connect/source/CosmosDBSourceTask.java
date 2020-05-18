@@ -30,7 +30,7 @@ import java.util.function.Consumer;
 
 import static java.lang.Thread.sleep;
 
-public class CosmosDBSourceTask  extends SourceTask {
+public class CosmosDBSourceTask extends SourceTask {
     private static final Logger logger = LoggerFactory.getLogger(CosmosDBSourceTask.class);
     private final AtomicBoolean running = new AtomicBoolean(false);
     private CosmosAsyncClient client = null;
