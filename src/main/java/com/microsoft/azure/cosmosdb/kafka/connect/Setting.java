@@ -8,6 +8,9 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+/**
+ * Represents a setting that is configured in Kafka Connect. Maps such settings to POJO accessors and modifiers.
+ */
 public class Setting {
     private final String name;
     private final String documentation;
@@ -17,6 +20,14 @@ public class Setting {
     private final Optional<Object> defaultValue;
 
 
+    /**
+     * Defines a setting
+     * @param name The name of the setting, as configured in Kafka Connect configuration.
+     * @param documentation The description of the setting
+     * @param displayName How the setting is displayed in a UI
+     * @param modifier A setter that gets invoked to enable idiomatic access to the value.
+     * @param accessor A getter that gets invoked to read the value of the setting
+     */
     public Setting(String name, String documentation, String displayName, Consumer<String> modifier, Supplier<String> accessor) {
         this.name = name;
         this.documentation = documentation;
@@ -26,6 +37,16 @@ public class Setting {
         this.displayName = displayName;
     }
 
+
+    /**
+     * Defines a setting
+     * @param name The name of the setting, as configured in Kafka Connect configuration.
+     * @param documentation The description of the setting
+     * @param displayName How the setting is displayed in a UI
+     * @param defaultValue The default value of the setting
+     * @param modifier A setter that gets invoked to enable idiomatic access to the value.
+     * @param accessor A getter that gets invoked to read the value of the setting
+     */
     public Setting(String name, String documentation, String displayName, Object defaultValue, Consumer<String> modifier, Supplier<String> accessor) {
         this.name = name;
         this.documentation = documentation;
@@ -36,6 +57,9 @@ public class Setting {
 
     }
 
+    /**
+     * @return The name of the setting as defined in the connector configuration.
+     */
     public String getName() {
         return name;
     }
@@ -45,9 +69,7 @@ public class Setting {
     }
 
     /**
-     * Returns the assigned value of a setting or its default
-     *
-     * @return
+     * @return the assigned value of a setting or its default
      */
     public String getValueOrDefault() {
         String assignedValue = getAccessor().get();
@@ -57,13 +79,14 @@ public class Setting {
             return getDefaultValue().isPresent() ? getDefaultValue().get().toString() : "";
     }
 
+    /**
+     * @return The modifier for this setting.
+     */
     public Consumer<String> getModifier() {
         return modifier;
     }
 
     /**
-     * Returns the default value for the setting, if specified.
-     *
      * @return the default value for the setting, if specified.
      */
     public Optional<Object> getDefaultValue() {

@@ -7,9 +7,9 @@
     "value.converter": "JsonConverter",
     "value.converter.schemas.enable": "false",
     "errors.tolerance": "all",
-    "connect.cosmosdb.cosmosdb.databasename": "azure-spring-cloud-cosmosdb",
-    "connect.cosmosdb.master.key": "vY0nLvSUAnef5eKMKMxynJVvMBpTIi3UMsAfSdPwg1vNKd9evrZbVGbA3lZOVAjLvwls1A3BeDxcl3KAEG8CRQ==",
-    "connect.cosmosdb.connection.endpoint": "https://sclabc-spva6my4jtfcm.documents.azure.com:443/",
-    "connect.cosmosdb.containers.topicmap": "connect-test#sinktasktest4321"
+    "connect.cosmosdb.cosmosdb.databasename": "",
+    "connect.cosmosdb.master.key": "",
+    "connect.cosmosdb.connection.endpoint": "",
+    "connect.cosmosdb.containers.topicmap": ""
   }
 }
