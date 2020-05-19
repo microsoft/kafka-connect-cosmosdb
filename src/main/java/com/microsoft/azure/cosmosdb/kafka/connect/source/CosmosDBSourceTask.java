@@ -80,9 +80,10 @@ public class CosmosDBSourceTask extends SourceTask {
     }
 
     @Override
-    public List<SourceRecord> poll() throws InterruptedException {
+    public List<SourceRecord> poll() throws InterruptedException, IllegalStateException {
         List<SourceRecord> records = new ArrayList<>();
         Map<String, String> partition = new HashMap<>();
+        long maxWaitTime = System.currentTimeMillis() + this.settings.getTaskTimeout();
         partition.put("DatabaseName",this.settings.getDatabaseName());
         partition.put("Container", this.settings.getContainerList());
         TopicContainerMap topicContainerMap = this.settings.getTopicContainerMap();
@@ -92,7 +93,6 @@ public class CosmosDBSourceTask extends SourceTask {
         while(running.get()){
             Long bufferSize = this.settings.getTaskBufferSize();
             Long batchSize = this.settings.getTaskBatchSize();
-            long maxWaitTime = System.currentTimeMillis() + this.settings.getTaskTimeout();
             int count = 0;
             while(bufferSize > 0 && count < batchSize && System.currentTimeMillis() < maxWaitTime) {
                 JsonNode node = this.queue.poll(this.settings.getTaskPollInterval(), TimeUnit.MILLISECONDS);
@@ -111,7 +111,7 @@ public class CosmosDBSourceTask extends SourceTask {
                 count++;
             }
 
-            if (records.size() > 0) {
+            if (records.size() > 0 || System.currentTimeMillis() > maxWaitTime) {
                 if(logger.isDebugEnabled()) {
                     logger.debug(String.format("Sending %d documents.", records.size()));
                 }
