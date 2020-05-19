@@ -16,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.connect.json.JsonSerializer;
 import org.junit.Assert;
@@ -73,25 +74,17 @@ public class PostToKafkaTest {
 
 
     /**
-     * Set up standard Kafka client properties, subject to modification in individual tests.
+     * Post a valid JSON message that should go through to CosmosDB.
+     * Then read the result from CosmosDB.
      */
-    @Before
-    public void setUp() {
-        assertNotNull("kafka_topic variable must be set.");
+    @Test
+    public void postJsonMessage() throws InterruptedException, ExecutionException {
         kafkaProperties = new Properties();
         kafkaProperties.put("bootstrap.servers", "localhost:9092");
         kafkaProperties.put("client.id", "IntegrationTest");
         kafkaProperties.put("key.serializer", StringSerializer.class.getName());
         kafkaProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class.getName());
         kafkaProperties.put("acks", "all");
-    }
-
-    /**
-     * Post a valid JSON message that should go through to CosmosDB.
-     * Then read the result from CosmosDB.
-     */
-    @Test
-    public void postJsonMessage() throws InterruptedException, ExecutionException {
         logger.info("Testing post to " + kafkaProperties.getProperty("bootstrap.servers"));
         Person person = new Person("`Lucy Ferr", RandomUtils.nextLong(1L, 9999999L) + "");
         ObjectMapper om = new ObjectMapper();
@@ -104,21 +97,6 @@ public class PostToKafkaTest {
         Optional<Person> retrievedPerson = readResponse.stream().filter(item -> item.getId().equals(person.getId())).findFirst();
         Assert.assertNotNull("Person could not be retrieved", retrievedPerson.orElse(null));
 
-    }
-
-    /**
-     * Send an invalid JSON message.
-     */
-    @Test
-    public void postPlainTextPayload() throws InterruptedException, ExecutionException {
-        logger.info("Testing post to " + kafkaProperties.getProperty("bootstrap.servers"));
-        kafkaProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-        ProducerRecord<String, String> record = new ProducerRecord<>(topic, "{\"schema\":{\"type\":\"string\",\"optional\":false},\"payload\":\"foo\"}");
-        try (KafkaProducer<String, String> producer = new KafkaProducer<>(kafkaProperties)) {
-            producer.send(record).get();
-        } catch (BadRequestException bre) {
-            Assert.fail("Connector should not expose CosmosDB internals");
-        }
     }
 
     /**
