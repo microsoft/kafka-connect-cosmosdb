@@ -9,4 +9,4 @@ try {
         throw $_;
     }
 }
-Invoke-RestMethod "http://localhost:8083/connectors" -Method Post -Body (Get-Content "source.config.json") -ContentType 'application/json'
+Invoke-RestMethod "http://localhost:8083/connectors" -Method Post -Body (Get-Content "resources/source.config.json") -ContentType 'application/json'

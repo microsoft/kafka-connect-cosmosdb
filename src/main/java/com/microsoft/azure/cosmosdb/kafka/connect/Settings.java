@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Contains settings applicable to both Source and Sink CosmosDB connectors.
+ */
 public class Settings {
     public static final String PREFIX = "connect.cosmosdb";
     private static final Logger logger = LoggerFactory.getLogger(Settings.class);

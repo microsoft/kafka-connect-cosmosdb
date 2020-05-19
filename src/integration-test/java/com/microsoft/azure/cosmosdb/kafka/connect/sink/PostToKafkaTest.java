@@ -48,6 +48,10 @@ public class PostToKafkaTest {
     private static CosmosContainer targetContainer;
     private Properties kafkaProperties;
 
+
+    /**
+     * Load CosmosDB configuration from the connector config JSON and set up CosmosDB client.
+     */
     @BeforeClass
     public static void readConnectionData() throws URISyntaxException, IOException {
         URL configFileUrl = PostToKafkaTest.class.getClassLoader().getResource("sink.config.json");
@@ -67,6 +71,10 @@ public class PostToKafkaTest {
         targetContainer = targetDatabase.getContainer(StringUtils.substringAfter(topicContainerMap, "#"));
     }
 
+
+    /**
+     * Set up standard Kafka client properties, subject to modification in individual tests.
+     */
     @Before
     public void setUp() {
         assertNotNull("kafka_topic variable must be set.");
@@ -78,6 +86,10 @@ public class PostToKafkaTest {
         kafkaProperties.put("acks", "all");
     }
 
+    /**
+     * Post a valid JSON message that should go through to CosmosDB.
+     * Then read the result from CosmosDB.
+     */
     @Test
     public void postJsonMessage() throws InterruptedException, ExecutionException {
         logger.info("Testing post to " + kafkaProperties.getProperty("bootstrap.servers"));
@@ -94,6 +106,9 @@ public class PostToKafkaTest {
 
     }
 
+    /**
+     * Send an invalid JSON message.
+     */
     @Test
     public void postPlainTextPayload() throws InterruptedException, ExecutionException {
         logger.info("Testing post to " + kafkaProperties.getProperty("bootstrap.servers"));
@@ -106,6 +121,9 @@ public class PostToKafkaTest {
         }
     }
 
+    /**
+     * A simple entity to serialize to/deserialize from JSON in tests.
+     */
     static class Person {
         String name;
         String id;

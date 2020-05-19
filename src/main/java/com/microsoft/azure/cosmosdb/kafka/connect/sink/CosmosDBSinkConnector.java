@@ -12,6 +12,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * A Sink connector that publishes topic messages to CosmosDB.
+ */
 public class CosmosDBSinkConnector extends SinkConnector {
 
     private static Logger logger = LoggerFactory.getLogger(CosmosDBSinkConnector.class);

@@ -6,7 +6,7 @@
     "topics":"CartContainerByState",
     "connect.cosmosdb.cosmosdb.databasename": "StoreDatabase",
     "connect.cosmosdb.master.key": "",
-    "connect.cosmosdb.connection.endpoint":"https://cosmoslab39590.documents.azure.com:443/",
+    "connect.cosmosdb.connection.endpoint":"",
     "connect.cosmosdb.containers.topicmap" : "CartContainerByState#CartContainer",
     "connect.cosmosdb.containers" : "CartContainer",
     "connect.cosmosdb.task.poll.interval" : "10000"
