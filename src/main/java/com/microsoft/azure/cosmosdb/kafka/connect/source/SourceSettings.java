@@ -16,24 +16,39 @@ public class SourceSettings extends Settings {
     private final List<Setting> sourceSettings = Arrays.asList(
             new Setting(Settings.PREFIX + ".source.post-processor", "Comma-separated list of Source Post-Processor class names to use for post-processing",
                     "Source post-processor", this::setPostProcessor, this::getPostProcessor),
-            new Setting(Settings.PREFIX + ".assigned.partitions", "The CosmosDB partitions a task has been assigned",
-                    "Assigned Partitions", this::setAssignedPartitions, this::getAssignedPartitions)
+            new Setting(Settings.PREFIX + ".assigned.container", "The CosmosDB Feed Container assigned to the task.",
+                    "Assigned Container", this::setAssignedContainer, this::getAssignedContainer),
+          new Setting(Settings.PREFIX + ".worker.name", "The CosmosDB worker name.",
+            "Worker name", this::setWorkerName, this::getWorkerName)
 
     );
 
-    private String getAssignedPartitions() {
-        return this.assignedPartitions;
+
+    private String workerName;
+
+    public void setWorkerName(String workerName) {
+        this.workerName = workerName;
     }
 
-    private void setAssignedPartitions(String assignedPartitions) {
-        this.assignedPartitions = assignedPartitions;
+    public String getWorkerName() {
+        return this.workerName;
     }
 
-    private String getPostProcessor() {
+    private String assignedContainer;
+
+    public String getAssignedContainer() {
+        return this.assignedContainer;
+    }
+
+    public void setAssignedContainer(String assignedPartitions) {
+        this.assignedContainer = assignedPartitions;
+    }
+
+    public String getPostProcessor() {
         return this.postProcessor;
     }
 
-    private void setPostProcessor(String postProcessor) {
+    public void setPostProcessor(String postProcessor) {
         this.postProcessor = postProcessor;
     }
 
