@@ -1,7 +1,6 @@
 package com.microsoft.azure.cosmosdb.kafka.connect.source;
 
 import com.microsoft.azure.cosmosdb.kafka.connect.Settings;
-import com.microsoft.azure.cosmosdb.kafka.connect.sink.SinkSettings;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -40,6 +39,19 @@ public class SourceSettingsTest {
         assertEquals(10000L, (long) sourceSettings.getTaskBufferSize());
         assertEquals(100L, (long) sourceSettings.getTaskBatchSize());
         assertEquals(1000L, (long) sourceSettings.getTaskPollInterval());
+
+    }
+
+    @Test
+    public void testContainerListEmpty(){
+        HashMap<String, String> source = new HashMap<>();
+        SourceSettings sourceSettings = new SourceSettings();
+        sourceSettings.populate(source);
+        // Check the default is empty string.
+        assertEquals("",  sourceSettings.getContainerList());
+        // Manually set it to empty.
+        sourceSettings.setContainerList("");
+        assertEquals("",  sourceSettings.getContainerList());
 
     }
 }
