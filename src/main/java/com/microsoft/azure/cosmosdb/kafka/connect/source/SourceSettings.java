@@ -44,9 +44,6 @@ public class SourceSettings extends Settings {
         this.assignedContainer = assignedPartitions;
     }
 
-
-    private String postProcessor;
-
     public String getPostProcessor() {
         return this.postProcessor;
     }

@@ -1,11 +1,14 @@
 package com.microsoft.azure.cosmosdb.kafka.connect;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Settings {
     public static final String PREFIX = "connect.cosmosdb";
@@ -185,17 +188,14 @@ public class Settings {
         this.topicContainerMap = topicCollectionMap;
     }
 
-    private ArrayList<String> containerList;
+    private List<String> containerList;
 
     /**
      * Sets the List of Container names
      * @param commaSeparatedContainerList
      */
     public void setContainerList(String commaSeparatedContainerList) {
-        this.containerList = new ArrayList<String>(Optional.ofNullable(StringUtils.split(commaSeparatedContainerList, ","))
-                .map(Arrays::stream)
-                .orElseGet(Stream::empty)
-                .collect(Collectors.toList()));
+        this.containerList =commaSeparatedContainerList != null ? Arrays.asList(StringUtils.split(commaSeparatedContainerList,",")) : Collections.emptyList() ;
     }
 
     /**

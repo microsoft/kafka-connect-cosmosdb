@@ -124,7 +124,7 @@ public class CosmosDBSourceTask extends SourceTask {
     @Override
     public void stop() {
         logger.info("Stopping CosmosDB source task.");
-        while(this.queue.isEmpty()){
+        while(!this.queue.isEmpty()){
             // Wait till the items are drained by poll before stopping.
             try {
                 sleep(500);
@@ -161,23 +161,25 @@ public class CosmosDBSourceTask extends SourceTask {
                 .hostName(hostName)
                 .feedContainer(feedContainer)
                 .leaseContainer(leaseContainer)
-                .handleChanges((List<JsonNode> docs) -> {
-                    for (JsonNode document : docs) {
-                        // Blocks for each transfer till it is processed by the poll method.
-                        // If we fail before checkpointing then the new worker starts again.
-                        try {
-                            if(logger.isDebugEnabled()) {
-                                logger.debug("Queuing document : " + document.toString());
-                            }
-                            this.queue.transfer(document);
-                        } catch (InterruptedException e) {
-                            logger.error("Interrupted in changeFeedReader.");
-                        }
-
-                    }
-                })
+                .handleChanges(this::handleCosmosDbChanges)
                 .build();
 
+    }
+
+    protected void handleCosmosDbChanges(List<JsonNode> docs)  {
+        for (JsonNode document : docs) {
+            // Blocks for each transfer till it is processed by the poll method.
+            // If we fail before checkpointing then the new worker starts again.
+            try {
+                if(logger.isDebugEnabled()) {
+                    logger.debug("Queuing document : " + document.toString());
+                }
+                this.queue.transfer(document);
+            } catch (InterruptedException e) {
+                logger.error("Interrupted in changeFeedReader.", e);
+            }
+
+        }
     }
 
     private  CosmosAsyncContainer createNewLeaseContainer(CosmosAsyncClient client, String databaseName, String leaseCollectionName) {
@@ -188,7 +190,18 @@ public class CosmosDBSourceTask extends SourceTask {
         logger.info("Creating new lease container.");
         try {
             leaseContainerResponse = leaseCollectionLink.read().block();
-        } catch (CosmosClientException ex) {
+        } catch (RuntimeException ex) {
+            // Swallowing exceptions when the type is CosmosClientException and statusCode is 404
+            if (ex instanceof CosmosClientException) {
+                CosmosClientException cosmosClientException = (CosmosClientException) ex;
+
+                if (cosmosClientException.getStatusCode() == 404) {
+                    throw ex;
+                }
+            } else {
+                throw ex;
+            }
+
             logger.info("Lease container does not exist" + ex.getMessage());
         }
 
