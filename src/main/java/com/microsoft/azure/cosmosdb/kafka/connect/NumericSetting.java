@@ -6,6 +6,9 @@ import org.apache.kafka.common.config.ConfigDef;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+/**
+ * Represents a setting that must be a number
+ */
 public class NumericSetting extends Setting {
 
     public NumericSetting(String name, String documentation, String displayName, Long defaultValue, Consumer<Long> modifier, Supplier<Long> accessor) {

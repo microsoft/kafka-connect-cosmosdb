@@ -5,7 +5,6 @@ import com.azure.cosmos.CosmosClientBuilder;
 import com.azure.cosmos.CosmosContainer;
 import com.azure.cosmos.implementation.BadRequestException;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.kafka.connect.errors.ConnectException;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.apache.kafka.connect.sink.SinkTask;
 import org.slf4j.Logger;
@@ -71,7 +70,7 @@ public class CosmosDBSinkTask extends SinkTask {
                 try {
                     container.createItem(record.value());
                 } catch (BadRequestException bre) {
-                    throw new ConnectException("Unable to write to CosmosDB: " + record.key(), bre);
+                    throw new CosmosDBWriteException(record, bre);
                 }
             }
         }

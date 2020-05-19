@@ -10,6 +10,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
+/**
+ * The CosmosDB Source Connector
+ */
 public class CosmosDBSourceConnector extends SourceConnector {
     private static final Logger logger = LoggerFactory.getLogger(CosmosDBSourceConnector.class);
     private SourceSettings settings = null;

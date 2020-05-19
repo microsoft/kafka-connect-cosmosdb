@@ -9,4 +9,4 @@ try {
         throw $_;
     }
 }
-Invoke-RestMethod "http://localhost:8083/connectors" -Method Post -Body (Get-Content "sink.config.json") -ContentType 'application/json'
+Invoke-RestMethod "http://localhost:8083/connectors" -Method Post -Body (Get-Content "resources/sink.config.json") -ContentType 'application/json'
