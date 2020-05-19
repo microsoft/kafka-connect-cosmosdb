@@ -34,13 +34,14 @@ public class CosmosDBSourceTaskTest {
     private CosmosAsyncClient mockCosmosClient;
     private CosmosAsyncContainer mockFeedContainer;
     private CosmosAsyncContainer mockLeaseContainer;
+    private SourceSettings settings;
 
     @Before
     public void setup() throws IllegalAccessException {
         testTask = new CosmosDBSourceTask();
 
         //Configure settings
-        SourceSettings settings = new SourceSettings();
+        settings = new SourceSettings();
         settings.setTopicContainerMap(TopicContainerMap.deserialize(topicName + "#" + containerName));
         settings.setDatabaseName(databaseName);
         settings.setAssignedContainer(containerName);
@@ -87,5 +88,59 @@ public class CosmosDBSourceTaskTest {
 
         List<SourceRecord>  result=testTask.poll();
         Assert.assertEquals(result.size(),1);
+    }
+
+    @Test
+    public void testZeroBatchSize() throws InterruptedException, JsonProcessingException, IllegalAccessException {
+        String jsonString = "{\"k1\":\"v1\",\"k2\":\"v2\"}";
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode actualObj = mapper.readTree(jsonString);
+        List<JsonNode> changes = new ArrayList<>();
+        changes.add(actualObj);
+        settings.setTaskBatchSize(0L);
+        FieldUtils.writeField(testTask, "settings", settings, true);
+
+        new Thread(() -> {
+            testTask.handleCosmosDbChanges(changes);
+        }).start();
+
+        List<SourceRecord>  result=testTask.poll();
+        Assert.assertEquals(result.size(),0);
+    }
+
+    @Test
+    public void testSmallBufferSize() throws InterruptedException, JsonProcessingException, IllegalAccessException {
+        String jsonString = "{\"k1\":\"v1\",\"k2\":\"v2\"}";
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode actualObj = mapper.readTree(jsonString);
+        List<JsonNode> changes = new ArrayList<>();
+        changes.add(actualObj);
+        settings.setTaskBufferSize(1L);
+        FieldUtils.writeField(testTask, "settings", settings, true);
+
+        new Thread(() -> {
+            testTask.handleCosmosDbChanges(changes);
+        }).start();
+
+        List<SourceRecord>  result=testTask.poll();
+        Assert.assertEquals(result.size(),0);
+    }
+
+
+    @Test(expected=IllegalStateException.class)
+    public void testEmptyAssignedContainerThrowsIllegalStateException() throws InterruptedException, JsonProcessingException, IllegalAccessException {
+        String jsonString = "{\"k1\":\"v1\",\"k2\":\"v2\"}";
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode actualObj = mapper.readTree(jsonString);
+        List<JsonNode> changes = new ArrayList<>();
+        changes.add(actualObj);
+        settings.setAssignedContainer("");
+        FieldUtils.writeField(testTask, "settings", settings, true);
+
+        new Thread(() -> {
+            testTask.handleCosmosDbChanges(changes);
+        }).start();
+
+        List<SourceRecord>  result=testTask.poll();
     }
 }
