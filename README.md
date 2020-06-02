@@ -20,13 +20,8 @@ The sink & source connectors are configurable in order to support
 
 Since key and value settings can be independently configured, it is possible to work with different data formats for records' keys and values respectively.
 
-_NOTE: Even when using RAW JSON mode i.e. with [StringConverter](https://kafka.apache.org/21/javadoc/index.html?org/apache/kafka/connect/storage/StringConverter.html) {:target="_blank"} the expected Strings have to be valid and parsable JSON._
+_NOTE: Even when using RAW JSON mode i.e. with [StringConverter](https://kafka.apache.org/21/javadoc/index.html?org/apache/kafka/connect/storage/StringConverter.html) the expected Strings have to be valid and parsable JSON._
 
-[link](url){:target="_blank"}
-
-[Google](https://google.com" target="_blank)
-
-[Hello, world!](http://example.com/){target="_blank"}
 
 #### Configuration example for JSON plain
 ```properties
