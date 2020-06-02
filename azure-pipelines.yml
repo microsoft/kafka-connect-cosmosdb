@@ -1,0 +1,38 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- master
+
+variables:      # pipeline-level
+  projName: 'kafka-connect-cosmosdb'
+  topicName: '$(Build.SourceBranchName)'
+  releaseversion: '$(Build.BuildNumber)'
+  appName: 'kafkaconnectcosmosdb'
+
+stages:
+- stage: Build_Container
+  displayName: Build the App and publish it in Azure Container Registry
+  jobs:
+  - job: BuildJob
+    pool:
+      vmImage: 'ubuntu-latest'
+
+    steps:
+    - task: Bash@3
+      inputs:
+        targetType: 'inline'
+        script: 'docker build --target=build -t $(appName)acr.azurecr.io/$(appname):canary .'
+        
+    - task: Bash@3
+      inputs:
+        targetType: 'inline'
+        script: 'docker cp app/cosmosdbkafkaconnector.jar $(Build.ArtifactStagingDirectory)'
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'drop'
+        publishLocation: 'Container'
