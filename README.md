@@ -45,7 +45,7 @@ The Sink and Source connectors share the following common configuration properti
 
 For Sink connector specific configuration please refer to [Sink Connector Documentation](./doc/README_Sink.md)
 
-For Source connector specific configuration please refer to [Source Connector Documentation](.doc/README_Source.md)
+For Source connector specific configuration please refer to [Source Connector Documentation](./doc/README_Source.md)
 
 ## Limitations
 
