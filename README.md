@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This project provides connectors for <a href="http://kafka.apache.org/documentation.html#connect" target="_blank">Kafka Connect</a> to read from and write data to <a href="https://azure.microsoft.com/databases/cosmos-db" target="_blank">Azure Cosmos DB</a>.
+This project provides connectors for <a href="http://kafka.apache.org/documentation.html#connect" target="_blank">Kafka Connect</a> to read from and write data to <a href="https://azure.microsoft.com/en-us/services/cosmos-db/" target="_blank">Azure Cosmos DB</a>.
 
 ## Development
 
@@ -60,5 +60,5 @@ The Sink & Source connectors do not currently support the following data formats
 ## Resources
 <a href="http://kafka.apache.org/documentation.html#connect" target="_blank">Kafka Connect</a>
 
-<a href="https://www.confluent.io/blog/kafka-connect-deep-dive-converters-serialization-explained/#json-topics" target="_blank">Kafka Connect Deep Dive – Converters and Serialization Explained</a>
+<a href="https://www.confluent.io/blog/kafka-connect-deep-dive-converters-serialization-explained/" target="_blank">Kafka Connect Deep Dive – Converters and Serialization Explained</a>
 
