@@ -23,5 +23,10 @@ All configuation properties for the sink connector are prefixed with *connect.co
 | containers.topicmap | a map in the format of topic#container  | string |
 
 
+### Kafka Connect Converter Configuration
+
+The *key.converter* and *value.converter* configuration should be set to match the serialization format that was used when the data was written to the Kafka topic. 
+
+Data will alwyas be written to Cosmos DB as JSON, with no schema. 
 
 ## Quick Start

@@ -9,7 +9,7 @@ Download and extract the ZIP file for your connector and follow the manual conne
 
 ## Configuration
 
-At the moment the following settings can be configured by means of the *connector.properties* file. For a config file containing default settings see [this example](./src/integration-test/resources/source.config.json).
+At the moment the following settings can be configured by means of the *connector.properties* file. For a config file containing default settings see [this example](../src/integration-test/resources/source.config.json).
 
 All configuation properties for the source connector are prefixed with *connect.cosmosdb. e.g. connect.cosmosdb.databasename*
 
@@ -22,6 +22,29 @@ All configuation properties for the source connector are prefixed with *connect.
 | containers.topicmap | a map in the format of topic#container  | string |
 | containers |   | string |
 | task.poll.interval |  | int
+
+### Kafka Connect Converter Configuration
+
+Data will always be read from Cosmos DB as JSON. 
+
+The *key.converter* and *value.converter* configuration should be set according to how you want the data serialized when written to the Kafka topic. 
+
+If the data in Cosmos DB contains the schema embedded in the document and it is in the following format - 
+
+```javascript
+
+```
+
+then you can configure the value.converter to use JSON with Schema by setting the following configuration: 
+
+```properties
+
+```
+
+It is possible to have the Source connector output CSV string by using StringConverter as follows: 
+
+```properties
+```
 
 
 

@@ -15,27 +15,103 @@ This project provides connectors for <a href="http://kafka.apache.org/documentat
 
 ## Supported Data Formats
 The sink & source connectors are configurable in order to support
+* **AVRO** (requires a Kafka Schema Registry)
+* **JSON with Schema** (offers JSON record structure with explicit schema information either through a registry, or embedded in the JSON)
 * **JSON plain** (offers JSON record structure without any attached schema)
-* **RAW JSON** (string only - JSON structure not managed by Kafka connect)
 
-Since key and value settings can be independently configured, it is possible to work with different data formats for records' keys and values respectively.
+Since key and value settings, including the format and serialization, can be independently configured in Kafka, it is possible to work with different data formats for records' keys and values respectively.
 
-_NOTE: Even when using RAW JSON mode i.e. with [StringConverter](https://kafka.apache.org/21/javadoc/index.html?org/apache/kafka/connect/storage/StringConverter.html) the expected Strings have to be valid and parsable JSON._
+To cater for this there is converter configuration for both *key.converter* and *value.converter*.
 
+### JSON And Schemas
 
-#### Configuration example for JSON plain
+If you're configuring a Source connector and want Kafka Connect to include the schema in the message it writes to Kafka, you’d set:
+
 ```properties
-key.converter=org.apache.kafka.connect.json.JsonConverter
-key.converter.schemas.enable=false
-
 value.converter=org.apache.kafka.connect.json.JsonConverter
-value.converter.schemas.enable=false
+value.converter.schemas.enable=true
 ```
 
-#### Configuration example for RAW JSON
+The resulting message to Kafka would look like the example below, with schema and payload top-level elements in the JSON:
+
+```javascript
+{
+  "schema": {
+    "type": "struct",
+    "fields": [
+      {
+        "type": "int32",
+        "optional": false,
+        "field": "userid"
+      },
+      {
+        "type": "string",
+        "optional": false,
+        "field": "name"
+      }
+    ],
+    "optional": false,
+    "name": "ksql.users"
+  },
+  "payload": {
+    "userid": 123,
+    "name": "user's name"
+  }
+}
+```
+
+_NOTE: The message written is made up of the schema + payload. Notice the size of the message, as well as the proportion of it that is made up of the payload vs. the schema. This is repeated in every message you write to Kafka. In scenarios like this, you may want to use a serialisation format like JSON Schema or Avro, where the schema is stored separately and the message holds just the payload._
+
+If you’re consuming JSON data from a Kafka topic in to a Sink connector, you need to understand how the JSON was serialised when it was written to the Kafka topic. 
+
+If it was with JSON Schema serialiser, then you need to set Kafka Connect to use the JSON Schema converter (io.confluent.connect.json.JsonSchemaConverter).
+
+ If the JSON data was written as a plain string, then you need to determine if the data includes a nested schema. If it does, and it’s in the same format as below, and not some arbitrary format, 
+ 
+ ```javascript
+{
+  "schema": {
+    "type": "struct",
+    "fields": [
+      {
+        "type": "int32",
+        "optional": false,
+        "field": "userid"
+      },
+      {
+        "type": "string",
+        "optional": false,
+        "field": "name"
+      }
+    ]
+  },
+  "payload": {
+    "userid": 123,
+    "name": "Sam"
+  }
+}
+```
+
+then you would set:
+
 ```properties
-key.converter=org.apache.kafka.connect.storage.StringConverter
-value.converter=org.apache.kafka.connect.storage.StringConverter
+value.converter=org.apache.kafka.connect.json.JsonConverter
+value.converter.schemas.enable=true
+```
+
+However, if you’re consuming JSON data and it doesn’t have the schema/payload construct, such as this sample:
+```javascript
+{
+  "userid": 1234,
+  "name": "Sam"
+}
+```
+
+then you must tell Kafka Connect <span style="text-decoration: underline">**not**</span> to look for a schema by setting schemas.*enable=false*:
+
+```properties
+value.converter=org.apache.kafka.connect.json.JsonConverter
+value.converter.schemas.enable=false
 ```
 
 ## Configuration Properties
@@ -47,13 +123,6 @@ The Sink and Source connectors share the following common configuration properti
 For Sink connector specific configuration please refer to [Sink Connector Documentation](./doc/README_Sink.md)
 
 For Source connector specific configuration please refer to [Source Connector Documentation](./doc/README_Source.md)
-
-## Limitations
-
-### Supported Data Formats
-The Sink & Source connectors do not currently support the following data formats
-* **AVRO** (makes use of Confluent's Kafka Schema Registry)
-* **JSON with Schema** (offers JSON record structure with explicit schema information)
 
 ## Quickstart
 
