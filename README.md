@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This project provides connectors for [Kafka Connect](http://kafka.apache.org/documentation.html#connect) to read from and write data to [Azure Cosmos DB](https://azure.microsoft.com/databases/cosmos-db).
+This project provides connectors for <a href="http://kafka.apache.org/documentation.html#connect" target="_blank">Kafka Connect</a> to read from and write data to <a href="https://azure.microsoft.com/databases/cosmos-db" target="_blank">Azure Cosmos DB</a>.
 
 ## Development
 
@@ -20,7 +20,7 @@ The sink & source connectors are configurable in order to support
 
 Since key and value settings can be independently configured, it is possible to work with different data formats for records' keys and values respectively.
 
-_NOTE: Even when using RAW JSON mode i.e. with [StringConverter](https://kafka.apache.org/21/javadoc/index.html?org/apache/kafka/connect/storage/StringConverter.html) the expected Strings have to be valid and parsable JSON._
+_NOTE: Even when using RAW JSON mode i.e. with <a href="https://kafka.apache.org/21/javadoc/index.html?org/apache/kafka/connect/storage/StringConverter.html" target="_blank">*StringConverter*</a>
 
 #### Configuration example for JSON plain
 ```properties
@@ -57,7 +57,7 @@ The Sink & Source connectors do not currently support the following data formats
 ## Quickstart
 
 ## Resources
-[Kafka Connect](http://kafka.apache.org/documentation.html#connect)
+<a href="http://kafka.apache.org/documentation.html#connect" target="_blank">Kafka Connect</a>
 
-[Kafka Connect Deep Dive – Converters and Serialization Explained](https://www.confluent.io/blog/kafka-connect-deep-dive-converters-serialization-explained/#json-topics)
+<a href="https://www.confluent.io/blog/kafka-connect-deep-dive-converters-serialization-explained/#json-topics" target="_blank">Kafka Connect Deep Dive – Converters and Serialization Explained</a>
 
