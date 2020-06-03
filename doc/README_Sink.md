@@ -1,12 +1,15 @@
 # Kafka Connect Cosmos DB Sink Connector
 
-You can use the Azure Cosmos DB Sink connector to export data from Apache Kafka® topics to Azure Cosmos DB collections in JSON format.
-The Azure Cosmos DB sink connector periodically polls data from Kafka and in turn uploads it to Azure Cosmos DB. 
+The Azure Cosmos DB sink connector allows you to export data from Apache Kafka® topics to an Azure Cosmos DB database. 
+The connector polls data from Kafka to write to collection(s) in the database based on the topics subscription. 
+
 
 ## Installation
 
 ### Install Connector Manually
 Download and extract the ZIP file for your connector and follow the manual connector installation [instructions](https://docs.confluent.io/current/connect/managing/install.html#install-connector-manually)
+
+<hr>
 
 ## Configuration
 
@@ -102,5 +105,12 @@ As the message itself states, if you just have plain JSON data, you should chang
 "value.converter": "org.apache.kafka.connect.json.JsonConverter",
 "value.converter.schemas.enable": "false",
 ```
+
+<hr>
+
+## Limitations
+* Auto-creation of databases and collections within Cosmos DB are not supported. The database and collections must already exist, and the must be configured to use these.
+
+<hr>
 
 ## Quick Start
