@@ -9,7 +9,6 @@ The connector polls data from Kafka to write to collection(s) in the database ba
 ### Install Connector Manually
 Download and extract the ZIP file for your connector and follow the manual connector installation [instructions](https://docs.confluent.io/current/connect/managing/install.html#install-connector-manually)
 
-<hr>
 
 ## Configuration
 
@@ -106,11 +105,8 @@ As the message itself states, if you just have plain JSON data, you should chang
 "value.converter.schemas.enable": "false",
 ```
 
-<hr>
-
 ## Limitations
 * Auto-creation of databases and collections within Cosmos DB are not supported. The database and collections must already exist, and the must be configured to use these.
 
-<hr>
 
 ## Quick Start

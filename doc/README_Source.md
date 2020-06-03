@@ -7,8 +7,6 @@ The Azure Cosmos DB Source connector provides the capability to read data from t
 ### Install Connector Manually
 Download and extract the ZIP file for your connector and follow the manual connector installation [instructions](https://docs.confluent.io/current/connect/managing/install.html#install-connector-manually)
 
-<hr>
-
 ## Configuration
 
 At the moment the following settings can be configured by means of the *connector.properties* file. For a config file containing default settings see [this example](../src/integration-test/resources/source.config.json).
@@ -48,6 +46,5 @@ It is possible to have the Source connector output CSV string by using StringCon
 ```properties
 ```
 
-<hr>
 
 ## Quick Start

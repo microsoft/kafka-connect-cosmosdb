@@ -4,8 +4,6 @@
 
 This project provides connectors for <a href="http://kafka.apache.org/documentation.html#connect" target="_blank">Kafka Connect</a> to read from and write data to <a href="https://azure.microsoft.com/en-us/services/cosmos-db/" target="_blank">Azure Cosmos DB</a>.
 
-<hr>
-
 ## Development
 
 ### Building the connectors
@@ -14,7 +12,6 @@ This project provides connectors for <a href="http://kafka.apache.org/documentat
 
 ### Debugging with Trace Logging
 
-<hr>
 
 ## Supported Data Formats
 The sink & source connectors are configurable in order to support
@@ -117,8 +114,6 @@ value.converter=org.apache.kafka.connect.json.JsonConverter
 value.converter.schemas.enable=false
 ```
 
-<hr>
-
 ## Configuration
 
 ### Common Configuration Properties
@@ -134,8 +129,6 @@ The Sink and Source connectors share the following common configuration properti
 For Sink connector specific configuration please refer to [Sink Connector Documentation](./doc/README_Sink.md)
 
 For Source connector specific configuration please refer to [Source Connector Documentation](./doc/README_Source.md)
-
-<hr>
 
 ## Resources
 <a href="http://kafka.apache.org/documentation.html#connect" target="_blank">Kafka Connect</a>
