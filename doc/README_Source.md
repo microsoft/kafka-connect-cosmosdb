@@ -48,3 +48,11 @@ It is possible to have the Source connector output CSV string by using StringCon
 
 
 ## Quick Start
+
+### Create Azure Cosmos DB Instance, Database and Collection
+
+### Install and Load the connector
+
+### Write data to Cosmos DB
+
+### Confirm messages written to Kafka

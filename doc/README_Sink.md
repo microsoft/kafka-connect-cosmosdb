@@ -6,6 +6,8 @@ The connector polls data from Kafka to write to collection(s) in the database ba
 
 ## Installation
 
+### Install from the [Confluent Hub Client](https://docs.confluent.io/current/connect/managing/confluent-hub/client.html#confluent-hub-client)
+
 ### Install Connector Manually
 Download and extract the ZIP file for your connector and follow the manual connector installation [instructions](https://docs.confluent.io/current/connect/managing/install.html#install-connector-manually)
 
@@ -110,3 +112,130 @@ As the message itself states, if you just have plain JSON data, you should chang
 
 
 ## Quick Start
+
+### Prerequisites
+* [Confluent Platform](https://docs.confluent.io/current/installation/index.html#installation-overview)
+* [Confluent CLI](https://docs.confluent.io/current/cli/installing.html#cli-install) (requires separate installation)
+* [Azure CLI](https://docs.microsoft.com/cli/azure/install-azure-cli) (requires separate installation)
+
+### Create Azure Cosmos DB Instance, Database and Collection
+
+Create a new Azure Resource Group for this quickstart, then add to it a Cosmos DB Account, Database and Collection using the Azure CLI
+
+```bash
+# create cosmosdb account
+
+# create database
+
+# create collection
+
+```
+
+### Install connector
+```bash
+# install the connector (run from your CP installation directory)
+
+# start conluent platform
+confluent local start
+
+```
+
+### Write message to Kafka
+Produce test data to the hotels-sample topic in Kafka.
+
+Start the Avro console producer to import a few records to Kafka:
+
+```bash
+<path-to-confluent>/bin/kafka-avro-console-producer --broker-list localhost:9092 --topic hotels-sample \
+--property value.schema='{"type":"record","name":"myrecord","fields":[{"name":"HotelName","type":"string"},{"name":"Description","type":"string"}]}' \
+--property key.schema='{"type":"string"}' \
+--property "parse.key=true" \
+--property "key.separator=,"
+```
+
+Then in the console producer, enter:
+
+```bash
+"marriotId",{"HotelName": "Marriot", "Description": "Marriot description"}
+"holidayinnId",{"HotelName": "HolidayInn", "Description": "HolidayInn description"}
+"motel8Id",{"HotelName": "Motel8", "Description": "motel8 description"}
+```
+
+The three records entered are published to the Kafka topic hotels-sample in Avro format.
+
+
+### Load the connector
+Create *azure-cosmosdb.json* file with the following contents: 
+
+```javascript
+{
+  "name": "azure-cosmosdb",
+  "config": {
+    "topics": "hotels-sample",
+    "tasks.max": "1",
+    "connector.class": "com.microsoft.azure.cosmosdb.kafka.connect.sink.CosmosDBSinkConnector",
+    "key.converter": "io.confluent.connect.avro.AvroConverter",
+    "key.converter.schema.registry.url": "http://localhost:8081",
+    "value.converter": "io.confluent.connect.avro.AvroConverter",
+    "value.converter.schema.registry.url": "http://localhost:8081",
+    "confluent.topic.bootstrap.servers": "localhost:9092",
+    "confluent.topic.replication.factor": "1"
+  }
+}
+```
+
+Load the Azure Cosmos DB Sink Connector
+```bash
+confluent local load azure-cosmosdb -- -d path/to/azure-cosmosdb.json
+```
+
+Confirm that the connector is in a RUNNING state.
+```bash
+confluent local status azure-cosmosdb
+```
+
+Confirm that the messages were delivered to the result topic in Kafka
+```bash
+confluent local consume test-result -- --from-beginning
+```
+
+### Confirm data written to Cosmos DB
+
+```bash
+```
+
+There should be the same 3 records in Cosmos DB in a similar format to below: 
+```javascript
+[
+  {
+    "id": "marriotId",
+    "HotelName": "Marriot",
+    "Description": "Marriot description"
+  },
+  {
+    "id": "holidayinnId",
+    "HotelName": "HolidayInn",
+    "Description": "HolidayInn description"
+  },
+  {
+    "id": "motel8Id",
+    "HotelName": "Motel8",
+    "Description": "motel8 description"
+  }
+]
+```
+
+### Cleanup
+Delete the connector
+```bash
+confluent local unload azure-cosmosdb
+```
+
+Stop Confluent Platform
+```bash
+confluent local stop
+```
+
+Delete the created Azure Cosmos DB service and its resource group using Azure CLI.
+```bash
+```
