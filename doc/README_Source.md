@@ -18,9 +18,7 @@ All configuation properties for the source connector are prefixed with *connect.
 |------------------------------------------------|------------------------------------------------------------------------------------------------------|---------|-------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------|------------|
 | databasename                             | name of the database to write to                                                              | string  |
 | master.key | the configured master key for Cosmos DB | string |
-| connection.endpoint | the endpoint for the Cosmos DB Account | uri | 
-| containers.topicmap | a map in the format of topic#container  | string |
-| containers |   | string |
+| endpoint | the endpoint for the Cosmos DB Account | uri | 
 | task.poll.interval |  | int
 
 ### Kafka Connect Converter Configuration
