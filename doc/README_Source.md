@@ -46,13 +46,89 @@ It is possible to have the Source connector output CSV string by using StringCon
 ```properties
 ```
 
-
 ## Quick Start
+
+### Prerequisites
+* [Confluent Platform](https://docs.confluent.io/current/installation/index.html#installation-overview)
+* [Confluent CLI](https://docs.confluent.io/current/cli/installing.html#cli-install) (requires separate installation)
+* [Azure CLI](https://docs.microsoft.com/cli/azure/install-azure-cli) (requires separate installation)
 
 ### Create Azure Cosmos DB Instance, Database and Collection
 
-### Install and Load the connector
+Create a new Azure Resource Group for this quickstart, then add to it a Cosmos DB Account, Database and Collection using the Azure CLI
 
-### Write data to Cosmos DB
+```bash
+# create cosmosdb account
 
-### Confirm messages written to Kafka
+# create database
+
+# create collection
+
+```
+
+### Install connector
+```bash
+# install the connector (run from your CP installation directory)
+
+# start conluent platform
+confluent local start
+
+```
+
+### Insert document in to Cosmos DB
+
+Insert a new document in to Cosmos DB using the Azure CLI
+```bash
+```
+
+Verify the record is in Cosmos DB
+```bash
+```
+
+### Load the connector
+Create *azure-cosmosdb.json* file with the following contents: 
+
+```javascript
+{
+  "name": "azure-cosmosdb",
+  "config": {
+    "tasks.max": "1",
+    "connector.class": "com.microsoft.azure.cosmosdb.kafka.connect.source.CosmosDBSourceConnector",
+    "key.converter": "io.confluent.connect.avro.AvroConverter",
+    "key.converter.schema.registry.url": "http://localhost:8081",
+    "value.converter": "io.confluent.connect.avro.AvroConverter",
+    "value.converter.schema.registry.url": "http://localhost:8081",
+    "confluent.topic.bootstrap.servers": "localhost:9092",
+    "confluent.topic.replication.factor": "1"
+  }
+}
+```
+
+Load the Azure Cosmos DB Source Connector
+```bash
+confluent local load azure-cosmosdb -- -d path/to/azure-cosmosdb.json
+```
+
+Confirm that the connector is in a RUNNING state.
+```bash
+confluent local status azure-cosmosdb
+```
+
+Confirm that the messages were delivered to the result topic in Kafka
+```bash
+```
+
+### Cleanup
+Delete the connector
+```bash
+confluent local unload azure-cosmosdb
+```
+
+Stop Confluent Platform
+```bash
+confluent local stop
+```
+
+Delete the created Azure Cosmos DB service and its resource group using Azure CLI.
+```bash
+```
