@@ -1,32 +1,23 @@
 package com.microsoft.azure.cosmosdb.kafka.connect.source;
 
 import com.azure.cosmos.*;
-import com.azure.cosmos.implementation.PartitionKeyRange;
-import com.azure.cosmos.implementation.changefeed.ChangeFeedObserver;
-import com.azure.cosmos.implementation.changefeed.ChangeFeedObserverFactory;
-import com.azure.cosmos.implementation.changefeed.implementation.ChangeFeedObserverFactoryImpl;
-import com.azure.cosmos.implementation.changefeed.implementation.ChangeFeedProcessorBuilderImpl;
 import com.azure.cosmos.models.*;
-import com.ctc.wstx.shaded.msv_core.grammar.xmlschema.SimpleTypeExp;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.microsoft.azure.cosmosdb.kafka.connect.TopicContainerMap;
-import com.microsoft.azure.cosmosdb.kafka.connect.sink.CosmosDBSinkTask;
-import com.microsoft.azure.cosmosdb.kafka.connect.sink.SinkSettings;
 import org.apache.kafka.connect.source.SourceRecord;
 import org.apache.kafka.connect.source.SourceTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import java.time.Duration;
-import java.time.LocalTime;
-import java.util.*;
-import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
 
 import static java.lang.Thread.sleep;
 
@@ -144,7 +135,6 @@ public class CosmosDBSourceTask extends SourceTask {
         return new CosmosClientBuilder()
                 .endpoint(this.settings.getEndpoint())
                 .key(this.settings.getKey())
-                .connectionPolicy(ConnectionPolicy.getDefaultPolicy())
                 .consistencyLevel(ConsistencyLevel.SESSION)
                 .buildAsyncClient();
     }
@@ -156,13 +146,13 @@ public class CosmosDBSourceTask extends SourceTask {
         changeFeedProcessorOptions.setMaxItemCount(this.settings.getTaskBatchSize().intValue());
         changeFeedProcessorOptions.setStartFromBeginning(true);
 
-        return  ChangeFeedProcessor.changeFeedProcessorBuilder()
+        return new ChangeFeedProcessorBuilder()
                 .options(changeFeedProcessorOptions)
                 .hostName(hostName)
                 .feedContainer(feedContainer)
                 .leaseContainer(leaseContainer)
                 .handleChanges(this::handleCosmosDbChanges)
-                .build();
+                .buildChangeFeedProcessor();
 
     }
 
@@ -183,17 +173,18 @@ public class CosmosDBSourceTask extends SourceTask {
     }
 
     private  CosmosAsyncContainer createNewLeaseContainer(CosmosAsyncClient client, String databaseName, String leaseCollectionName) {
-        CosmosAsyncDatabase databaseLink = client.getDatabase(databaseName);
-        CosmosAsyncContainer leaseCollectionLink = databaseLink.getContainer(leaseCollectionName);
-        CosmosAsyncContainerResponse leaseContainerResponse = null;
+        CosmosAsyncDatabase database = client.getDatabase(databaseName);
+        CosmosAsyncContainer leaseCollection = database.getContainer(leaseCollectionName);
+        CosmosContainerResponse leaseContainerResponse = null;
 
         logger.info("Creating new lease container.");
         try {
-            leaseContainerResponse = leaseCollectionLink.read().block();
+            leaseContainerResponse = leaseCollection.read().block();
+
         } catch (RuntimeException ex) {
             // Swallowing exceptions when the type is CosmosClientException and statusCode is 404
-            if (ex instanceof CosmosClientException) {
-                CosmosClientException cosmosClientException = (CosmosClientException) ex;
+            if (ex instanceof CosmosException) {
+                CosmosException cosmosClientException = (CosmosException) ex;
 
                 if (cosmosClientException.getStatusCode() == 404) {
                     throw ex;
@@ -208,16 +199,17 @@ public class CosmosDBSourceTask extends SourceTask {
         if (leaseContainerResponse == null) {
             logger.info(String.format("Creating the Lease container : %s", leaseCollectionName));
             CosmosContainerProperties containerSettings = new CosmosContainerProperties(leaseCollectionName, "/id");
+            ThroughputProperties throughputProperties = ThroughputProperties.createManualThroughput(400);
             CosmosContainerRequestOptions requestOptions = new CosmosContainerRequestOptions();
 
-            leaseContainerResponse = databaseLink.createContainer(containerSettings, 400, requestOptions).block();
+            leaseContainerResponse = database.createContainer(containerSettings, throughputProperties, requestOptions).block();
 
             if (leaseContainerResponse == null) {
                 throw new RuntimeException(String.format("Failed to create collection %s in database %s.", leaseCollectionName, databaseName));
             }
             logger.info("Successfully created new lease container.");
         }
-        return leaseContainerResponse.getContainer();
+        return database.getContainer(leaseContainerResponse.getProperties().getId());
     }
 
 }
