@@ -181,18 +181,11 @@ public class CosmosDBSourceTask extends SourceTask {
         try {
             leaseContainerResponse = leaseCollection.read().block();
 
-        } catch (RuntimeException ex) {
-            // Swallowing exceptions when the type is CosmosClientException and statusCode is 404
-            if (ex instanceof CosmosException) {
-                CosmosException cosmosClientException = (CosmosException) ex;
-
-                if (cosmosClientException.getStatusCode() == 404) {
-                    throw ex;
-                }
-            } else {
+        } catch (CosmosException ex) {
+            // Swallowing exceptions when the type is CosmosException and statusCode is 404
+            if (ex.getStatusCode() != 404) {
                 throw ex;
             }
-
             logger.info("Lease container does not exist" + ex.getMessage());
         }
 
