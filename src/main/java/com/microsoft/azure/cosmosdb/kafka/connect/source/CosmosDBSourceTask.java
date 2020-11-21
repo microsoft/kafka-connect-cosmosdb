@@ -103,9 +103,8 @@ public class CosmosDBSourceTask extends SourceTask {
             }
 
             if (records.size() > 0 || System.currentTimeMillis() > maxWaitTime) {
-                if(logger.isDebugEnabled()) {
-                    logger.debug(String.format("Sending %d documents.", records.size()));
-                }
+                logger.debug("Sending {} documents.", records.size());
+
                 break;
             }
         }
@@ -140,7 +139,7 @@ public class CosmosDBSourceTask extends SourceTask {
     }
 
     private ChangeFeedProcessor getChangeFeedProcessor(String hostName, CosmosAsyncContainer feedContainer, CosmosAsyncContainer leaseContainer) {
-        logger.info("Creating Change Feed Processor for " + hostName + ".");
+        logger.info("Creating Change Feed Processor for {}.", hostName);
         ChangeFeedProcessorOptions changeFeedProcessorOptions = new ChangeFeedProcessorOptions();
         changeFeedProcessorOptions.setFeedPollDelay(Duration.ofMillis(this.settings.getTaskPollInterval()));
         changeFeedProcessorOptions.setMaxItemCount(this.settings.getTaskBatchSize().intValue());
@@ -161,9 +160,8 @@ public class CosmosDBSourceTask extends SourceTask {
             // Blocks for each transfer till it is processed by the poll method.
             // If we fail before checkpointing then the new worker starts again.
             try {
-                if(logger.isDebugEnabled()) {
-                    logger.debug("Queuing document : " + document.toString());
-                }
+                logger.debug("Queuing document : {}", document.toString());
+
                 this.queue.transfer(document);
             } catch (InterruptedException e) {
                 logger.error("Interrupted in changeFeedReader.", e);
@@ -186,11 +184,11 @@ public class CosmosDBSourceTask extends SourceTask {
             if (ex.getStatusCode() != 404) {
                 throw ex;
             }
-            logger.info("Lease container does not exist" + ex.getMessage());
+            logger.info("Lease container does not exist {}", ex.getMessage());
         }
 
         if (leaseContainerResponse == null) {
-            logger.info(String.format("Creating the Lease container : %s", leaseCollectionName));
+            logger.info("Creating the Lease container : {}", leaseCollectionName);
             CosmosContainerProperties containerSettings = new CosmosContainerProperties(leaseCollectionName, "/id");
             ThroughputProperties throughputProperties = ThroughputProperties.createManualThroughput(400);
             CosmosContainerRequestOptions requestOptions = new CosmosContainerRequestOptions();
