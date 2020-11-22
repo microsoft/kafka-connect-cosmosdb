@@ -135,6 +135,7 @@ public class CosmosDBSourceTask extends SourceTask {
                 .endpoint(this.settings.getEndpoint())
                 .key(this.settings.getKey())
                 .consistencyLevel(ConsistencyLevel.SESSION)
+                .contentResponseOnWriteEnabled(true)
                 .buildAsyncClient();
     }
 
