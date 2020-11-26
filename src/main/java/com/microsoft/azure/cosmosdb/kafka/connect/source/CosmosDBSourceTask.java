@@ -144,7 +144,7 @@ public class CosmosDBSourceTask extends SourceTask {
         ChangeFeedProcessorOptions changeFeedProcessorOptions = new ChangeFeedProcessorOptions();
         changeFeedProcessorOptions.setFeedPollDelay(Duration.ofMillis(this.settings.getTaskPollInterval()));
         changeFeedProcessorOptions.setMaxItemCount(this.settings.getTaskBatchSize().intValue());
-        changeFeedProcessorOptions.setStartFromBeginning(true);
+        changeFeedProcessorOptions.setStartFromBeginning(this.settings.isStartFromBeginning());
 
         return new ChangeFeedProcessorBuilder()
                 .options(changeFeedProcessorOptions)
