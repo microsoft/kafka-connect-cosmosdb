@@ -18,6 +18,7 @@ At the moment the following settings can be configured by means of the *connecto
 | connect.cosmosdb.connection.endpoint | the endpoint for the Cosmos DB Account | uri |
 | connect.cosmosdb.containers.topicmap | comma separeted topic to collection mapping, eg. topic1#coll1,topic2#coll2 | string
 | connect.cosmosdb.containers | list of collections to monitor | string
+| connect.cosmosdb.changefeed.startFromBeginning | set if the change feed should start from beginning | boolean | true 
 | connect.cosmosdb.task.poll.interval | interval to poll the changefeedcontainer for changes  | int
 
 ### Kafka Connect Converter Configuration
