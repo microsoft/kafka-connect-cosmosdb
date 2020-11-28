@@ -6,6 +6,7 @@ import org.junit.Test;
 import java.util.HashMap;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class SourceSettingsTest {
     /**
@@ -20,12 +21,14 @@ public class SourceSettingsTest {
         source.put(Settings.PREFIX + ".task.timeout", "444");
         source.put(Settings.PREFIX + ".task.poll.interval", "787");
         source.put(Settings.PREFIX + ".containers.topicmap", "mytopic666#mycontainer555");
+        source.put(Settings.PREFIX + ".changefeed.startFromBeginning", "true");
         SourceSettings sourceSettings = new SourceSettings();
         sourceSettings.populate(source);
 
         assertEquals("foobar", sourceSettings.getPostProcessor());
         assertEquals(444L, (long) sourceSettings.getTaskTimeout());
         assertEquals(666L, (long) sourceSettings.getTaskBufferSize());
+        assertTrue(sourceSettings.isStartFromBeginning());
         assertEquals("mytopic666", sourceSettings.getTopicContainerMap().getTopicForContainer("mycontainer555").get());
         assertEquals("mycontainer555", sourceSettings.getTopicContainerMap().getContainerForTopic("mytopic666").get());
     }
@@ -35,6 +38,7 @@ public class SourceSettingsTest {
         HashMap<String, String> source = new HashMap<>();
         SourceSettings sourceSettings = new SourceSettings();
         sourceSettings.populate(source);
+        assertTrue(sourceSettings.isStartFromBeginning());
         assertEquals(5000L, (long) sourceSettings.getTaskTimeout());
         assertEquals(10000L, (long) sourceSettings.getTaskBufferSize());
         assertEquals(100L, (long) sourceSettings.getTaskBatchSize());
