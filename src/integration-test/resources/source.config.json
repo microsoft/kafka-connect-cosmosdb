@@ -4,7 +4,7 @@
     "connector.class": "com.microsoft.azure.cosmosdb.kafka.connect.source.CosmosDBSourceConnector",
     "tasks.max": "3",
     "topics":"CartContainerByState",
-    "connect.cosmosdb.cosmosdb.databasename": "StoreDatabase",
+    "connect.cosmosdb.databasename": "StoreDatabase",
     "connect.cosmosdb.master.key": "",
     "connect.cosmosdb.connection.endpoint":"",
     "connect.cosmosdb.containers.topicmap" : "CartContainerByState#CartContainer",

@@ -13,7 +13,7 @@ At the moment the following settings can be configured by means of the *connecto
 
 | Name                                           | Description                                                                                          | Type    | Default                                                                       | Valid Values                                                                                                     | Importance |
 |------------------------------------------------|------------------------------------------------------------------------------------------------------|---------|-------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------|------------|
-| connect.cosmosdb.cosmosdb.databasename                             | name of the database to write to                                                              | string  |
+| connect.cosmosdb.databasename                             | name of the database to write to                                                              | string  |
 | connect.cosmosdb.master.key | the configured master key for Cosmos DB | string |
 | connect.cosmosdb.connection.endpoint | the endpoint for the Cosmos DB Account | uri |
 | connect.cosmosdb.containers.topicmap | comma separeted topic to collection mapping, eg. topic1#coll1,topic2#coll2 | string
@@ -120,7 +120,7 @@ docker run --name=kafka-connect-cosmosdb --net=host --env-file variables.env -v 
 ```shell script
 curl -X POST \
   -H "Content-Type: application/json" \
-  --data '{ "name": "quickstart-cosmosdb-source", "config": { "connector.class": "com.microsoft.azure.cosmosdb.kafka.connect.source.CosmosDBSourceConnector", "tasks.max": 1, "connect.cosmosdb.cosmosdb.databasename": "<DB_NAME>", "connect.cosmosdb.master.key": "<KEY>", "connect.cosmosdb.connection.endpoint": "<URL_COSMOS>", "connect.cosmosdb.task.poll.interval": "10000", "connect.cosmosdb.containers.topicmap": "<TOPIC_MAPPING>", "connect.cosmosdb.containers": "<COLLECTIONS>" } }' \
+  --data '{ "name": "quickstart-cosmosdb-source", "config": { "connector.class": "com.microsoft.azure.cosmosdb.kafka.connect.source.CosmosDBSourceConnector", "tasks.max": 1, "connect.cosmosdb.databasename": "<DB_NAME>", "connect.cosmosdb.master.key": "<KEY>", "connect.cosmosdb.connection.endpoint": "<URL_COSMOS>", "connect.cosmosdb.task.poll.interval": "10000", "connect.cosmosdb.containers.topicmap": "<TOPIC_MAPPING>", "connect.cosmosdb.containers": "<COLLECTIONS>" } }' \
   http://localhost:8083/connectors
 ```
 ### Insert document in to Cosmos DB
