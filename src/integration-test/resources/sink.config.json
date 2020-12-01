@@ -7,7 +7,7 @@
     "value.converter": "JsonConverter",
     "value.converter.schemas.enable": "false",
     "errors.tolerance": "all",
-    "connect.cosmosdb.cosmosdb.databasename": "",
+    "connect.cosmosdb.databasename": "",
     "connect.cosmosdb.master.key": "",
     "connect.cosmosdb.connection.endpoint": "",
     "connect.cosmosdb.containers.topicmap": ""

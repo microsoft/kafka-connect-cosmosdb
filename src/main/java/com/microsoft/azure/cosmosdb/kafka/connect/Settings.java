@@ -34,8 +34,8 @@ public class Settings {
                     "Task poll interval", SettingDefaults.TASK_POLL_INTERVAL, this::setTaskPollInterval, this::getTaskPollInterval),
             new Setting(PREFIX+".connection.endpoint", "The Cosmos DB endpoint.", "CosmosDB Endpoint", this::setEndpoint, this::getEndpoint),
             new Setting(PREFIX+".master.key", "The connection master key.", "Master Key", this::setKey, this::getKey),
-            new Setting(PREFIX+".cosmosdb.databasename", "The Cosmos DB target database.", "CosmosDB Database Name", this::setDatabaseName, this::getDatabaseName),
-            new Setting(PREFIX+".containers.topicmap", "A comma delimited list of collections mapped to their partitions. Formatted coll1#topic1,coll2#topic2.",
+            new Setting(PREFIX+".databasename", "The Cosmos DB target database.", "CosmosDB Database Name", this::setDatabaseName, this::getDatabaseName),
+            new Setting(PREFIX+".containers.topicmap", "A comma delimited list of collections mapped to their partitions. Formatted topic1#coll1,topic2#coll2.",
                     "Topic-Container map", value -> this.setTopicContainerMap(TopicContainerMap.deserialize(value)), ()->this.getTopicContainerMap().serialize()),
             new Setting(PREFIX+".containers", "A comma delimited list of source/target container names.",
                     "Collection Names List", this::setContainerList, this::getContainerList)

@@ -61,7 +61,7 @@ public class PostToKafkaTest {
         topic = StringUtils.substringBefore(topicContainerMap, "#");
 
         //Get the Cosmos container for reading messages.
-        databaseName = config.get("connect.cosmosdb.cosmosdb.databasename").textValue();
+        databaseName = config.get("connect.cosmosdb.databasename").textValue();
 
         CosmosClient cosmosClient = new CosmosClientBuilder()
                 .endpoint(config.get("connect.cosmosdb.connection.endpoint").textValue())
