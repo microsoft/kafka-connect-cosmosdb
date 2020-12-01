@@ -6,8 +6,6 @@ The connector polls data from Kafka to write to collection(s) in the database ba
 
 ## Installation
 
-### Install from the [Confluent Hub Client](https://docs.confluent.io/current/connect/managing/confluent-hub/client.html#confluent-hub-client)
-
 ### Install Connector Manually
 Download and extract the ZIP file for your connector and follow the manual connector installation [instructions](https://docs.confluent.io/current/connect/managing/install.html#install-connector-manually)
 
