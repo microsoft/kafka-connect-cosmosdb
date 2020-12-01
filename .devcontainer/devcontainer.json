@@ -1,0 +1,54 @@
+{
+    "name": "kafka-connect-cosmosdb",
+    
+    "build": {
+      "dockerfile": "Dockerfile",
+      "context": "..",
+      "args": {
+        "VARIANT": "11",
+        "INSTALL_MAVEN": "true",
+        "MAVEN_VERSION": "3.6.3",
+        "INSTALL_AZURE_CLI": "true",
+        "INSTALL_CONFLUENT": "true",
+        "CONFLUENT_VERSION": "6.0",
+        "CONFLUENT_CLI_VERSION": "v1.16.0",
+        "INSTALL_DOCKER": "true"
+      }
+    },
+  
+    "mounts": [
+      "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
+    ],
+  
+    "settings": {
+      "terminal.integrated.shell.linux": "/bin/bash",
+      "java.home": "/docker-java-home"
+    },
+  
+    "remoteUser": "vscode",
+  
+    // Open ports for Confluent Control Center and Kafka UI Services
+    "forwardPorts": [9000, 9001, 9004, 9021],
+  
+    // Install extensions
+    "extensions": [
+      "vscjava.vscode-java-debug",
+      "vscjava.vscode-java-dependency",
+      "vscjava.vscode-java-pack",
+      "vscjava.vscode-java-test",
+      "redhat.java",
+      "redhat.vscode-xml",
+      "eamodio.gitlens",
+      "davidanson.vscode-markdownlint",
+      "gruntfuggly.todo-tree",
+      "ms-azuretools.vscode-docker",
+      "gabrielbb.vscode-lombok",
+      "sonarsource.sonarlint-vscode",
+      "visualstudioexptteam.vscodeintellicode",
+      "vscjava.vscode-maven",
+      "ms-vscode.PowerShell"
+    ],
+  
+    // Run Bash script in .devcontainer directory
+    "postCreateCommand": "/bin/bash ./.devcontainer/post-install.sh"
+  }
