@@ -17,9 +17,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <kafka.version>2.5.0</kafka.version>
-        <log4j.version>2.13.3</log4j.version>
-        <slf4j.version>1.7.30</slf4j.version>
+        <kafka.version>2.6.0</kafka.version>
+        <log4j.version>2.14.0</log4j.version>
+        <slf4j.version>2.0.0-alpha1</slf4j.version>
     </properties>
 
     <dependencies>
@@ -36,7 +36,7 @@
         <dependency>
             <groupId>com.azure</groupId>
             <artifactId>azure-cosmos</artifactId>
-            <version>4.2.0</version>
+            <version>4.8.0</version>
         </dependency>
 
         <!-- Apache commons -->
@@ -49,7 +49,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.10</version>
+            <version>3.11</version>
         </dependency>
 
 
@@ -92,7 +92,7 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>3.3.3</version>
+            <version>3.6.28</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -108,7 +108,7 @@
                     <dependency>
                         <groupId>com.github.spotbugs</groupId>
                         <artifactId>spotbugs</artifactId>
-                        <version>4.0.3</version>
+                        <version>4.2.0</version>
                     </dependency>
                 </dependencies>
                 <executions>
@@ -143,7 +143,6 @@
         </plugins>
         <pluginManagement>
             <plugins>
-
                 <plugin>
                     <artifactId>maven-clean-plugin</artifactId>
                     <version>3.1.0</version>
@@ -159,7 +158,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.0.0-M4</version>
+                    <version>3.0.0-M5</version>
                     <configuration>
                         <excludedGroups>com.microsoft.azure.cosmosdb.kafka.connect.IntegrationTest</excludedGroups>
                     </configuration>
