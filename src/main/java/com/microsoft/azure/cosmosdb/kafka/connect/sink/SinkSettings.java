@@ -14,7 +14,7 @@ import java.util.List;
 public class SinkSettings extends Settings {
     private String postProcessor;
     private final List<Setting> sinkSettings = Arrays.asList(
-            // Add all sink settings here:
+            //Add all sink settings here:
             new Setting(Settings.PREFIX + ".sink.post-processor", "Comma-separated list of Sink Post-Processor class names to use for post-processing.",
                     "Sink post-processor", this::setPostProcessor, this::getPostProcessor),
 

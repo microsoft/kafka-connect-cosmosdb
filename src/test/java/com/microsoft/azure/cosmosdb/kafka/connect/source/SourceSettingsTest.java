@@ -1,6 +1,7 @@
 package com.microsoft.azure.cosmosdb.kafka.connect.source;
 
 import com.microsoft.azure.cosmosdb.kafka.connect.Settings;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -57,5 +58,33 @@ public class SourceSettingsTest {
         sourceSettings.setContainerList("");
         assertEquals("",  sourceSettings.getContainerList());
 
+    }
+
+    @Test
+    public void testNumberVerification() {
+        HashMap<String, String> source = new HashMap<>();
+        SourceSettings sourceSettings = new SourceSettings();
+
+        source.put(Settings.PREFIX + ".task.buffer.size", "Foobar");
+        try {
+            sourceSettings.populate(source);
+            Assert.fail("Expected IllegalArgumentException");
+        } catch (Throwable t) {
+            assertEquals("Incorrect exception type: " + t.getClass().getName(), "IllegalArgumentException", t.getClass().getSimpleName());
+        }
+    }
+
+    @Test
+    public void testEmptySpaceSettings() {
+        HashMap<String, String> source = new HashMap<>();
+        SourceSettings sourceSettings = new SourceSettings();
+
+        source.put(Settings.PREFIX + ".task.buffer.size", " ");
+        try {
+            sourceSettings.populate(source);
+            Assert.fail("Expected IllegalArgumentException");
+        } catch (Throwable t) {
+            assertEquals("Incorrect exception type: " + t.getClass().getName(), "IllegalArgumentException", t.getClass().getSimpleName());
+        }
     }
 }

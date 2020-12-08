@@ -17,12 +17,12 @@ public class SourceSettings extends Settings {
     private String postProcessor;
     private boolean startFromBeginning;
     private final List<Setting> sourceSettings = Arrays.asList(
-            // Add all source settings here:
+            //Add all source settings here:
             new NumericSetting(PREFIX + ".task.timeout", "The max number of milliseconds the source task will use to read documents before sending them to Kafka.",
                     "Task Timeout", SettingDefaults.TASK_TIMEOUT, this::setTaskTimeout, this::getTaskTimeout),
-            new NumericSetting(PREFIX + ".task.buffer.size", "The max size the container of documents the source task will buffer before sending them to Kafka.",
+            new NumericSetting(PREFIX + ".task.buffer.size", "The max size the container of documents (in bytes) the source task will buffer before sending them to Kafka.",
                     "Task reader buffer size", SettingDefaults.TASK_BUFFER_SIZE, this::setTaskBufferSize, this::getTaskBufferSize),
-            new NumericSetting(PREFIX + ".task.batch.size","The max number of of documents the source task will buffer before sending them to Kafka.",
+            new NumericSetting(PREFIX + ".task.batch.size","The max number of documents the source task will buffer before sending them to Kafka.",
                     "Task batch size", SettingDefaults.TASK_BATCH_SIZE, this::setTaskBatchSize, this::getTaskBatchSize),
             new NumericSetting(PREFIX + ".task.poll.interval","The default polling interval in milliseconds that a source task polls for changes.",
                     "Task poll interval", SettingDefaults.TASK_POLL_INTERVAL, this::setTaskPollInterval, this::getTaskPollInterval),

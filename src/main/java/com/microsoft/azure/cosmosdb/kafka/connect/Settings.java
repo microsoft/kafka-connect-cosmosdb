@@ -23,7 +23,7 @@ public class Settings {
     private String databaseName;
     private TopicContainerMap topicContainerMap = TopicContainerMap.empty();
     private final List<Setting> allSettings = Arrays.asList(
-            // Add all common Source and Sink settings here:
+            //Add all common Source and Sink settings here:
             new Setting(PREFIX + ".connection.endpoint", "The Cosmos DB endpoint.", "CosmosDB Endpoint", this::setEndpoint, this::getEndpoint),
             new Setting(PREFIX + ".master.key", "The connection master key.", "Master Key", this::setKey, this::getKey),
             new Setting(PREFIX + ".databasename", "The Cosmos DB target database.", "CosmosDB Database Name", this::setDatabaseName, this::getDatabaseName),
