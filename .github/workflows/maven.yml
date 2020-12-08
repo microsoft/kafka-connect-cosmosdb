@@ -5,9 +5,9 @@ name: Java CI with Maven
 
 on:
   push:
-    branches: [master, dev]
+    branches: [main, kev-dev]
   pull_request:
-    branches: [ master, dev ]
+    branches: [main, kev-dev]
 
 jobs:
   build:
@@ -22,3 +22,10 @@ jobs:
         java-version: 1.8
     - name: Build with Maven
       run: mvn -B package --file pom.xml
+    - name: Run Unit Tests
+      run: mvn clean test
+    - name: Run Integration Test
+      shell: pwsh
+      run: pwsh -command ".src/integration-test/startup.ps1" 
+      if: github.ref == 'refs/heads/main'
+
