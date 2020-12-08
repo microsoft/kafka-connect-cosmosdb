@@ -26,5 +26,5 @@ jobs:
       run: mvn clean test
     - name: Run Integration Test
       shell: pwsh
-      run: pwsh -command ".src/integration-test/startup.ps1" 
+      run: ./src/integration-test/startup.ps1
       if: github.ref == 'refs/heads/kev-dev'
