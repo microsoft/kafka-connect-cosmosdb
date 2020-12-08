@@ -27,5 +27,4 @@ jobs:
     - name: Run Integration Test
       shell: pwsh
       run: pwsh -command ".src/integration-test/startup.ps1" 
-      if: github.ref == 'refs/heads/main'
-
+      if: github.ref == 'refs/heads/kev-dev'
