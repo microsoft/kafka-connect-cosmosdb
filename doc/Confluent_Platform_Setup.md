@@ -36,14 +36,13 @@ export REPO_ROOT=$(pwd)
 
 Start up the docker containers for Confluent Platform using `docker-compose`
 
+If you're using codespaces, either option will work. Otherwise, use the script best suited to your shell environment.
+
+> Running either script for the first time may take several minutes to run in order to download docker images for the Confluent platform components.
+
 ```bash
 
 cd $REPO_ROOT/src/integration-test
-
-# If you're using codespaces, either option will work.
-# Otherwise, use the setup best suited to your shell environment.
-
-# Running either script for the first time may take several minutes to run in order to download the necessary docker images.
 
 # Option 1: Use the bash script to setup
 ./startup.sh
@@ -79,9 +78,9 @@ All of the Confluent Platform services should now be accessible on `localhost`. 
 | Schema Registry UI | <http://localhost:9001> | Can view and create new schemas, ideal for interacting with Avro data.  |
 | ZooNavigator | <http://localhost:9004> | Web interface for Zookeeper. Refer to the [docs](https://zoonavigator.elkozmon.com/en/stable/) for more information. |
 
-### Clean up
+### Cleanup
 
-Tear down the Confluent Platform setup and clean up any unneeded resources
+Tear down the Confluent Platform setup and cleanup any unneeded resources
 
 ```bash
 
@@ -90,7 +89,7 @@ cd $REPO_ROOT/src/integration-test
 # bring down all docker containers
 docker-compose down
 
-# clean up dangling volumes and networks
+# remove dangling volumes and networks
 docker system prune -f --volumes
 
 ```
