@@ -6,7 +6,7 @@ This guide walks through setting up a Kafka stack with Confluent Platform using 
 
 - Bash shell (tested on Github Codespaces, Mac, Ubuntu, Windows with WSL2)
   - Will not work in Cloud Shell or WSL1
-- Java 8/11 ([download](https://www.oracle.com/java/technologies/javase-downloads.html))
+- Java 11+ ([download](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html))
 - Maven ([download](https://maven.apache.org/download.cgi))
 - Docker ([download](https://www.docker.com/products/docker-desktop))
 - Powershell (optional) ([download](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell))
