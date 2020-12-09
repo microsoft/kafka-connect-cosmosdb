@@ -15,11 +15,11 @@ This guide walks through setting up a Kafka stack with Confluent Platform using 
 
 > [Github Codespaces](https://github.com/features/codespaces) is the easiest way to evaluate the Cosmos DB Kafka Connectors as all of the prerequisites are automatically installed
 >
-> Follow the setup steps in the [developer setup](../DEVELOPER_WALKTHROUGH.MD) to setup Codespaces.
+> Follow the setup steps in the [developer setup](../DEVELOPER_WALKTHROUGH.MD) to setup Codespaces
 
 ### Initialize repo
 
-Clone the Kafka Connect Cosmos DB repo.
+Clone the Kafka Connect Cosmos DB repo
 
 ```bash
 
@@ -34,7 +34,7 @@ export REPO_ROOT=$(pwd)
 
 ### Startup
 
-Start up the docker containers for the Kafka Stack.
+Start up the docker containers for the Kafka Stack
 
 ```bash
 
@@ -81,7 +81,7 @@ All of the Kafka services should now be accessible on `localhost`. You can also 
 
 ### Clean up
 
-Destroy the Kafka Stack and clean up any unneeded resources.
+Destroy the Kafka Stack and clean up any unneeded resources
 
 ```bash
 
