@@ -1,6 +1,6 @@
-# Kafka Stack Setup
+# Confluent Platform Setup
 
-This guide walks through setting up a Kafka stack with Confluent Platform using Docker containers.
+This guide walks through setting up Confluent Platform using Docker containers.
 
 ## Prerequisites
 
@@ -34,7 +34,7 @@ export REPO_ROOT=$(pwd)
 
 ### Startup
 
-Start up the docker containers for the Kafka Stack
+Start up the docker containers for Confluent Platform using `docker-compose`
 
 ```bash
 
@@ -60,11 +60,11 @@ docker-compose ps
 >
 > Rerun the startup script to reinitialize the docker containers.
 
-The Kafka stack is now ready to use!
+Your Confluent Platform setup is now ready to use!
 
-### Access Kafka Services
+### Access Confluent Platform components
 
-All of the Kafka services should now be accessible on `localhost`. You can also access the web interfaces for some services as shown below.
+All of the Confluent Platform services should now be accessible on `localhost`. You can also access the web interfaces for some services as shown below.
 
 > If you're using Codespaces, you need to go through the forwarded ports to view the following webpages. Navigate to the 'Forwarded Ports' section in the 'Remote Explorer' extension to access these forwarded ports.
 
@@ -81,7 +81,7 @@ All of the Kafka services should now be accessible on `localhost`. You can also 
 
 ### Clean up
 
-Destroy the Kafka Stack and clean up any unneeded resources
+Tear down the Confluent Platform setup and clean up any unneeded resources
 
 ```bash
 
