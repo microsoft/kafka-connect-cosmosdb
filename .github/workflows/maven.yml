@@ -5,9 +5,9 @@ name: Java CI with Maven
 
 on:
   push:
-    branches: [main, kev-dev]
+    branches: [main, dev]
   pull_request:
-    branches: [main, kev-dev]
+    branches: [main, dev]
 
 jobs:
   build:
@@ -15,7 +15,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v2
     - name: Set up JDK 1.8
       uses: actions/setup-java@v1
       with:
@@ -27,4 +28,4 @@ jobs:
     - name: Run Integration Test
       shell: pwsh
       run: ./src/integration-test/startup.ps1
-      if: github.ref == 'refs/heads/kev-dev'
+      if: github.ref == 'refs/heads/main'
