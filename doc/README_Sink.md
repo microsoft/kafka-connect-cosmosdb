@@ -1,72 +1,89 @@
 # Kafka Connect Cosmos DB Sink Connector
 
-The Azure Cosmos DB sink connector allows you to export data from Apache Kafka® topics to an Azure Cosmos DB database. 
-The connector polls data from Kafka to write to collection(s) in the database based on the topics subscription. 
+The Azure Cosmos DB sink connector allows you to export data from Apache Kafka® topics to an Azure Cosmos DB database.
+The connector polls data from Kafka to write to container(s) in the database based on the topics subscription.
 
+## Topics covered
 
-## Installation
+- [Quickstart](#quickstart)
+- [Connector installation](#connector-installation)
+- [Sink configuration properties](#sink-configuration-properties)
+- [Troubleshooting common issues](#troubleshooting-common-issues)
+- [Limitations](#limitations)
 
-### Install Connector Manually
-Download and extract the ZIP file for your connector and follow the manual connector installation [instructions](https://docs.confluent.io/current/connect/managing/install.html#install-connector-manually)
+## Quickstart
 
+asf
 
-## Configuration
+## Sink configuration properties
 
-At the moment the following settings can be configured by means of the *connector.properties* file. For a config file containing default settings see [this example](../src/integration-test/resources/sink.config.json).
+The following settings are used to configure the Cosmos DB Kafka Sink Connector. These configuration values determine which Kafka topics data is consumed, which Cosmos DB containers data is written into and formats to serialize the data. For an example configuration file with the default values, refer to [this config](../src/integration-test/resources/sink.config.json).
 
-All configuation properties for the sink connector are prefixed with *connect.cosmosdb. e.g. connect.cosmosdb.databasename*
+| Name | Type | Description | Required/Optional |
+| :--- | :--- | :--- | :--- |
+| topics | list | A list of Kafka topics to watch | Required |
+| connector.class | string | Classname of the Cosmos DB sink. Should be set to `com.microsoft.azure.cosmosdb.kafka.connect.sink.CosmosDBSinkConnector` | Required |
+| connect.cosmosdb.connection.endpoint | uri | Cosmos DB endpoint URI string | Required |
+| connect.cosmosdb.master.key | string | The Cosmos DB primary key that the sink connects with | Required |
+| connect.cosmosdb.databasename | string | The name of the Cosmos DB database the sink writes to | Required |
+| connect.cosmosdb.containers.topicmap | string | Mapping between Kafka Topics and Cosmos DB Containers, formatted using CSV as shown: `topic#container,topic2#container2` | Required |
+| key.converter | string | Serialization format for the key data written into Kafka topic | Required |
+| value.converter | string | Serialization format for the value data written into the Kafka topic | Required |
+| key.converter.schemas.enable | string | Set to `"true"` if the key data has embedded schema | Optional |
+| value.converter.schemas.enable | string | Set to `"true"` if the key data has embedded schema | Optional |
+| tasks.max | int | Maximum number of connector sink tasks. Default is `1` | Optional |
 
+Data will always be written to the Cosmos DB as JSON without any schema.
 
-| Name                                           | Description                                                                                          | Type    | Default                                                                       | Valid Values                                                                                                     | Importance |
-|------------------------------------------------|------------------------------------------------------------------------------------------------------|---------|-------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------|------------|
-| databasename                             | name of the database to write to                                                              | string  |
-| master.key | the configured master key for Cosmos DB | string |
-| connection.endpoint | the endpoint for the Cosmos DB Account | uri | 
-| containers.topicmap | a map in the format of topic#container  | string |
+## Troubleshooting common issues
 
+Here are solutions to some common problems that you may encounter when working with the Cosmos DB Kafka Sink Connector.
 
-### Kafka Connect Converter configuration
+### Reading non-JSON data with JsonConverter
 
-The *key.converter* and *value.converter* configuration should be set to match the serialization format that was used when the data was written to the Kafka topic. 
-
-Data will alwyas be written to Cosmos DB as JSON, with no schema. 
-
-### Problem: Reading non-JSON data with JsonConverter
 If you have non-JSON data on your source topic in Kafka and attempt to read it using the JsonConverter, you will see the following exception:
 
 ```properties
+
 org.apache.kafka.connect.errors.DataException: Converting byte[] to Kafka Connect data failed due to serialization error:
 …
 org.apache.kafka.common.errors.SerializationException: java.io.CharConversionException: Invalid UTF-32 character 0x1cfa7e2 (above 0x0010ffff) at char #1, byte #7)
+
 ```
 
 This is likely caused by data in the source topic being serialized in either Avro or another format (like CSV string).
 
-Solution: If the data is actually in Avro, then change your Kafka Connect sink connector to use:
+**Solution**: If the topic data is actually in Avro, then change your Kafka Connect sink connector to use the AvroConverter as shown below.
 
 ```properties
+
 "value.converter": "io.confluent.connect.avro.AvroConverter",
-"value.converter.schema.registry.url": "http://schema-registry:8081",
+"value.converter.schema.registry.url": "http://schema-registry:8081" ,
+
 ```
 
-### Problem: Reading non-Avro data with AvroConverter
+### Reading non-Avro data with AvroConverter
+
 When you try to use the Avro converter to read data from a topic that is not Avro. This would include data written by an Avro serializer other than the Confluent Schema Registry’s Avro serializer, which has its own wire format.
 
 ```properties
+
 org.apache.kafka.connect.errors.DataException: my-topic-name
 at io.confluent.connect.avro.AvroConverter.toConnectData(AvroConverter.java:97)
 …
 org.apache.kafka.common.errors.SerializationException: Error deserializing Avro message for id -1
 org.apache.kafka.common.errors.SerializationException: Unknown magic byte!
+
 ```
 
-The solution is to check the source topic’s serialization format, and either switch Kafka Connect’s sink connector to use the correct converter, or switch the upstream format to Avro. 
+**Solution**: Check the source topic’s serialization format. Then, either switch Kafka Connect’s sink connector to use the correct converter, or switch the upstream format to Avro.
 
-### Problem: Reading a JSON message without the expected schema/payload structure
-Kafka Connect supports a special structure of JSON messages containing both payload and schema as follows - 
+### Reading a JSON message without the expected schema/payload structure
 
- 
- ```javascript
+Kafka Connect supports a special structure of JSON messages containing both payload and schema as follows.
+
+ ```json
+
 {
   "schema": {
     "type": "struct",
@@ -88,12 +105,15 @@ Kafka Connect supports a special structure of JSON messages containing both payl
     "name": "Sam"
   }
 }
+
 ```
 
 If you try to read JSON data that does not contain the data in this structure, you will get this error:
 
 ```properties
+
 org.apache.kafka.connect.errors.DataException: JsonConverter with schemas.enable requires "schema" and "payload" fields and may not contain additional fields. If you are trying to deserialize plain JSON data, set schemas.enable=false in your converter configuration.
+
 ```
 
 To be clear, the only JSON structure that is valid for schemas.enable=true has schema and payload fields as the top-level elements (shown above).
@@ -101,68 +121,84 @@ To be clear, the only JSON structure that is valid for schemas.enable=true has s
 As the message itself states, if you just have plain JSON data, you should change your connector’s configuration to:
 
 ```properties
+
 "value.converter": "org.apache.kafka.connect.json.JsonConverter",
 "value.converter.schemas.enable": "false",
+
 ```
 
 ## Limitations
-* Auto-creation of databases and collections within Cosmos DB are not supported. The database and collections must already exist, and the must be configured to use these.
 
+- Auto-creation of databases and containers within Cosmos DB are not supported. The database and containers must already exist, and they must be configured to use these.
 
 ## Quick Start
 
 ### Prerequisites
-* [Confluent Platform](https://docs.confluent.io/current/installation/index.html#installation-overview)
-* [Confluent CLI](https://docs.confluent.io/current/cli/installing.html#cli-install) (requires separate installation)
-* [Azure CLI](https://docs.microsoft.com/cli/azure/install-azure-cli) (requires separate installation)
 
-### Create Azure Cosmos DB Instance, Database and Collection
+- Confluent Platform (recommended to use this [setup](../Confluent_Platform_Setup.md))
+  - If you plan on using a separate Confluent Platform instance, you will need to install the Cosmos DB connectors manually
+- Cosmos DB Instance ([setup guide](../CosmosDB_Setup.md))
+- Bash shell (tested on Github Codespaces, Mac, Ubuntu, Windows with WSL2)
+  - Will not work in Cloud Shell or WSL1
+- Java 11+ ([download](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html))
+- Maven ([download](https://maven.apache.org/download.cgi))
 
-Create a new Azure Resource Group for this quickstart, then add to it a Cosmos DB Account, Database and Collection using the Azure CLI
+### Install Cosmos DB Sink connector
+
+If you are using the Confluent Platform setup from this repo, the Cosmos DB Sink Connector is included in the installation and you can skip this step. Otherwise, you will need to package this repo and include the JAR file in your installation.
 
 ```bash
-# create cosmosdb account
 
-# create database
+# clone the kafka-connect-cosmosdb repo if you have not done so already
+git clone https://github.com/microsoft/kafka-connect-cosmosdb.git
+cd kafka-connect-cosmosdb
 
-# create collection
+# package the source code into a JAR file
+mvn clean package
+
+# include the following JAR file in Confluent Platform installation
+ls target/*dependencies.jar
 
 ```
 
-### Install connector
-```bash
-# install the connector (run from your CP installation directory)
+For more information on installing the connector manually, refer to these [instructions](https://docs.confluent.io/current/connect/managing/install.html#install-connector-manually).
 
-# start conluent platform
-confluent local start
+### Create Kafka Topic and write data
 
-```
+Create a Kafka topic using Confluent Control Center and write a few messages into the topic. For this quickstart, we will create a Kafka topic named `hotels` and will write JSON data (non-schema embedded) to the topic.
 
-### Write message to Kafka
-Produce test data to the hotels-sample topic in Kafka.
+To create a topic inside Control Center, see [here](https://docs.confluent.io/platform/current/quickstart/ce-docker-quickstart.html#step-2-create-ak-topics.
 
-Start the Avro console producer to import a few records to Kafka:
+Next, start the Kafka console producer to write a few records to the `hotels` topic.
 
-```bash
-<path-to-confluent>/bin/kafka-avro-console-producer --broker-list localhost:9092 --topic hotels-sample \
---property value.schema='{"type":"record","name":"myrecord","fields":[{"name":"HotelName","type":"string"},{"name":"Description","type":"string"}]}' \
---property key.schema='{"type":"string"}' \
---property "parse.key=true" \
---property "key.separator=,"
+```powershell
+
+# Option 1: If using Codespaces, use the built-in CLI utility
+kafka-console-producer --broker-list localhost:9092 --topic hotels
+
+# Option 2: Using this repo's Confluent Platform setup, first exec into the broker container
+docker exec -it broker /bin/bash
+kafka-console-producer --broker-list localhost:9092 --topic hotels
+
+# Option 3: Using your Confluent Platform setup and CLI install
+<path-to-confluent>/bin/kafka-console-producer --broker-list :9092 --topic hotels
+
 ```
 
 Then in the console producer, enter:
 
 ```bash
+
 "marriotId",{"HotelName": "Marriot", "Description": "Marriot description"}
 "holidayinnId",{"HotelName": "HolidayInn", "Description": "HolidayInn description"}
 "motel8Id",{"HotelName": "Motel8", "Description": "motel8 description"}
+
 ```
 
 The three records entered are published to the Kafka topic hotels-sample in Avro format.
 
-
 ### Load the connector
+
 Create *azure-cosmosdb.json* file with the following contents: 
 
 ```javascript
