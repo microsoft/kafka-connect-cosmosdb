@@ -75,3 +75,17 @@ echo https://${Cosmos_Name}.documents.azure.com:443/
 az cosmosdb keys list -n $Cosmos_Name -g $Cosmos_RG --query primaryMasterKey -o tsv
 
 ```
+
+### Cleanup
+
+Remove the Cosmos DB instance and the associated resource group
+
+```bash
+
+# delete Cosmos DB instance
+az cosmosdb delete -g $Cosmos_RG -n $Cosmos_Name
+
+# delete Cosmos DB resource group
+az group delete --no-wait -y -n $Cosmos_RG
+
+```

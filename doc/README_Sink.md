@@ -6,14 +6,154 @@ The connector polls data from Kafka to write to container(s) in the database bas
 ## Topics covered
 
 - [Quickstart](#quickstart)
-- [Connector installation](#connector-installation)
 - [Sink configuration properties](#sink-configuration-properties)
 - [Troubleshooting common issues](#troubleshooting-common-issues)
 - [Limitations](#limitations)
 
 ## Quickstart
 
-asf
+### Prerequisites
+
+- Confluent Platform (recommended to use this [setup](./Confluent_Platform_Setup.md))
+  - If you plan on using a separate Confluent Platform instance, you will need to install the Cosmos DB connectors manually.
+- Cosmos DB Instance ([setup guide](./CosmosDB_Setup.md))
+- Bash shell (tested on Github Codespaces, Mac, Ubuntu, Windows with WSL2)
+  - Will not work in Cloud Shell or WSL1
+- Java 11+ ([download](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html))
+- Maven ([download](https://maven.apache.org/download.cgi))
+
+### Install sink connector
+
+If you are using the Confluent Platform setup from this repo, the Cosmos DB Sink Connector is included in the installation and you can skip this step. Otherwise, you will need to package this repo and include the JAR file in your installation.
+
+```bash
+
+# clone the kafka-connect-cosmosdb repo if you haven't done so already
+git clone https://github.com/microsoft/kafka-connect-cosmosdb.git
+cd kafka-connect-cosmosdb
+
+# package the source code into a JAR file
+mvn clean package
+
+# include the following JAR file in Confluent Platform installation
+ls target/*dependencies.jar
+
+```
+
+For more information on installing the connector manually, refer to these [instructions](https://docs.confluent.io/current/connect/managing/install.html#install-connector-manually).
+
+### Create Kafka topic and write data
+
+Create a Kafka topic using Confluent Control Center and write a few messages into the topic. For this quickstart, we will create a Kafka topic named `hotels` and will write JSON data (non-schema embedded) to the topic.
+
+To create a topic inside Control Center, see [here](https://docs.confluent.io/platform/current/quickstart/ce-docker-quickstart.html#step-2-create-ak-topics).
+
+Next, start the Kafka console producer to write a few records to the `hotels` topic.
+
+```powershell
+
+# Option 1: If using Codespaces, use the built-in CLI utility
+kafka-console-producer --broker-list localhost:9092 --topic hotels
+
+# Option 2: Using this repo's Confluent Platform setup, first exec into the broker container
+docker exec -it broker /bin/bash
+kafka-console-producer --broker-list localhost:9092 --topic hotels
+
+# Option 3: Using your Confluent Platform setup and CLI install
+<path-to-confluent>/bin/kafka-console-producer --broker-list <kafka broker hostname> --topic hotels
+
+```
+
+In the console producer, enter:
+
+```bash
+
+{"id": "h1", "HotelName": "Marriott", "Description": "Marriott description"}
+{"id": "h2", "HotelName": "HolidayInn", "Description": "HolidayInn description"}
+{"id": "h3", "HotelName": "Motel8", "Description": "Motel8 description"}
+
+```
+
+The three records entered are published to the `hotels` Kafka topic in JSON format.
+
+### Create the sink connector
+
+Create the Cosmos DB Sink Connector in Kafka Connect
+
+The following JSON body defines the config for the Cosmos DB Sink Connector. You will need to fill out the values for `connect.cosmosdb.connection.endpoint` and `connect.cosmosdb.master.key`, which you should have saved from the [Cosmos DB setup guide](./CosmosDB_Setup.md).
+
+Refer to the [sink properties](#sink-configuration-properties) section for more information on each of these configuration properties.
+
+```json
+
+{
+  "name": "cosmosdb-sink-connector",
+  "config": {
+    "connector.class": "com.microsoft.azure.cosmosdb.kafka.connect.sink.CosmosDBSinkConnector",
+    "tasks.max": "1",
+    "topics": [
+      "hotels"
+    ],
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": "false",
+    "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "key.converter.schemas.enable": "false",
+    "connect.cosmosdb.connection.endpoint": "https://<cosmosinstance-name>.documents.azure.com:443/",
+    "connect.cosmosdb.master.key": "<cosmosdbprimarykey>",
+    "connect.cosmosdb.databasename": "kafkaconnect",
+    "connect.cosmosdb.containers.topicmap": "hotels#kafka"
+  }
+}
+
+```
+
+Once you have all the values filled out, save the JSON file somewhere locally. You can use this file to create the connector using the REST API.
+
+#### Create connector using Control Center
+
+An easy option to create the connector is by going through the Control Center webpage.
+
+Follow this [guide](https://docs.confluent.io/platform/current/quickstart/ce-docker-quickstart.html#step-3-install-a-ak-connector-and-generate-sample-data) to create a connector from Control Center but instead of using the `DatagenConnector` option, use the `CosmosDBSinkConnector` tile instead. When configuring the sink connector, fill out the values as you have filled in the JSON file.
+
+Alternatively, in the connectors page, you can upload the JSON file from earlier by using the `Upload connector config file` option.
+
+![Upload connector config](./images/upload-connector-config.png "Upload connector config")
+
+#### Create connector using REST API
+
+Create the sink connector using the Connect REST API
+
+```bash
+
+# Curl to Kafka connect service
+curl -H "Content-Type: application/json" -X POST -d @<path-to-JSON-config-file> http://localhost:8083/connectors
+
+```
+
+### Confirm data written to Cosmos DB
+
+Check that the three records from the `hotels` topic are created in Cosmos DB.
+
+Navigate to your Cosmos DB instance on Azure portal You should see something like this:
+
+![CosmosDB sink records](./images/cosmosdb-sink-records.png "CosmosDB sink records")
+
+### Cleanup
+
+To delete the connector from the Control Center, navigate to the sink connector you created and click the `Delete` icon.
+
+![Delete connector](./images/delete-connector.png "Delete connector")
+
+Alternatively, use the Connect REST API.
+
+```bash
+
+# Curl to Kafka connect service
+curl -X DELETE http://localhost:8083/connectors/cosmosdb-sink-connector
+
+```
+
+To delete the created Azure Cosmos DB service and its resource group using Azure CLI, refer to these [steps](./CosmosDB_Setup.md#cleanup).
 
 ## Sink configuration properties
 
@@ -130,146 +270,3 @@ As the message itself states, if you just have plain JSON data, you should chang
 ## Limitations
 
 - Auto-creation of databases and containers within Cosmos DB are not supported. The database and containers must already exist, and they must be configured to use these.
-
-## Quick Start
-
-### Prerequisites
-
-- Confluent Platform (recommended to use this [setup](../Confluent_Platform_Setup.md))
-  - If you plan on using a separate Confluent Platform instance, you will need to install the Cosmos DB connectors manually
-- Cosmos DB Instance ([setup guide](../CosmosDB_Setup.md))
-- Bash shell (tested on Github Codespaces, Mac, Ubuntu, Windows with WSL2)
-  - Will not work in Cloud Shell or WSL1
-- Java 11+ ([download](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html))
-- Maven ([download](https://maven.apache.org/download.cgi))
-
-### Install Cosmos DB Sink connector
-
-If you are using the Confluent Platform setup from this repo, the Cosmos DB Sink Connector is included in the installation and you can skip this step. Otherwise, you will need to package this repo and include the JAR file in your installation.
-
-```bash
-
-# clone the kafka-connect-cosmosdb repo if you have not done so already
-git clone https://github.com/microsoft/kafka-connect-cosmosdb.git
-cd kafka-connect-cosmosdb
-
-# package the source code into a JAR file
-mvn clean package
-
-# include the following JAR file in Confluent Platform installation
-ls target/*dependencies.jar
-
-```
-
-For more information on installing the connector manually, refer to these [instructions](https://docs.confluent.io/current/connect/managing/install.html#install-connector-manually).
-
-### Create Kafka Topic and write data
-
-Create a Kafka topic using Confluent Control Center and write a few messages into the topic. For this quickstart, we will create a Kafka topic named `hotels` and will write JSON data (non-schema embedded) to the topic.
-
-To create a topic inside Control Center, see [here](https://docs.confluent.io/platform/current/quickstart/ce-docker-quickstart.html#step-2-create-ak-topics.
-
-Next, start the Kafka console producer to write a few records to the `hotels` topic.
-
-```powershell
-
-# Option 1: If using Codespaces, use the built-in CLI utility
-kafka-console-producer --broker-list localhost:9092 --topic hotels
-
-# Option 2: Using this repo's Confluent Platform setup, first exec into the broker container
-docker exec -it broker /bin/bash
-kafka-console-producer --broker-list localhost:9092 --topic hotels
-
-# Option 3: Using your Confluent Platform setup and CLI install
-<path-to-confluent>/bin/kafka-console-producer --broker-list :9092 --topic hotels
-
-```
-
-Then in the console producer, enter:
-
-```bash
-
-"marriotId",{"HotelName": "Marriot", "Description": "Marriot description"}
-"holidayinnId",{"HotelName": "HolidayInn", "Description": "HolidayInn description"}
-"motel8Id",{"HotelName": "Motel8", "Description": "motel8 description"}
-
-```
-
-The three records entered are published to the Kafka topic hotels-sample in Avro format.
-
-### Load the connector
-
-Create *azure-cosmosdb.json* file with the following contents: 
-
-```javascript
-{
-  "name": "azure-cosmosdb",
-  "config": {
-    "topics": "hotels-sample",
-    "tasks.max": "1",
-    "connector.class": "com.microsoft.azure.cosmosdb.kafka.connect.sink.CosmosDBSinkConnector",
-    "key.converter": "io.confluent.connect.avro.AvroConverter",
-    "key.converter.schema.registry.url": "http://localhost:8081",
-    "value.converter": "io.confluent.connect.avro.AvroConverter",
-    "value.converter.schema.registry.url": "http://localhost:8081",
-    "confluent.topic.bootstrap.servers": "localhost:9092",
-    "confluent.topic.replication.factor": "1"
-  }
-}
-```
-
-Load the Azure Cosmos DB Sink Connector
-```bash
-confluent local load azure-cosmosdb -- -d path/to/azure-cosmosdb.json
-```
-
-Confirm that the connector is in a RUNNING state.
-```bash
-confluent local status azure-cosmosdb
-```
-
-Confirm that the messages were delivered to the result topic in Kafka
-```bash
-confluent local consume test-result -- --from-beginning
-```
-
-### Confirm data written to Cosmos DB
-
-```bash
-```
-
-There should be the same 3 records in Cosmos DB in a similar format to below: 
-```javascript
-[
-  {
-    "id": "marriotId",
-    "HotelName": "Marriot",
-    "Description": "Marriot description"
-  },
-  {
-    "id": "holidayinnId",
-    "HotelName": "HolidayInn",
-    "Description": "HolidayInn description"
-  },
-  {
-    "id": "motel8Id",
-    "HotelName": "Motel8",
-    "Description": "motel8 description"
-  }
-]
-```
-
-### Cleanup
-Delete the connector
-```bash
-confluent local unload azure-cosmosdb
-```
-
-Stop Confluent Platform
-```bash
-confluent local stop
-```
-
-Delete the created Azure Cosmos DB service and its resource group using Azure CLI.
-```bash
-```
