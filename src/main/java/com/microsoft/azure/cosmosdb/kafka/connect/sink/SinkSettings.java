@@ -14,11 +14,11 @@ import java.util.List;
 public class SinkSettings extends Settings {
     private String postProcessor;
     private final List<Setting> sinkSettings = Arrays.asList(
-            //Add all settings here:
-            new Setting(Settings.PREFIX + ".sink.post-processor", "Comma-separated list of Sink Post-Processor class names to use for post-processing",
+            //Add all sink settings here:
+            new Setting(Settings.PREFIX + ".sink.post-processor", "Comma-separated list of Sink Post-Processor class names to use for post-processing.",
                     "Sink post-processor", this::setPostProcessor, this::getPostProcessor),
 
-            new Setting(SinkTask.TOPICS_CONFIG, "List of topics to consume, separated by commas", "Topics", s -> {
+            new Setting(SinkTask.TOPICS_CONFIG, "List of topics to consume, separated by commas.", "Topics", s -> {
             }, () -> ""),
             new Setting(SinkTask.TOPICS_REGEX_CONFIG,
                     "Regular expression giving topics to consume. " +
