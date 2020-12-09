@@ -1,4 +1,4 @@
-#Adapted from https://github.com/simplesteph/kafka-stack-docker-compose
+# Adapted from https://github.com/confluentinc/cp-all-in-one and https://github.com/simplesteph/kafka-stack-docker-compose
 version: '2.1'
 
 services:
@@ -12,9 +12,6 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
-    volumes:
-      - ./full-stack/zookeeper/data:/data
-      - ./full-stack/zookeeper/datalog:/datalog
 
   broker:
     image: confluentinc/cp-server:6.0.0
@@ -42,8 +39,6 @@ services:
       CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
       CONFLUENT_METRICS_ENABLE: 'true'
       CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
-    volumes:
-      - ./full-stack/broker/data:/var/lib/kafka/data
     depends_on:
       - zookeeper
 
