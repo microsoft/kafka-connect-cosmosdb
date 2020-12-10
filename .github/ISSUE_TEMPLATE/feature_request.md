@@ -21,5 +21,6 @@ Add any other context or screenshots about the feature request here.
 
 ## Next Steps
 - [ ] Team consensus to proceed 
-- [ ] Complete Design Review
 - [ ] Schedule Design Session
+- [ ] Complete Design Review
+
