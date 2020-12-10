@@ -5,7 +5,7 @@
 * Git
 * Java 11+ ([download](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html))
 * Maven ([download](https://maven.apache.org/download.cgi))
-* Powershell ([download](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell?view=powershell-7.1))
+* Powershell (optional) ([download](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell?view=powershell-7.1))
 
 ## Setup Locally
 * Clone the Github repo microsoft/kafka-connect-cosmosdb GitHub repository.
@@ -46,8 +46,8 @@
   ```
 * Validate generated Connetor JAR under `/kafka-connect-cosmosdb/src/integration-test/connectors`
 
-## Configure Control Center, CosmosDB & validate Kafka Connectos
-* [Confluent Platform Setup](https://github.com/microsoft/kafka-connect-cosmosdb/blob/dev/doc/Confluent_Platform_Setup.md)
-* [Setting up an Azure Cosmos DB Instance](https://github.com/microsoft/kafka-connect-cosmosdb/blob/dev/doc/CosmosDB_Setup.md)
-* [Kafka Connect Cosmos DB Sink Connector](https://github.com/microsoft/kafka-connect-cosmosdb/blob/dev/doc/README_Sink.md)
-* [Kafka Connect Cosmos DB Source Connector](https://github.com/microsoft/kafka-connect-cosmosdb/blob/dev/doc/README_Source.md)
+## Configure Control Center, CosmosDB & validate Kafka Connectors
+* [Confluent Platform Setup](doc/Confluent_Platform_Setup.md)
+* [Setting up an Azure Cosmos DB Instance](doc/CosmosDB_Setup.md)
+* [Kafka Connect Cosmos DB Sink Connector](doc/README_Sink.md)
+* [Kafka Connect Cosmos DB Source Connector](doc/README_Source.md)

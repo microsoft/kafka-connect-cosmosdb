@@ -122,6 +122,9 @@ For Sink connector specific configuration please refer to [Sink Connector Docume
 
 For Source connector specific configuration please refer to [Source Connector Documentation](./doc/README_Source.md)
 
+## Project Setup
+Please refer [Developer Walkthrough and Project Setup](DEVELOPER_WALKTHROUGH.MD) for initial setup instructions.
+
 ## Resources
 <a href="http://kafka.apache.org/documentation.html#connect" target="_blank">Kafka Connect</a>
 
