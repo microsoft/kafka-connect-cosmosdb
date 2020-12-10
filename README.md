@@ -1,7 +1,6 @@
 # Kafka Connect for Azure Cosmos DB
 
 ## Introduction
-
 This project provides connectors for <a href="http://kafka.apache.org/documentation.html#connect" target="_blank">Kafka Connect</a> to read from and write data to <a href="https://azure.microsoft.com/en-us/services/cosmos-db/" target="_blank">Azure Cosmos DB</a>.
 
 

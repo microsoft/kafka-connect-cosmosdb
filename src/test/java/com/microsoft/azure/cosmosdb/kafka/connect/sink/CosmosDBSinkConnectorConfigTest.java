@@ -45,23 +45,4 @@ public class CosmosDBSinkConnectorConfigTest {
         assertNotNull(dbNameSetting);
         assertNull(new CosmosDBSinkConnector().config().defaultValues().get(dbNameSetting.getName()));
     }
-
-    @Test
-    public void testPresentDefaults() {
-        //The task timeout has a default setting. Let's see if the configdef does
-        assertNotNull(TIMEOUT_SETTING.getDefaultValue().get());
-        assertEquals(TIMEOUT_SETTING.getDefaultValue().get(), new CosmosDBSinkConnector().config().defaultValues().get(TIMEOUT_SETTING.getName()));
-    }
-
-    @Test
-    public void testNumericValidation() {
-        Map<String, String> settingAssignment = newMapWithMinimalSettings();
-
-        settingAssignment.put(TIMEOUT_SETTING.getName(), "definitely not a number");
-        ConfigDef config = new CosmosDBSinkConnector().config();
-
-        List<ConfigValue> postValidation = config.validate(settingAssignment);
-        ConfigValue timeoutConfigValue = postValidation.stream().filter(item -> item.name().equals(TIMEOUT_SETTING.getName())).findFirst().get();
-        assertEquals("Expected error message when assigning non-numeric value to task timeout", 1, timeoutConfigValue.errorMessages().size());
-    }
 }
