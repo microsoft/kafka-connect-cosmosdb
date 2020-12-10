@@ -50,5 +50,4 @@
 * [Confluent Platform Setup](https://github.com/microsoft/kafka-connect-cosmosdb/blob/dev/doc/Confluent_Platform_Setup.md)
 * [Setting up an Azure Cosmos DB Instance](https://github.com/microsoft/kafka-connect-cosmosdb/blob/dev/doc/CosmosDB_Setup.md)
 * [Kafka Connect Cosmos DB Sink Connector](https://github.com/microsoft/kafka-connect-cosmosdb/blob/dev/doc/README_Sink.md)
-* [Kafka Connect Cosmos DB Source Connector
-](https://github.com/microsoft/kafka-connect-cosmosdb/blob/dev/doc/README_Source.md)
+* [Kafka Connect Cosmos DB Source Connector](https://github.com/microsoft/kafka-connect-cosmosdb/blob/dev/doc/README_Source.md)
