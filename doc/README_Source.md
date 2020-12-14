@@ -49,9 +49,9 @@ To create a topic inside Control Center, see [here](https://docs.confluent.io/pl
 
 The following JSON body defines the config for the Cosmos DB Source Connector. 
 
->Note: You will need to replace placeholder values for below properties which you should have saved from the [Cosmos DB setup guide](./CosmosDB_Setup.md).
->`connect.cosmosdb.connection.endpoint`
->`connect.cosmosdb.master.key`
+>Note: You will need to replace placeholder values for below properties which you should have saved from the [Cosmos DB setup guide](./CosmosDB_Setup.md).  
+>`connect.cosmosdb.connection.endpoint`  
+>`connect.cosmosdb.master.key`  
 
 Refer to the [source properties](#source-configuration-properties) section for more information on each of these configuration properties.
 
