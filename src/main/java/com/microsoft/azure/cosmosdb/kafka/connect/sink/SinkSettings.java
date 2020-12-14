@@ -15,9 +15,6 @@ public class SinkSettings extends Settings {
     private String postProcessor;
     private final List<Setting> sinkSettings = Arrays.asList(
             //Add all sink settings here:
-            new Setting(Settings.PREFIX + ".sink.post-processor", "Comma-separated list of Sink Post-Processor class names to use for post-processing.",
-                    "Sink post-processor", this::setPostProcessor, this::getPostProcessor),
-
             new Setting(SinkTask.TOPICS_CONFIG, "List of topics to consume, separated by commas.", "Topics", s -> {
             }, () -> ""),
             new Setting(SinkTask.TOPICS_REGEX_CONFIG,
@@ -32,26 +29,4 @@ public class SinkSettings extends Settings {
     protected List<Setting> getAllSettings() {
         return ListUtils.union(super.getAllSettings(), sinkSettings);
     }
-
-    /**
-     * Returns the sink post-processor list
-     *
-     * @Return The sink post-processor list
-     */
-
-    public String getPostProcessor() {
-        return this.postProcessor;
-    }
-
-
-    /**
-     * Sets the sink post-processor list
-     *
-     * @param postProcessor
-     */
-    public void setPostProcessor(String postProcessor) {
-        this.postProcessor = postProcessor;
-    }
-
-
 }
