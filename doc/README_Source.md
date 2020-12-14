@@ -21,23 +21,22 @@ The Azure Cosmos DB Source connector provides the capability to read data from t
 
 ### Install source connector
 
-If you are using the Confluent Platform setup from this repo, the Cosmos DB Source Connector is included in the installation and you can skip this step. Otherwise, you will need to package this repo and include the JAR file in your installation.
+If you are using the Confluent Platform setup from this repo, the Cosmos DB Source Connector is included in the installation and you can skip this step. 
+Otherwise, you can use JAR file from latest [Release](https://github.com/microsoft/kafka-connect-cosmosdb/releases) and install the connector manually, refer to these [instructions](https://docs.confluent.io/current/connect/managing/install.html#install-connector-manually).
 
-```bash
-
-# clone the kafka-connect-cosmosdb repo if you haven't done so already
-git clone https://github.com/microsoft/kafka-connect-cosmosdb.git
-cd kafka-connect-cosmosdb
-
-# package the source code into a JAR file
-mvn clean package
-
-# include the following JAR file in Confluent Platform installation
-ls target/*dependencies.jar
-
-```
-
-For more information on installing the connector manually, refer to these [instructions](https://docs.confluent.io/current/connect/managing/install.html#install-connector-manually).
+>You can always package new JAR file following this steps:
+>```bash
+># clone the kafka-connect-cosmosdb repo if you haven't done so already
+>git clone https://github.com/microsoft/kafka-connect-cosmosdb.git
+>cd kafka-connect-cosmosdb
+>
+># package the source code into a JAR file
+>mvn clean package
+>
+># include the following JAR file in Confluent Platform installation
+>ls target/*dependencies.jar
+>
+>```
 
 ### Create Kafka topic
 Create a Kafka topic using Confluent Control Center. For this quickstart, we will create a Kafka topic named `apparels` and will write JSON data (non-schema embedded) to the topic.
@@ -48,7 +47,11 @@ To create a topic inside Control Center, see [here](https://docs.confluent.io/pl
 
 #### Create the Cosmos DB Source Connector in Kafka Connect
 
-The following JSON body defines the config for the Cosmos DB Source Connector. You will need to fill out the values for `connect.cosmosdb.connection.endpoint` and `connect.cosmosdb.master.key`, which you should have saved from the [Cosmos DB setup guide](./CosmosDB_Setup.md).
+The following JSON body defines the config for the Cosmos DB Source Connector. 
+
+>Note: You will need to replace placeholder values for below properties which you should have saved from the [Cosmos DB setup guide](./CosmosDB_Setup.md).
+>`connect.cosmosdb.connection.endpoint`
+>`connect.cosmosdb.master.key`
 
 Refer to the [source properties](#source-configuration-properties) section for more information on each of these configuration properties.
 
@@ -65,7 +68,7 @@ Refer to the [source properties](#source-configuration-properties) section for m
     "connect.cosmosdb.master.key": "<cosmosdbprimarykey>",
     "connect.cosmosdb.databasename": "kafkaconnect",
     "connect.cosmosdb.containers.topicmap": "apparels#kafka",
-    "connect.cosmosdb.containers": "Persons",
+    "connect.cosmosdb.containers": "kafka",
     "connect.cosmosdb.changefeed.startFromBeginning": true,
     "value.converter.schemas.enable": "false",
     "key.converter.schemas.enable": "false"
@@ -128,7 +131,7 @@ Use [Cosmos DB setup guide](./CosmosDB_Setup.md) to create and set up Cosmos DB 
 
 * Open Kafka Topic UI on http://localhost:9000
 * Select the Kafka topic `apparels` you created
-* Validate document that was inserted in to Cosmos DB in previous step.
+* Verify that the document inserted in to Cosmos DB earlier appears in the Kafka topic.
 
 ### Cleanup
 
