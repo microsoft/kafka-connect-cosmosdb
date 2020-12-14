@@ -25,7 +25,6 @@ public class SourceSettingsTest {
         SourceSettings sourceSettings = new SourceSettings();
         sourceSettings.populate(source);
 
-        assertEquals("foobar", sourceSettings.getPostProcessor());
         assertEquals(444L, (long) sourceSettings.getTaskTimeout());
         assertEquals(666L, (long) sourceSettings.getTaskBufferSize());
         assertTrue(sourceSettings.isStartFromBeginning());
