@@ -11,10 +11,6 @@ public class PasswordSetting extends Setting {
         super(name, documentation, displayName, modifier, accessor);
     }
 
-    public PasswordSetting(String name, String documentation, String displayName, Object defaultValue, Consumer<String> modifier, Supplier<String> accessor) {
-        super(name, documentation, displayName, defaultValue, modifier, accessor);
-    }
-
     @Override
     protected ConfigDef.Type getKafkaConfigType() {
         return ConfigDef.Type.PASSWORD;
