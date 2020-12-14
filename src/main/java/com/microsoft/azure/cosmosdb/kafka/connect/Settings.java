@@ -25,7 +25,7 @@ public class Settings {
     private final List<Setting> allSettings = Arrays.asList(
             //Add all common Source and Sink settings here:
             new Setting(PREFIX + ".connection.endpoint", "The Cosmos DB endpoint.", "CosmosDB Endpoint", this::setEndpoint, this::getEndpoint),
-            new Setting(PREFIX + ".master.key", "The connection master key.", "Master Key", this::setKey, this::getKey),
+            new PasswordSetting(PREFIX + ".master.key", "The connection master key.", "Master Key", this::setKey, this::getKey),
             new Setting(PREFIX + ".databasename", "The Cosmos DB target database.", "CosmosDB Database Name", this::setDatabaseName, this::getDatabaseName),
             new Setting(PREFIX + ".containers.topicmap", "A comma delimited list of containers mapped to their topic partitions. Example: topic1#con1,topic2#con2.",
                     "Topic-Container map", value -> this.setTopicContainerMap(TopicContainerMap.deserialize(value)), ()->this.getTopicContainerMap().serialize())
