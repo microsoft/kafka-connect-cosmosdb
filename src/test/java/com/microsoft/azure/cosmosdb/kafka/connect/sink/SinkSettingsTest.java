@@ -59,7 +59,6 @@ public class SinkSettingsTest {
         HashMap<String, String> source = new HashMap<>();
         SinkSettings sinkSettings = new SinkSettings();
         sinkSettings.populate(source);
-        assertNull(sinkSettings.getPostProcessor());
     }
 
 }
