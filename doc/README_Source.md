@@ -5,7 +5,7 @@ The Azure Cosmos DB Source connector provides the capability to read data from t
 ## Topics covered
 
 - [Quickstart](#quickstart)
-- [Source configuration properties](#sink-configuration-properties)
+- [Source configuration properties](#source-configuration-properties)
 
 ## Quickstart
 
