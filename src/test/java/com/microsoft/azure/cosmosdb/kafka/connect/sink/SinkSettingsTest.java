@@ -30,13 +30,11 @@ public class SinkSettingsTest {
     public void readGenericAndSpecific() {
         HashMap<String, String> source = new HashMap<>();
         //Add specific setting
-        source.put(Settings.PREFIX + ".sink.post-processor", "foobar");
         source.put(Settings.PREFIX + ".databasename", "mydb");
         source.put(Settings.PREFIX + ".containers.topicmap", "mytopic666#mycontainer555");
         SinkSettings sinkSettings = new SinkSettings();
         sinkSettings.populate(source);
 
-        assertEquals("foobar", sinkSettings.getPostProcessor());
         assertEquals("mydb", sinkSettings.getDatabaseName());
         assertEquals("mytopic666", sinkSettings.getTopicContainerMap().getTopicForContainer("mycontainer555").get());
         assertEquals("mycontainer555", sinkSettings.getTopicContainerMap().getContainerForTopic("mytopic666").get());
@@ -47,9 +45,9 @@ public class SinkSettingsTest {
         //Ensure per KAFKA requirement that topics and topics.regex settings are available
         Set<String> settingsNames = new SinkSettings().getAllSettings().stream()
                 .map(Setting::getName).collect(Collectors.toSet());
+
         assertTrue(settingsNames.contains(SinkTask.TOPICS_CONFIG));
         assertTrue(settingsNames.contains(SinkTask.TOPICS_REGEX_CONFIG));
-
     }
 
 

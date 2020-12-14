@@ -17,7 +17,6 @@ public class SourceSettingsTest {
     public void readGenericAndSpecific() {
         HashMap<String, String> source = new HashMap<>();
         //Add specific setting
-        source.put(Settings.PREFIX + ".source.post-processor", "foobar");
         source.put(Settings.PREFIX + ".task.buffer.size", "666");
         source.put(Settings.PREFIX + ".task.timeout", "444");
         source.put(Settings.PREFIX + ".task.poll.interval", "787");
@@ -39,6 +38,7 @@ public class SourceSettingsTest {
         HashMap<String, String> source = new HashMap<>();
         SourceSettings sourceSettings = new SourceSettings();
         sourceSettings.populate(source);
+
         assertTrue(sourceSettings.isStartFromBeginning());
         assertEquals(5000L, (long) sourceSettings.getTaskTimeout());
         assertEquals(10000L, (long) sourceSettings.getTaskBufferSize());
