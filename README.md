@@ -6,8 +6,6 @@ This project provides connectors for <a href="http://kafka.apache.org/documentat
 
 ## Supported Data Formats
 The sink & source connectors are configurable in order to support
-* **AVRO** (requires a Kafka Schema Registry)
-* **JSON with Schema** (offers JSON record structure with explicit schema information either through a registry, or embedded in the JSON)
 * **JSON plain** (offers JSON record structure without any attached schema)
 
 Since key and value settings, including the format and serialization, can be independently configured in Kafka, it is possible to work with different data formats for records' keys and values respectively.
