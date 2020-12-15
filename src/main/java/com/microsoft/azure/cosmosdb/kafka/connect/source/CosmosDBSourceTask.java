@@ -92,7 +92,7 @@ public class CosmosDBSourceTask extends SourceTask {
                     continue;
                 }
 
-                // Set the Kafka message key if option is provided and "id" field is set in document
+                // Set the Kafka message key if option is enabled and field is configured in document
                 String messageKey = "";
                 if (this.settings.isMessageKeyEnabled()) {
                     JsonNode messageKeyFieldNode = node.get(this.settings.getMessageKeyField());
