@@ -91,6 +91,25 @@ public class CosmosDBSourceTaskTest {
     }
 
     @Test
+    public void testPollWithMessageKey() throws InterruptedException, JsonProcessingException {
+        String jsonString = "{\"id\":123,\"k1\":\"v1\",\"k2\":\"v2\"}";
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode actualObj = mapper.readTree(jsonString);
+        List<JsonNode> changes = new ArrayList<>();
+        settings.setMessageKeyEnabled(true);
+        settings.setMessageKeyField("id");
+        changes.add(actualObj);
+
+        new Thread(() -> {
+            testTask.handleCosmosDbChanges(changes);
+        }).start();
+
+        List<SourceRecord>  result=testTask.poll();
+        Assert.assertEquals(result.size(),1);
+        Assert.assertEquals(result.get(0).key(), "123");
+    }
+
+    @Test
     public void testZeroBatchSize() throws InterruptedException, JsonProcessingException, IllegalAccessException {
         String jsonString = "{\"k1\":\"v1\",\"k2\":\"v2\"}";
         ObjectMapper mapper = new ObjectMapper();

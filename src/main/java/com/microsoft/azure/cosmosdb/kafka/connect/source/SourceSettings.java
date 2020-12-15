@@ -14,6 +14,7 @@ import java.util.List;
  * Contains settings for the CosmosDB Kafka Source Connector
  */
 public class SourceSettings extends Settings {
+    private boolean messageKeyEnabled;
     private boolean startFromBeginning;
 
     private final List<Setting> sourceSettings = Arrays.asList(
@@ -32,6 +33,10 @@ public class SourceSettings extends Settings {
                     "Assigned Container", this::setAssignedContainer, this::getAssignedContainer),
             new Setting(Settings.PREFIX + ".worker.name", "The Cosmos DB worker name.",
                     "Worker name", this::setWorkerName, this::getWorkerName),
+            new BooleanSetting(Settings.PREFIX + ".messagekey.enabled", "Whether to set the Kafka message key.",
+                    "Message key enabled", SourceSettingDefaults.MESSAGE_KEY_ENABLED, this::setMessageKeyEnabled, this::isMessageKeyEnabled),
+            new Setting(Settings.PREFIX + ".messagekey.field", "The document field to use as the message key.",
+                    "Message key field", SourceSettingDefaults.MESSAGE_KEY_FIELD, this::setMessageKeyField, this::getMessageKeyField),
             new BooleanSetting(Settings.PREFIX + ".changefeed.startFromBeginning", "Whether the change feed should start from beginning.",
                     "Change Feed start from beginning", SourceSettingDefaults.CHANGE_FEED_START_FROM_BEGINNING, this::setStartFromBeginning, this::isStartFromBeginning)
     );
@@ -55,6 +60,20 @@ public class SourceSettings extends Settings {
 
     public void setAssignedContainer(String assignedPartitions) {
         this.assignedContainer = assignedPartitions;
+    }
+
+    public boolean isMessageKeyEnabled() { return this.messageKeyEnabled; }
+
+    public void setMessageKeyEnabled(boolean messageKeyEnabled) { this.messageKeyEnabled = messageKeyEnabled;  }
+
+    private String messageKeyField;
+
+    public String getMessageKeyField() {
+        return this.messageKeyField;
+    }
+
+    public void setMessageKeyField(String messageKeyField) {
+        this.messageKeyField = messageKeyField;
     }
 
     public boolean isStartFromBeginning() { return this.startFromBeginning; }

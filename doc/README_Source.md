@@ -154,7 +154,6 @@ To delete the created Azure Cosmos DB service and its resource group using Azure
 
 The following settings are used to configure the Cosmos DB Kafka Source Connector. These configuration values determine which Cosmos DB container is consumed, which Kafka topics data is written into and formats to serialize the data. For an example configuration file with the default values, refer to [this config](../src/integration-test/resources/source.config.json).
 
-
 | Name | Type | Description | Required/Optional |
 |------|------|-------------|-------------------|
 | connector.class | string | Classname of the Cosmos DB sink. Should be set to `com.microsoft.azure.cosmosdb.kafka.connect.sink.CosmosDBSourceConnector` | Required |
@@ -163,8 +162,10 @@ The following settings are used to configure the Cosmos DB Kafka Source Connecto
 | connect.cosmosdb.connection.endpoint | uri | the endpoint for the Cosmos DB Account | Required |
 | connect.cosmosdb.containers.topicmap | string | comma separeted topic to collection mapping, eg. topic1#coll1,topic2#coll2 | Required |
 | connect.cosmosdb.containers | string | list of collections to monitor |  Required |
-| connect.cosmosdb.changefeed.startFromBeginning | boolean |  set if the change feed should start from beginning | Required |
-| connect.cosmosdb.task.poll.interval | int | interval to poll the changefeedcontainer for changes | Required | 
+| connect.cosmosdb.messagekey.enabled | boolean | set if the Kafka message key should be set. Default is `true` | Required |
+| connect.cosmosdb.messagekey.field | string | use the field's value from the document as the message key. Default is `id` | Required |
+| connect.cosmosdb.changefeed.startFromBeginning | boolean |  set if the change feed should start from beginning. Default is `true` | Required |
+| connect.cosmosdb.task.poll.interval | int | interval to poll the changefeedcontainer for changes | Required |
 | key.converter | string | Serialization format for the key data written into Kafka topic | Required |
 | value.converter | string | Serialization format for the value data written into the Kafka topic | Required |
 | key.converter.schemas.enable | string | Set to `"true"` if the key data has embedded schema | Optional |

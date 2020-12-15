@@ -4,6 +4,7 @@ import com.azure.cosmos.*;
 import com.azure.cosmos.models.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.microsoft.azure.cosmosdb.kafka.connect.TopicContainerMap;
+import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.source.SourceRecord;
 import org.apache.kafka.connect.source.SourceTask;
 import org.slf4j.Logger;
@@ -90,8 +91,18 @@ public class CosmosDBSourceTask extends SourceTask {
                 if(node == null) {
                     continue;
                 }
+
+                // Set the Kafka message key if option is enabled and field is configured in document
+                String messageKey = "";
+                if (this.settings.isMessageKeyEnabled()) {
+                    JsonNode messageKeyFieldNode = node.get(this.settings.getMessageKeyField());
+                    messageKey = (messageKeyFieldNode != null) ? messageKeyFieldNode.toString() : "";
+                }
+
                 // Since Lease container takes care of maintaining state we don't have to send source offset to kafka
-                SourceRecord sourceRecord = new SourceRecord(partition, null, topic, null, node.toString());
+                SourceRecord sourceRecord = new SourceRecord(partition, null, topic,
+                                                    Schema.STRING_SCHEMA, messageKey, 
+                                                    Schema.STRING_SCHEMA, node.toString());
                 bufferSize -= sourceRecord.value().toString().getBytes().length;
                 // If the buffer Size exceeds then do not remove the node .
                 if (bufferSize <=0){
