@@ -162,8 +162,9 @@ The following settings are used to configure the Cosmos DB Kafka Source Connecto
 | connect.cosmosdb.connection.endpoint | uri | the endpoint for the Cosmos DB Account | Required |
 | connect.cosmosdb.containers.topicmap | string | comma separeted topic to collection mapping, eg. topic1#coll1,topic2#coll2 | Required |
 | connect.cosmosdb.containers | string | list of collections to monitor |  Required |
-| connect.cosmosdb.setMessageKey | boolean | set if the Kafka message key should be set to Cosmos DB document ID | Required |
-| connect.cosmosdb.changefeed.startFromBeginning | boolean |  set if the change feed should start from beginning | Required |
+| connect.cosmosdb.messagekey.enabled | boolean | set if the Kafka message key should be set. Default is `true` | Required |
+| connect.cosmosdb.messagekey.field | string | use the field's value from the document as the message key. Default is `id` | Required |
+| connect.cosmosdb.changefeed.startFromBeginning | boolean |  set if the change feed should start from beginning. Default is `true` | Required |
 | connect.cosmosdb.task.poll.interval | int | interval to poll the changefeedcontainer for changes | Required |
 | key.converter | string | Serialization format for the key data written into Kafka topic | Required |
 | value.converter | string | Serialization format for the value data written into the Kafka topic | Required |

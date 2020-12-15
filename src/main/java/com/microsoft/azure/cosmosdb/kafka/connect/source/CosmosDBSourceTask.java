@@ -94,8 +94,9 @@ public class CosmosDBSourceTask extends SourceTask {
 
                 // Set the Kafka message key if option is provided and "id" field is set in document
                 String messageKey = "";
-                if (node.get("id") != null && this.settings.isSetMessageKey()) {
-                    messageKey = node.get("id").toString();
+                if (this.settings.isMessageKeyEnabled()) {
+                    JsonNode messageKeyFieldNode = node.get(this.settings.getMessageKeyField());
+                    messageKey = (messageKeyFieldNode != null) ? messageKeyFieldNode.toString() : "";
                 }
 
                 // Since Lease container takes care of maintaining state we don't have to send source offset to kafka
