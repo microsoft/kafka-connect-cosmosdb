@@ -14,6 +14,7 @@ import java.util.List;
  * Contains settings for the CosmosDB Kafka Source Connector
  */
 public class SourceSettings extends Settings {
+    private boolean setMessageKey;
     private boolean startFromBeginning;
 
     private final List<Setting> sourceSettings = Arrays.asList(
@@ -32,6 +33,8 @@ public class SourceSettings extends Settings {
                     "Assigned Container", this::setAssignedContainer, this::getAssignedContainer),
             new Setting(Settings.PREFIX + ".worker.name", "The Cosmos DB worker name.",
                     "Worker name", this::setWorkerName, this::getWorkerName),
+            new BooleanSetting(Settings.PREFIX + ".setMessageKey", "Whether to set the document ID as the message key.",
+                    "Set message key", SourceSettingDefaults.SET_MESSAGE_KEY, this::setSetMessageKey, this::isSetMessageKey),
             new BooleanSetting(Settings.PREFIX + ".changefeed.startFromBeginning", "Whether the change feed should start from beginning.",
                     "Change Feed start from beginning", SourceSettingDefaults.CHANGE_FEED_START_FROM_BEGINNING, this::setStartFromBeginning, this::isStartFromBeginning)
     );
@@ -56,6 +59,10 @@ public class SourceSettings extends Settings {
     public void setAssignedContainer(String assignedPartitions) {
         this.assignedContainer = assignedPartitions;
     }
+
+    public boolean isSetMessageKey() { return this.setMessageKey; }
+
+    public void setSetMessageKey(boolean setMessageKey) { this.setMessageKey = setMessageKey;  }
 
     public boolean isStartFromBeginning() { return this.startFromBeginning; }
 
