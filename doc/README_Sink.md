@@ -7,6 +7,7 @@ The connector polls data from Kafka to write to container(s) in the database bas
 
 - [Quickstart](#quickstart)
 - [Sink configuration properties](#sink-configuration-properties)
+- [Single Message Transforms (SMTs)](#single-message-transforms)
 - [Troubleshooting common issues](#troubleshooting-common-issues)
 - [Limitations](#limitations)
 
@@ -24,7 +25,7 @@ The connector polls data from Kafka to write to container(s) in the database bas
 
 ### Install sink connector
 
-If you are using the Confluent Platform setup from this repo, the Cosmos DB Sink Connector is included in the installation and you can skip this step. Otherwise, you will need to package this repo and include the JAR file in your installation.
+If you are using the Confluent Platform setup from this repo, the Cosmos DB Sink Connector is included in the installation and you can skip this step. Alternatively, you can download the JAR file from the latest [Release](https://github.com/microsoft/kafka-connect-cosmosdb/releases) or package this repo to create a new JAR file. To install the connector manually using the JAR file, refer to these [instructions](https://docs.confluent.io/current/connect/managing/install.html#install-connector-manually).
 
 ```bash
 
@@ -39,8 +40,6 @@ mvn clean package
 ls target/*dependencies.jar
 
 ```
-
-For more information on installing the connector manually, refer to these [instructions](https://docs.confluent.io/current/connect/managing/install.html#install-connector-manually).
 
 ### Create Kafka topic and write data
 
@@ -80,7 +79,9 @@ The three records entered are published to the `hotels` Kafka topic in JSON form
 
 Create the Cosmos DB Sink Connector in Kafka Connect
 
-The following JSON body defines the config for the Cosmos DB Sink Connector. You will need to fill out the values for `connect.cosmosdb.connection.endpoint` and `connect.cosmosdb.master.key`, which you should have saved from the [Cosmos DB setup guide](./CosmosDB_Setup.md).
+The following JSON body defines the config for the Cosmos DB Sink Connector.
+
+> Note: You will need to fill out the values for `connect.cosmosdb.connection.endpoint` and `connect.cosmosdb.master.key`, which you should have saved from the [Cosmos DB setup guide](./CosmosDB_Setup.md).
 
 Refer to the [sink properties](#sink-configuration-properties) section for more information on each of these configuration properties.
 
@@ -167,6 +168,7 @@ The following settings are used to configure the Cosmos DB Kafka Sink Connector.
 | connect.cosmosdb.master.key | string | The Cosmos DB primary key that the sink connects with | Required |
 | connect.cosmosdb.databasename | string | The name of the Cosmos DB database the sink writes to | Required |
 | connect.cosmosdb.containers.topicmap | string | Mapping between Kafka Topics and Cosmos DB Containers, formatted using CSV as shown: `topic#container,topic2#container2` | Required |
+| connect.cosmosdb.sink.useUpsert | boolean | Whether to upsert items into Cosmos DB. Default is `false`. | Optional |
 | key.converter | string | Serialization format for the key data written into Kafka topic | Required |
 | value.converter | string | Serialization format for the value data written into the Kafka topic | Required |
 | key.converter.schemas.enable | string | Set to `"true"` if the key data has embedded schema | Optional |
@@ -174,6 +176,33 @@ The following settings are used to configure the Cosmos DB Kafka Sink Connector.
 | tasks.max | int | Maximum number of connector sink tasks. Default is `1` | Optional |
 
 Data will always be written to the Cosmos DB as JSON without any schema.
+
+## Single Message Transforms
+
+Along with the Sink connector settings, you can specify the use of Single Message Transformations (SMTs) to modify messages flowing through the Kafka Connect platform. Refer to the [Confluent SMT Documentation](https://docs.confluent.io/platform/current/connect/transforms/overview.html) for more information.
+
+### Using SMTs to apply Time to live (TTL) for Cosmos DB items
+
+Using both the `InsertField` and `Cast` SMTs, you can add specify the TTL on each item created in Cosmos DB.
+
+> Note: You will need to enable TTL on the Cosmos DB container to enable TTL at an item level. Refer to the [Cosmos DB setup guide](./CosmosDB_Setup.md) or the [Cosmos DB docs](https://docs.microsoft.com/en-us/azure/cosmos-db/how-to-time-to-live?tabs=dotnetv2%2Cjavav4#enable-time-to-live-on-a-container-using-azure-portal) for more information on setting the TTL.
+
+Inside your Sink connector config, add the following properties to set the TTL (in seconds). In this following example, the TTL is set to 100 seconds.
+
+> Note: If the message already contains the `TTL` field, the `TTL` value will be overwritten by these SMTs.
+
+```json
+
+"transforms": "insertTTL,castTTLInt",
+"transforms.insertTTL.type": "org.apache.kafka.connect.transforms.InsertField$Value",
+"transforms.insertTTL.static.field": "ttl",
+"transforms.insertTTL.static.value": "100",
+"transforms.castTTLInt.type": "org.apache.kafka.connect.transforms.Cast$Value",
+"transforms.castTTLInt.spec": "ttl:int32"
+
+```
+
+Refer to the [InsertField](https://docs.confluent.io/platform/current/connect/transforms/insertfield.html) and [Cast](https://docs.confluent.io/platform/current/connect/transforms/cast.html) documenation for more information on using these SMTs.
 
 ## Troubleshooting common issues
 
