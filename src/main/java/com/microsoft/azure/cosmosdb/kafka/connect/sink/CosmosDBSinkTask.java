@@ -65,19 +65,17 @@ public class CosmosDBSinkTask extends SinkTask {
             String containerName = entry.getKey();
             CosmosContainer container = client.getDatabase(settings.getDatabaseName()).getContainer(containerName);
             for (SinkRecord record : entry.getValue()) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Writing record, value type: {}", record.value().getClass().getName());
-                    logger.debug("Key Schema: {}", record.keySchema());
-                    logger.debug("Value schema: {}", record.valueSchema());
-                    logger.debug("Value.toString(): {}",  record.value() != null ? record.value().toString() : "<null>");
-                }
+                logger.debug("Writing record, value type: {}", record.value().getClass().getName());
+                logger.debug("Key Schema: {}", record.keySchema());
+                logger.debug("Value schema: {}", record.valueSchema());
+                logger.debug("Value.toString(): {}",  record.value() != null ? record.value().toString() : "<null>");
+                
                 try {
-                    if(!this.settings.getUseUpsert()) {
+                    if (Boolean.TRUE.equals(this.settings.getUseUpsert())) {
+                        container.upsertItem(record.value()); 
+                      } else {
                         container.createItem(record.value());
-                    }
-                    else {
-                        container.upsertItem(record.value());
-                    }
+                      }
                 } catch (BadRequestException bre) {
                     throw new CosmosDBWriteException(record, bre);
                 }

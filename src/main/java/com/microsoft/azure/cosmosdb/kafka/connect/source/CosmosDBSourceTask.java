@@ -72,51 +72,64 @@ public class CosmosDBSourceTask extends SourceTask {
     @Override
     public List<SourceRecord> poll() throws InterruptedException {
         List<SourceRecord> records = new ArrayList<>();
-        Map<String, String> partition = new HashMap<>();
+        
         long maxWaitTime = System.currentTimeMillis() + this.settings.getTaskTimeout();
+        
+        Map<String, String> partition = new HashMap<>();
         partition.put("DatabaseName",this.settings.getDatabaseName());
         partition.put("Container", this.settings.getContainerList());
+
         TopicContainerMap topicContainerMap = this.settings.getTopicContainerMap();
         String topic = topicContainerMap.getTopicForContainer(settings.getAssignedContainer()).orElseThrow(
                 () -> new IllegalStateException("No topic defined for container " + settings.getAssignedContainer() + "."));
+        
+        while (running.get()) {
+            fillRecords(records, partition, topic);
 
-        while(running.get()){
-            Long bufferSize = this.settings.getTaskBufferSize();
-            Long batchSize = this.settings.getTaskBatchSize();
-            int count = 0;
-            while(bufferSize > 0 && count < batchSize && System.currentTimeMillis() < maxWaitTime) {
-                JsonNode node = this.queue.poll(this.settings.getTaskPollInterval(), TimeUnit.MILLISECONDS);
-                if(node == null) {
-                    continue;
-                }
+            if (records.isEmpty() || System.currentTimeMillis() > maxWaitTime) {
+                logger.debug("Sending {} documents.", records.size());
+                break;
+            }
+        }  
+        
+        return records;
+    }
 
+    private void fillRecords(List<SourceRecord> records, Map<String, String> partition, String topic) throws InterruptedException {
+        Long bufferSize = this.settings.getTaskBufferSize();
+        Long batchSize = this.settings.getTaskBatchSize();
+        long maxWaitTime = System.currentTimeMillis() + this.settings.getTaskTimeout();
+
+        int count = 0;
+        while ( bufferSize > 0 && count < batchSize && System.currentTimeMillis() < maxWaitTime ) {
+            JsonNode node = this.queue.poll(this.settings.getTaskPollInterval(), TimeUnit.MILLISECONDS);
+            
+            if(!node.isNull()) {                
+                
                 // Set the Kafka message key if option is enabled and field is configured in document
                 String messageKey = "";
                 if (this.settings.isMessageKeyEnabled()) {
                     JsonNode messageKeyFieldNode = node.get(this.settings.getMessageKeyField());
                     messageKey = (messageKeyFieldNode != null) ? messageKeyFieldNode.toString() : "";
                 }
-
+                
                 // Since Lease container takes care of maintaining state we don't have to send source offset to kafka
                 SourceRecord sourceRecord = new SourceRecord(partition, null, topic,
                                                     Schema.STRING_SCHEMA, messageKey, 
                                                     Schema.STRING_SCHEMA, node.toString());
+
                 bufferSize -= sourceRecord.value().toString().getBytes().length;
+
                 // If the buffer Size exceeds then do not remove the node .
                 if (bufferSize <=0){
                     this.queue.add(node);
                     break;
                 }
+                
                 records.add(sourceRecord);
                 count++;
             }
-
-            if (records.isEmpty() || System.currentTimeMillis() > maxWaitTime) {
-                logger.debug("Sending {} documents.", records.size());
-                break;
-            }
         }
-        return records;
     }
 
     @Override
