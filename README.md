@@ -1,5 +1,3 @@
-![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/microsoft/kafka-connect-cosmosdb/)
-
 # Kafka Connect for Azure Cosmos DB
 
 ## Introduction
