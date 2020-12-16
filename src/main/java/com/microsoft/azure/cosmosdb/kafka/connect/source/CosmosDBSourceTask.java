@@ -1,5 +1,6 @@
 package com.microsoft.azure.cosmosdb.kafka.connect.source;
 
+import com.microsoft.azure.cosmosdb.kafka.connect.SettingDefaults;
 import com.azure.cosmos.*;
 import com.azure.cosmos.models.*;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -146,6 +147,7 @@ public class CosmosDBSourceTask extends SourceTask {
                 .key(this.settings.getKey())
                 .consistencyLevel(ConsistencyLevel.SESSION)
                 .contentResponseOnWriteEnabled(true)
+                .userAgentSuffix(SettingDefaults.COSMOS_CLIENT_USER_AGENT_SUFFIX+version())
                 .buildAsyncClient();
     }
 
