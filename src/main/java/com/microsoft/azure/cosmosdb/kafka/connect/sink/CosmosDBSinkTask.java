@@ -1,5 +1,6 @@
 package com.microsoft.azure.cosmosdb.kafka.connect.sink;
 
+import com.microsoft.azure.cosmosdb.kafka.connect.SettingDefaults;
 import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.CosmosClientBuilder;
 import com.azure.cosmos.CosmosContainer;
@@ -37,6 +38,7 @@ public class CosmosDBSinkTask extends SinkTask {
         this.client = new CosmosClientBuilder()
                 .endpoint(settings.getEndpoint())
                 .key(settings.getKey())
+                .userAgentSuffix(SettingDefaults.COSMOS_CLIENT_USER_AGENT_SUFFIX+version())
                 .buildClient();
 
         client.createDatabaseIfNotExists(settings.getDatabaseName());
@@ -68,7 +70,12 @@ public class CosmosDBSinkTask extends SinkTask {
                     logger.debug("Value.toString(): " + (record.value() != null ? record.value().toString() : "<null>"));
                 }
                 try {
-                    container.createItem(record.value());
+                    if(!this.settings.getUseUpsert()) {
+                        container.createItem(record.value());
+                    }
+                    else {
+                        container.upsertItem(record.value());
+                    }
                 } catch (BadRequestException bre) {
                     throw new CosmosDBWriteException(record, bre);
                 }
