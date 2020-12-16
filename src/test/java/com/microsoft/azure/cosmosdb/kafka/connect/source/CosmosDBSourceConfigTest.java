@@ -2,13 +2,10 @@ package com.microsoft.azure.cosmosdb.kafka.connect.source;
 
 import com.microsoft.azure.cosmosdb.kafka.connect.Setting;
 import com.microsoft.azure.cosmosdb.kafka.connect.Settings;
-import com.microsoft.azure.cosmosdb.kafka.connect.sink.CosmosDBSinkConnector;
-import com.microsoft.azure.cosmosdb.kafka.connect.sink.SinkSettings;
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.common.config.ConfigValue;
 import org.junit.Test;
 
-import javax.xml.transform.Source;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,7 +62,7 @@ public class CosmosDBSourceConfigTest {
         CosmosDBSourceConnector sourceConnector = new CosmosDBSourceConnector();
         sourceConnector.start(settingAssignment);
         List<Map<String, String>> taskConfigs = sourceConnector.taskConfigs(3);
-        assertEquals(taskConfigs.size(), 0);
+        assertEquals(0, taskConfigs.size());
     }
 
     @Test
@@ -76,12 +73,12 @@ public class CosmosDBSourceConfigTest {
         CosmosDBSourceConnector sourceConnector = new CosmosDBSourceConnector();
         sourceConnector.start(settingAssignment);
         List<Map<String, String>> taskConfigs = sourceConnector.taskConfigs(6);
-        assertEquals(taskConfigs.size(), 6);
-        assertEquals(taskConfigs.get(0).get(Settings.PREFIX +".assigned.container"),"C1");
-        assertEquals(taskConfigs.get(1).get(Settings.PREFIX +".assigned.container"),"C2");
-        assertEquals(taskConfigs.get(2).get(Settings.PREFIX +".assigned.container"),"C3");
-        assertEquals(taskConfigs.get(3).get(Settings.PREFIX +".assigned.container"),"C4");
-        assertEquals(taskConfigs.get(4).get(Settings.PREFIX +".assigned.container"),"C1");
-        assertEquals(taskConfigs.get(5).get(Settings.PREFIX +".assigned.container"),"C2");
+        assertEquals(6, taskConfigs.size());
+        assertEquals("C1", taskConfigs.get(0).get(Settings.PREFIX +".assigned.container"));
+        assertEquals("C2", taskConfigs.get(1).get(Settings.PREFIX +".assigned.container"));
+        assertEquals("C3", taskConfigs.get(2).get(Settings.PREFIX +".assigned.container"));
+        assertEquals("C4", taskConfigs.get(3).get(Settings.PREFIX +".assigned.container"));
+        assertEquals("C1", taskConfigs.get(4).get(Settings.PREFIX +".assigned.container"));
+        assertEquals("C2", taskConfigs.get(5).get(Settings.PREFIX +".assigned.container"));
     }
 }

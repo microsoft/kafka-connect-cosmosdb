@@ -50,22 +50,24 @@ public class CosmosDBSinkTask extends SinkTask {
             return;
         }
 
-        logger.info("Sending " + records.size() + " records to be written");
+        logger.info("Sending {} records to be written", records.size());
 
         Map<String, List<SinkRecord>> recordsByContainer = records.stream()
                 //Find target collection for each record
                 .collect(Collectors.groupingBy(record ->
                         settings.getTopicContainerMap().getContainerForTopic(record.topic()).orElseThrow(
-                                () -> new IllegalStateException("No container defined for topic " + record.topic() + "."))));
+                                () -> new IllegalStateException(String.format("No container defined for topic %s .",
+                                record.topic())))));
+                                
         for (Map.Entry<String, List<SinkRecord>> entry : recordsByContainer.entrySet()) {
             String containerName = entry.getKey();
             CosmosContainer container = client.getDatabase(settings.getDatabaseName()).getContainer(containerName);
             for (SinkRecord record : entry.getValue()) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Writing record, value type: " + record.value().getClass().getName());
-                    logger.debug("Key Schema: " + record.keySchema());
-                    logger.debug("Value schema:" + record.valueSchema());
-                    logger.debug("Value.toString(): " + (record.value() != null ? record.value().toString() : "<null>"));
+                    logger.debug("Writing record, value type: {}", record.value().getClass().getName());
+                    logger.debug("Key Schema: {}", record.keySchema());
+                    logger.debug("Value schema: {}", record.valueSchema());
+                    logger.debug("Value.toString(): {}",  record.value() != null ? record.value().toString() : "<null>");
                 }
                 try {
                     container.createItem(record.value());
@@ -79,11 +81,13 @@ public class CosmosDBSinkTask extends SinkTask {
     @Override
     public void stop() {
         logger.trace("Stopping sink task");
+
         try {
             client.close();
-        } catch (Throwable t) {
-            logger.warn("Unable to successfully close the CosmosDB client", t);
+        } catch (Exception e) {
+            logger.warn("Unable to successfully close the CosmosDB client", e);
         }
+
         client = null;
         settings = null;
 

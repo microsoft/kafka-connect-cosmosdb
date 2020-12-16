@@ -27,10 +27,7 @@ public class CosmosDBSourceTask extends SourceTask {
     private final AtomicBoolean running = new AtomicBoolean(false);
     private CosmosAsyncClient client = null;
     private SourceSettings settings = null;
-    private CosmosAsyncDatabase database = null;
     private LinkedTransferQueue<JsonNode> queue = null;
-    private CosmosAsyncContainer leaseContainer;
-    private CosmosAsyncContainer feedContainer;
     private ChangeFeedProcessor changeFeedProcessor;
 
     @Override
@@ -47,32 +44,32 @@ public class CosmosDBSourceTask extends SourceTask {
         logger.info("Creating the client.");
         client = getCosmosClient();
 
-        database =  client.getDatabase(settings.getDatabaseName());
+        CosmosAsyncDatabase database =  client.getDatabase(settings.getDatabaseName());
 
         String container = settings.getAssignedContainer();
-        feedContainer = database.getContainer(container);
-        leaseContainer = createNewLeaseContainer(client, settings.getDatabaseName(), container + "-leases");
+        CosmosAsyncContainer feedContainer = database.getContainer(container);
+        CosmosAsyncContainer leaseContainer = createNewLeaseContainer(client, settings.getDatabaseName(), container + "-leases");
         changeFeedProcessor = getChangeFeedProcessor(this.settings.getWorkerName(),feedContainer,leaseContainer);
         changeFeedProcessor.start()
                 .subscribeOn(Schedulers.elastic())
-                .doOnSuccess(aVoid -> {
-                    running.set(true);
-                })
+                .doOnSuccess(aVoid -> running.set(true))
                 .subscribe();
 
         while(!running.get()){
             try {
                 sleep(500);
             } catch (InterruptedException e) {
-                logger.error(e.getMessage());
+                logger.warn("Interrupted!", e);                
+                // Restore interrupted state...
+                Thread.currentThread().interrupt();                
             }
         }// Wait for ChangeFeedProcessor to start.
-        logger.info("Started CosmosDB source task.");
 
+        logger.info("Started CosmosDB source task.");
     }
 
     @Override
-    public List<SourceRecord> poll() throws InterruptedException, IllegalStateException {
+    public List<SourceRecord> poll() throws InterruptedException {
         List<SourceRecord> records = new ArrayList<>();
         Map<String, String> partition = new HashMap<>();
         long maxWaitTime = System.currentTimeMillis() + this.settings.getTaskTimeout();
@@ -113,9 +110,8 @@ public class CosmosDBSourceTask extends SourceTask {
                 count++;
             }
 
-            if (records.size() > 0 || System.currentTimeMillis() > maxWaitTime) {
+            if (records.isEmpty() || System.currentTimeMillis() > maxWaitTime) {
                 logger.debug("Sending {} documents.", records.size());
-
                 break;
             }
         }
@@ -130,18 +126,21 @@ public class CosmosDBSourceTask extends SourceTask {
             try {
                 sleep(500);
             } catch (InterruptedException e) {
-                logger.error("Failed to stop the task", e);
+                logger.error("Interrupted! Failed to stop the task", e);            
+                // Restore interrupted state...
+                Thread.currentThread().interrupt();                      
             }
         }
+        
         // Release all the resources.
         changeFeedProcessor.stop();
         client.close();
         running.set(false);
-
     }
 
     private CosmosAsyncClient getCosmosClient() {
         logger.info("Creating Cosmos Client.");
+
         return new CosmosClientBuilder()
                 .endpoint(this.settings.getEndpoint())
                 .key(this.settings.getKey())
@@ -152,6 +151,7 @@ public class CosmosDBSourceTask extends SourceTask {
 
     private ChangeFeedProcessor getChangeFeedProcessor(String hostName, CosmosAsyncContainer feedContainer, CosmosAsyncContainer leaseContainer) {
         logger.info("Creating Change Feed Processor for {}.", hostName);
+
         ChangeFeedProcessorOptions changeFeedProcessorOptions = new ChangeFeedProcessorOptions();
         changeFeedProcessorOptions.setFeedPollDelay(Duration.ofMillis(this.settings.getTaskPollInterval()));
         changeFeedProcessorOptions.setMaxItemCount(this.settings.getTaskBatchSize().intValue());
@@ -164,7 +164,6 @@ public class CosmosDBSourceTask extends SourceTask {
                 .leaseContainer(leaseContainer)
                 .handleChanges(this::handleCosmosDbChanges)
                 .buildChangeFeedProcessor();
-
     }
 
     protected void handleCosmosDbChanges(List<JsonNode> docs)  {
@@ -172,11 +171,13 @@ public class CosmosDBSourceTask extends SourceTask {
             // Blocks for each transfer till it is processed by the poll method.
             // If we fail before checkpointing then the new worker starts again.
             try {
-                logger.debug("Queuing document : {}", document.toString());
+                logger.debug("Queuing document : {}", document);
 
                 this.queue.transfer(document);
             } catch (InterruptedException e) {
-                logger.error("Interrupted in changeFeedReader.", e);
+                logger.error("Interrupted! changeFeedReader.", e);
+                // Restore interrupted state...
+                Thread.currentThread().interrupt();                
             }
 
         }
@@ -205,11 +206,13 @@ public class CosmosDBSourceTask extends SourceTask {
             ThroughputProperties throughputProperties = ThroughputProperties.createManualThroughput(400);
             CosmosContainerRequestOptions requestOptions = new CosmosContainerRequestOptions();
 
-            leaseContainerResponse = database.createContainer(containerSettings, throughputProperties, requestOptions).block();
-
-            if (leaseContainerResponse == null) {
-                throw new RuntimeException(String.format("Failed to create collection %s in database %s.", leaseCollectionName, databaseName));
+            try{
+                leaseContainerResponse = database.createContainer(containerSettings, throughputProperties, requestOptions).block();
+            } catch(Exception e){
+                logger.error("Failed to create container {} in database {}", leaseCollectionName, databaseName);
+                throw e;
             }
+                
             logger.info("Successfully created new lease container.");
         }
         return database.getContainer(leaseContainerResponse.getProperties().getId());

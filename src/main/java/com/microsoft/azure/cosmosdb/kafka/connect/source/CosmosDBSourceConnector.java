@@ -1,6 +1,5 @@
 package com.microsoft.azure.cosmosdb.kafka.connect.source;
 
-import com.azure.cosmos.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.connect.connector.Task;
@@ -16,8 +15,6 @@ import java.util.*;
 public class CosmosDBSourceConnector extends SourceConnector {
     private static final Logger logger = LoggerFactory.getLogger(CosmosDBSourceConnector.class);
     private SourceSettings settings = null;
-    private CosmosAsyncClient client;
-    private CosmosAsyncDatabase database;
 
     @Override
     public void start(Map<String, String> sourceConectorSetttings) {

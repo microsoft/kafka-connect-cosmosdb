@@ -68,6 +68,7 @@ public class CosmosDBSinkTaskTest {
             //Will throw exception:
             try {
                 JsonNode jsonNode = new ObjectMapper().readTree(item.toString());
+                assertNotNull(jsonNode);
                 return null;
             } catch (JsonParseException jpe) {
                 throw new BadRequestException("Unable to serialize JSON request", jpe);

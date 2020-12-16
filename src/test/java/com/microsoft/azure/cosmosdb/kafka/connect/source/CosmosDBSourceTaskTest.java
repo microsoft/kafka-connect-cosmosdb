@@ -1,30 +1,27 @@
 package com.microsoft.azure.cosmosdb.kafka.connect.source;
 
-import com.azure.cosmos.*;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.microsoft.azure.cosmosdb.kafka.connect.TopicContainerMap;
-import com.microsoft.azure.cosmosdb.kafka.connect.sink.CosmosDBSinkTask;
-import com.microsoft.azure.cosmosdb.kafka.connect.sink.SinkSettings;
-import org.apache.commons.lang3.reflect.FieldUtils;
-import org.apache.kafka.connect.source.SourceRecord;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mockito;
-
-import javax.xml.transform.Source;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static java.lang.Thread.sleep;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
+import com.azure.cosmos.CosmosAsyncClient;
+import com.azure.cosmos.CosmosAsyncContainer;
+import com.azure.cosmos.CosmosAsyncDatabase;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.microsoft.azure.cosmosdb.kafka.connect.TopicContainerMap;
+
+import org.apache.commons.lang3.reflect.FieldUtils;
+import org.apache.kafka.connect.source.SourceRecord;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
 
 public class CosmosDBSourceTaskTest {
     private CosmosDBSourceTask testTask;
@@ -87,7 +84,7 @@ public class CosmosDBSourceTaskTest {
         }).start();
 
         List<SourceRecord>  result=testTask.poll();
-        Assert.assertEquals(result.size(),1);
+        Assert.assertEquals(1, result.size());
     }
 
     @Test
@@ -105,8 +102,8 @@ public class CosmosDBSourceTaskTest {
         }).start();
 
         List<SourceRecord>  result=testTask.poll();
-        Assert.assertEquals(result.size(),1);
-        Assert.assertEquals(result.get(0).key(), "123");
+        Assert.assertEquals(1, result.size());
+        Assert.assertEquals("123", result.get(0).key());
     }
 
     @Test
@@ -124,7 +121,7 @@ public class CosmosDBSourceTaskTest {
         }).start();
 
         List<SourceRecord>  result=testTask.poll();
-        Assert.assertEquals(result.size(),0);
+        Assert.assertEquals(0, result.size());
     }
 
     @Test
@@ -142,7 +139,7 @@ public class CosmosDBSourceTaskTest {
         }).start();
 
         List<SourceRecord>  result=testTask.poll();
-        Assert.assertEquals(result.size(),0);
+        Assert.assertEquals(0, result.size());
     }
 
 
@@ -160,6 +157,6 @@ public class CosmosDBSourceTaskTest {
             testTask.handleCosmosDbChanges(changes);
         }).start();
 
-        List<SourceRecord>  result=testTask.poll();
+        testTask.poll();
     }
 }
