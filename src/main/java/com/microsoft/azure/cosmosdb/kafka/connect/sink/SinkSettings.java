@@ -14,7 +14,7 @@ import java.util.List;
  */
 public class SinkSettings extends Settings {
     private Boolean useUpsert;
-    private final List<Setting> sinkSettings = Arrays.asList(
+    private final List<Setting> settings = Arrays.asList(
 
             //Add all sink settings here:
             new Setting(SinkTask.TOPICS_CONFIG, "List of topics to consume, separated by commas.", "Topics", s -> {
