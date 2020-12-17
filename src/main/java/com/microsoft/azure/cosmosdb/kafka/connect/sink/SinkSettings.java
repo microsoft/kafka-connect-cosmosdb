@@ -13,9 +13,9 @@ import java.util.List;
  * Contains settings for the Kafka ComsosDB Sink Connector
  */
 public class SinkSettings extends Settings {
-    private String postProcessor;
     private Boolean useUpsert;
-    private final List<Setting> sinkSettings = Arrays.asList(
+    private final List<Setting> settings = Arrays.asList(
+
             //Add all sink settings here:
             new Setting(SinkTask.TOPICS_CONFIG, "List of topics to consume, separated by commas.", "Topics", s -> {
             }, () -> ""),
@@ -32,7 +32,7 @@ public class SinkSettings extends Settings {
 
     @Override
     protected List<Setting> getAllSettings() {
-        return ListUtils.union(super.getAllSettings(), sinkSettings);
+        return ListUtils.union(super.getAllSettings(), settings);
     }
 
     /**

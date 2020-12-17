@@ -17,7 +17,7 @@ public class SourceSettings extends Settings {
     private boolean messageKeyEnabled;
     private boolean startFromBeginning;
 
-    private final List<Setting> sourceSettings = Arrays.asList(
+    private final List<Setting> settings = Arrays.asList(
             //Add all source settings here:
             new NumericSetting(PREFIX + ".task.timeout", "The max number of milliseconds the source task will use to read documents before sending them to Kafka.",
                     "Task Timeout", SettingDefaults.TASK_TIMEOUT, this::setTaskTimeout, this::getTaskTimeout),
@@ -82,7 +82,7 @@ public class SourceSettings extends Settings {
 
     @Override
     protected List<Setting> getAllSettings() {
-        return ListUtils.union(super.getAllSettings(), sourceSettings);
+        return ListUtils.union(super.getAllSettings(), settings);
     }
 
 }
