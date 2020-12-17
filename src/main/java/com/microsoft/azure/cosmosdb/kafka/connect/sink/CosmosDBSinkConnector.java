@@ -51,9 +51,7 @@ public class CosmosDBSinkConnector extends SinkConnector {
         ConfigDef configDef = new ConfigDef();
         new SinkSettings().getAllSettings().stream().forEachOrdered(setting -> setting.toConfigDef(configDef));
 
-        logger.debug(
-            "Sink ConfigDef with {} settings",
-            configDef.configKeys().size()
+        logger.debug("Sink ConfigDef with {} settings", configDef.configKeys().size()
         );
 
         return configDef;
