@@ -40,8 +40,9 @@ public class CosmosDBSourceTask extends SourceTask {
     public void start(Map<String, String> map) {
         logger.info("Starting CosmosDBSourceTask.");
         this.settings = new SourceSettings();
-        this.settings.populate(map);
+        this.settings.populate(map);        
         this.queue = new LinkedTransferQueue<>();
+
         logger.info("Creating the client.");
         client = getCosmosClient();
 
@@ -84,8 +85,7 @@ public class CosmosDBSourceTask extends SourceTask {
                 () -> new IllegalStateException("No topic defined for container " + settings.getAssignedContainer() + "."));
         
         while (running.get()) {
-            fillRecords(records, partition, topic);
-
+            fillRecords(records, partition, topic);            
             if (records.isEmpty() || System.currentTimeMillis() > maxWaitTime) {
                 logger.debug("Sending {} documents.", records.size());
                 break;
@@ -103,9 +103,8 @@ public class CosmosDBSourceTask extends SourceTask {
         int count = 0;
         while ( bufferSize > 0 && count < batchSize && System.currentTimeMillis() < maxWaitTime ) {
             JsonNode node = this.queue.poll(this.settings.getTaskPollInterval(), TimeUnit.MILLISECONDS);
-            
-            if(!node.isNull()) {                
-                
+
+            if(node != null) {                   
                 // Set the Kafka message key if option is enabled and field is configured in document
                 String messageKey = "";
                 if (this.settings.isMessageKeyEnabled()) {
