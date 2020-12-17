@@ -6,7 +6,7 @@ labels: Process, Pri1
 assignees: ''
 
 ---
-# Tech Lead's Engineering Fundamentals Checklist
+## Tech Lead's Engineering Fundamentals Checklist
 
 This checklist helps to ensure that our projects meet our Engineering Fundamentals.
 

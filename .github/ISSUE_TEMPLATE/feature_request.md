@@ -20,7 +20,7 @@ A clear and concise description of any alternative solutions or features you've 
 Add any other context or screenshots about the feature request here.
 
 ## Next Steps
-- [ ] Team consensus to proceed 
+
+- [ ] Team consensus to proceed
 - [ ] Schedule Design Session
 - [ ] Complete Design Review
-
