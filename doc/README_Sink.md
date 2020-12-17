@@ -181,7 +181,47 @@ Data will always be written to the Cosmos DB as JSON without any schema.
 
 Along with the Sink connector settings, you can specify the use of Single Message Transformations (SMTs) to modify messages flowing through the Kafka Connect platform. Refer to the [Confluent SMT Documentation](https://docs.confluent.io/platform/current/connect/transforms/overview.html) for more information.
 
-### Using SMTs to apply Time to live (TTL) for Cosmos DB items
+### Using the InsertUUID SMT to automatically add item IDs
+
+With the custom `InsertUUID` SMT, you can insert the `id` field with a random UUID value for each message, before it is written to Cosmos DB.
+
+> WARNING: Only use this SMT if the messages do **NOT** contain the `id` field. Otherwise, the `id` values will be **overwritten** and you may end up with duplicate items in your database.
+
+#### Install the SMT
+
+Before you can use the `InsertUUID` SMT, you will need to install this transform in your Confluent Platform setup. If you are using the Confluent Platform setup from this repo, the transform is already included in the installation and you can skip this step.
+
+Alternatively, you can package the [InsertUUID source](https://github.com/confluentinc/kafka-connect-insert-uuid) to create a new JAR file. To install the connector manually using the JAR file, refer to these [instructions](https://docs.confluent.io/current/connect/managing/install.html#install-connector-manually).
+
+```bash
+
+# clone the kafka-connect-insert-uuid repo
+https://github.com/confluentinc/kafka-connect-insert-uuid.git
+cd kafka-connect-insert-uuid
+
+# package the source code into a JAR file
+mvn clean package
+
+# include the following JAR file in Confluent Platform installation
+ls target/*.jar
+
+```
+
+#### Configure the SMT
+
+Inside your Sink connector config, add the following properties to set the `id`.
+
+```json
+
+"transforms": "insertID",
+"transforms.insertID.type": "com.github.cjmatta.kafka.connect.smt.InsertUuid$Value",
+"transforms.insertID.uuid.field.name": "id"
+
+```
+
+Refer to the [InsertUUID repository](https://github.com/confluentinc/kafka-connect-insert-uuid) for more information on using this SMT.
+
+### Using SMTs to configure Time to live (TTL) for Cosmos DB items
 
 Using both the `InsertField` and `Cast` SMTs, you can add specify the TTL on each item created in Cosmos DB.
 
