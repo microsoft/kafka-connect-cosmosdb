@@ -60,6 +60,10 @@ az cosmosdb sql database create -a $Cosmos_Name -n $Cosmos_Database -g $Cosmos_R
 # /id is the partition key (case sensitive)
 az cosmosdb sql container create -p /id -g $Cosmos_RG -a $Cosmos_Name -d $Cosmos_Database -n $Cosmos_Container
 
+# OPTIONAL: Enable Time to Live (TTL) on the container
+export Cosmos_Container_TTL=1000
+az cosmosdb sql container update -g $Cosmos_RG -a $Cosmos_Name -d $Cosmos_Database -n $Cosmos_Container --ttl=$Cosmos_Container_TTL
+
 ```
 
 With the Azure Cosmos DB instance setup, you will need to get the Cosmos DB endpoint URI and primary connection key. These values will be used to setup the Cosmos DB Source and Sink connectors.
