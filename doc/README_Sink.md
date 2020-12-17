@@ -25,7 +25,11 @@ The connector polls data from Kafka to write to container(s) in the database bas
 
 ### Install sink connector
 
-If you are using the Confluent Platform setup from this repo, the Cosmos DB Sink Connector is included in the installation and you can skip this step. Alternatively, you can download the JAR file from the latest [Release](https://github.com/microsoft/kafka-connect-cosmosdb/releases) or package this repo to create a new JAR file. To install the connector manually using the JAR file, refer to these [instructions](https://docs.confluent.io/current/connect/managing/install.html#install-connector-manually).
+If you are using the Confluent Platform setup from this repo, the Cosmos DB Sink Connector is included in the installation and you can skip this step.
+
+Otherwise, you can download the JAR file from the latest [Release](https://github.com/microsoft/kafka-connect-cosmosdb/releases) or package this repo to create a new JAR file. To install the connector manually using the JAR file, refer to these [instructions](https://docs.confluent.io/current/connect/managing/install.html#install-connector-manually).
+
+You can also package a new JAR file from the source code.
 
 ```bash
 
@@ -65,7 +69,7 @@ kafka-console-producer --broker-list localhost:9092 --topic hotels
 
 In the console producer, enter:
 
-```bash
+```json
 
 {"id": "h1", "HotelName": "Marriott", "Description": "Marriott description"}
 {"id": "h2", "HotelName": "HolidayInn", "Description": "HolidayInn description"}
@@ -252,7 +256,7 @@ Here are solutions to some common problems that you may encounter when working w
 
 If you have non-JSON data on your source topic in Kafka and attempt to read it using the JsonConverter, you will see the following exception:
 
-```properties
+```none
 
 org.apache.kafka.connect.errors.DataException: Converting byte[] to Kafka Connect data failed due to serialization error:
 …
@@ -264,10 +268,10 @@ This is likely caused by data in the source topic being serialized in either Avr
 
 **Solution**: If the topic data is actually in Avro, then change your Kafka Connect sink connector to use the AvroConverter as shown below.
 
-```properties
+```json
 
 "value.converter": "io.confluent.connect.avro.AvroConverter",
-"value.converter.schema.registry.url": "http://schema-registry:8081" ,
+"value.converter.schema.registry.url": "http://schema-registry:8081",
 
 ```
 
@@ -275,7 +279,7 @@ This is likely caused by data in the source topic being serialized in either Avr
 
 When you try to use the Avro converter to read data from a topic that is not Avro. This would include data written by an Avro serializer other than the Confluent Schema Registry’s Avro serializer, which has its own wire format.
 
-```properties
+```none
 
 org.apache.kafka.connect.errors.DataException: my-topic-name
 at io.confluent.connect.avro.AvroConverter.toConnectData(AvroConverter.java:97)
@@ -319,7 +323,7 @@ Kafka Connect supports a special structure of JSON messages containing both payl
 
 If you try to read JSON data that does not contain the data in this structure, you will get this error:
 
-```properties
+```none
 
 org.apache.kafka.connect.errors.DataException: JsonConverter with schemas.enable requires "schema" and "payload" fields and may not contain additional fields. If you are trying to deserialize plain JSON data, set schemas.enable=false in your converter configuration.
 
@@ -329,7 +333,7 @@ To be clear, the only JSON structure that is valid for schemas.enable=true has s
 
 As the message itself states, if you just have plain JSON data, you should change your connector’s configuration to:
 
-```properties
+```json
 
 "value.converter": "org.apache.kafka.connect.json.JsonConverter",
 "value.converter.schemas.enable": "false",
