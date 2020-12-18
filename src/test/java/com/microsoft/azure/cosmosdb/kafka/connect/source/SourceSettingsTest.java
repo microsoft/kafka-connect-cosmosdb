@@ -1,6 +1,7 @@
 package com.microsoft.azure.cosmosdb.kafka.connect.source;
 
 import com.microsoft.azure.cosmosdb.kafka.connect.Settings;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -16,7 +17,6 @@ public class SourceSettingsTest {
     public void readGenericAndSpecific() {
         HashMap<String, String> source = new HashMap<>();
         //Add specific setting
-        source.put(Settings.PREFIX + ".source.post-processor", "foobar");
         source.put(Settings.PREFIX + ".task.buffer.size", "666");
         source.put(Settings.PREFIX + ".task.timeout", "444");
         source.put(Settings.PREFIX + ".task.poll.interval", "787");
@@ -25,7 +25,6 @@ public class SourceSettingsTest {
         SourceSettings sourceSettings = new SourceSettings();
         sourceSettings.populate(source);
 
-        assertEquals("foobar", sourceSettings.getPostProcessor());
         assertEquals(444L, (long) sourceSettings.getTaskTimeout());
         assertEquals(666L, (long) sourceSettings.getTaskBufferSize());
         assertTrue(sourceSettings.isStartFromBeginning());
@@ -38,6 +37,7 @@ public class SourceSettingsTest {
         HashMap<String, String> source = new HashMap<>();
         SourceSettings sourceSettings = new SourceSettings();
         sourceSettings.populate(source);
+
         assertTrue(sourceSettings.isStartFromBeginning());
         assertEquals(5000L, (long) sourceSettings.getTaskTimeout());
         assertEquals(10000L, (long) sourceSettings.getTaskBufferSize());
@@ -57,5 +57,33 @@ public class SourceSettingsTest {
         sourceSettings.setContainerList("");
         assertEquals("",  sourceSettings.getContainerList());
 
+    }
+
+    @Test
+    public void testNumberVerification() {
+        HashMap<String, String> source = new HashMap<>();
+        SourceSettings sourceSettings = new SourceSettings();
+
+        source.put(Settings.PREFIX + ".task.buffer.size", "Foobar");
+        try {
+            sourceSettings.populate(source);
+            Assert.fail("Expected IllegalArgumentException");
+        } catch (Throwable t) {
+            assertEquals("Incorrect exception type: " + t.getClass().getName(), "IllegalArgumentException", t.getClass().getSimpleName());
+        }
+    }
+
+    @Test
+    public void testEmptySpaceSettings() {
+        HashMap<String, String> source = new HashMap<>();
+        SourceSettings sourceSettings = new SourceSettings();
+
+        source.put(Settings.PREFIX + ".task.buffer.size", " ");
+        try {
+            sourceSettings.populate(source);
+            Assert.fail("Expected IllegalArgumentException");
+        } catch (Throwable t) {
+            assertEquals("Incorrect exception type: " + t.getClass().getName(), "IllegalArgumentException", t.getClass().getSimpleName());
+        }
     }
 }

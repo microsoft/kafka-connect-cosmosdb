@@ -30,6 +30,7 @@ public class CosmosDBSinkTaskTest {
     private final String topicName = "testtopic";
     private final String containerName = "container666";
     private final String databaseName = "fakeDatabase312";
+    private final Boolean upsertFalse = false;
     private CosmosDBSinkTask testTask;
     private CosmosClient mockCosmosClient;
     private CosmosContainer mockContainer;
@@ -42,6 +43,7 @@ public class CosmosDBSinkTaskTest {
         SinkSettings settings = new SinkSettings();
         settings.setTopicContainerMap(TopicContainerMap.deserialize(topicName + "#" + containerName));
         settings.setDatabaseName(databaseName);
+        settings.setUseUpsert(upsertFalse);
         FieldUtils.writeField(testTask, "settings", settings, true);
 
         //Mock the Cosmos SDK
@@ -68,6 +70,7 @@ public class CosmosDBSinkTaskTest {
             //Will throw exception:
             try {
                 JsonNode jsonNode = new ObjectMapper().readTree(item.toString());
+                assertNotNull(jsonNode);
                 return null;
             } catch (JsonParseException jpe) {
                 throw new BadRequestException("Unable to serialize JSON request", jpe);

@@ -22,23 +22,14 @@ public class Settings {
     private String key;
     private String databaseName;
     private TopicContainerMap topicContainerMap = TopicContainerMap.empty();
+    
     private final List<Setting> allSettings = Arrays.asList(
-            //Add all settings here:
-            new NumericSetting(PREFIX + ".task.timeout", "The max number of milliseconds the source task will use to read documents before send them to Kafka.",
-                    "Task Timeout", SettingDefaults.TASK_TIMEOUT, this::setTaskTimeout, this::getTaskTimeout),
-            new NumericSetting(PREFIX + ".task.buffer.size", "The max size the collection of documents the source task will buffer before send them to Kafka.",
-                    "Task reader buffer size", SettingDefaults.TASK_BUFFER_SIZE, this::setTaskBufferSize, this::getTaskBufferSize),
-            new NumericSetting(PREFIX + ".task.batch.size","The max number of of documents the source task will buffer before send them to Kafka.",
-                    "Task batch size", SettingDefaults.TASK_BATCH_SIZE, this::setTaskBatchSize, this::getTaskBatchSize),
-            new NumericSetting(PREFIX + ".task.poll.interval","The default polling interval in milli seconds that a source task polls for changes.",
-                    "Task poll interval", SettingDefaults.TASK_POLL_INTERVAL, this::setTaskPollInterval, this::getTaskPollInterval),
-            new Setting(PREFIX+".connection.endpoint", "The Cosmos DB endpoint.", "CosmosDB Endpoint", this::setEndpoint, this::getEndpoint),
-            new Setting(PREFIX+".master.key", "The connection master key.", "Master Key", this::setKey, this::getKey),
-            new Setting(PREFIX+".databasename", "The Cosmos DB target database.", "CosmosDB Database Name", this::setDatabaseName, this::getDatabaseName),
-            new Setting(PREFIX+".containers.topicmap", "A comma delimited list of collections mapped to their partitions. Formatted topic1#coll1,topic2#coll2.",
-                    "Topic-Container map", value -> this.setTopicContainerMap(TopicContainerMap.deserialize(value)), ()->this.getTopicContainerMap().serialize()),
-            new Setting(PREFIX+".containers", "A comma delimited list of source/target container names.",
-                    "Collection Names List", this::setContainerList, this::getContainerList)
+            //Add all common Source and Sink settings here:
+            new Setting(PREFIX + ".connection.endpoint", "The Cosmos DB endpoint.", "CosmosDB Endpoint", this::setEndpoint, this::getEndpoint),
+            new PasswordSetting(PREFIX + ".master.key", "The connection master key.", "Master Key", this::setKey, this::getKey),
+            new Setting(PREFIX + ".databasename", "The Cosmos DB target database.", "CosmosDB Database Name", this::setDatabaseName, this::getDatabaseName),
+            new Setting(PREFIX + ".containers.topicmap", "A comma delimited list of containers mapped to their topic partitions. Example: topic1#con1,topic2#con2.",
+                    "Topic-Container map", value -> this.setTopicContainerMap(TopicContainerMap.deserialize(value)), ()->this.getTopicContainerMap().serialize())
             );
 
 

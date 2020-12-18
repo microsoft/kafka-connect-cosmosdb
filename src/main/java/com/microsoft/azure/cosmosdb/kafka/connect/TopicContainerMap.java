@@ -58,9 +58,6 @@ public class TopicContainerMap {
                 .collect(Collectors.joining(","));
     }
 
-
-    //TODO: eliminate this mutability
-
     /**
      * Adds topic names, generating default container names
      *

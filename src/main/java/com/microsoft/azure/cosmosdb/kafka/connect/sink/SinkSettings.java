@@ -1,6 +1,7 @@
 package com.microsoft.azure.cosmosdb.kafka.connect.sink;
 
 import com.microsoft.azure.cosmosdb.kafka.connect.Setting;
+import com.microsoft.azure.cosmosdb.kafka.connect.BooleanSetting;
 import com.microsoft.azure.cosmosdb.kafka.connect.Settings;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.kafka.connect.sink.SinkTask;
@@ -12,46 +13,43 @@ import java.util.List;
  * Contains settings for the Kafka ComsosDB Sink Connector
  */
 public class SinkSettings extends Settings {
-    private String postProcessor;
-    private final List<Setting> sinkSettings = Arrays.asList(
-            //Add all settings here:
-            new Setting(Settings.PREFIX + ".sink.post-processor", "Comma-separated list of Sink Post-Processor class names to use for post-processing",
-                    "Sink post-processor", this::setPostProcessor, this::getPostProcessor),
+    private Boolean useUpsert;
+    private final List<Setting> settings = Arrays.asList(
 
-            new Setting(SinkTask.TOPICS_CONFIG, "List of topics to consume, separated by commas", "Topics", s -> {
+            //Add all sink settings here:
+            new Setting(SinkTask.TOPICS_CONFIG, "List of topics to consume, separated by commas.", "Topics", s -> {
             }, () -> ""),
             new Setting(SinkTask.TOPICS_REGEX_CONFIG,
                     "Regular expression giving topics to consume. " +
                             "Under the hood, the regex is compiled to a <code>java.util.regex.Pattern</code>. " +
                             "Only one of " + SinkTask.TOPICS_CONFIG + " or " + SinkTask.TOPICS_REGEX_CONFIG + " should be specified.",
                     "Topics RegEx", s -> {
-            }, () -> "")
+            }, () -> ""),
+            new BooleanSetting(Settings.PREFIX + ".sink.useUpsert", "Behaviour of operation to Cosmos DB. " +
+                    "'false' is the default value and signals that all operations to Cosmos DB are Insert; 'true' changes the behaviour to use Upsert operation.",
+                    "Use Upsert", SinkSettingDefaults.USE_UPSERT, this::setUseUpsert, this::getUseUpsert)
     );
 
     @Override
     protected List<Setting> getAllSettings() {
-        return ListUtils.union(super.getAllSettings(), sinkSettings);
+        return ListUtils.union(super.getAllSettings(), settings);
     }
 
     /**
-     * Returns the sink post-processor list
+     * Returns boolean value to use upsert operation
      *
-     * @Return The sink post-processor list
+     * @return useUpsert
      */
-
-    public String getPostProcessor() {
-        return this.postProcessor;
+    public Boolean getUseUpsert() {
+        return this.useUpsert;
     }
-
 
     /**
-     * Sets the sink post-processor list
+     * Sets boolean value to use upsert operation
      *
-     * @param postProcessor
+     * @param useUpsert
      */
-    public void setPostProcessor(String postProcessor) {
-        this.postProcessor = postProcessor;
+    public void setUseUpsert(Boolean useUpsert) {
+        this.useUpsert = useUpsert;
     }
-
-
 }

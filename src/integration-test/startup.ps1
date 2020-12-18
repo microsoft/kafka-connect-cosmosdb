@@ -1,14 +1,26 @@
 #!/usr/bin/env pwsh
 $ErrorActionPreference='Stop'
 cd $PSScriptRoot
-Write-Host shutting down Docker Compose orchestration...
+Write-Host "Shutting down Docker Compose orchestration..."
 docker-compose down
-Write-Host "Deleting prior Kafka State..."
-Remove-Item -Recurse -Force "full-stack" -Verbose -ErrorAction Continue 2>$null
-mkdir $PSScriptRoot/connectors -Force
+
+Write-Host "Deleting prior Cosmos DB connectors..."
+rm -rf "$PSScriptRoot/connectors"
+New-Item -Path "$PSScriptRoot" -ItemType "directory" -Name "connectors" -Force | Out-Null
 cd $PSScriptRoot/../..
+
+Write-Host "Rebuilding Cosmos DB connectors..."
 mvn clean package -DskipTests=true
 copy target\*-jar-with-dependencies.jar $PSScriptRoot/connectors
 cd $PSScriptRoot
+
+Write-Host "Adding custom Insert UUID SMT"
+cd $PSScriptRoot/connectors
+git clone https://github.com/confluentinc/kafka-connect-insert-uuid.git insertuuid -q && cd insertuuid
+mvn clean package -DskipTests=true
+copy target\*.jar $PSScriptRoot/connectors
+rm -rf "$PSScriptRoot/connectors/insertuuid"
+cd $PSScriptRoot
+
 Write-Host "Starting Docker Compose..."
 docker-compose up -d
