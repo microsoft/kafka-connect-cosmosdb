@@ -144,22 +144,19 @@ public class CosmosDBSourceTask extends SourceTask {
                 Thread.currentThread().interrupt();                      
             }
         }
+        running.set(false);
         
         // Release all the resources.
         if (changeFeedProcessor != null) {
-            changeFeedProcessor.stop();   
+            changeFeedProcessor.stop();
+            changeFeedProcessor = null;
         }
 
-        try {
+        if (client != null) {
             client.close();
-        } catch (Exception e) {
-            logger.warn("Unable to successfully close the CosmosDB client", e);
+            client = null;
         }
-        
-        running.set(false);
 
-        changeFeedProcessor = null;
-        client = null;
         settings = null;
     }
 
