@@ -146,8 +146,14 @@ public class CosmosDBSourceTask extends SourceTask {
         }
         
         // Release all the resources.
-        changeFeedProcessor.stop();
-        client.close();
+        if (changeFeedProcessor != null) {
+            changeFeedProcessor.stop();   
+        }
+
+        if (client != null) {
+            client.close();
+        }
+        
         running.set(false);
     }
 
