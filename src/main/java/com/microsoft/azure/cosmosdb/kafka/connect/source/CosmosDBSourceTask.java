@@ -150,9 +150,13 @@ public class CosmosDBSourceTask extends SourceTask {
             changeFeedProcessor.stop();   
         }
 
-        if (client != null) {
+        try {
             client.close();
+        } catch (Exception e) {
+            logger.warn("Unable to successfully close the CosmosDB client", e);
         }
+        client = null;
+        settings = null;
         
         running.set(false);
     }
