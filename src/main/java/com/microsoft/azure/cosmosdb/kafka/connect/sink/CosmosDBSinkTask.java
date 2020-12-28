@@ -85,15 +85,13 @@ public class CosmosDBSinkTask extends SinkTask {
 
     @Override
     public void stop() {
-        logger.trace("Stopping sink task");
+        logger.trace("Stopping CosmosDB sink task");
 
-        try {
+        if (client != null) {
             client.close();
-        } catch (Exception e) {
-            logger.warn("Unable to successfully close the CosmosDB client", e);
+            client = null;
         }
-
-        client = null;
+        
         settings = null;
 
     }
