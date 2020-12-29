@@ -40,7 +40,7 @@ public class JsonToStruct {
                         if (optionalField || defaultValue != null) {
                         struct.put(field, defaultValue);
                         } else {
-                            logger.error("msg");
+                            logger.error("Missing value for field {}", field.name());
                         }
                     }
                 });
@@ -56,7 +56,7 @@ public class JsonToStruct {
             case NUMBER:
                 if (jsonValue.isIntegralNumber()) {
                     // Add support for INT8 & INT64
-                    return Schema.INT32_SCHEMA;
+                    return Schema.INT64_SCHEMA;
                 }
                 else {
                     return Schema.FLOAT64_SCHEMA;
