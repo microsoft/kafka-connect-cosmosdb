@@ -51,7 +51,7 @@ public class CosmosDBSourceConnector extends SourceConnector {
             Map<String, String> taskProps = config.originalsStrings();
             taskProps.put(CosmosDBSourceConfig.COSMOS_ASSIGNED_CONTAINER_CONF,
                           containerList[i % containerList.length]);
-            taskProps.put(CosmosDBSourceConfig.COSMOS_WORKER_NAME_CONF, "worker" + i);
+            taskProps.put(CosmosDBSourceConfig.COSMOS_WORKER_NAME_CONF, config.getWorkerName() + i);
             taskConfigs.add(taskProps);
         }
 
