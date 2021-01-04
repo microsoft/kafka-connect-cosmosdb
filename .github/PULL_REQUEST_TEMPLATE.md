@@ -9,9 +9,9 @@
 ## Purpose of PR
 
 ## Observability + Testing
-- What changes or considerations in relation to observability?
+- What changes or considerations did you make in relation to observability?
 
-- Did you add testing to account for new or changed work?
+- Did you add testing to account for any new or changed work?
 
 
 ## Review notes
