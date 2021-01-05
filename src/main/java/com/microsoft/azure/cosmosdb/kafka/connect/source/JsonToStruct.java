@@ -16,11 +16,14 @@ import static org.apache.kafka.connect.data.Values.convertToInteger;
 import static org.apache.kafka.connect.data.Values.convertToLong;
 import static org.apache.kafka.connect.data.Values.convertToShort;
 
+import static java.lang.String.format;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 
 public class JsonToStruct {
     private static final Logger logger = LoggerFactory.getLogger(CosmosDBSourceTask.class);
+    public static final String SCHEMA_NAME_TEMPLATE = "inferred_name_%s";
 
     public SchemaAndValue recordToSchemaAndValue(final JsonNode node) {
         Schema nodeSchema = inferSchema(node);
@@ -55,7 +58,6 @@ public class JsonToStruct {
                 return Schema.BOOLEAN_SCHEMA;
             case NUMBER:
                 if (jsonValue.isIntegralNumber()) {
-                    // Add support for INT8 & INT64
                     return Schema.INT64_SCHEMA;
                 }
                 else {
@@ -63,6 +65,7 @@ public class JsonToStruct {
                 }
             case ARRAY:
                 SchemaBuilder arrayBuilder = SchemaBuilder.array(jsonValue.elements().hasNext() ? inferSchema(jsonValue.elements().next()) : Schema.OPTIONAL_STRING_SCHEMA);
+                arrayBuilder.name(generateName(arrayBuilder));
                 return arrayBuilder.build();
             case OBJECT:
                 SchemaBuilder structBuilder = SchemaBuilder.struct();
@@ -71,6 +74,7 @@ public class JsonToStruct {
                     Map.Entry<String, JsonNode> entry = it.next();
                     structBuilder.field(entry.getKey(), inferSchema(entry.getValue()));
                 }
+                structBuilder.name(generateName(structBuilder));
                 return structBuilder.build();
             case STRING:
                 return Schema.STRING_SCHEMA;
@@ -80,6 +84,11 @@ public class JsonToStruct {
             default:
                 return null;
         }
+    }
+
+    // Generate Unique Schema Name
+    public static String generateName(final SchemaBuilder builder) {
+      return format(SCHEMA_NAME_TEMPLATE, Objects.hashCode(builder.build())).replace("-", "_");
     }
 
     private SchemaAndValue toSchemaAndValue(final Schema schema, final JsonNode node) {
