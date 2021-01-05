@@ -10,6 +10,10 @@ import org.apache.kafka.connect.sink.SinkRecord;
 import org.apache.kafka.connect.sink.SinkTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.apache.kafka.connect.data.Struct;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.Collection;
 import java.util.List;
@@ -23,6 +27,7 @@ public class CosmosDBSinkTask extends SinkTask {
     private static final Logger logger = LoggerFactory.getLogger(CosmosDBSinkTask.class);
     private CosmosClient client = null;
     private SinkSettings settings = null;
+    ObjectMapper mapper = new ObjectMapper();
 
     @Override
     public String version() {
@@ -70,11 +75,20 @@ public class CosmosDBSinkTask extends SinkTask {
                 logger.debug("Value schema: {}", record.valueSchema());
                 logger.debug("Value.toString(): {}",  record.value() != null ? record.value().toString() : "<null>");
                 
+                Object recordValue;
+                if(record.value() instanceof Struct) {
+                    Map<String, Object> jsonMap = StructToJsonMap.toJsonMap((Struct) record.value());
+                    recordValue = mapper.convertValue(jsonMap, JsonNode.class);
+                }
+                else {
+                    recordValue = record.value();
+                }
+
                 try {
                     if (Boolean.TRUE.equals(this.settings.getUseUpsert())) {
-                        container.upsertItem(record.value()); 
+                        container.upsertItem(recordValue); 
                       } else {
-                        container.createItem(record.value());
+                        container.createItem(recordValue);
                       }
                 } catch (BadRequestException bre) {
                     throw new CosmosDBWriteException(record, bre);
