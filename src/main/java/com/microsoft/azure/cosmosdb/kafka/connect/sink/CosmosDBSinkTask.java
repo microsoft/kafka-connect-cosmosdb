@@ -49,7 +49,6 @@ public class CosmosDBSinkTask extends SinkTask {
         client.createDatabaseIfNotExists(settings.getDatabaseName());
     }
 
-
     @Override
     public void put(Collection<SinkRecord> records) {
         if (CollectionUtils.isEmpty(records)) {
@@ -60,12 +59,11 @@ public class CosmosDBSinkTask extends SinkTask {
         logger.info("Sending {} records to be written", records.size());
 
         Map<String, List<SinkRecord>> recordsByContainer = records.stream()
-                //Find target collection for each record
-                .collect(Collectors.groupingBy(record ->
-                        settings.getTopicContainerMap().getContainerForTopic(record.topic()).orElseThrow(
-                                () -> new IllegalStateException(String.format("No container defined for topic %s .",
-                                record.topic())))));
-                                
+                // Find target collection for each record
+                .collect(Collectors.groupingBy(record -> settings.getTopicContainerMap()
+                        .getContainerForTopic(record.topic()).orElseThrow(() -> new IllegalStateException(
+                                String.format("No container defined for topic %s .", record.topic())))));
+
         for (Map.Entry<String, List<SinkRecord>> entry : recordsByContainer.entrySet()) {
             String containerName = entry.getKey();
             CosmosContainer container = client.getDatabase(settings.getDatabaseName()).getContainer(containerName);
@@ -73,23 +71,22 @@ public class CosmosDBSinkTask extends SinkTask {
                 logger.debug("Writing record, value type: {}", record.value().getClass().getName());
                 logger.debug("Key Schema: {}", record.keySchema());
                 logger.debug("Value schema: {}", record.valueSchema());
-                logger.debug("Value.toString(): {}",  record.value() != null ? record.value().toString() : "<null>");
-                
+                logger.debug("Value.toString(): {}", record.value() != null ? record.value().toString() : "<null>");
+
                 Object recordValue;
-                if(record.value() instanceof Struct) {
+                if (record.value() instanceof Struct) {
                     Map<String, Object> jsonMap = StructToJsonMap.toJsonMap((Struct) record.value());
                     recordValue = mapper.convertValue(jsonMap, JsonNode.class);
-                }
-                else {
+                } else {
                     recordValue = record.value();
                 }
 
                 try {
                     if (Boolean.TRUE.equals(this.settings.getUseUpsert())) {
-                        container.upsertItem(recordValue); 
-                      } else {
+                        container.upsertItem(recordValue);
+                    } else {
                         container.createItem(recordValue);
-                      }
+                    }
                 } catch (BadRequestException bre) {
                     throw new CosmosDBWriteException(record, bre);
                 }
