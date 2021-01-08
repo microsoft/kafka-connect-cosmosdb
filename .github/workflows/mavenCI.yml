@@ -5,9 +5,9 @@ name: Java CI with Maven
 
 on:
   push:
-    branches: [main, dev]
+    branches: [main, dev, kev-test]
   pull_request:
-    branches: [main, dev]
+    branches: [main, dev, kev-test]
 
 jobs:
   build:
@@ -29,3 +29,6 @@ jobs:
       shell: pwsh
       run: ./src/integration-test/startup.ps1
       if: github.ref == 'refs/heads/main'
+    - name: Run Component Detection
+      task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
+      displayName: 'Component Detection'
