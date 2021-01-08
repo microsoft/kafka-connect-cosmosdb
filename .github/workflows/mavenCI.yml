@@ -29,5 +29,5 @@ jobs:
       shell: pwsh
       run: ./src/integration-test/startup.ps1
       if: github.ref == 'refs/heads/main'
-    - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
-      displayName: 'Component Detection'
+    - name: Component Detection
+      uses: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
