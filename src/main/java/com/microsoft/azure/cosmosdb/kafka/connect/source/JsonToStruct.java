@@ -73,9 +73,10 @@ public class JsonToStruct {
                         : inferSchema(jsonValues.get(0));
                 if (jsonValues.isEmpty()
                         || jsonValues.stream().anyMatch(jv -> !Objects.equals(inferSchema(jv), firstItemSchema))) {
-                        arrayBuilder = SchemaBuilder.array(Schema.OPTIONAL_STRING_SCHEMA);
-                        arrayBuilder.name(generateName(arrayBuilder));
-                        return arrayBuilder.optional().build();
+                    // If array is emtpy or it contains elements with different schema types
+                    arrayBuilder = SchemaBuilder.array(Schema.OPTIONAL_STRING_SCHEMA);
+                    arrayBuilder.name(generateName(arrayBuilder));
+                    return arrayBuilder.optional().build();
                 }
                 arrayBuilder = SchemaBuilder.array(inferSchema(jsonValues.get(0)));
                 arrayBuilder.name(generateName(arrayBuilder));
@@ -122,7 +123,7 @@ public class JsonToStruct {
                 schemaAndValue = new SchemaAndValue(schema, node.asBoolean());
                 break;
             case STRING:
-                schemaAndValue = new SchemaAndValue(schema, node.asText());
+                schemaAndValue = stringToSchemaAndValue(schema, node);
                 break;
             case BYTES:
                 schemaAndValue = new SchemaAndValue(schema, node);
@@ -142,12 +143,24 @@ public class JsonToStruct {
         return schemaAndValue;
     }
 
+    private SchemaAndValue stringToSchemaAndValue(final Schema schema, final JsonNode nodeValue) {
+        String value;
+        if (nodeValue.isTextual()) {
+            value = nodeValue.asText();
+        } else {
+            value = nodeValue.toString();
+        }
+        return new SchemaAndValue(schema, value);
+    }
+
     private SchemaAndValue arrayToSchemaAndValue(final Schema schema, final JsonNode nodeValue) {
         if (!nodeValue.isArray()) {
             logger.error("Unexpted value %s for Schma %s", nodeValue, schema);
         }
         List<Object> values = new ArrayList<>();
-        nodeValue.forEach(v -> values.add(toSchemaAndValue(schema.valueSchema(), v).value()));
+        nodeValue.forEach(v -> {
+            values.add(toSchemaAndValue(schema.valueSchema(), v).value());
+        });
         return new SchemaAndValue(schema, values);
     }
 
