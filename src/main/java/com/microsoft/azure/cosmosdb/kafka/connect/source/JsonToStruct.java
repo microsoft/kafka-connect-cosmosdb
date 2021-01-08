@@ -26,7 +26,7 @@ import java.util.Objects;
 
 public class JsonToStruct {
     private static final Logger logger = LoggerFactory.getLogger(CosmosDBSourceTask.class);
-    public static final String SCHEMA_NAME_TEMPLATE = "inferred_name_%s";
+    private static final String SCHEMA_NAME_TEMPLATE = "inferred_name_%s";
 
     public SchemaAndValue recordToSchemaAndValue(final JsonNode node) {
         Schema nodeSchema = inferSchema(node);
@@ -64,6 +64,7 @@ public class JsonToStruct {
                 }
             case ARRAY:
                 List<JsonNode> jsonValues = new ArrayList<>();
+                SchemaBuilder arrayBuilder;
                 jsonNode.forEach(jn -> {
                     jsonValues.add(jn);
                 });
@@ -72,10 +73,13 @@ public class JsonToStruct {
                         : inferSchema(jsonValues.get(0));
                 if (jsonValues.isEmpty()
                         || jsonValues.stream().anyMatch(jv -> !Objects.equals(inferSchema(jv), firstItemSchema))) {
-                    return SchemaBuilder.array(Schema.OPTIONAL_STRING_SCHEMA).optional().build();
+                        arrayBuilder = SchemaBuilder.array(Schema.OPTIONAL_STRING_SCHEMA);
+                        arrayBuilder.name(generateName(arrayBuilder));
+                        return arrayBuilder.optional().build();
                 }
-                return SchemaBuilder.array(inferSchema(jsonValues.get(0))).optional().build();
-
+                arrayBuilder = SchemaBuilder.array(inferSchema(jsonValues.get(0)));
+                arrayBuilder.name(generateName(arrayBuilder));
+                return arrayBuilder.optional().build();
             case OBJECT:
                 SchemaBuilder structBuilder = SchemaBuilder.struct();
                 Iterator<Map.Entry<String, JsonNode>> it = jsonNode.fields();
@@ -96,7 +100,7 @@ public class JsonToStruct {
     }
 
     // Generate Unique Schema Name
-    public static String generateName(final SchemaBuilder builder) {
+    private static String generateName(final SchemaBuilder builder) {
         return format(SCHEMA_NAME_TEMPLATE, Objects.hashCode(builder.build())).replace("-", "_");
     }
 
