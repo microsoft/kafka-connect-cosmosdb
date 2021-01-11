@@ -8,7 +8,6 @@ import com.azure.cosmos.implementation.BadRequestException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.microsoft.azure.cosmosdb.kafka.connect.TopicContainerMap;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.kafka.connect.data.ConnectSchema;
 import org.apache.kafka.connect.data.Schema;
@@ -30,7 +29,7 @@ public class CosmosDBSinkTaskTest {
     private final String topicName = "testtopic";
     private final String containerName = "container666";
     private final String databaseName = "fakeDatabase312";
-    private final Boolean upsertFalse = false;
+    private final String upsertFalse = "false";
     private CosmosDBSinkTask testTask;
     private CosmosClient mockCosmosClient;
     private CosmosContainer mockContainer;
@@ -40,11 +39,12 @@ public class CosmosDBSinkTaskTest {
         testTask = new CosmosDBSinkTask();
 
         //Configure settings
-        SinkSettings settings = new SinkSettings();
-        settings.setTopicContainerMap(TopicContainerMap.deserialize(topicName + "#" + containerName));
-        settings.setDatabaseName(databaseName);
-        settings.setUseUpsert(upsertFalse);
-        FieldUtils.writeField(testTask, "settings", settings, true);
+        Map<String, String> settingAssignment = CosmosDBSinkConfigTest.setupConfigs();
+        settingAssignment.put(CosmosDBSinkConfig.COSMOS_CONTAINER_TOPIC_MAP_CONF, topicName + "#" + containerName);
+        settingAssignment.put(CosmosDBSinkConfig.COSMOS_DATABASE_NAME_CONF, databaseName);
+        settingAssignment.put(CosmosDBSinkConfig.COSMOS_USE_UPSERT_CONF, upsertFalse);
+        CosmosDBSinkConfig config = new CosmosDBSinkConfig(settingAssignment);
+        FieldUtils.writeField(testTask, "config", config, true);
 
         //Mock the Cosmos SDK
         mockCosmosClient = Mockito.mock(CosmosClient.class);
@@ -55,7 +55,6 @@ public class CosmosDBSinkTaskTest {
 
         FieldUtils.writeField(testTask, "client", mockCosmosClient, true);
     }
-
 
     @Test
     public void testPutPlainTextString() {

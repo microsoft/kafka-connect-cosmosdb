@@ -1,6 +1,5 @@
 package com.microsoft.azure.cosmosdb.kafka.connect.sink;
 
-import com.microsoft.azure.cosmosdb.kafka.connect.SettingDefaults;
 import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.CosmosClientBuilder;
 import com.azure.cosmos.CosmosContainer;
@@ -26,7 +25,7 @@ import java.util.stream.Collectors;
 public class CosmosDBSinkTask extends SinkTask {
     private static final Logger logger = LoggerFactory.getLogger(CosmosDBSinkTask.class);
     private CosmosClient client = null;
-    private SinkSettings settings = null;
+    private CosmosDBSinkConfig config = null;
     ObjectMapper mapper = new ObjectMapper();
 
     @Override
@@ -37,13 +36,12 @@ public class CosmosDBSinkTask extends SinkTask {
     @Override
     public void start(Map<String, String> map) {
         logger.trace("Sink task started.");
-        this.settings = new SinkSettings();
-        this.settings.populate(map);
+        this.config = new CosmosDBSinkConfig(map);
 
-        this.client = new CosmosClientBuilder().endpoint(settings.getEndpoint()).key(settings.getKey())
-                .userAgentSuffix(SettingDefaults.COSMOS_CLIENT_USER_AGENT_SUFFIX + version()).buildClient();
+        this.client = new CosmosClientBuilder().endpoint(config.getConnEndpoint()).key(config.getConnKey())
+                .userAgentSuffix(CosmosDBSinkConfig.COSMOS_CLIENT_USER_AGENT_SUFFIX + version()).buildClient();
 
-        client.createDatabaseIfNotExists(settings.getDatabaseName());
+        client.createDatabaseIfNotExists(config.getDatabaseName());
     }
 
     @Override
@@ -57,13 +55,13 @@ public class CosmosDBSinkTask extends SinkTask {
 
         Map<String, List<SinkRecord>> recordsByContainer = records.stream()
                 // Find target collection for each record
-                .collect(Collectors.groupingBy(record -> settings.getTopicContainerMap()
+                .collect(Collectors.groupingBy(record -> config.getTopicContainerMap()
                         .getContainerForTopic(record.topic()).orElseThrow(() -> new IllegalStateException(
                                 String.format("No container defined for topic %s .", record.topic())))));
 
         for (Map.Entry<String, List<SinkRecord>> entry : recordsByContainer.entrySet()) {
             String containerName = entry.getKey();
-            CosmosContainer container = client.getDatabase(settings.getDatabaseName()).getContainer(containerName);
+            CosmosContainer container = client.getDatabase(config.getDatabaseName()).getContainer(containerName);
             for (SinkRecord record : entry.getValue()) {
                 logger.debug("Writing record, value type: {}", record.value().getClass().getName());
                 logger.debug("Key Schema: {}", record.keySchema());
@@ -79,7 +77,7 @@ public class CosmosDBSinkTask extends SinkTask {
                 }
 
                 try {
-                    if (Boolean.TRUE.equals(this.settings.getUseUpsert())) {
+                    if (Boolean.TRUE.equals(config.getUseUpsert())) {
                         container.upsertItem(recordValue);
                     } else {
                         container.createItem(recordValue);
@@ -99,8 +97,9 @@ public class CosmosDBSinkTask extends SinkTask {
             client.close();
             client = null;
         }
-        
-        settings = null;
+
+        client = null;
+        config = null;
 
     }
 }

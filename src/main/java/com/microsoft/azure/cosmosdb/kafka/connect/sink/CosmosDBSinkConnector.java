@@ -34,34 +34,23 @@ public class CosmosDBSinkConnector extends SinkConnector {
         logger.info("Setting task configurations for {} workers.", maxTasks);
         final List<Map<String, String>> configs = new ArrayList<>(maxTasks);
         for (int i = 0; i < maxTasks; ++i) {
-          configs.add(configProps);
+            configs.add(configProps);
         }
         return configs;
       }
 
     @Override
     public void stop() {
-        logger.debug("Stopping CosmosDB sink connector.");
+        logger.debug("Stopping CosmosDB Sink Connector.");
     }
 
     @Override
     public ConfigDef config() {
-        logger.debug("config invoked");
-
-        ConfigDef configDef = new ConfigDef();
-        new SinkSettings().getAllSettings().stream().forEachOrdered(setting -> setting.toConfigDef(configDef));
-
-        logger.debug("Sink ConfigDef with {} settings", configDef.configKeys().size()
-        );
-
-        return configDef;
+        return CosmosDBSinkConfig.getConfig();
     }
     
     @Override
     public String version() {
-        String val = this.getClass().getPackage().getImplementationVersion();
-        logger.debug("version {}", val);
-        return val;
+        return this.getClass().getPackage().getImplementationVersion();
     }
-
 }

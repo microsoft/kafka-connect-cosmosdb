@@ -2,7 +2,9 @@ package com.microsoft.azure.cosmosdb.kafka.connect.source;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.common.config.ConfigDef;
+import org.apache.kafka.common.config.ConfigException;
 import org.apache.kafka.connect.connector.Task;
+import org.apache.kafka.connect.errors.ConnectException;
 import org.apache.kafka.connect.source.SourceConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,14 +15,19 @@ import java.util.*;
  * The CosmosDB Source Connector
  */
 public class CosmosDBSourceConnector extends SourceConnector {
+    
     private static final Logger logger = LoggerFactory.getLogger(CosmosDBSourceConnector.class);
-    private SourceSettings settings = null;
+    private CosmosDBSourceConfig config = null;
 
     @Override
-    public void start(Map<String, String> sourceConectorSetttings) {
+    public void start(Map<String, String> props) {
         logger.info("Starting the Source Connector");
-        this.settings = new SourceSettings();
-        this.settings.populate(sourceConectorSetttings);
+        try {
+            config = new CosmosDBSourceConfig(props);
+        } catch (ConfigException e) {
+            throw new ConnectException(
+                "Couldn't start CosmosDBSourceConnector due to configuration error", e);
+        }
     }
 
     @Override
@@ -28,39 +35,37 @@ public class CosmosDBSourceConnector extends SourceConnector {
         return CosmosDBSourceTask.class;
     }
 
-
     @Override
     public List<Map<String, String>> taskConfigs(int maxTasks) {
         logger.info("Creating the task Configs");
-        String[] containerList = StringUtils.split(settings.getContainerList(),",");
+        String[] containerList = StringUtils.split(config.getContainerList(), ",");
         List<Map<String, String>> taskConfigs = new ArrayList<>(maxTasks);
 
-        if(containerList.length == 0) {
+        if (containerList.length == 0) {
             logger.debug("Container list is not specified");
             return taskConfigs;
         }
-        for (int i = 0; i< maxTasks; i++) {
+
+        for (int i = 0; i < maxTasks; i++) {
             // Equally distribute workers by assigning workers to containers in round robin fashion.
-            this.settings.setAssignedContainer(containerList[i % containerList.length]);
-            this.settings.setWorkerName("worker" + i);
-            Map<String, String> taskConfig = this.settings.asMap();
-            taskConfigs.add(taskConfig);
+            Map<String, String> taskProps = config.originalsStrings();
+            taskProps.put(CosmosDBSourceConfig.COSMOS_ASSIGNED_CONTAINER_CONF,
+                          containerList[i % containerList.length]);
+            taskProps.put(CosmosDBSourceConfig.COSMOS_WORKER_NAME_CONF, "worker" + i);
+            taskConfigs.add(taskProps);
         }
 
         return taskConfigs;
     }
 
-
     @Override
     public void stop() {
-        logger.info("Stopping CosmosDBSourceConnector");
+        logger.info("Stopping CosmosDB Source Connector");
     }
 
     @Override
     public ConfigDef config() {
-        ConfigDef configDef = new ConfigDef();
-        new SourceSettings().getAllSettings().stream().forEachOrdered(setting -> setting.toConfigDef(configDef));
-        return configDef;
+        return CosmosDBSourceConfig.getConfig();
     }
 
     @Override

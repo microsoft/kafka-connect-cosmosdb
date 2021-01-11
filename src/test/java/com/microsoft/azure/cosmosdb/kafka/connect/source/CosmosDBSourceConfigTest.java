@@ -1,84 +1,57 @@
 package com.microsoft.azure.cosmosdb.kafka.connect.source;
 
-import com.microsoft.azure.cosmosdb.kafka.connect.Setting;
-import com.microsoft.azure.cosmosdb.kafka.connect.Settings;
-import org.apache.kafka.common.config.ConfigDef;
-import org.apache.kafka.common.config.ConfigValue;
+import org.apache.kafka.common.config.ConfigException;
 import org.junit.Test;
 
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 
 public class CosmosDBSourceConfigTest {
-    private static final Setting BATCH_SETTING = new SourceSettings().getAllSettings().stream().filter(s->s.getDisplayName().equals("Task batch size")).findFirst().orElse(null);
+    private static final String COSMOS_URL = "https://<cosmosinstance-name>.documents.azure.com:443/";
 
-    @Test
-    public void testConfig(){
-        ConfigDef configDef = new CosmosDBSourceConnector().config();
-        assertNotNull(configDef);
-
-        //Ensure all settings are represented
-        Set<String> allSettingsNames = new SourceSettings().getAllSettings().stream().map(Setting::getName).collect(Collectors.toSet());
-        assertEquals("Not all settings are representeed", allSettingsNames, configDef.names());
-    }
-
-
-    @Test
-    public void testAbsentDefaults(){
-        //Assigned Container is set in connector and does not have a default setting. Let's see if the configdef does
-
-        Setting assignedContainer = new SourceSettings().getAllSettings().stream().filter(s->s.getDisplayName().equals("Assigned Container")).findFirst().orElse(null);
-        assertNotNull(assignedContainer);
-        assertNull(new CosmosDBSourceConnector().config().defaultValues().get(assignedContainer.getName()));
+    public static HashMap<String, String> setupConfigs() {
+        HashMap<String, String> configs = new HashMap<>();
+        configs.put(CosmosDBSourceConfig.COSMOS_CONN_ENDPOINT_CONF, COSMOS_URL);
+        configs.put(CosmosDBSourceConfig.COSMOS_CONN_KEY_CONF, "mykey");
+        configs.put(CosmosDBSourceConfig.COSMOS_DATABASE_NAME_CONF, "mydb");
+        configs.put(CosmosDBSourceConfig.COSMOS_CONTAINER_TOPIC_MAP_CONF, "mytopic5#mycontainer6");
+        configs.put(CosmosDBSourceConfig.COSMOS_CONTAINERS_LIST_CONF, "mycontainer6");
+        return configs;
     }
 
     @Test
-    public void testPresentDefaults(){
-        //The task timeout has a default setting. Let's see if the configdef does
-        assertNotNull(BATCH_SETTING.getDefaultValue().get());
-        assertEquals(BATCH_SETTING.getDefaultValue().get(), new CosmosDBSourceConnector().config().defaultValues().get(BATCH_SETTING.getName()));
+    public void shouldAcceptValidConfig() {
+        // Adding required Configuration with no default value.
+        CosmosDBSourceConfig config = new CosmosDBSourceConfig(setupConfigs());
+        assertNotNull(config);
+        assertEquals(COSMOS_URL, config.getConnEndpoint());
+        assertEquals("mykey", config.getConnKey());
+        assertEquals("mydb", config.getDatabaseName());
+        assertEquals("mycontainer6", config.getTopicContainerMap().getContainerForTopic("mytopic5").get());
+        assertEquals("mycontainer6", config.getContainerList());
     }
 
     @Test
-    public void testNumericValidation(){
-        Map<String, String> settingAssignment = new HashMap<>(1);
-        settingAssignment.put(BATCH_SETTING.getName(), "definitely not a number");
-        ConfigDef config = new CosmosDBSourceConnector().config();
-
-        List<ConfigValue> postValidation = config.validate(settingAssignment);
-        ConfigValue timeoutConfigValue = postValidation.stream().filter(item -> item.name().equals(BATCH_SETTING.getName())).findFirst().get();
-        assertEquals("Expected error message when assigning non-numeric value to task timeout", 1, timeoutConfigValue.errorMessages().size());
+    public void shouldHaveDefaultValues() {
+        // Adding required Configuration with no default value.
+        CosmosDBSourceConfig config = new CosmosDBSourceConfig(setupConfigs());
+        assertEquals(5000L, config.getTaskTimeout().longValue());
+        assertEquals(10000L, config.getTaskBufferSize().longValue());
+        assertEquals(100L, config.getTaskBatchSize().longValue());
+        assertEquals(1000L, config.getTaskPollInterval().longValue());
+        assertEquals("", config.getAssignedContainer());
+        assertEquals("", config.getWorkerName());
+        assertTrue(config.isStartFromBeginning());
     }
 
     @Test
-    public void testTaskConfigs(){
-        Map<String, String> settingAssignment = new HashMap<>(1);
-        settingAssignment.put(BATCH_SETTING.getName(), "200");
-        CosmosDBSourceConnector sourceConnector = new CosmosDBSourceConnector();
-        sourceConnector.start(settingAssignment);
-        List<Map<String, String>> taskConfigs = sourceConnector.taskConfigs(3);
-        assertEquals(0, taskConfigs.size());
-    }
-
-    @Test
-    public void testValidTaskConfigContainerAssignment(){
-        Map<String, String> settingAssignment = new HashMap<>(1);
-        settingAssignment.put(BATCH_SETTING.getName(), "200");
-        settingAssignment.put(Settings.PREFIX + ".containers", "C1,C2,C3,C4");
-        CosmosDBSourceConnector sourceConnector = new CosmosDBSourceConnector();
-        sourceConnector.start(settingAssignment);
-        List<Map<String, String>> taskConfigs = sourceConnector.taskConfigs(6);
-        assertEquals(6, taskConfigs.size());
-        assertEquals("C1", taskConfigs.get(0).get(Settings.PREFIX +".assigned.container"));
-        assertEquals("C2", taskConfigs.get(1).get(Settings.PREFIX +".assigned.container"));
-        assertEquals("C3", taskConfigs.get(2).get(Settings.PREFIX +".assigned.container"));
-        assertEquals("C4", taskConfigs.get(3).get(Settings.PREFIX +".assigned.container"));
-        assertEquals("C1", taskConfigs.get(4).get(Settings.PREFIX +".assigned.container"));
-        assertEquals("C2", taskConfigs.get(5).get(Settings.PREFIX +".assigned.container"));
+    public void shouldThrowExceptionWhenCosmosEndpointNotGiven() {
+        // Adding required Configuration with no default value.
+        HashMap<String, String> settings = setupConfigs();
+        settings.remove(CosmosDBSourceConfig.COSMOS_CONN_ENDPOINT_CONF);
+        assertThrows(ConfigException.class, () -> {
+            new CosmosDBSourceConfig(settings);
+        });
     }
 }
