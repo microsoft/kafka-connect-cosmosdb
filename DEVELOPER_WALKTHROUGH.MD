@@ -53,7 +53,21 @@ mvn clean test
 
 ## Execute Integration Tests
 
-Integration tests are being reworked. These will be added soon.
+To run the integration tests, you will need to first setup the following resources:
+
+- [Confluent Platform](doc/Confluent_Platform_Setup.md)
+- [Setting up an Azure Cosmos DB Instance](doc/CosmosDB_Setup.md)
+
+Update the sink and source connectors configuration files located in `src/test/resources` by filling out the values for `connect.cosmosdb.connection.endpoint` and `connect.cosmosdb.master.key`, which you should have saved from the [Cosmos DB setup guide](doc/CosmosDB_Setup.md).
+
+Navigate to root project directory and execute the integration tests
+
+```bash
+
+cd kafka-connect-cosmosdb
+mvn clean test-compile failsafe:integration-test
+
+```
 
 ## Configure Control Center, CosmosDB & validate Kafka Connectors
 

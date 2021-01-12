@@ -29,7 +29,7 @@ jobs:
         run: mvn clean test
       - name: Run Integration Test
         shell: pwsh
-        run: ./src/integration-test/startup.ps1
+        run: ./src/docker/startup.ps1
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
