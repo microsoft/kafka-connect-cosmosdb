@@ -41,7 +41,6 @@ public class SourceSettings extends Settings {
                     "Change Feed start from beginning", SourceSettingDefaults.CHANGE_FEED_START_FROM_BEGINNING, this::setStartFromBeginning, this::isStartFromBeginning)
     );
 
-
     private String workerName;
 
     public void setWorkerName(String workerName) {

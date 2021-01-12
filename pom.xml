@@ -17,10 +17,18 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <kafka.version>2.6.0</kafka.version>
+        <kafka.version>2.7.0</kafka.version>
         <log4j.version>2.14.0</log4j.version>
         <slf4j.version>1.7.30</slf4j.version>
     </properties>
+
+    <repositories>
+        <repository>
+            <id>confluent</id>
+            <name>Confluent</name>
+            <url>http://packages.confluent.io/maven/</url>
+        </repository>
+    </repositories>
 
     <dependencies>
         <dependency>
@@ -38,9 +46,13 @@
             <artifactId>azure-cosmos</artifactId>
             <version>4.8.0</version>
         </dependency>
+        <dependency>
+            <groupId>io.confluent</groupId>
+            <artifactId>kafka-schema-registry-maven-plugin</artifactId>
+            <version>6.0.1</version>
+        </dependency>
 
         <!-- Apache commons -->
-
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-collections4</artifactId>
