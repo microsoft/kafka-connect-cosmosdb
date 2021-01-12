@@ -9,8 +9,8 @@ cd ../../
 
 echo "Rebuilding Cosmos DB connectors..."
 mvn clean package -DskipTests=true
-cp target/*-jar-with-dependencies.jar src/integration-test/connectors
-cd src/integration-test
+cp target/*-jar-with-dependencies.jar src/docker/connectors
+cd src/docker
 
 echo "Adding custom Insert UUID SMT"
 cd connectors
@@ -19,6 +19,9 @@ mvn clean package -DskipTests=true
 cp target/*.jar ../
 cd .. && rm -rf insertuuid
 cd ../
+
+echo "Building Cosmos DB Kafka Connect Docker image"
+docker build . -t cosmosdb-kafka-connect:latest
 
 echo "Starting Docker Compose..."
 docker-compose up -d
