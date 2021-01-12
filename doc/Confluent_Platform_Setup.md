@@ -42,7 +42,7 @@ If you're using codespaces, either option will work. Otherwise, use the script b
 
 ```bash
 
-cd $REPO_ROOT/src/integration-test
+cd $REPO_ROOT/src/docker
 
 # Option 1: Use the bash script to setup
 ./startup.sh
@@ -84,7 +84,7 @@ Tear down the Confluent Platform setup and cleanup any unneeded resources
 
 ```bash
 
-cd $REPO_ROOT/src/integration-test
+cd $REPO_ROOT/src/docker
 
 # bring down all docker containers
 docker-compose down
