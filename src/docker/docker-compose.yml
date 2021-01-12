@@ -98,7 +98,8 @@ services:
       - rest-proxy
 
   connect:
-    image: confluentinc/cp-kafka-connect:6.0.0
+    # Using modified version of confluentinc/cp-kafka-connect:6.0.0 to avoid dealing with volume mounts
+    image: cosmosdb-kafka-connect:latest
     hostname: connect
     container_name: connect
     ports:
@@ -128,8 +129,6 @@ services:
       CONNECT_LOG4J_ROOT_LOGLEVEL: "WARN"
       CONNECT_LOG4J_LOGGERS: "org.apache.kafka=INFO,org.reflections=ERROR,com.microsoft=DEBUG"
       CONNECT_PLUGIN_PATH: '/usr/share/java,/etc/kafka-connect/jars'
-    volumes:
-      - ./connectors:/etc/kafka-connect/jars/
     depends_on:
       - zookeeper
       - broker

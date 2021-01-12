@@ -20,5 +20,8 @@ cp target/*.jar ../
 cd .. && rm -rf insertuuid
 cd ../
 
+echo "Building Cosmos DB Kafka Connect Docker image"
+docker build . -t cosmosdb-kafka-connect:latest
+
 echo "Starting Docker Compose..."
 docker-compose up -d
