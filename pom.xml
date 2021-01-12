@@ -152,6 +152,45 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>io.confluent</groupId>
+                <version>0.11.3</version>
+                <artifactId>kafka-connect-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>kafka-connect</goal>
+                        </goals>
+                        <configuration>
+                            <title>Kafka Connect Azure Cosmos DB Source and Sink Connectors</title>
+                            <documentationUrl>https://github.com/microsoft/kafka-connect-cosmosdb</documentationUrl>
+                            <description>
+                                The Cosmos DB connectors allow moving data to and from Azure Cosmos DB into Kafka topics. 
+                                
+                                The Cosmos DB Sink connctor writes data from a topic in Kafka to a Cosmos DB container. The Cosmos DB Source connector records changes from a Cosmos DB container and writes them to a Kafka topic.
+                            </description>
+                            <version>${project.version}</version>
+                            <ownerUsername>microsoftcorporation</ownerUsername>
+                            <ownerName>Microsoft Corporation</ownerName>
+                            <componentTypes>
+                                <componentType>source</componentType>
+                                <componentType>sink</componentType>
+                            </componentTypes>
+                            <tags>
+                                <tag>Azure</tag>
+                                <tag>Cosmos</tag>
+                                <tag>Database</tag>
+                                <tag>Source</tag>
+                                <tag>Sink</tag>
+                                <tag>Kafka Connect</tag>
+                            </tags>
+                            <confluentControlCenterIntegration>true</confluentControlCenterIntegration>
+                            <supportProviderName>Microsoft</supportProviderName>
+                            <supportUrl>https://github.com/microsoft/kafka-connect-cosmosdb/issues</supportUrl>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
         <pluginManagement>
             <plugins>
