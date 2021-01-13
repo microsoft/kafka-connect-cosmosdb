@@ -5,6 +5,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -14,7 +15,6 @@ import com.azure.cosmos.CosmosAsyncDatabase;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.microsoft.azure.cosmosdb.kafka.connect.TopicContainerMap;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.kafka.connect.source.SourceRecord;
@@ -31,22 +31,24 @@ public class CosmosDBSourceTaskTest {
     private CosmosAsyncClient mockCosmosClient;
     private CosmosAsyncContainer mockFeedContainer;
     private CosmosAsyncContainer mockLeaseContainer;
-    private SourceSettings settings;
+    private Map<String, String> sourceSettings;
+    private CosmosDBSourceConfig config;
 
     @Before
     public void setup() throws IllegalAccessException {
         testTask = new CosmosDBSourceTask();
 
         //Configure settings
-        settings = new SourceSettings();
-        settings.setTopicContainerMap(TopicContainerMap.deserialize(topicName + "#" + containerName));
-        settings.setDatabaseName(databaseName);
-        settings.setAssignedContainer(containerName);
-        settings.setTaskPollInterval(10000L);
-        settings.setTaskBufferSize(5000L);
-        settings.setTaskBatchSize(1L);
-        settings.setTaskTimeout(20000L);
-        FieldUtils.writeField(testTask, "settings", settings, true);
+        sourceSettings = CosmosDBSourceConfigTest.setupConfigs();
+        sourceSettings.put(CosmosDBSourceConfig.COSMOS_CONTAINER_TOPIC_MAP_CONF, topicName + "#" + containerName);
+        sourceSettings.put(CosmosDBSourceConfig.COSMOS_DATABASE_NAME_CONF, databaseName);
+        sourceSettings.put(CosmosDBSourceConfig.COSMOS_ASSIGNED_CONTAINER_CONF, containerName);
+        sourceSettings.put(CosmosDBSourceConfig.COSMOS_SOURCE_TASK_POLL_INTERVAL_CONF, "500");
+        sourceSettings.put(CosmosDBSourceConfig.COSMOS_SOURCE_TASK_BATCH_SIZE_CONF, "1");
+        sourceSettings.put(CosmosDBSourceConfig.COSMOS_SOURCE_TASK_BUFFER_SIZE_CONF, "5000");
+        sourceSettings.put(CosmosDBSourceConfig.COSMOS_SOURCE_TASK_TIMEOUT_CONF, "1000");
+        config = new CosmosDBSourceConfig(sourceSettings);
+        FieldUtils.writeField(testTask, "config", config, true);
 
         // Create the TransferQueue
         LinkedTransferQueue<JsonNode> queue = new LinkedTransferQueue<>();
@@ -93,8 +95,6 @@ public class CosmosDBSourceTaskTest {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode actualObj = mapper.readTree(jsonString);
         List<JsonNode> changes = new ArrayList<>();
-        settings.setMessageKeyEnabled(true);
-        settings.setMessageKeyField("id");
         changes.add(actualObj);
 
         new Thread(() -> {
@@ -113,8 +113,9 @@ public class CosmosDBSourceTaskTest {
         JsonNode actualObj = mapper.readTree(jsonString);
         List<JsonNode> changes = new ArrayList<>();
         changes.add(actualObj);
-        settings.setTaskBatchSize(0L);
-        FieldUtils.writeField(testTask, "settings", settings, true);
+        sourceSettings.put(CosmosDBSourceConfig.COSMOS_SOURCE_TASK_BATCH_SIZE_CONF, "0");
+        config = new CosmosDBSourceConfig(sourceSettings);
+        FieldUtils.writeField(testTask, "config", config, true);
 
         new Thread(() -> {
             testTask.handleCosmosDbChanges(changes);
@@ -131,8 +132,9 @@ public class CosmosDBSourceTaskTest {
         JsonNode actualObj = mapper.readTree(jsonString);
         List<JsonNode> changes = new ArrayList<>();
         changes.add(actualObj);
-        settings.setTaskBufferSize(1L);
-        FieldUtils.writeField(testTask, "settings", settings, true);
+        sourceSettings.put(CosmosDBSourceConfig.COSMOS_SOURCE_TASK_BUFFER_SIZE_CONF, "1");
+        config = new CosmosDBSourceConfig(sourceSettings);
+        FieldUtils.writeField(testTask, "config", config, true);
 
         new Thread(() -> {
             testTask.handleCosmosDbChanges(changes);
@@ -150,8 +152,9 @@ public class CosmosDBSourceTaskTest {
         JsonNode actualObj = mapper.readTree(jsonString);
         List<JsonNode> changes = new ArrayList<>();
         changes.add(actualObj);
-        settings.setAssignedContainer("");
-        FieldUtils.writeField(testTask, "settings", settings, true);
+        sourceSettings.put(CosmosDBSourceConfig.COSMOS_ASSIGNED_CONTAINER_CONF, "");
+        config = new CosmosDBSourceConfig(sourceSettings);
+        FieldUtils.writeField(testTask, "config", config, true);
 
         new Thread(() -> {
             testTask.handleCosmosDbChanges(changes);

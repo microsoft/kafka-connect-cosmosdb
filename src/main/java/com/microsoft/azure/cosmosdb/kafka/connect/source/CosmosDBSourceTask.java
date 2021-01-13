@@ -1,6 +1,5 @@
 package com.microsoft.azure.cosmosdb.kafka.connect.source;
 
-import com.microsoft.azure.cosmosdb.kafka.connect.SettingDefaults;
 import com.azure.cosmos.*;
 import com.azure.cosmos.models.*;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -28,7 +27,7 @@ public class CosmosDBSourceTask extends SourceTask {
     private static final Logger logger = LoggerFactory.getLogger(CosmosDBSourceTask.class);
     private final AtomicBoolean running = new AtomicBoolean(false);
     private CosmosAsyncClient client = null;
-    private SourceSettings settings = null;
+    private CosmosDBSourceConfig config = null;
     private LinkedTransferQueue<JsonNode> queue = null;
     private ChangeFeedProcessor changeFeedProcessor;
     private JsonToStruct jsonToStruct = new JsonToStruct();
@@ -41,19 +40,18 @@ public class CosmosDBSourceTask extends SourceTask {
     @Override
     public void start(Map<String, String> map) {
         logger.info("Starting CosmosDBSourceTask.");
-        this.settings = new SourceSettings();
-        this.settings.populate(map);        
+        config = new CosmosDBSourceConfig(map);        
         this.queue = new LinkedTransferQueue<>();
 
         logger.info("Creating the client.");
         client = getCosmosClient();
 
-        CosmosAsyncDatabase database =  client.getDatabase(settings.getDatabaseName());
+        CosmosAsyncDatabase database =  client.getDatabase(config.getDatabaseName());
 
-        String container = settings.getAssignedContainer();
+        String container = config.getAssignedContainer();
         CosmosAsyncContainer feedContainer = database.getContainer(container);
-        CosmosAsyncContainer leaseContainer = createNewLeaseContainer(client, settings.getDatabaseName(), container + "-leases");
-        changeFeedProcessor = getChangeFeedProcessor(this.settings.getWorkerName(),feedContainer,leaseContainer);
+        CosmosAsyncContainer leaseContainer = createNewLeaseContainer(client, config.getDatabaseName(), container + "-leases");
+        changeFeedProcessor = getChangeFeedProcessor(config.getWorkerName(),feedContainer,leaseContainer);
         changeFeedProcessor.start()
                 .subscribeOn(Schedulers.elastic())
                 .doOnSuccess(aVoid -> running.set(true))
@@ -76,15 +74,15 @@ public class CosmosDBSourceTask extends SourceTask {
     public List<SourceRecord> poll() throws InterruptedException {
         List<SourceRecord> records = new ArrayList<>();
         
-        long maxWaitTime = System.currentTimeMillis() + this.settings.getTaskTimeout();
+        long maxWaitTime = System.currentTimeMillis() + config.getTaskTimeout();
         
         Map<String, String> partition = new HashMap<>();
-        partition.put("DatabaseName",this.settings.getDatabaseName());
-        partition.put("Container", this.settings.getContainerList());
+        partition.put("DatabaseName", config.getDatabaseName());
+        partition.put("Container", config.getContainerList());
 
-        TopicContainerMap topicContainerMap = this.settings.getTopicContainerMap();
-        String topic = topicContainerMap.getTopicForContainer(settings.getAssignedContainer()).orElseThrow(
-                () -> new IllegalStateException("No topic defined for container " + settings.getAssignedContainer() + "."));
+        TopicContainerMap topicContainerMap = config.getTopicContainerMap();
+        String topic = topicContainerMap.getTopicForContainer(config.getAssignedContainer()).orElseThrow(
+                () -> new IllegalStateException("No topic defined for container " + config.getAssignedContainer() + "."));
         
         while (running.get()) {
             fillRecords(records, partition, topic);            
@@ -98,20 +96,20 @@ public class CosmosDBSourceTask extends SourceTask {
     }
 
     private void fillRecords(List<SourceRecord> records, Map<String, String> partition, String topic) throws InterruptedException {
-        Long bufferSize = this.settings.getTaskBufferSize();
-        Long batchSize = this.settings.getTaskBatchSize();
-        long maxWaitTime = System.currentTimeMillis() + this.settings.getTaskTimeout();
+        Long bufferSize = config.getTaskBufferSize();
+        Long batchSize = config.getTaskBatchSize();
+        long maxWaitTime = System.currentTimeMillis() + config.getTaskTimeout();
 
         int count = 0;
         while ( bufferSize > 0 && count < batchSize && System.currentTimeMillis() < maxWaitTime ) {
-            JsonNode node = this.queue.poll(this.settings.getTaskPollInterval(), TimeUnit.MILLISECONDS);
+            JsonNode node = this.queue.poll(config.getTaskPollInterval(), TimeUnit.MILLISECONDS);
 
             if(node != null) {
                 try {                
                     // Set the Kafka message key if option is enabled and field is configured in document
                     String messageKey = "";
-                    if (this.settings.isMessageKeyEnabled()) {
-                        JsonNode messageKeyFieldNode = node.get(this.settings.getMessageKeyField());
+                    if (Boolean.TRUE.equals(config.isMessageKeyEnabled())) {
+                        JsonNode messageKeyFieldNode = node.get(config.getMessageKeyField());
                         messageKey = (messageKeyFieldNode != null) ? messageKeyFieldNode.toString() : "";
                     }
 
@@ -168,18 +166,18 @@ public class CosmosDBSourceTask extends SourceTask {
             client = null;
         }
 
-        settings = null;
+        config = null;
     }
 
     private CosmosAsyncClient getCosmosClient() {
         logger.info("Creating Cosmos Client.");
 
         return new CosmosClientBuilder()
-                .endpoint(this.settings.getEndpoint())
-                .key(this.settings.getKey())
+                .endpoint(config.getConnEndpoint())
+                .key(config.getConnKey())
                 .consistencyLevel(ConsistencyLevel.SESSION)
                 .contentResponseOnWriteEnabled(true)
-                .userAgentSuffix(SettingDefaults.COSMOS_CLIENT_USER_AGENT_SUFFIX+version())
+                .userAgentSuffix(CosmosDBSourceConfig.COSMOS_CLIENT_USER_AGENT_SUFFIX + version())
                 .buildAsyncClient();
     }
 
@@ -187,9 +185,9 @@ public class CosmosDBSourceTask extends SourceTask {
         logger.info("Creating Change Feed Processor for {}.", hostName);
 
         ChangeFeedProcessorOptions changeFeedProcessorOptions = new ChangeFeedProcessorOptions();
-        changeFeedProcessorOptions.setFeedPollDelay(Duration.ofMillis(this.settings.getTaskPollInterval()));
-        changeFeedProcessorOptions.setMaxItemCount(this.settings.getTaskBatchSize().intValue());
-        changeFeedProcessorOptions.setStartFromBeginning(this.settings.isStartFromBeginning());
+        changeFeedProcessorOptions.setFeedPollDelay(Duration.ofMillis(config.getTaskPollInterval()));
+        changeFeedProcessorOptions.setMaxItemCount(config.getTaskBatchSize().intValue());
+        changeFeedProcessorOptions.setStartFromBeginning(config.isStartFromBeginning());
 
         return new ChangeFeedProcessorBuilder()
                 .options(changeFeedProcessorOptions)
