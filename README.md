@@ -1,4 +1,5 @@
 # Kafka Connect for Azure Cosmos DB
+
 [![Open Source Love svg2](https://badges.frapsoft.com/os/v2/open-source.svg?v=103)](https://github.com/microsoft/kafka-connect-cosmosdb/blob/dev/CODE_OF_CONDUCT.MD) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/microsoft/kafka-connect-cosmosdb/blob/dev/CONTRIBUTING.md) [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/microsoft/kafka-connect-cosmosdb/pulse) 
 
 [![Java CI with Maven](https://github.com/microsoft/kafka-connect-cosmosdb/workflows/Java%20CI%20with%20Maven/badge.svg)](https://github.com/microsoft/kafka-connect-cosmosdb/actions?query=workflow%3A%22Java+CI+with+Maven%22) [![Release](https://img.shields.io/github/v/release/microsoft/kafka-connect-cosmosdb?include_prereleases&label=Latest%20Release)](https://github.com/microsoft/kafka-connect-cosmosdb/releases)
@@ -12,11 +13,10 @@ This project provides connectors for [Kafka Connect](http://kafka.apache.org/doc
 The sink & source connectors are configurable in order to support:
 
 | Format Name  | Description |
-| :----------- | :---------- | 
+| :----------- | :---------- |
 | JSON (Pain) | JSON record structure without any attached schema. |
 | JSON with Schema | JSON record structure with explicit schema information to ensure the data matches the expected format. |
-| AVRO | An open source serialization system that provides a compact binary format and a JSON-like API. Integrates with the [Confluent Schema Registry](https://www.confluent.io/confluent-schema-registry) to manage schema definitions. 
-
+| AVRO | An open source serialization system that provides a compact binary format and a JSON-like API. Integrates with the [Confluent Schema Registry](https://www.confluent.io/confluent-schema-registry) to manage schema definitions.
 
 Since key and value settings, including the format and serialization, can be independently configured in Kafka, it is possible to work with different data formats for records' keys and values respectively.
 
@@ -25,6 +25,7 @@ To cater for this there is converter configuration for both *key.converter* and 
 ### Converter Configuration Examples
 
 #### JSON (Plain)
+
 - If you need to use JSON without Schema Registry for Connect data, you can use the JsonConverter supported with Kafka. The example below shows the JsonConverter key and value properties that are added to the configuration:
 
   ```properties
@@ -76,6 +77,7 @@ To cater for this there is converter configuration for both *key.converter* and 
 > NOTE: The message written is made up of the schema + payload. Notice the size of the message, as well as the proportion of it that is made up of the payload vs. the schema. This is repeated in every message you write to Kafka. In scenarios like this, you may want to use a serialisation format like JSON Schema or Avro, where the schema is stored separately and the message holds just the payload.
 
 #### AVRO
+
 - To use the AvroConverter with [Schema Registry](https://docs.confluent.io/platform/current/schema-registry/connect.html), you specify the `key.converter` and `value.converter` properties in the worker configuration. An additional converter property must also be added that provides the Schema Registry URL. The example below shows the AvroConverter key and value properties that are added to the configuration:
 
   ```properties
@@ -87,12 +89,12 @@ To cater for this there is converter configuration for both *key.converter* and 
 
 ### Choosing a conversion format
 
-- If you're configuring a **Source connector** and 
+- If you're configuring a **Source connector** and
   - If you want Kafka Connect to incldue plain JSON in the message it writes to Kafka, you'd set [JSON (Plain)](#json-plain) configuration.
   - If you want Kafka Connect to include the schema in the message it writes to Kafka, you’d set [JSON with Schema](#json-with-schema) configuration.
   - If you want Kafka Connect to include AVRO format in the message it writes to Kafka, you'd set [AVRO](#avro) configuration.
 
-- If you’re consuming JSON data from a Kafka topic in to a **Sink connector**, you need to understand how the JSON was serialised when it was written to the Kafka topic: 
+- If you’re consuming JSON data from a Kafka topic in to a **Sink connector**, you need to understand how the JSON was serialised when it was written to the Kafka topic:
   - If it was with JSON serialiser, then you need to set Kafka Connect to use the JSON converter `(org.apache.kafka.connect.json.JsonConverter)`.
     - If the JSON data was written as a plain string, then you need to determine if the data includes a nested schema/payload. If it does,then you would set, [JSON with Schema](#json-with-schema) configuration.
     - However, if you’re consuming JSON data and it doesn’t have the schema/payload construct, then you must tell Kafka Connect **not** to look for a schema by setting `schemas.enable=false` as per [JSON (Plain)](#json-plain) configuration.
@@ -123,7 +125,7 @@ For Source connector specific configuration, please refer to the [Source Connect
 
 ## Project Setup
 
-Please refer [Developer Walkthrough and Project Setup](DEVELOPER_WALKTHROUGH.MD) for initial setup instructions.
+Please refer [Developer Walkthrough and Project Setup](./doc/Developer_Walkthrough.md) for initial setup instructions.
 
 ## Resources
 

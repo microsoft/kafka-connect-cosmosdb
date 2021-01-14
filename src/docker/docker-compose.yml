@@ -128,7 +128,7 @@ services:
       CONNECT_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
       CONNECT_LOG4J_ROOT_LOGLEVEL: "WARN"
       CONNECT_LOG4J_LOGGERS: "org.apache.kafka=INFO,org.reflections=ERROR,com.microsoft=DEBUG"
-      CONNECT_PLUGIN_PATH: '/usr/share/java,/etc/kafka-connect/jars'
+      CONNECT_PLUGIN_PATH: '/usr/share/java,/usr/share/confluent-hub-components,/etc/kafka-connect/jars'
     depends_on:
       - zookeeper
       - broker
