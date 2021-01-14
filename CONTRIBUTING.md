@@ -1,5 +1,11 @@
+## Contributing Code
+- Create your branch from dev
+- 
 
-# Contributing
+### Administrative Considerations
+- While we don't require an issue in order to submit a PR, please do attach your PR to any issue that it solves. You will see a place to do this at the end of the PR template. Additionally, please do create an issue if the work is a bug.
+
+### Contributor License Agreement
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
 Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
