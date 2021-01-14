@@ -1,6 +1,11 @@
 ## Contributing Code
+
+### Hard Requirements
+- Please include a test for any code you submit via PR. 
+
+### The Basics
 - Create your branch from dev
-- 
+- Open your PR against the dev branch
 
 ### Issues
 - We do not require an issue for submitted PRs unless the fix is for a bug. If it's for a bug, please [create a bug report](https://github.com/microsoft/kafka-connect-cosmosdb/issues/new?assignees=&labels=Bug&template=bug_report.md&title=) and attach it to your PR.
