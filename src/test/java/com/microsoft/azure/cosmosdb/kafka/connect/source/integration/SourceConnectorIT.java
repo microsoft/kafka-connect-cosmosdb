@@ -50,11 +50,10 @@ import static org.sourcelab.kafka.connect.apiclient.request.dto.NewConnectorDefi
 @Category(IntegrationTest.class)
 public class SourceConnectorIT {
     private static Logger logger = LoggerFactory.getLogger(SourceConnectorIT.class);
-
-    private final String COSMOSDB_SOURCE_CONNECTOR_NAME = "test-cosmosdb-source";
     
     private String databaseName;
     private String topic;
+    private String connectorName;
     private Builder connectConfig;
     private CosmosClient cosmosClient;
     private CosmosContainer targetContainer;
@@ -69,7 +68,9 @@ public class SourceConnectorIT {
     public void before() throws URISyntaxException, IOException {
         // Load the source.config.json config file
         URL configFileUrl = SourceConnectorIT.class.getClassLoader().getResource("source.config.json");
-        JsonNode config = new ObjectMapper().readTree(configFileUrl).get("config");
+        JsonNode config = new ObjectMapper().readTree(configFileUrl);
+        connectorName = config.get("name").textValue();
+        config = config.get("config");
         String topicContainerMap = config.get("connect.cosmosdb.containers.topicmap").textValue();
         topic = StringUtils.substringBefore(topicContainerMap, "#");
         String containerName = StringUtils.substringAfter(topicContainerMap, "#");
@@ -110,7 +111,7 @@ public class SourceConnectorIT {
         }
 
         if (connectClient != null) {
-            connectClient.deleteConnector(COSMOSDB_SOURCE_CONNECTOR_NAME);
+            connectClient.deleteConnector(connectorName);
         }
 
         if (consumer != null) {
@@ -125,7 +126,7 @@ public class SourceConnectorIT {
         // Cosmos Source Connector Config
         logger.debug("Creating Cosmos Source Connector");
         connectConfig = NewConnectorDefinition.newBuilder()
-            .withName(COSMOSDB_SOURCE_CONNECTOR_NAME)
+            .withName(connectorName)
             .withConfig("connector.class", config.get("connector.class").textValue())
             .withConfig("tasks.max", config.get("tasks.max").textValue())
             .withConfig("topics", config.get("topics").textValue())
