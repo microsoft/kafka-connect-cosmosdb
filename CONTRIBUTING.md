@@ -2,8 +2,11 @@
 - Create your branch from dev
 - 
 
-### Administrative Considerations
-- While we don't require an issue in order to submit a PR, please do attach your PR to any issue that it solves. You will see a place to do this at the end of the PR template. Additionally, please do create an issue if the work is a bug.
+### Issues
+- We do not require an issue for submitted PRs unless the fix is for a bug. If it's for a bug, please [create a bug report](https://github.com/microsoft/kafka-connect-cosmosdb/issues/new?assignees=&labels=Bug&template=bug_report.md&title=) and attach it to your PR.
+- If your PR solves an existing issue, please make sure you note this in your PR so that the work is attached to the issue. At the end of the PR template, you will see a place to attach your PR to an issue
+
+
 
 ### Contributor License Agreement
 
