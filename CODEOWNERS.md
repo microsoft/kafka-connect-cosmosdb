@@ -1,0 +1,26 @@
+# ==============================================================================
+#                         Kafka Connect Cosmos DB CODEOWNERS
+# ==============================================================================
+
+# Configuration of code ownership and review approvals for the bitcoin/bitcoin
+# repo.
+
+# Order is important; the last matching pattern takes the most precedence.
+# More info on how this file works can be found at:
+# https://help.github.com/articles/about-codeowners/
+
+# This file is called CODEOWNERS because it is a magic file for GitHub to
+# automatically suggest reviewers. In this project's case, the names below
+# should be thought of as code reviewers rather than owners. Regular
+# contributors are free to add their names to specific directories or files
+# provided that they are willing to provide a review when automatically
+# assigned.
+
+# Absence from this list should not be interpreted as a discouragement to
+# review a pull request. Peer review is always welcome and is a critical
+# component of the progress of the codebase. Information on peer review
+# guidelines can be found in the CONTRIBUTING.md doc.
+
+
+# Maintainers
+#   @microsoft/kafka-connect-cosmosdb-devs
