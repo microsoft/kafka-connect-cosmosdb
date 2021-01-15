@@ -2,9 +2,6 @@
 #                         Kafka Connect Cosmos DB CODEOWNERS
 # ==============================================================================
 
-# Configuration of code ownership and review approvals for the bitcoin/bitcoin
-# repo.
-
 # Order is important; the last matching pattern takes the most precedence.
 # More info on how this file works can be found at:
 # https://help.github.com/articles/about-codeowners/
