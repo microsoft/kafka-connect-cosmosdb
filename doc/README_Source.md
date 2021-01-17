@@ -64,7 +64,7 @@ Refer to the [source properties](#source-configuration-properties) section for m
 {
   "name": "cosmosdb-source-connector",
   "config": {
-    "connector.class": "com.microsoft.azure.cosmosdb.kafka.connect.source.CosmosDBSourceConnector",
+    "connector.class": "com.azure.cosmos.kafka.connect.source.CosmosDBSourceConnector",
     "tasks.max": "1",
     "key.converter": "org.apache.kafka.connect.json.JsonConverter",
     "value.converter": "org.apache.kafka.connect.json.JsonConverter",
@@ -168,7 +168,7 @@ The following settings are used to configure the Cosmos DB Kafka Source Connecto
 
 | Name | Type | Description | Required/Optional |
 | :--- | :--- | :--- | :--- |
-| connector.class | string | Classname of the Cosmos DB sink. Should be set to `com.microsoft.azure.cosmosdb.kafka.connect.sink.CosmosDBSourceConnector` | Required |
+| connector.class | string | Classname of the Cosmos DB sink. Should be set to `com.azure.cosmos.kafka.connect.sink.CosmosDBSourceConnector` | Required |
 | connect.cosmosdb.databasename | string | name of the database to read from | Required |
 | connect.cosmosdb.master.key | string | the configured master key for Cosmos DB | Required |
 | connect.cosmosdb.connection.endpoint | uri | the endpoint for the Cosmos DB Account | Required |

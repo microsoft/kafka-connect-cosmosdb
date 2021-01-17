@@ -5,13 +5,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.microsoft.azure</groupId>
-    <artifactId>cosmosdb.kafka.connect</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <groupId>com.azure.cosmos.kafka</groupId>
+    <artifactId>kafka-connect-cosmos</artifactId>
+    <version>1.0-beta</version>
 
-    <name>cosmosdb.kafka.connect</name>
-    <!-- FIXME change it to the project's website -->
-    <url>http://www.example.com</url>
+    <name> kafka-connect-cosmos</name>
+    <url>https://github.com/microsoft/kafka-connect-cosmosdb</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -171,9 +170,10 @@
                             <title>Kafka Connect Azure Cosmos DB Source and Sink Connectors</title>
                             <documentationUrl>https://github.com/microsoft/kafka-connect-cosmosdb</documentationUrl>
                             <description>
-                                The Cosmos DB connectors allow moving data to and from Azure Cosmos DB into Kafka topics. 
+                                The Cosmos DB connectors allow moving data between Azure Cosmos DB and Kafka. 
                                 
-                                The Cosmos DB Sink connctor writes data from a topic in Kafka to a Cosmos DB container. The Cosmos DB Source connector records changes from a Cosmos DB container and writes them to a Kafka topic.
+                                The Cosmos DB Sink connctor writes data from a Kafka topic  to a Cosmos DB container. 
+                                The Cosmos DB Source connector writes changes from a Cosmos DB container to a Kafka topic.
                             </description>
                             <version>${project.version}</version>
                             <ownerUsername>microsoftcorporation</ownerUsername>
@@ -185,6 +185,7 @@
                             <tags>
                                 <tag>Azure</tag>
                                 <tag>Cosmos</tag>
+                                <tag>Cosmos DB</tag>
                                 <tag>Database</tag>
                                 <tag>Source</tag>
                                 <tag>Sink</tag>
@@ -214,7 +215,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.0.0-M5</version>
                 <configuration>
-                    <excludedGroups>com.microsoft.azure.cosmosdb.kafka.connect.IntegrationTest</excludedGroups>
+                    <excludedGroups>com.azure.cosmos.kafka.connect.IntegrationTest</excludedGroups>
                     <skip>${skipSurefire}</skip>
                 </configuration>
             </plugin>
