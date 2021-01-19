@@ -7,7 +7,8 @@ We highly value contributions made from the community and we thank you for stopp
 ### The Basics
 - Create your branch from dev
 - Open your PR against the dev branch
-- Once you open your PR, it will automatically be assigned to the correct review group (https://github.com/orgs/microsoft/teams/kafka-connect-cosmosdb-devs)
+- Once you open your PR, it will automatically be assigned to the correct review group 
+(https://github.com/orgs/microsoft/teams/kafka-connect-cosmosdb-devs)
 - When we are ready to cut a release, we will merge dev into main.
 
 ### Issues
