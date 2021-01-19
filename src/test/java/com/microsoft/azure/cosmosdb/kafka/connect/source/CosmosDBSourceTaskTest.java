@@ -1,9 +1,12 @@
 package com.microsoft.azure.cosmosdb.kafka.connect.source;
 
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.LinkedTransferQueue;
@@ -12,6 +15,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import com.azure.cosmos.CosmosAsyncClient;
 import com.azure.cosmos.CosmosAsyncContainer;
 import com.azure.cosmos.CosmosAsyncDatabase;
+import com.azure.cosmos.util.CosmosPagedFlux;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -35,6 +39,7 @@ public class CosmosDBSourceTaskTest {
     private CosmosDBSourceConfig config;
 
     @Before
+    @SuppressWarnings("unchecked") // Need to maintain Typed objects
     public void setup() throws IllegalAccessException {
         testTask = new CosmosDBSourceTask();
 
@@ -69,7 +74,20 @@ public class CosmosDBSourceTaskTest {
         mockLeaseContainer = Mockito.mock(CosmosAsyncContainer.class);
         when(mockDatabase.getContainer("lease")).thenReturn(mockLeaseContainer);
 
+        //Mock query results and iterator for getting lease container token
+        CosmosPagedFlux<JsonNode> mockLeaseQueryResults = (CosmosPagedFlux<JsonNode>) Mockito.mock(CosmosPagedFlux.class);
+        when(mockLeaseContainer.queryItems(anyString(), any(), eq(JsonNode.class))).thenReturn(mockLeaseQueryResults);
+        
+        Iterable<JsonNode> mockLeaseQueryIterable = (Iterable<JsonNode>) Mockito.mock(Iterable.class);
+        when(mockLeaseQueryResults.toIterable()).thenReturn(mockLeaseQueryIterable);
+
+        Iterator<JsonNode> mockLeaseQueryIterator = (Iterator<JsonNode>) Mockito.mock(Iterator.class);
+        when(mockLeaseQueryIterable.iterator()).thenReturn(mockLeaseQueryIterator);
+        when(mockLeaseQueryIterator.hasNext()).thenReturn(false);
+
+
         FieldUtils.writeField(testTask, "client", mockCosmosClient, true);
+        FieldUtils.writeField(testTask, "leaseContainer", mockLeaseContainer, true);
 
     }
 

@@ -8,7 +8,7 @@
     "value.converter": "org.apache.kafka.connect.json.JsonConverter",
     "value.converter.schemas.enable": "false",
     "connect.cosmosdb.task.poll.interval": "100",
-    "connect.cosmosdb.changefeed.startFromBeginning": true,
+    "connect.cosmosdb.offset.useLatest": false,
     "connect.cosmosdb.containers": "kafka",
     "connect.cosmosdb.connection.endpoint": "https://<cosmosinstance-name>.documents.azure.com:443/",
     "connect.cosmosdb.master.key": "<cosmosdbprimarykey>",

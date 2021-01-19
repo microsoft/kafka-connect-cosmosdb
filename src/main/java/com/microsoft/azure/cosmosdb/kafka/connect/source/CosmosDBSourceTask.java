@@ -3,6 +3,7 @@ package com.microsoft.azure.cosmosdb.kafka.connect.source;
 import com.azure.cosmos.*;
 import com.azure.cosmos.models.*;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.microsoft.azure.cosmosdb.kafka.connect.TopicContainerMap;
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.source.SourceRecord;
@@ -10,6 +11,7 @@ import org.apache.kafka.connect.source.SourceTask;
 import org.apache.kafka.connect.data.SchemaAndValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import reactor.core.scheduler.Schedulers;
 
 import java.time.Duration;
@@ -22,15 +24,23 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static java.lang.Thread.sleep;
+import static java.util.Collections.singletonMap;
 
 public class CosmosDBSourceTask extends SourceTask {
+
     private static final Logger logger = LoggerFactory.getLogger(CosmosDBSourceTask.class);
+    private static final String OFFSET_KEY = "recordContinuationToken";
+    private static final String CONTINUATION_TOKEN = "ContinuationToken";
+    private static final String ZERO_CONTINUATION_TOKEN = "0";
+
     private final AtomicBoolean running = new AtomicBoolean(false);
     private CosmosAsyncClient client = null;
-    private CosmosDBSourceConfig config = null;
+    private CosmosDBSourceConfig config;
     private LinkedTransferQueue<JsonNode> queue = null;
     private ChangeFeedProcessor changeFeedProcessor;
     private JsonToStruct jsonToStruct = new JsonToStruct();
+    private Map<String, String> partitionMap;
+    private CosmosAsyncContainer leaseContainer;
 
     @Override
     public String version() {
@@ -46,11 +56,36 @@ public class CosmosDBSourceTask extends SourceTask {
         logger.info("Creating the client.");
         client = getCosmosClient();
 
-        CosmosAsyncDatabase database =  client.getDatabase(config.getDatabaseName());
-
+        // Initialize the database, feed and lease containers
+        CosmosAsyncDatabase database = client.getDatabase(config.getDatabaseName());
         String container = config.getAssignedContainer();
         CosmosAsyncContainer feedContainer = database.getContainer(container);
-        CosmosAsyncContainer leaseContainer = createNewLeaseContainer(client, config.getDatabaseName(), container + "-leases");
+        leaseContainer = createNewLeaseContainer(client, config.getDatabaseName(), container + "-leases");
+
+        // Create source partition map
+        partitionMap = new HashMap<>();
+        partitionMap.put("DatabaseName", config.getDatabaseName());
+        partitionMap.put("Container", config.getAssignedContainer());
+        
+        Map<String, Object> offset = context.offsetStorageReader().offset(partitionMap);
+        // If NOT using the latest offset, reset lease container token to earliest possible value
+        if (!config.useLatestOffset()) {
+            updateContinuationToken(ZERO_CONTINUATION_TOKEN);
+        }
+        // Check for previous offset and compare with lease container token
+        // If there's a mismatch, rewind lease container token to offset value
+        else if (offset != null) {
+            String lastOffsetToken = (String) offset.get(OFFSET_KEY);
+            String continuationToken = getContinuationToken();
+
+            if (continuationToken != null && !lastOffsetToken.equals(continuationToken)) {
+                logger.info("Mismatch in last offset {} and current continuation token {}.", 
+                    lastOffsetToken, continuationToken);
+                updateContinuationToken(lastOffsetToken);
+            }
+        }
+
+        // Initiate Cosmos change feed processor
         changeFeedProcessor = getChangeFeedProcessor(config.getWorkerName(),feedContainer,leaseContainer);
         changeFeedProcessor.start()
                 .subscribeOn(Schedulers.elastic())
@@ -70,32 +105,58 @@ public class CosmosDBSourceTask extends SourceTask {
         logger.info("Started CosmosDB source task.");
     }
 
+    private JsonNode getLeaseContainerRecord() {
+        String sql = "SELECT * FROM c WHERE IS_DEFINED(c.Owner)";
+        Iterable<JsonNode> filteredDocs = leaseContainer.queryItems(sql, new CosmosQueryRequestOptions(), JsonNode.class).toIterable();
+        if (filteredDocs.iterator().hasNext()) {
+            JsonNode result = filteredDocs.iterator().next();
+            // Return node only if it has the continuation token field present
+            if (result.has(CONTINUATION_TOKEN)) {
+                return result;
+            }
+        }
+
+        return null;
+    }
+
+    private String getContinuationToken() {
+        JsonNode leaseRecord = getLeaseContainerRecord();
+        if (client == null || leaseRecord == null) {
+            return null;
+        }
+        return leaseRecord.get(CONTINUATION_TOKEN).textValue();
+    }
+
+    private void updateContinuationToken(String newToken) {        
+        JsonNode leaseRecord = getLeaseContainerRecord();
+        if (leaseRecord != null) {
+            ((ObjectNode)leaseRecord).put(CONTINUATION_TOKEN, newToken);
+            leaseContainer.upsertItem(leaseRecord).block();
+        }
+    }
+
     @Override
     public List<SourceRecord> poll() throws InterruptedException {
         List<SourceRecord> records = new ArrayList<>();
         
         long maxWaitTime = System.currentTimeMillis() + config.getTaskTimeout();
-        
-        Map<String, String> partition = new HashMap<>();
-        partition.put("DatabaseName", config.getDatabaseName());
-        partition.put("Container", config.getContainerList());
 
         TopicContainerMap topicContainerMap = config.getTopicContainerMap();
         String topic = topicContainerMap.getTopicForContainer(config.getAssignedContainer()).orElseThrow(
                 () -> new IllegalStateException("No topic defined for container " + config.getAssignedContainer() + "."));
         
         while (running.get()) {
-            fillRecords(records, partition, topic);            
+            fillRecords(records, topic);            
             if (records.isEmpty() || System.currentTimeMillis() > maxWaitTime) {
                 logger.debug("Sending {} documents.", records.size());
                 break;
             }
-        }  
+        }
         
         return records;
     }
 
-    private void fillRecords(List<SourceRecord> records, Map<String, String> partition, String topic) throws InterruptedException {
+    private void fillRecords(List<SourceRecord> records, String topic) throws InterruptedException {
         Long bufferSize = config.getTaskBufferSize();
         Long batchSize = config.getTaskBatchSize();
         long maxWaitTime = System.currentTimeMillis() + config.getTaskTimeout();
@@ -113,11 +174,15 @@ public class CosmosDBSourceTask extends SourceTask {
                         messageKey = (messageKeyFieldNode != null) ? messageKeyFieldNode.toString() : "";
                     }
 
+                    // Get the latest token and record as offset
+                    Map<String, Object> sourceOffset = singletonMap(OFFSET_KEY, getContinuationToken());
+                    logger.debug("Latest offset is {}.", sourceOffset.get(OFFSET_KEY));
+
                     // Convert JSON to Kafka Connect struct and JSON schema
                     SchemaAndValue schemaAndValue = jsonToStruct.recordToSchemaAndValue(node);
 
                     // Since Lease container takes care of maintaining state we don't have to send source offset to kafka
-                    SourceRecord sourceRecord = new SourceRecord(partition, null, topic,
+                    SourceRecord sourceRecord = new SourceRecord(partitionMap, sourceOffset, topic,
                                                         Schema.STRING_SCHEMA, messageKey,
                                                         schemaAndValue.schema(), schemaAndValue.value());
 
@@ -165,8 +230,6 @@ public class CosmosDBSourceTask extends SourceTask {
             client.close();
             client = null;
         }
-
-        config = null;
     }
 
     private CosmosAsyncClient getCosmosClient() {
@@ -187,7 +250,6 @@ public class CosmosDBSourceTask extends SourceTask {
         ChangeFeedProcessorOptions changeFeedProcessorOptions = new ChangeFeedProcessorOptions();
         changeFeedProcessorOptions.setFeedPollDelay(Duration.ofMillis(config.getTaskPollInterval()));
         changeFeedProcessorOptions.setMaxItemCount(config.getTaskBatchSize().intValue());
-        changeFeedProcessorOptions.setStartFromBeginning(config.isStartFromBeginning());
 
         return new ChangeFeedProcessorBuilder()
                 .options(changeFeedProcessorOptions)
@@ -247,7 +309,7 @@ public class CosmosDBSourceTask extends SourceTask {
                 
             logger.info("Successfully created new lease container.");
         }
+
         return database.getContainer(leaseContainerResponse.getProperties().getId());
     }
-
 }

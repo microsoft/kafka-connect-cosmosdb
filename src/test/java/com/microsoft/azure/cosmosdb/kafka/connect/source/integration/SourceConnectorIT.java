@@ -30,12 +30,13 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
-import java.util.Collections;
-import java.util.List;
-import java.util.ArrayList;
 import java.time.Duration;
 
 import static org.apache.kafka.common.utils.Utils.sleep;
@@ -50,15 +51,18 @@ import static org.sourcelab.kafka.connect.apiclient.request.dto.NewConnectorDefi
 @Category(IntegrationTest.class)
 public class SourceConnectorIT {
     private static Logger logger = LoggerFactory.getLogger(SourceConnectorIT.class);
+    private static final String SECOND_COSMOS_CONTAINER = "newkafka";
+    private static final String SECOND_KAFKA_TOPIC = "newsource-test";
     
     private String databaseName;
-    private String topic;
     private String connectorName;
     private Builder connectConfig;
     private CosmosClient cosmosClient;
     private CosmosContainer targetContainer;
+    private CosmosContainer secondContainer;
     private KafkaConnectClient connectClient;
     private KafkaConsumer<String, JsonNode> consumer;
+    private List<ConsumerRecord<String, JsonNode>> recordBuffer;
 
     /**
      * Load CosmosDB configuration from the connector config JSON and set up CosmosDB client.
@@ -72,7 +76,7 @@ public class SourceConnectorIT {
         connectorName = config.get("name").textValue();
         config = config.get("config");
         String topicContainerMap = config.get("connect.cosmosdb.containers.topicmap").textValue();
-        topic = StringUtils.substringBefore(topicContainerMap, "#");
+        String topic = StringUtils.substringBefore(topicContainerMap, "#");
         String containerName = StringUtils.substringAfter(topicContainerMap, "#");
 
         // Setup Cosmos Client
@@ -87,17 +91,27 @@ public class SourceConnectorIT {
         cosmosClient.createDatabaseIfNotExists(databaseName);
         CosmosDatabase targetDatabase = cosmosClient.getDatabase(databaseName);
 
-        // Create Cosmos Container if not exists
+        // Create Cosmos Containers (one from config, another for testing multiple workers) if they do not exist
         CosmosContainerProperties containerProperties =
                 new CosmosContainerProperties(containerName, "/id");
         containerProperties.setDefaultTimeToLiveInSeconds(-1);
         targetDatabase.createContainerIfNotExists(containerProperties, ThroughputProperties.createManualThroughput(400));
+        containerProperties.setId(SECOND_COSMOS_CONTAINER);
+        targetDatabase.createContainerIfNotExists(containerProperties, ThroughputProperties.createManualThroughput(400));
         targetContainer = targetDatabase.getContainer(containerName);
+        secondContainer = targetDatabase.getContainer(SECOND_COSMOS_CONTAINER);
 
         // Setup Kafka Connect Client and connector config
         logger.debug("Setting up the Kafka Connect client");
         connectClient = new KafkaConnectClient(new Configuration("http://localhost:8083"));
         setupConnectorConfig(config);
+
+        // Create Kafka Consumer subscribed to topics, recordBuffer to store records from topics
+        Properties kafkaProperties = createKafkaConsumerProperties();
+        consumer = new KafkaConsumer<>(kafkaProperties);
+        consumer.subscribe(Arrays.asList(topic, SECOND_KAFKA_TOPIC));
+        logger.debug("Consuming Kafka messages from " + kafkaProperties.getProperty("bootstrap.servers"));
+        recordBuffer = new ArrayList<>();
     }
 
     /**
@@ -117,6 +131,10 @@ public class SourceConnectorIT {
         if (consumer != null) {
             consumer.close();
         }
+
+        if (recordBuffer != null) {
+            recordBuffer.clear();
+        }
     }
 
     /**
@@ -129,13 +147,12 @@ public class SourceConnectorIT {
             .withName(connectorName)
             .withConfig("connector.class", config.get("connector.class").textValue())
             .withConfig("tasks.max", config.get("tasks.max").textValue())
-            .withConfig("topics", config.get("topics").textValue())
             .withConfig("value.converter", config.get("value.converter").textValue())
             .withConfig("value.converter.schemas.enable", config.get("value.converter.schemas.enable").textValue())
             .withConfig("key.converter", config.get("key.converter").textValue())
             .withConfig("key.converter.schemas.enable", config.get("key.converter.schemas.enable").textValue())
             .withConfig("connect.cosmosdb.task.poll.interval", config.get("connect.cosmosdb.task.poll.interval").textValue())
-            .withConfig("connect.cosmosdb.changefeed.startFromBeginning", config.get("connect.cosmosdb.changefeed.startFromBeginning").booleanValue())
+            .withConfig("connect.cosmosdb.offset.useLatest", config.get("connect.cosmosdb.offset.useLatest").booleanValue())
             .withConfig("connect.cosmosdb.containers", config.get("connect.cosmosdb.containers").textValue())
             .withConfig("connect.cosmosdb.connection.endpoint", config.get("connect.cosmosdb.connection.endpoint").textValue())
             .withConfig("connect.cosmosdb.master.key", config.get("connect.cosmosdb.master.key").textValue())
@@ -156,44 +173,198 @@ public class SourceConnectorIT {
         return kafkaProperties;
     }
 
-    /**
-     * Create an item in Cosmos DB and have the source connector transfer data into a Kafka topic.
-     * Then read the result from Kafka topic.
-     */
-    @Test
-    public void testReadCosmosItem() throws InterruptedException, ExecutionException {
-        // Configure Kafka Config
-        Properties kafkaProperties = createKafkaConsumerProperties();
-
-        // Create source connector with default config
-        connectClient.addConnector(connectConfig.build());
-
-        // Create item in Cosmos DB
-        logger.debug("Creating item in Cosmos DB.");
-        Person person = new Person("Lucy Ferr", RandomUtils.nextLong(1L, 9999999L) + "");
-        targetContainer.createItem(person);
-        
-        // Allow time for Source connector to transmit data from Cosmos DB
-        sleep(10000);
-        
-        // Setup Kafka Consumer and consume Kafka message from topic
-        consumer = new KafkaConsumer<>(kafkaProperties);
-        consumer.subscribe(Collections.singletonList(topic));
-        logger.debug("Consuming Kafka messages from " + kafkaProperties.getProperty("bootstrap.servers"));
-
-        List<ConsumerRecord<String, JsonNode>> recordBuffer = new ArrayList<>();
+    private Optional<ConsumerRecord<String, JsonNode>> searchConsumerRecords(Person person) {
         ConsumerRecords<String, JsonNode> records = consumer.poll(Duration.ofMillis(2000));
         for (ConsumerRecord<String, JsonNode> record : records) {
             recordBuffer.add(record);
         }
 
-        Assert.assertTrue("No messages read from Kafka topic.", recordBuffer.size() > 0);
-        
-        Optional<ConsumerRecord<String, JsonNode>> resultRecord = recordBuffer.stream().filter(
+        return recordBuffer.stream().filter(
             p -> p.value().get("id").textValue().equals(person.getId())).findFirst();
+    }
+
+    /**
+     * Create a source connector and an item in Cosmos DB. Allow the source connector to 
+     * transfer data into a Kafka topic. Then read the result from Kafka topic.
+     */
+    @Test
+    public void testReadCosmosItem() throws InterruptedException, ExecutionException {
+        // Create source connector with default config
+        connectClient.addConnector(connectConfig.build());
+        
+        // Allow time for Source connector to setup resources
+        sleep(8000);
+
+        // Create item in Cosmos DB
+        Person person = new Person("Lucy Ferr", RandomUtils.nextLong(1L, 9999999L) + "");
+        targetContainer.createItem(person);
+
+        // Allow time for Source connector to process data from Cosmos DB
+        sleep(8000);
+
+        Optional<ConsumerRecord<String, JsonNode>> resultRecord = searchConsumerRecords(person);
         Assert.assertNotNull("Person could not be retrieved from messages", resultRecord.orElse(null));
         Assert.assertTrue("Message Key is not the Person ID", resultRecord.get().key().contains(person.getId()));
+    }
 
+    /**
+     * Testing the connector's response to offsets.
+     * 
+     * 1. First testing connector reading from earliest offset.
+     * Create a connector with a long timeout (300s), create item (A) in Cosmos DB but delete the
+     * connector before it finishes transferring the data to Kafka. Check that the item A is NOT in the topic.
+     * 
+     * Then, recreate the connector with a regular timeout, let it process the data and verify
+     * that the previously created item in Cosmos DB is now in the Kafka topic.
+     * 
+     * 2. Testing connector reading from latest offset recorded in the Kafka source partition.
+     * Create new connector with a long timeout (300s) and using latest offsets, create item (B)
+     * in Cosmos and delete connector before it can finish processing. Verify that item B is not in the topic.
+     * 
+     * Recreate connector with normal settings and using latest offsets, let it process data.
+     * Ensure that item B is now in the Kafka topics and item A is only in the topic ONCE, since the new
+     * connector should resume processing FROM item A.
+     */
+    @Test
+    public void testResumeFromOffsets() throws InterruptedException, ExecutionException {
+        ////////////////
+        // Testing connector resume with earliest offsets
+        ////////////////
+
+        // Create connector with long timeout
+        connectClient.addConnector(connectConfig
+            .withConfig("connect.cosmosdb.task.timeout", 300000L)
+            .build());
+
+        // Create item in Cosmos DB
+        Person person = new Person("Lucy Ferr", RandomUtils.nextLong(1L, 9999999L) + "");
+        targetContainer.createItem(person);
+        
+        // Allow time for connector to start up, but delete it quickly so it won't process data
+        sleep(10000);
+        connectClient.deleteConnector(connectorName);
+        
+        // Ensure that the record is not in the Kafka topic
+        Optional<ConsumerRecord<String, JsonNode>> resultRecord = searchConsumerRecords(person);
+        Assert.assertNull("Person A can be retrieved from messages.", resultRecord.orElse(null));
+
+        // Recreate connector with default settings
+        connectClient.addConnector(connectConfig
+            .withConfig("connect.cosmosdb.task.timeout", 5000L)
+            .build());
+
+        // Allow connector to process records
+        sleep(10000);
+        connectClient.deleteConnector(connectorName);
+
+        // Verify that record A is now in the Kafka topic
+        resultRecord = searchConsumerRecords(person);
+        Assert.assertNotNull("Person A could not be retrieved from messages", resultRecord.orElse(null));
+        Assert.assertTrue("Message Key is not the Person A ID", resultRecord.get().key().contains(person.getId()));
+
+        ////////////////
+        // Testing connector resume with latest offsets
+        ////////////////
+
+        // Create item in Cosmos DB
+        Person newPerson = new Person("Test Person", RandomUtils.nextLong(1L, 9999999L) + "");
+        targetContainer.createItem(newPerson);
+        
+        // Allow time for Source connector to start up, but delete it quickly so it won't process data
+        connectClient.addConnector(connectConfig
+            .withConfig("connect.cosmosdb.task.timeout", 300000L)
+            .withConfig("connect.cosmosdb.offset.useLatest", true)
+            .build());
+        sleep(10000);
+        connectClient.deleteConnector(connectorName);
+        
+        // Ensure that the record is not in the Kafka topic
+        resultRecord = searchConsumerRecords(newPerson);
+        Assert.assertNull("Person B can be retrieved from messages.", resultRecord.orElse(null));
+
+        // Recreate connector with default settings
+        connectClient.addConnector(connectConfig
+            .withConfig("connect.cosmosdb.task.timeout", 5000L)
+            .withConfig("connect.cosmosdb.offset.useLatest", true)
+            .build());
+
+        // Allow connector to process records
+        sleep(10000);
+
+        // Verify that record is now in the Kafka topic
+        resultRecord = searchConsumerRecords(newPerson);
+        Assert.assertNotNull("Person B could not be retrieved from messages", resultRecord.orElse(null));
+        Assert.assertTrue("Message Key is not the Person B ID", resultRecord.get().key().contains(newPerson.getId()));
+        Assert.assertEquals("Duplicate original person (A) records found.", 1L, recordBuffer.stream().filter(
+            p -> p.value().get("id").textValue().equals(person.getId())).count());
+    }
+
+    /**
+     * Testing connector with multiple workers reading from latest offset recorded in the Kafka source partition.
+     * 
+     * Recreate connector with multiple workers let it process data so offsets are recorded in the Kafka source partition.
+     * Then create new connector with a long timeout (300s) and using latest offsets and create new items
+     * in Cosmos DB. Delete this connector so these new items won't be processed. Finally, recreate the
+     * connector with multiple workers and normal timeout, let it resume from the last offset, and check that
+     * only the new items are added.
+     */
+    @Test
+    public void testResumeFromLatestOffsetsMultipleWorkers() throws InterruptedException, ExecutionException {
+        // Create source connector with multi-worker config
+        Map<String, String> currentParams = connectConfig.build().getConfig();
+        Builder multiWorkerConfigBuilder = connectConfig
+            .withConfig("tasks.max", 2)
+            .withConfig("connect.cosmosdb.containers", 
+                currentParams.get("connect.cosmosdb.containers") 
+                + String.format(",%s", SECOND_COSMOS_CONTAINER))
+            .withConfig("connect.cosmosdb.containers.topicmap", 
+                currentParams.get("connect.cosmosdb.containers.topicmap") 
+                + String.format(",%s#%s", SECOND_KAFKA_TOPIC, SECOND_COSMOS_CONTAINER));
+        connectClient.addConnector(multiWorkerConfigBuilder.build());
+        
+        // Allow time for Source connector to setup resources
+        sleep(8000);
+        
+        // Create items in Cosmos DB to register initial offsets
+        targetContainer.createItem(new Person("Test Person", RandomUtils.nextLong(1L, 9999999L) + ""));
+        secondContainer.createItem(new Person("Another Person", RandomUtils.nextLong(1L, 9999999L) + ""));
+
+        sleep(8000);
+        connectClient.deleteConnector(connectorName);
+
+        Person person = new Person("Frodo Baggins", RandomUtils.nextLong(1L, 9999999L) + "");
+        Person secondPerson = new Person("Sam Wise", RandomUtils.nextLong(1L, 9999999L) + "");
+        targetContainer.createItem(person);
+        secondContainer.createItem(secondPerson);
+
+        // Allow time for Source connector to start up, but delete it quickly so it won't process data
+        connectClient.addConnector(multiWorkerConfigBuilder
+            .withConfig("connect.cosmosdb.task.timeout", 300000L)
+            .withConfig("connect.cosmosdb.offset.useLatest", true)
+            .build());
+        sleep(10000);
+        connectClient.deleteConnector(connectorName);
+        
+        // Ensure that the record is not in the Kafka topic
+        Optional<ConsumerRecord<String, JsonNode>> resultRecord = searchConsumerRecords(person);
+        Assert.assertNull("Person A can be retrieved from messages.", resultRecord.orElse(null));
+        resultRecord = searchConsumerRecords(secondPerson);
+        Assert.assertNull("Person B can be retrieved from messages.", resultRecord.orElse(null));
+
+        // Recreate connector with default settings
+        connectClient.addConnector(connectConfig
+            .withConfig("connect.cosmosdb.task.timeout", 5000L)
+            .withConfig("connect.cosmosdb.offset.useLatest", true)
+            .build());
+
+        // Allow connector to process records
+        sleep(14000);
+
+        // Verify that record is now in the Kafka topic
+        resultRecord = searchConsumerRecords(person);
+        Assert.assertNotNull("Person A could not be retrieved from messages", resultRecord.orElse(null));
+        resultRecord = searchConsumerRecords(secondPerson);
+        Assert.assertNotNull("Person B could not be retrieved from messages", resultRecord.orElse(null));
     }
 
     /**

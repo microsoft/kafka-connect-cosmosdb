@@ -52,6 +52,7 @@ public class CosmosDBSourceConfig extends CosmosDBConfig {
     private static final String COSMOS_ASSIGNED_CONTAINER_DISPLAY = "Cosmos Assigned Container";
 
     static final String COSMOS_WORKER_NAME_CONF = "connect.cosmosdb.worker.name";
+    private static final String COSMOS_WORKER_NAME_DEFAULT = "worker";
     private static final String COSMOS_WORKER_NAME_DOC = "The Cosmos DB worker name";
     private static final String COSMOS_WORKER_NAME_DISPLAY = "Cosmos Worker name";
 
@@ -65,11 +66,14 @@ public class CosmosDBSourceConfig extends CosmosDBConfig {
     private static final String COSMOS_MESSAGE_KEY_FIELD_DOC = "The document field to use as the message key.";
     private static final String COSMOS_MESSAGE_KEY_FIELD_DISPLAY = "Kafka Message key field";
 
-    static final String COSMOS_CF_START_FROM_BEGINNING_CONF = "connect.cosmosdb.changefeed.startFromBeginning";
-    private static final String COSMOS_CF_START_FROM_BEGINNING_DEFAULT = "true";
-    private static final String COSMOS_CF_START_FROM_BEGINNING_DOC = 
-        "Whether the change feed should start from the beginning.";
-    private static final String COSMOS_CF_START_FROM_BEGINNING_DISPLAY = "Cosmos Change Feed start from beginning";
+    static final String COSMOS_USE_LATEST_OFFSET_CONF = "connect.cosmosdb.offset.useLatest";
+    private static final String COSMOS_USE_LATEST_OFFSET_DEFAULT = "false";
+    private static final String COSMOS_USE_LATEST_OFFSET_DOC = 
+        "Whether to use the latest (most recent) source offset. If true, processing will"
+        + " resume from the last recorded offset in the Kafka source partition. Otherwise, the"
+        + " connector will start processing changes from the earliest time the Cosmos container"
+        + "  was monitored by a source task.";
+    private static final String COSMOS_USE_LATEST_OFFSET_DISPLAY = "Use latest offset";
 
     private Long timeout;
     private Long bufferSize;
@@ -80,7 +84,7 @@ public class CosmosDBSourceConfig extends CosmosDBConfig {
     private String workerName;
     private Boolean messageKeyEnabled;
     private String messageKeyField;
-    private Boolean cfStartFromBeginning;
+    private Boolean useLatestOffset;
 
     public CosmosDBSourceConfig(ConfigDef config, Map<String, String> parsedConfig) {
         super(config, parsedConfig);
@@ -98,7 +102,7 @@ public class CosmosDBSourceConfig extends CosmosDBConfig {
         workerName = this.getString(COSMOS_WORKER_NAME_CONF);
         messageKeyEnabled = this.getBoolean(COSMOS_MESSAGE_KEY_ENABLED_CONF);
         messageKeyField = this.getString(COSMOS_MESSAGE_KEY_FIELD_CONF);
-        cfStartFromBeginning = this.getBoolean(COSMOS_CF_START_FROM_BEGINNING_CONF);
+        useLatestOffset = this.getBoolean(COSMOS_USE_LATEST_OFFSET_CONF);
     }
 
     public static ConfigDef getConfig() {
@@ -180,15 +184,15 @@ public class CosmosDBSourceConfig extends CosmosDBConfig {
                 COSMOS_CONTAINERS_LIST_DISPLAY
             )
             .define(
-                COSMOS_CF_START_FROM_BEGINNING_CONF,
+                COSMOS_USE_LATEST_OFFSET_CONF,
                 Type.BOOLEAN,
-                COSMOS_CF_START_FROM_BEGINNING_DEFAULT,
+                COSMOS_USE_LATEST_OFFSET_DEFAULT,
                 Importance.HIGH,
-                COSMOS_CF_START_FROM_BEGINNING_DOC,
+                COSMOS_USE_LATEST_OFFSET_DOC,
                 databaseGroupName,
                 ++databaseGroupOrder,
                 Width.MEDIUM,
-                COSMOS_CF_START_FROM_BEGINNING_DISPLAY
+                COSMOS_USE_LATEST_OFFSET_DISPLAY
             )
             .define(
                 COSMOS_ASSIGNED_CONTAINER_CONF,
@@ -204,7 +208,7 @@ public class CosmosDBSourceConfig extends CosmosDBConfig {
             .define(
                 COSMOS_WORKER_NAME_CONF,
                 Type.STRING,
-                "",
+                COSMOS_WORKER_NAME_DEFAULT,
                 Importance.MEDIUM,
                 COSMOS_WORKER_NAME_DOC,
                 databaseGroupName,
@@ -280,7 +284,7 @@ public class CosmosDBSourceConfig extends CosmosDBConfig {
         return this.messageKeyField;
     }
 
-    public boolean isStartFromBeginning() {
-        return this.cfStartFromBeginning.booleanValue();
+    public boolean useLatestOffset() {
+        return this.useLatestOffset.booleanValue();
     }
 }
