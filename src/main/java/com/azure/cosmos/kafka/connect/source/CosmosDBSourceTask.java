@@ -4,6 +4,7 @@ import com.azure.cosmos.*;
 import com.azure.cosmos.models.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.azure.cosmos.kafka.connect.TopicContainerMap;
+import com.azure.cosmos.kafka.connect.CosmosDBConfig;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.source.SourceRecord;
@@ -156,6 +157,7 @@ public class CosmosDBSourceTask extends SourceTask {
         return records;
     }
 
+    @SuppressWarnings("squid:S135") // while loop needs multiple breaks
     private void fillRecords(List<SourceRecord> records, String topic) throws InterruptedException {
         Long bufferSize = config.getTaskBufferSize();
         Long batchSize = config.getTaskBatchSize();
@@ -240,7 +242,7 @@ public class CosmosDBSourceTask extends SourceTask {
                 .key(config.getConnKey())
                 .consistencyLevel(ConsistencyLevel.SESSION)
                 .contentResponseOnWriteEnabled(true)
-                .userAgentSuffix(CosmosDBSourceConfig.COSMOS_CLIENT_USER_AGENT_SUFFIX + version())
+                .userAgentSuffix(CosmosDBConfig.COSMOS_CLIENT_USER_AGENT_SUFFIX + version())
                 .buildAsyncClient();
     }
 
@@ -277,15 +279,14 @@ public class CosmosDBSourceTask extends SourceTask {
         }
     }
 
-    private  CosmosAsyncContainer createNewLeaseContainer(CosmosAsyncClient client, String databaseName, String leaseCollectionName) {
+    private CosmosAsyncContainer createNewLeaseContainer(CosmosAsyncClient client, String databaseName, String leaseCollectionName) {
         CosmosAsyncDatabase database = client.getDatabase(databaseName);
         CosmosAsyncContainer leaseCollection = database.getContainer(leaseCollectionName);
         CosmosContainerResponse leaseContainerResponse = null;
 
-        logger.info("Creating new lease container.");
+        logger.info("Checking whether the lease container exists.");
         try {
             leaseContainerResponse = leaseCollection.read().block();
-
         } catch (CosmosException ex) {
             // Swallowing exceptions when the type is CosmosException and statusCode is 404
             if (ex.getStatusCode() != 404) {
@@ -300,16 +301,15 @@ public class CosmosDBSourceTask extends SourceTask {
             ThroughputProperties throughputProperties = ThroughputProperties.createManualThroughput(400);
             CosmosContainerRequestOptions requestOptions = new CosmosContainerRequestOptions();
 
-            try{
-                leaseContainerResponse = database.createContainer(containerSettings, throughputProperties, requestOptions).block();
-            } catch(Exception e){
+            try {
+                database.createContainer(containerSettings, throughputProperties, requestOptions).block();
+            } catch (Exception e) {
                 logger.error("Failed to create container {} in database {}", leaseCollectionName, databaseName);
                 throw e;
             }
-                
             logger.info("Successfully created new lease container.");
         }
 
-        return database.getContainer(leaseContainerResponse.getProperties().getId());
+        return database.getContainer(leaseCollectionName);
     }
 }
