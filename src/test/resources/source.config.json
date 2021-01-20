@@ -1,7 +1,7 @@
 {
     "name": "cosmosdb-source-connector",
     "config": {
-      "connector.class": "com.microsoft.azure.cosmosdb.kafka.connect.source.CosmosDBSourceConnector",
+      "connector.class": "com.azure.cosmos.kafka.connect.source.CosmosDBSourceConnector",
       "tasks.max": "1",
       "topics": "source-test",
       "value.converter": "org.apache.kafka.connect.json.JsonConverter",
