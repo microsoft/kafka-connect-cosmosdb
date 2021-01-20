@@ -50,6 +50,11 @@
             <artifactId>kafka-schema-registry-maven-plugin</artifactId>
             <version>6.0.1</version>
         </dependency>
+        <dependency>
+            <groupId>io.confluent</groupId>
+            <artifactId>kafka-avro-serializer</artifactId>
+            <version>6.0.1</version>
+        </dependency>
 
         <!-- Apache commons -->
         <dependency>
