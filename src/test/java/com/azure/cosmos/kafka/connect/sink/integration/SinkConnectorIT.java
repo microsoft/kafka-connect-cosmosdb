@@ -213,7 +213,7 @@ public class SinkConnectorIT {
         producer.send(personRecord).get();
 
         // Wait a few seconds for the sink connector to push data to Cosmos DB
-        sleep(3000);
+        sleep(5000);
 
         // Query Cosmos DB for data and check Person exists
         String sql = String.format("SELECT * FROM c where c.id = '%s'", person.getId());
