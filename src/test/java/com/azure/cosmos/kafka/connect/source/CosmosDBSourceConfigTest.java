@@ -41,8 +41,8 @@ public class CosmosDBSourceConfigTest {
         assertEquals(100L, config.getTaskBatchSize().longValue());
         assertEquals(1000L, config.getTaskPollInterval().longValue());
         assertEquals("", config.getAssignedContainer());
-        assertEquals("", config.getWorkerName());
-        assertTrue(config.isStartFromBeginning());
+        assertEquals("worker", config.getWorkerName());
+        assertFalse(config.useLatestOffset());
     }
 
     @Test

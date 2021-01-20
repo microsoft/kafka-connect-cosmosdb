@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 public class CosmosDBSinkTask extends SinkTask {
     private static final Logger logger = LoggerFactory.getLogger(CosmosDBSinkTask.class);
     private CosmosClient client = null;
-    private CosmosDBSinkConfig config = null;
+    private CosmosDBSinkConfig config;
     ObjectMapper mapper = new ObjectMapper();
 
     @Override
@@ -99,7 +99,6 @@ public class CosmosDBSinkTask extends SinkTask {
         }
 
         client = null;
-        config = null;
 
     }
 }
