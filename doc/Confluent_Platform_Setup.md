@@ -13,9 +13,9 @@ This guide walks through setting up Confluent Platform using Docker containers.
 
 ## Setup
 
-> [Github Codespaces](https://github.com/features/codespaces) is the easiest way to evaluate the Cosmos DB Kafka Connectors as all of the prerequisites are automatically installed
+> [Github Codespaces](https://github.com/features/codespaces) is the easiest way to evaluate the Cosmos DB Kafka Connectors as all of the prerequisites are automatically installed. Similarly, you can also use Visual Studio Code Dev Containers to setup locally.
 >
-> Follow the setup steps in the [developer setup](../DEVELOPER_WALKTHROUGH.MD) to setup Codespaces
+> Follow the setup steps in the [developer setup](./Developer_Walkthrough.md) to setup Codespaces and/or Dev Containers.
 
 ### Initialize repo
 
@@ -23,7 +23,7 @@ Clone the Kafka Connect Cosmos DB repo
 
 ```bash
 
-### skip this step if using Codespaces
+### skip this step if using Codespaces or Dev Containers
 
 git clone https://github.com/microsoft/kafka-connect-cosmosdb.git
 
@@ -36,13 +36,19 @@ export REPO_ROOT=$(pwd)
 
 Start up the docker containers for Confluent Platform using `docker-compose`
 
-If you're using codespaces, either option will work. Otherwise, use the script best suited to your shell environment.
+If you're using codespaces or dev containers, either option will work. Otherwise, use the script best suited to your shell environment.
+
+> NOTE: If you're using dev containers, you will need to stop ALL of the forwarded ports before you start this step. This is to prevent Visual Studio Code from occupying the ports and allowing the new docker containers to use them instead.
+>
+> You can do this from the `Remote Explorer` menu as shown below or you can open up the Command Palette (`F1` key) and search for `Stop Forwarding Port`.
+
+![Close Forwarded Ports](./images/vscode-close-forwarded-ports.png "Close Forwarded Ports")
 
 > Running either script for the first time may take several minutes to run in order to download docker images for the Confluent platform components.
 
 ```bash
 
-cd $REPO_ROOT/src/integration-test
+cd $REPO_ROOT/src/docker
 
 # Option 1: Use the bash script to setup
 ./startup.sh
@@ -84,12 +90,12 @@ Tear down the Confluent Platform setup and cleanup any unneeded resources
 
 ```bash
 
-cd $REPO_ROOT/src/integration-test
+cd $REPO_ROOT/src/docker
 
 # bring down all docker containers
 docker-compose down
 
 # remove dangling volumes and networks
-docker system prune -f --volumes
+docker system prune -f --volumes --filter "label=io.confluent.docker"
 
 ```

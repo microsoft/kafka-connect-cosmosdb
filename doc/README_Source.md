@@ -64,7 +64,7 @@ Refer to the [source properties](#source-configuration-properties) section for m
 {
   "name": "cosmosdb-source-connector",
   "config": {
-    "connector.class": "com.microsoft.azure.cosmosdb.kafka.connect.source.CosmosDBSourceConnector",
+    "connector.class": "com.azure.cosmos.kafka.connect.source.CosmosDBSourceConnector",
     "tasks.max": "1",
     "key.converter": "org.apache.kafka.connect.json.JsonConverter",
     "value.converter": "org.apache.kafka.connect.json.JsonConverter",
@@ -74,7 +74,7 @@ Refer to the [source properties](#source-configuration-properties) section for m
     "connect.cosmosdb.databasename": "kafkaconnect",
     "connect.cosmosdb.containers.topicmap": "apparels#kafka",
     "connect.cosmosdb.containers": "kafka",
-    "connect.cosmosdb.changefeed.startFromBeginning": true,
+    "connect.cosmosdb.offset.useLatest": false,
     "value.converter.schemas.enable": "false",
     "key.converter.schemas.enable": "false"
   }
@@ -164,11 +164,11 @@ To delete the created Azure Cosmos DB service and its resource group using Azure
 
 ## Source configuration properties
 
-The following settings are used to configure the Cosmos DB Kafka Source Connector. These configuration values determine which Cosmos DB container is consumed, which Kafka topics data is written into and formats to serialize the data. For an example configuration file with the default values, refer to [this config](../src/integration-test/resources/source.config.json).
+The following settings are used to configure the Cosmos DB Kafka Source Connector. These configuration values determine which Cosmos DB container is consumed, which Kafka topics data is written into and formats to serialize the data. For an example configuration file with the default values, refer to [this config](../src/docker/resources/source.config.json).
 
 | Name | Type | Description | Required/Optional |
 | :--- | :--- | :--- | :--- |
-| connector.class | string | Classname of the Cosmos DB sink. Should be set to `com.microsoft.azure.cosmosdb.kafka.connect.sink.CosmosDBSourceConnector` | Required |
+| connector.class | string | Classname of the Cosmos DB sink. Should be set to `com.azure.cosmos.kafka.connect.sink.CosmosDBSourceConnector` | Required |
 | connect.cosmosdb.databasename | string | name of the database to read from | Required |
 | connect.cosmosdb.master.key | string | the configured master key for Cosmos DB | Required |
 | connect.cosmosdb.connection.endpoint | uri | the endpoint for the Cosmos DB Account | Required |
@@ -176,7 +176,7 @@ The following settings are used to configure the Cosmos DB Kafka Source Connecto
 | connect.cosmosdb.containers | string | list of collections to monitor |  Required |
 | connect.cosmosdb.messagekey.enabled | boolean | set if the Kafka message key should be set. Default is `true` | Required |
 | connect.cosmosdb.messagekey.field | string | use the field's value from the document as the message key. Default is `id` | Required |
-| connect.cosmosdb.changefeed.startFromBeginning | boolean |  set if the change feed should start from beginning. Default is `true` | Required |
+| connect.cosmosdb.offset.useLatest | boolean |  Set to `"true"` to use the latest (most recent) source offset, `"false"` to use the earliest recorded offset. Default is `false` | Required |
 | connect.cosmosdb.task.poll.interval | int | interval to poll the changefeedcontainer for changes | Required |
 | key.converter | string | Serialization format for the key data written into Kafka topic | Required |
 | value.converter | string | Serialization format for the value data written into the Kafka topic | Required |

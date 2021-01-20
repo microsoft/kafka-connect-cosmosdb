@@ -94,7 +94,7 @@ Refer to the [sink properties](#sink-configuration-properties) section for more 
 {
   "name": "cosmosdb-sink-connector",
   "config": {
-    "connector.class": "com.microsoft.azure.cosmosdb.kafka.connect.sink.CosmosDBSinkConnector",
+    "connector.class": "com.azure.cosmos.kafka.connect.sink.CosmosDBSinkConnector",
     "tasks.max": "1",
     "topics": [
       "hotels"
@@ -162,12 +162,12 @@ To delete the created Azure Cosmos DB service and its resource group using Azure
 
 ## Sink configuration properties
 
-The following settings are used to configure the Cosmos DB Kafka Sink Connector. These configuration values determine which Kafka topics data is consumed, which Cosmos DB containers data is written into and formats to serialize the data. For an example configuration file with the default values, refer to [this config](../src/integration-test/resources/sink.config.json).
+The following settings are used to configure the Cosmos DB Kafka Sink Connector. These configuration values determine which Kafka topics data is consumed, which Cosmos DB containers data is written into and formats to serialize the data. For an example configuration file with the default values, refer to [this config](../src/docker/resources/sink.config.json).
 
 | Name | Type | Description | Required/Optional |
 | :--- | :--- | :--- | :--- |
 | topics | list | A list of Kafka topics to watch | Required |
-| connector.class | string | Classname of the Cosmos DB sink. Should be set to `com.microsoft.azure.cosmosdb.kafka.connect.sink.CosmosDBSinkConnector` | Required |
+| connector.class | string | Classname of the Cosmos DB sink. Should be set to `com.azure.cosmos.kafka.connect.sink.CosmosDBSinkConnector` | Required |
 | connect.cosmosdb.connection.endpoint | uri | Cosmos DB endpoint URI string | Required |
 | connect.cosmosdb.master.key | string | The Cosmos DB primary key that the sink connects with | Required |
 | connect.cosmosdb.databasename | string | The name of the Cosmos DB database the sink writes to | Required |
