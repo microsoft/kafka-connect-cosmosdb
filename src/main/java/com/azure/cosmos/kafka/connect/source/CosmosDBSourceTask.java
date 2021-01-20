@@ -4,6 +4,7 @@ import com.azure.cosmos.*;
 import com.azure.cosmos.models.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.azure.cosmos.kafka.connect.TopicContainerMap;
+import com.azure.cosmos.kafka.connect.CosmosDBConfig;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.source.SourceRecord;
@@ -156,6 +157,7 @@ public class CosmosDBSourceTask extends SourceTask {
         return records;
     }
 
+    @SuppressWarnings("squid:S135") // while loop needs multiple breaks
     private void fillRecords(List<SourceRecord> records, String topic) throws InterruptedException {
         Long bufferSize = config.getTaskBufferSize();
         Long batchSize = config.getTaskBatchSize();
@@ -164,43 +166,43 @@ public class CosmosDBSourceTask extends SourceTask {
         int count = 0;
         while ( bufferSize > 0 && count < batchSize && System.currentTimeMillis() < maxWaitTime ) {
             JsonNode node = this.queue.poll(config.getTaskPollInterval(), TimeUnit.MILLISECONDS);
-
-            if(node != null) {
-                try {                
-                    // Set the Kafka message key if option is enabled and field is configured in document
-                    String messageKey = "";
-                    if (Boolean.TRUE.equals(config.isMessageKeyEnabled())) {
-                        JsonNode messageKeyFieldNode = node.get(config.getMessageKeyField());
-                        messageKey = (messageKeyFieldNode != null) ? messageKeyFieldNode.toString() : "";
-                    }
-
-                    // Get the latest token and record as offset
-                    Map<String, Object> sourceOffset = singletonMap(OFFSET_KEY, getContinuationToken());
-                    logger.debug("Latest offset is {}.", sourceOffset.get(OFFSET_KEY));
-
-                    // Convert JSON to Kafka Connect struct and JSON schema
-                    SchemaAndValue schemaAndValue = jsonToStruct.recordToSchemaAndValue(node);
-
-                    // Since Lease container takes care of maintaining state we don't have to send source offset to kafka
-                    SourceRecord sourceRecord = new SourceRecord(partitionMap, sourceOffset, topic,
-                                                        Schema.STRING_SCHEMA, messageKey,
-                                                        schemaAndValue.schema(), schemaAndValue.value());
-
-                    bufferSize -= sourceRecord.value().toString().getBytes().length;
-
-                    // If the buffer Size exceeds then do not remove the node .
-                    if (bufferSize <=0){
-                        this.queue.add(node);
-                        break;
-                    }
-                    
-                    records.add(sourceRecord);
-                    count++;
+            
+            if (node == null) {continue;}
+            
+            try {                
+                // Set the Kafka message key if option is enabled and field is configured in document
+                String messageKey = "";
+                if (Boolean.TRUE.equals(config.isMessageKeyEnabled())) {
+                    JsonNode messageKeyFieldNode = node.get(config.getMessageKeyField());
+                    messageKey = (messageKeyFieldNode != null) ? messageKeyFieldNode.toString() : "";
                 }
-                catch (Exception e) {
-                    logger.error("Failed to fill Source Records for Topic {}", topic);
-                    throw e;
+
+                // Get the latest token and record as offset
+                Map<String, Object> sourceOffset = singletonMap(OFFSET_KEY, getContinuationToken());
+                logger.debug("Latest offset is {}.", sourceOffset.get(OFFSET_KEY));
+
+                // Convert JSON to Kafka Connect struct and JSON schema
+                SchemaAndValue schemaAndValue = jsonToStruct.recordToSchemaAndValue(node);
+
+                // Since Lease container takes care of maintaining state we don't have to send source offset to kafka
+                SourceRecord sourceRecord = new SourceRecord(partitionMap, sourceOffset, topic,
+                                                    Schema.STRING_SCHEMA, messageKey,
+                                                    schemaAndValue.schema(), schemaAndValue.value());
+
+                bufferSize -= sourceRecord.value().toString().getBytes().length;
+
+                // If the buffer Size exceeds then do not remove the node .
+                if (bufferSize <=0){
+                    this.queue.add(node);
+                    break;
                 }
+                
+                records.add(sourceRecord);
+                count++;
+            }
+            catch (Exception e) {
+                logger.error("Failed to fill Source Records for Topic {}", topic);
+                throw e;
             }
         }
     }
@@ -240,7 +242,7 @@ public class CosmosDBSourceTask extends SourceTask {
                 .key(config.getConnKey())
                 .consistencyLevel(ConsistencyLevel.SESSION)
                 .contentResponseOnWriteEnabled(true)
-                .userAgentSuffix(CosmosDBSourceConfig.COSMOS_CLIENT_USER_AGENT_SUFFIX + version())
+                .userAgentSuffix(CosmosDBConfig.COSMOS_CLIENT_USER_AGENT_SUFFIX + version())
                 .buildAsyncClient();
     }
 
@@ -277,15 +279,14 @@ public class CosmosDBSourceTask extends SourceTask {
         }
     }
 
-    private  CosmosAsyncContainer createNewLeaseContainer(CosmosAsyncClient client, String databaseName, String leaseCollectionName) {
+    private CosmosAsyncContainer createNewLeaseContainer(CosmosAsyncClient client, String databaseName, String leaseCollectionName) {
         CosmosAsyncDatabase database = client.getDatabase(databaseName);
         CosmosAsyncContainer leaseCollection = database.getContainer(leaseCollectionName);
         CosmosContainerResponse leaseContainerResponse = null;
 
-        logger.info("Creating new lease container.");
+        logger.info("Checking whether the lease container exists.");
         try {
             leaseContainerResponse = leaseCollection.read().block();
-
         } catch (CosmosException ex) {
             // Swallowing exceptions when the type is CosmosException and statusCode is 404
             if (ex.getStatusCode() != 404) {
@@ -300,16 +301,15 @@ public class CosmosDBSourceTask extends SourceTask {
             ThroughputProperties throughputProperties = ThroughputProperties.createManualThroughput(400);
             CosmosContainerRequestOptions requestOptions = new CosmosContainerRequestOptions();
 
-            try{
-                leaseContainerResponse = database.createContainer(containerSettings, throughputProperties, requestOptions).block();
-            } catch(Exception e){
+            try {
+                database.createContainer(containerSettings, throughputProperties, requestOptions).block();
+            } catch (Exception e) {
                 logger.error("Failed to create container {} in database {}", leaseCollectionName, databaseName);
                 throw e;
             }
-                
             logger.info("Successfully created new lease container.");
         }
 
-        return database.getContainer(leaseContainerResponse.getProperties().getId());
+        return database.getContainer(leaseCollectionName);
     }
 }

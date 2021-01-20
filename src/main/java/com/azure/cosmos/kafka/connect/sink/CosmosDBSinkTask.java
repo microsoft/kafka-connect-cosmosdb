@@ -4,6 +4,7 @@ import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.CosmosClientBuilder;
 import com.azure.cosmos.CosmosContainer;
 import com.azure.cosmos.implementation.BadRequestException;
+import com.azure.cosmos.kafka.connect.CosmosDBConfig;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.apache.kafka.connect.sink.SinkTask;
@@ -39,7 +40,7 @@ public class CosmosDBSinkTask extends SinkTask {
         this.config = new CosmosDBSinkConfig(map);
 
         this.client = new CosmosClientBuilder().endpoint(config.getConnEndpoint()).key(config.getConnKey())
-                .userAgentSuffix(CosmosDBSinkConfig.COSMOS_CLIENT_USER_AGENT_SUFFIX + version()).buildClient();
+                .userAgentSuffix(CosmosDBConfig.COSMOS_CLIENT_USER_AGENT_SUFFIX + version()).buildClient();
 
         client.createDatabaseIfNotExists(config.getDatabaseName());
     }
@@ -77,15 +78,19 @@ public class CosmosDBSinkTask extends SinkTask {
                 }
 
                 try {
-                    if (Boolean.TRUE.equals(config.getUseUpsert())) {
-                        container.upsertItem(recordValue);
-                    } else {
-                        container.createItem(recordValue);
-                    }
+                    addItemToContainer(container, recordValue);
                 } catch (BadRequestException bre) {
                     throw new CosmosDBWriteException(record, bre);
                 }
             }
+        }
+    }
+
+    private void addItemToContainer(CosmosContainer container, Object recordValue) {
+        if (Boolean.TRUE.equals(config.getUseUpsert())) {
+            container.upsertItem(recordValue);
+        } else {
+            container.createItem(recordValue);
         }
     }
 
