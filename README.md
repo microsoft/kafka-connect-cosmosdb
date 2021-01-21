@@ -2,9 +2,11 @@
 
 [![Open Source Love svg2](https://badges.frapsoft.com/os/v2/open-source.svg?v=103)](https://github.com/microsoft/kafka-connect-cosmosdb/blob/dev/CODE_OF_CONDUCT.MD) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/microsoft/kafka-connect-cosmosdb/blob/dev/CONTRIBUTING.md) [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/microsoft/kafka-connect-cosmosdb/pulse) 
 
-[![Java CI with Maven](https://github.com/microsoft/kafka-connect-cosmosdb/workflows/Java%20CI%20with%20Maven/badge.svg)](https://github.com/microsoft/kafka-connect-cosmosdb/actions?query=workflow%3A%22Java+CI+with+Maven%22) [![Release](https://img.shields.io/github/v/release/microsoft/kafka-connect-cosmosdb?include_prereleases&label=Latest%20Release)](https://github.com/microsoft/kafka-connect-cosmosdb/releases)
+[![Java CI with Maven](https://github.com/microsoft/kafka-connect-cosmosdb/workflows/Java%20CI%20with%20Maven/badge.svg)](https://github.com/microsoft/kafka-connect-cosmosdb/actions?query=workflow%3A%22Java+CI+with+Maven%22) [![Release](https://img.shields.io/github/v/release/microsoft/kafka-connect-cosmosdb?include_prereleases&label=Latest%20Release)](https://github.com/microsoft/kafka-connect-cosmosdb/releases/)
 
 ## Introduction
+
+This project is pre-production. File any issues / feature requests / questions etc. you may have in the [Issues](https://github.com/microsoft/kafka-connect-cosmosdb/issues) for this repo. 
 
 This project provides connectors for [Kafka Connect](http://kafka.apache.org/documentation.html#connect) to read from and write data to [Azure Cosmos DB](https://azure.microsoft.com/en-us/services/cosmos-db/).
 
