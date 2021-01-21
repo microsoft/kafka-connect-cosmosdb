@@ -57,16 +57,6 @@ import static org.sourcelab.kafka.connect.apiclient.request.dto.NewConnectorDefi
 @Category(IntegrationTest.class)
 public class SinkConnectorIT {
     private static Logger logger = LoggerFactory.getLogger(SinkConnectorIT.class);
-
-    private String databaseName;
-    private String connectorName;
-    private Builder connectConfig;
-    private CosmosClient cosmosClient;
-    private CosmosContainer targetContainer;
-    private KafkaConnectClient connectClient;
-    private KafkaProducer<String, JsonNode> producer;
-    private KafkaProducer<GenericRecord, GenericRecord> avroProducer;
-    private String kafkaTopicJson;
     private static final String KAFKA_TOPIC_JSON_SCHEMA = "sink-test-json-schema";
     private static final String KAFKA_TOPIC_AVRO = "sink-test-avro";
     private static final String AVRO_CONVERTER = "io.confluent.connect.avro.AvroConverter";
@@ -74,6 +64,16 @@ public class SinkConnectorIT {
     private static final String SCHEMA_REGISTRY_URL = "http://localhost:8081";
     private static final String CONNECT_CLIENT_URL = "http://localhost:8083";
     private static final String BOOTSTRAP_SERVER_ADD = "localhost:9092";
+
+    private String databaseName;
+    private String connectorName;
+    private String kafkaTopicJson;
+    private Builder connectConfig;
+    private CosmosClient cosmosClient;
+    private CosmosContainer targetContainer;
+    private KafkaConnectClient connectClient;
+    private KafkaProducer<String, JsonNode> producer;
+    private KafkaProducer<GenericRecord, GenericRecord> avroProducer;
 
     /**
      * Load CosmosDB configuration from the connector config JSON and set up CosmosDB client.
