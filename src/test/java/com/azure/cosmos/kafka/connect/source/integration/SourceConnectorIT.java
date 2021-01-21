@@ -13,7 +13,6 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -22,7 +21,7 @@ import org.sourcelab.kafka.connect.apiclient.Configuration;
 import org.sourcelab.kafka.connect.apiclient.KafkaConnectClient;
 import org.sourcelab.kafka.connect.apiclient.request.dto.NewConnectorDefinition;
 
-import io.confluent.kafka.serializers.KafkaAvroSerializer;
+import io.confluent.kafka.serializers.KafkaAvroDeserializer;
 
 import com.azure.cosmos.kafka.connect.IntegrationTest;
 import org.junit.Assert;
@@ -59,10 +58,13 @@ import static org.sourcelab.kafka.connect.apiclient.request.dto.NewConnectorDefi
 public class SourceConnectorIT {
     private static Logger logger = LoggerFactory.getLogger(SourceConnectorIT.class);
     private static final String SECOND_COSMOS_CONTAINER = "newkafka";
-    private static final String SECOND_KAFKA_TOPIC = "newsource-test";
-    private static final String AVRO_KAFKA_TOPIC = "avro-source-test";
+    private static final String SECOND_KAFKA_TOPIC = "source-test-2";
+    private static final String AVRO_KAFKA_TOPIC = "source-test-avro";
     private static final String AVRO_CONVERTER = "io.confluent.connect.avro.AvroConverter";
     private static final String AVRO_SCHEMA_REGISTRY = "http://schema-registry:8081";
+    private static final String SCHEMA_REGISTRY_URL = "http://localhost:8081";
+    private static final String CONNECT_CLIENT_URL = "http://localhost:8083";
+    private static final String BOOTSTRAP_SERVER_ADD = "localhost:9092";
 
     private String databaseName;
     private String connectorName;
@@ -72,9 +74,9 @@ public class SourceConnectorIT {
     private CosmosContainer secondContainer;
     private KafkaConnectClient connectClient;
     private KafkaConsumer<String, JsonNode> consumer;
-    private KafkaConsumer<String, GenericRecord> avroConsumer;
+    private KafkaConsumer<GenericRecord, GenericRecord> avroConsumer;
     private List<ConsumerRecord<String, JsonNode>> recordBuffer;
-    private List<ConsumerRecord<String, GenericRecord>> avroRecordBuffer;
+    private List<ConsumerRecord<GenericRecord, GenericRecord>> avroRecordBuffer;
 
     /**
      * Load CosmosDB configuration from the connector config JSON and set up CosmosDB client.
@@ -115,24 +117,26 @@ public class SourceConnectorIT {
 
         // Setup Kafka Connect Client and connector config
         logger.debug("Setting up the Kafka Connect client");
-        connectClient = new KafkaConnectClient(new Configuration("http://localhost:8083"));
+        connectClient = new KafkaConnectClient(new Configuration(CONNECT_CLIENT_URL));
         setupConnectorConfig(config);
 
         // Create Kafka Consumer subscribed to topics, recordBuffer to store records from topics
         Properties kafkaProperties = createKafkaConsumerProperties();
+        kafkaProperties.put("key.deserializer", StringDeserializer.class.getName());
+        kafkaProperties.put("value.deserializer", JsonDeserializer.class.getName());
         consumer = new KafkaConsumer<>(kafkaProperties);
         consumer.subscribe(Arrays.asList(topic, SECOND_KAFKA_TOPIC));
 
         Properties kafkaAvroProperties = createKafkaConsumerProperties();
-        kafkaAvroProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
-                KafkaAvroSerializer.class.getName());
-        kafkaAvroProperties.put("schema.registry.url", AVRO_SCHEMA_REGISTRY);
-        
+        kafkaAvroProperties.put("key.deserializer", KafkaAvroDeserializer.class.getName());
+        kafkaAvroProperties.put("value.deserializer", KafkaAvroDeserializer.class.getName());
+        kafkaAvroProperties.put("schema.registry.url", SCHEMA_REGISTRY_URL);
         avroConsumer = new KafkaConsumer<>(kafkaAvroProperties);
         avroConsumer.subscribe(Collections.singletonList(AVRO_KAFKA_TOPIC));
 
         logger.debug("Consuming Kafka messages from " + kafkaProperties.getProperty("bootstrap.servers"));
         recordBuffer = new ArrayList<>();
+        avroRecordBuffer = new ArrayList<>();
     }
 
     /**
@@ -186,11 +190,8 @@ public class SourceConnectorIT {
      */
     private Properties createKafkaConsumerProperties() {
         Properties kafkaProperties = new Properties();
-        kafkaProperties.put("bootstrap.servers", "localhost:9092");
+        kafkaProperties.put("bootstrap.servers", BOOTSTRAP_SERVER_ADD);
         kafkaProperties.put("group.id", "IntegrationTest");
-        kafkaProperties.put("key.deserializer", StringDeserializer.class.getName());
-        kafkaProperties.put("value.deserializer", JsonDeserializer.class.getName());
-
         return kafkaProperties;
     }
 
@@ -214,14 +215,14 @@ public class SourceConnectorIT {
             p -> p.value().get("payload").get("id").textValue().equals(person.getId())).findFirst();
     }
 
-    private Optional<ConsumerRecord<String, GenericRecord>> searchAvroConsumerRecords(Person person) {
-        ConsumerRecords<String, GenericRecord> records = avroConsumer.poll(Duration.ofMillis(2000));
-        for (ConsumerRecord<String, GenericRecord> record : records) {
+    private Optional<ConsumerRecord<GenericRecord, GenericRecord>> searchAvroConsumerRecords(Person person) {
+        ConsumerRecords<GenericRecord, GenericRecord> records = avroConsumer.poll(Duration.ofMillis(2000));
+        for (ConsumerRecord<GenericRecord, GenericRecord> record : records) {
             avroRecordBuffer.add(record);
         }
         
         return avroRecordBuffer.stream().filter(
-            p -> p.value().get("id").toString().equals(person.getId())).findFirst();
+            p -> p.key().toString().contains(person.getId())).findFirst();
     }
 
     /**
@@ -311,13 +312,11 @@ public class SourceConnectorIT {
         // Allow time for Source connector to transmit data from Cosmos DB
         sleep(10000);
 
-        Optional<ConsumerRecord<String, GenericRecord>> resultRecord = searchAvroConsumerRecords(person);
+        Optional<ConsumerRecord<GenericRecord, GenericRecord>> resultRecord = searchAvroConsumerRecords(person);
 
         Assert.assertNotNull("Person could not be retrieved from messages", resultRecord.orElse(null));
         Assert.assertTrue("Message Key is not the Person ID", resultRecord.get().key().toString().contains(person.getId()));
     }
-
-
 
     /**
      * Testing the connector's response to offsets.
