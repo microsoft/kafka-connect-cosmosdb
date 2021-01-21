@@ -71,8 +71,9 @@ public class SinkConnectorIT {
     private static final String KAFKA_TOPIC_AVRO = "sink-test-avro";
     private static final String AVRO_CONVERTER = "io.confluent.connect.avro.AvroConverter";
     private static final String AVRO_SCHEMA_REGISTRY = "http://schema-registry:8081";
-    private static final String AVRO_SCHEMA_REGISTRY_LOCAL_HOST= "http://localhost:8081";
+    private static final String SCHEMA_REGISTRY_URL = "http://localhost:8081";
     private static final String CONNECT_CLIENT_URL = "http://localhost:8083";
+    private static final String BOOTSTRAP_SERVER_ADD = "localhost:9092";
 
     /**
      * Load CosmosDB configuration from the connector config JSON and set up CosmosDB client.
@@ -164,7 +165,7 @@ public class SinkConnectorIT {
      */
     private Properties createKafkaProducerProperties() {
         Properties kafkaProperties = new Properties();
-        kafkaProperties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        kafkaProperties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVER_ADD);
         kafkaProperties.put(ProducerConfig.CLIENT_ID_CONFIG, "IntegrationTest");
         kafkaProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         kafkaProperties.put(ProducerConfig.MAX_BLOCK_MS_CONFIG, 2000L);
@@ -195,7 +196,7 @@ public class SinkConnectorIT {
         producer.send(personRecord).get();
 
         // Wait a few seconds for the sink connector to push data to Cosmos DB
-        sleep(10000);
+        sleep(8000);
 
         // Query Cosmos DB for data
         String sql = String.format("SELECT * FROM c where c.id = '%s'", person.getId());
@@ -236,14 +237,14 @@ public class SinkConnectorIT {
         ObjectMapper om = new ObjectMapper();
         JsonNode jsonSchemaNode = om.readTree(jsonSchemaString);
 
-        ProducerRecord<String, JsonNode> personRecord = new ProducerRecord<>(KAFKA_TOPIC_JSON_SCHEMA, "\""+person.getId()+"\"", jsonSchemaNode);
+        ProducerRecord<String, JsonNode> personRecord = new ProducerRecord<>(KAFKA_TOPIC_JSON_SCHEMA, person.getId(), jsonSchemaNode);
         producer.send(personRecord).get();
 
         // Wait a few seconds for the sink connector to push data to Cosmos DB
-        sleep(10000);
+        sleep(8000);
 
         // Query Cosmos DB for data
-        String sql = String.format("SELECT * FROM c where c.id = '%s'", person.getId());
+        String sql = String.format("SELECT * FROM c where c.id = '%s'", person.getId()+"");
         CosmosPagedIterable<Person> readResponse = targetContainer.queryItems(sql, new CosmosQueryRequestOptions(), Person.class);
         Optional<Person> retrievedPerson = readResponse.stream().filter(p -> p.getId().equals(person.getId())).findFirst();
         Assert.assertNotNull("Person could not be retrieved", retrievedPerson.orElse(null));
@@ -259,7 +260,7 @@ public class SinkConnectorIT {
         Properties kafkaProperties = createKafkaProducerProperties();
         kafkaProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class.getName());
         kafkaProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class.getName());
-        kafkaProperties.put("schema.registry.url", AVRO_SCHEMA_REGISTRY_LOCAL_HOST);
+        kafkaProperties.put("schema.registry.url", SCHEMA_REGISTRY_URL);
         avroProducer = new KafkaProducer<>(kafkaProperties);
 
         // Create sink connector with AVRO config
@@ -301,7 +302,7 @@ public class SinkConnectorIT {
         avroProducer.send(personRecord).get();
 
         // Wait a few seconds for the sink connector to push data to Cosmos DB
-        sleep(10000);
+        sleep(8000);
 
         // Query Cosmos DB for data
         String sql = String.format("SELECT * FROM c where c.id = '%s'", person.getId()+ "");

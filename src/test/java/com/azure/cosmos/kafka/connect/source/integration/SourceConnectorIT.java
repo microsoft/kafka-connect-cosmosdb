@@ -289,7 +289,7 @@ public class SourceConnectorIT {
             .build());
 
         // Allow connector to process records
-        sleep(14000);
+        sleep(10000);
 
         // Verify that record is now in the Kafka topic
         resultRecord = searchConsumerRecords(newPerson);
