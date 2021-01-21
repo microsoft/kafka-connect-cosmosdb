@@ -175,8 +175,8 @@ public class SinkConnectorIT {
     }
 
     /**
-     * Post a valid JSON message that should go through to CosmosDB. Then read the
-     * result from CosmosDB.
+     * Post a valid JSON message that should go through to CosmosDB. 
+     * Then read the result from CosmosDB.
      */
     @Test
     public void testPostJsonMessage() throws InterruptedException, ExecutionException {
