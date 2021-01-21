@@ -74,9 +74,9 @@ public class SourceConnectorIT {
     private CosmosContainer secondContainer;
     private KafkaConnectClient connectClient;
     private KafkaConsumer<String, JsonNode> consumer;
-    private KafkaConsumer<GenericRecord, GenericRecord> avroConsumer;
+    private KafkaConsumer<String, GenericRecord> avroConsumer;
     private List<ConsumerRecord<String, JsonNode>> recordBuffer;
-    private List<ConsumerRecord<GenericRecord, GenericRecord>> avroRecordBuffer;
+    private List<ConsumerRecord<String, GenericRecord>> avroRecordBuffer;
 
     /**
      * Load CosmosDB configuration from the connector config JSON and set up CosmosDB client.
@@ -122,17 +122,16 @@ public class SourceConnectorIT {
 
         // Create Kafka Consumer subscribed to topics, recordBuffer to store records from topics
         Properties kafkaProperties = createKafkaConsumerProperties();
-        kafkaProperties.put("key.deserializer", StringDeserializer.class.getName());
         kafkaProperties.put("value.deserializer", JsonDeserializer.class.getName());
         consumer = new KafkaConsumer<>(kafkaProperties);
         consumer.subscribe(Arrays.asList(topic, SECOND_KAFKA_TOPIC));
 
+        // Create Kafka Consumer subscribed to AVRO topic, avroRecordBuffer to store records from AVRO topic
         Properties kafkaAvroProperties = createKafkaConsumerProperties();
-        kafkaAvroProperties.put("key.deserializer", KafkaAvroDeserializer.class.getName());
         kafkaAvroProperties.put("value.deserializer", KafkaAvroDeserializer.class.getName());
         kafkaAvroProperties.put("schema.registry.url", SCHEMA_REGISTRY_URL);
         avroConsumer = new KafkaConsumer<>(kafkaAvroProperties);
-        avroConsumer.subscribe(Collections.singletonList(AVRO_KAFKA_TOPIC));
+        avroConsumer.subscribe(Arrays.asList(AVRO_KAFKA_TOPIC));
 
         logger.debug("Consuming Kafka messages from " + kafkaProperties.getProperty("bootstrap.servers"));
         recordBuffer = new ArrayList<>();
@@ -157,8 +156,16 @@ public class SourceConnectorIT {
             consumer.close();
         }
 
+        if (avroConsumer != null) {
+            avroConsumer.close();
+        }
+
         if (recordBuffer != null) {
             recordBuffer.clear();
+        }
+
+        if (avroRecordBuffer != null) {
+            avroRecordBuffer.clear();
         }
     }
 
@@ -192,10 +199,15 @@ public class SourceConnectorIT {
         Properties kafkaProperties = new Properties();
         kafkaProperties.put("bootstrap.servers", BOOTSTRAP_SERVER_ADD);
         kafkaProperties.put("group.id", "IntegrationTest");
+        kafkaProperties.put("key.deserializer", StringDeserializer.class.getName());
         return kafkaProperties;
     }
 
+    /**
+     * Find ConsumerRecord with Plain JSON
+     */
     private Optional<ConsumerRecord<String, JsonNode>> searchConsumerRecords(Person person) {
+        logger.debug("Searching JSON record from Kafka Consumer");
         ConsumerRecords<String, JsonNode> records = consumer.poll(Duration.ofMillis(2000));
         for (ConsumerRecord<String, JsonNode> record : records) {
             recordBuffer.add(record);
@@ -205,7 +217,11 @@ public class SourceConnectorIT {
             p -> p.value().get("id").textValue().equals(person.getId())).findFirst();
     }
 
+    /**
+     * Find ConsumerRecord with JSON Schema
+     */
     private Optional<ConsumerRecord<String, JsonNode>> searchJsonSchemaConsumerRecords(Person person) {
+        logger.debug("Searching JSON Schema record from Kafka Consumer");
         ConsumerRecords<String, JsonNode> records = consumer.poll(Duration.ofMillis(2000));
         for (ConsumerRecord<String, JsonNode> record : records) {
             recordBuffer.add(record);
@@ -215,9 +231,13 @@ public class SourceConnectorIT {
             p -> p.value().get("payload").get("id").textValue().equals(person.getId())).findFirst();
     }
 
-    private Optional<ConsumerRecord<GenericRecord, GenericRecord>> searchAvroConsumerRecords(Person person) {
-        ConsumerRecords<GenericRecord, GenericRecord> records = avroConsumer.poll(Duration.ofMillis(2000));
-        for (ConsumerRecord<GenericRecord, GenericRecord> record : records) {
+    /**
+     * Find ConsumerRecord with AVRO
+     */
+    private Optional<ConsumerRecord<String, GenericRecord>> searchAvroConsumerRecords(Person person) {
+        logger.debug("Searching AVRO record from Kafka Consumer");
+        ConsumerRecords<String, GenericRecord> records = avroConsumer.poll(Duration.ofMillis(2000));
+        for (ConsumerRecord<String, GenericRecord> record : records) {
             avroRecordBuffer.add(record);
         }
         
@@ -271,7 +291,7 @@ public class SourceConnectorIT {
         targetContainer.createItem(person);
         
         // Allow time for Source connector to transmit data from Cosmos DB
-        sleep(10000);
+        sleep(8000);
 
         Optional<ConsumerRecord<String, JsonNode>> resultRecord = searchJsonSchemaConsumerRecords(person);
 
@@ -310,9 +330,9 @@ public class SourceConnectorIT {
         targetContainer.createItem(person);
         
         // Allow time for Source connector to transmit data from Cosmos DB
-        sleep(10000);
+        sleep(8000);
 
-        Optional<ConsumerRecord<GenericRecord, GenericRecord>> resultRecord = searchAvroConsumerRecords(person);
+        Optional<ConsumerRecord<String, GenericRecord>> resultRecord = searchAvroConsumerRecords(person);
 
         Assert.assertNotNull("Person could not be retrieved from messages", resultRecord.orElse(null));
         Assert.assertTrue("Message Key is not the Person ID", resultRecord.get().key().toString().contains(person.getId()));
