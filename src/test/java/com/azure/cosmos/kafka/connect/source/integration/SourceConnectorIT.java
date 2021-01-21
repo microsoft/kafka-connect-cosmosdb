@@ -20,7 +20,6 @@ import org.apache.kafka.connect.json.JsonDeserializer;
 import org.sourcelab.kafka.connect.apiclient.Configuration;
 import org.sourcelab.kafka.connect.apiclient.KafkaConnectClient;
 import org.sourcelab.kafka.connect.apiclient.request.dto.NewConnectorDefinition;
-
 import io.confluent.kafka.serializers.KafkaAvroDeserializer;
 
 import com.azure.cosmos.kafka.connect.IntegrationTest;
@@ -36,7 +35,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

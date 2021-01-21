@@ -50,11 +50,6 @@
             <artifactId>kafka-schema-registry-maven-plugin</artifactId>
             <version>6.0.1</version>
         </dependency>
-        <dependency>
-            <groupId>io.confluent</groupId>
-            <artifactId>kafka-avro-serializer</artifactId>
-            <version>6.0.1</version>
-        </dependency>
 
         <!-- Apache commons -->
         <dependency>
@@ -115,6 +110,12 @@
             <groupId>org.sourcelab</groupId>
             <artifactId>kafka-connect-client</artifactId>
             <version>3.1.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.confluent</groupId>
+            <artifactId>kafka-avro-serializer</artifactId>
+            <version>6.0.1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
