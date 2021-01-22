@@ -123,20 +123,26 @@
     <build>
         <plugins>
             <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.6.0</version>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>3.1.1</version>
+                <configuration>
+                    <configLocation>google_checks.xml</configLocation>
+                    <encoding>UTF-8</encoding>
+                    <consoleOutput>true</consoleOutput>
+                    <failsOnError>true</failsOnError>
+                    <linkXRef>false</linkXRef>
+                    <failOnViolation>true</failOnViolation>
+                    <violationSeverity>warning</violationSeverity>
+                </configuration>
                 <executions>
-                <execution>
-                    <id>compile</id>
-                    <phase>process-sources</phase>
+                    <execution>
+                    <id>validate</id>
+                    <phase>compile</phase>
                     <goals>
-                    <goal>compile</goal>
+                        <goal>check</goal>
                     </goals>
-                    <configuration>
-                    <compilerArgument>-Xlint:-processing</compilerArgument>
-                    <failOnWarning>true</failOnWarning>
-                    </configuration>
-                </execution>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
