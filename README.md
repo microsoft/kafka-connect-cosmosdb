@@ -18,7 +18,7 @@ The sink & source connectors are configurable in order to support:
 | :----------- | :---------- |
 | JSON (Pain) | JSON record structure without any attached schema. |
 | JSON with Schema | JSON record structure with explicit schema information to ensure the data matches the expected format. |
-| AVRO | An open source serialization system that provides a compact binary format and a JSON-like API. Integrates with the [Confluent Schema Registry](https://www.confluent.io/confluent-schema-registry) to manage schema definitions.
+| AVRO | A row-oriented remote procedure call and data serialization framework developed within Apache's Hadoop project. It uses JSON for defining data types and protocols, and serializes data in a compact binary format. 
 
 Since key and value settings, including the format and serialization, can be independently configured in Kafka, it is possible to work with different data formats for records' keys and values respectively.
 
@@ -80,7 +80,7 @@ To cater for this there is converter configuration for both *key.converter* and 
 
 #### AVRO
 
-- To use the AvroConverter with [Schema Registry](https://docs.confluent.io/platform/current/schema-registry/connect.html), you specify the `key.converter` and `value.converter` properties in the worker configuration. An additional converter property must also be added that provides the Schema Registry URL. The example below shows the AvroConverter key and value properties that are added to the configuration:
+- This connector supports AVRO. To use AVRO you need to configure the Conluent Connect AvroConverter. Because Kafka deals with keys and values independently, you need to specify the `key.converter` andor `value.converter` properties as required in the worker configuration. An additional converter property must also be added that provides the Schema Registry URL. The example below shows the AvroConverter key and value properties that are added to the configuration:
 
   ```properties
   key.converter=io.confluent.connect.avro.AvroConverter
