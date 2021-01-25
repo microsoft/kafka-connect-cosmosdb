@@ -80,7 +80,9 @@ To cater for this there is converter configuration for both *key.converter* and 
 
 #### AVRO
 
-- This connector supports AVRO. To use AVRO you need to configure a AvroConverter so that Kafka Connect knows how to work with AVRO data. This connector has been tested with the [AvroConverter](https://www.confluent.io/hub/confluentinc/kafka-connect-avro-converter) supplied by Confluent, under Apache 2.0 license, but another custom converter can be used in its place instead if you prefer. Because Kafka deals with keys and values independently, you need to specify the `key.converter` andor `value.converter` properties as required in the worker configuration. An additional converter property must also be added that provides the Schema Registry URL. The example below shows the AvroConverter key and value properties that are added to the configuration:
+- This connector supports AVRO. To use AVRO you need to configure a AvroConverter so that Kafka Connect knows how to work with AVRO data. This connector has been tested with the [AvroConverter](https://www.confluent.io/hub/confluentinc/kafka-connect-avro-converter) supplied by Confluent, under Apache 2.0 license, but another custom converter can be used in its place instead if you prefer. 
+
+Kafka deals with keys and values independently, you need to specify the `key.converter` and `value.converter` properties as required in the worker configuration. An additional converter property must also be added that provides the Schema Registry URL. The example below shows the AvroConverter key and value properties that are added to the configuration:
 
   ```properties
   key.converter=io.confluent.connect.avro.AvroConverter
