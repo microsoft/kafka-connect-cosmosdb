@@ -81,7 +81,7 @@ If you instead would like to run Kafka Connect as `standalone mode`, which is us
 
 ### skip this step if using Kafka Connect as distributed mode (recommended)
 
-cd $REPO_ROOT/src/docker/resources/
+cd $REPO_ROOT/src/docker/resources
 
 # Setup a Cosmos source connector
 connect-standalone standalone.properties source.properties
