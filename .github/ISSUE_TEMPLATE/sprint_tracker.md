@@ -6,32 +6,28 @@ labels: ''
 assignees: ''
 
 ---
-- - - -
-**## Sprint Goal**
-_Put a concise sprint goal here to keep your team focused througout sprint._
-- - - -
 
-**## Commitment**
-- [ ] Bucket _example: performance improvements, migrate data to x, etc_
-  - #
+## Sprint Goal
+_Put a concise sprint goal here to keep your team focused throughout sprint._
 
-* * * * 
-**## Sprint Adjustments**
-* * * *
+## Commitment
+- [ ] Bucket _(example: performance improvements, migrate data to x, etc._)
+  - Issue Number
 
-**## Added to Sprint**
-_Ensure you list the justification for pulling anything into sprint. Ex: Prod outage, revenue impacts, dev bandwidth, etc.__
-- [ ] #
+
+## Sprint Adjustments
+
+
+### Added to Sprint
+_Ensure you list the justification for pulling anything into sprint. Ex: Prod outage, revenue impacts, dev bandwidth, etc._
+- [ ] # (issue number)
     - Justification:
 
-**## Trade-offs**
-_If you're swapping tickets in, what tickets are falling out?__
-- #
+### Trade-offs
+_If you're swapping tickets in, what tickets are falling out?_
+- Issue Number
 
-**## Notes**
+## Notes
 
 
-- - - -
-## Completion Rate
-- - - -
-# %
+## Completion Rate: %
