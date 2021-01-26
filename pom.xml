@@ -190,10 +190,10 @@
                             <goal>kafka-connect</goal>
                         </goals>
                         <configuration>
-                            <title>Kafka Connect Azure Cosmos DB Source and Sink Connectors</title>
+                            <title>Azure Cosmos DB Connector</title>
                             <documentationUrl>https://github.com/microsoft/kafka-connect-cosmosdb</documentationUrl>
                             <description>
-                                The Cosmos DB connectors allow moving data between Azure Cosmos DB and Kafka. 
+                                The Azure Cosmos DB connectors allow moving data between Azure Cosmos DB and Kafka. 
                                 
                                 The Cosmos DB Sink connctor writes data from a Kafka topic  to a Cosmos DB container. 
                                 The Cosmos DB Source connector writes changes from a Cosmos DB container to a Kafka topic.
