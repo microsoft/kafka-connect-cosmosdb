@@ -11,7 +11,7 @@ assignees: ''
 _Put a concise sprint goal here to keep your team focused throughout sprint._
 
 ## Commitment
-- [ ] Bucket _example: performance improvements, migrate data to x, etc._
+- [ ] Bucket _(example: performance improvements, migrate data to x, etc._)
   - #
 
 
@@ -30,7 +30,5 @@ _If you're swapping tickets in, what tickets are falling out?_
 ## Notes
 
 
-- - - -
 ## Completion Rate
-- - - -
 # %
