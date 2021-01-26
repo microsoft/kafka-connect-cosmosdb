@@ -30,5 +30,4 @@ _If you're swapping tickets in, what tickets are falling out?_
 ## Notes
 
 
-## Completion Rate
-# %
+## Completion Rate: %
