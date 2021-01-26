@@ -11,8 +11,8 @@ The Azure Cosmos DB Source connector provides the capability to read data from t
 
 ### Prerequisites
 
-- Confluent Platform (recommended to use this [setup](./Confluent_Platform_Setup.md))
-  - If you plan on using a separate Confluent Platform instance, you will need to install the Cosmos DB connectors manually.
+- It is recommended to start with the Confluent Platform (recommended to use this setup) as this gives you a complete environment to work with.
+    - If you do not wish to use Confluent Platform, then you need to install and configure Zookeper, Apache Kafka, Kafka Connect, yourself. You will also need to install and configure the Cosmos DB connectors manually.
 - Cosmos DB Instance ([setup guide](./CosmosDB_Setup.md))
 - Bash shell (tested on Github Codespaces, Mac, Ubuntu, Windows with WSL2)
   - Will not work in Cloud Shell or WSL1
