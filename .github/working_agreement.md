@@ -100,7 +100,7 @@ We pledge to follow the [Microsoft Open Source Code of Conduct](https://opensour
 
 ### Estimating
 
-- We will estimate User Stories with size tagging to help gauge how much we work we commit to within a sprint.
+- We will estimate User Stories with size tagging to help gauge how much work we commit to within a sprint.
 - We will use T-shirts sizing for our estimation -- with XS <1 day, Small is 1-2 days, Medium is 3-5 days, Large is 5 days, and XL is anything over 5 days (which would need to be broken down).
 
 ### Ceremonies
