@@ -60,24 +60,22 @@ We pledge to follow the [Microsoft Open Source Code of Conduct](https://opensour
 ##### User Story Issues to Avoid
 
 - Describing a task
-- UI too soon
 - Write in an inactive voice
 - Splitting too often in the iteration
 - Thinking too far ahead
 - Interdependent Stories
 - Too many details
-- Goldplating
+- [Goldplating](https://en.wikipedia.org/wiki/Gold_plating_(project_management))
 - Stories are too small
 
 #### Definition of Ready
 
 - User stories clearly provide context and scope of work
 - Acceptance Criteria is defined
-- User stories are achievable withinin the milestone
-  - Stories are broken down into prioritized tasks ranging from small to large (If extra large, break it down)
+- User stories are achievable within the milestone
   - "Spike" if investigating something in order to timebox and track outcomes
 - Story owner is able to break down user story into tasks if desired
-- Dependencies identified (either external or other work items)
+- Dependencies identified (either external or other work items) via the 'dependencies' label
 
 #### Definition of Done
 
@@ -92,10 +90,10 @@ We pledge to follow the [Microsoft Open Source Code of Conduct](https://opensour
 - User Story Board will be used to track User Story progress.
 - Kanban Board will be used to track project progress
   - Board columns:
-    - Housekeeping: All net-new tasks/bugs/features/stories need to be created as an "issue"; things to discuss/notes can be added as a "note"
-    - Ice Box: Items that are unvetted ideas, blocked w/no time estimate for unblocking, ticket that needs fleshing out by reporter, etc.
-    - Backlog (Ready): Stories that have been refined, triaged, and prioritized.
-    - Sprint Backlog: Stories that have been committed for the current sprint.
+    - **Housekeeping**: All net-new tasks/bugs/features/stories need to be created as an "issue"; things to discuss/notes can be added as a "note"
+    - **Ice Box**: Items that are unvetted ideas, blocked w/no time estimate for unblocking, ticket that needs fleshing out by reporter, etc.
+    - **Backlog (Ready)**: Stories that have been refined, triaged, and prioritized.
+    - **Sprint Backlog**: Stories that have been committed for the current sprint.
     - **In Progress**: A development team member owns the story or bug and begins work.
     - **In Review**: The owner of the story or bug determines the item meets our Definition of Done and has created a Pull Request. The item will stay in this status through the PR process -- including addressing requested feedback or fixing issues found.
     - **Closed**: The Pull Request/Task has completed, and the work has been committed to the `main` branch of the project repository.
@@ -122,12 +120,13 @@ We pledge to follow the [Microsoft Open Source Code of Conduct](https://opensour
 
 ### Branch Strategy
 
-- `main` branch will be used as the production branch
+- `main` branch will be used as the production branch and should always house release-ready code.
   - It will be locked, requiring a PR to make commits.
   - It will be shippable at any time.
   - Releases will occur through a merge of `dev` into `main`
+- `dev` is a protected working branch for CI
 - Branches will be used for story or bug-fix work.
-  - Naming convention will include alias with a short description of the story or bug (e.g., `dsturgell-create-working-agreement` or `jofultz-deploy-script-error-on-box`)
+  - Naming convention will include alias (or GitHub handle) with a short description of the story or bug (e.g., `dsturgell-create-working-agreement` or `jofultz-deploy-script-error-on-box`)
   - Commits should always have a short but descriptive message explaining what is changing.
 
 ### Versioning & Tagging
