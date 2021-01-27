@@ -1,2 +1,2 @@
 # ignore test resource configs
-resources/*.json
+resources/*.config.json
