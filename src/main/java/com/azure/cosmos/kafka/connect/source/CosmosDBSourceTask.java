@@ -143,7 +143,7 @@ public class CosmosDBSourceTask extends SourceTask {
 
         TopicContainerMap topicContainerMap = config.getTopicContainerMap();
         String topic = topicContainerMap.getTopicForContainer(config.getAssignedContainer()).orElseThrow(
-                () -> new IllegalStateException("No topic defined for container " + config.getAssignedContainer() + "."));
+            () -> new IllegalStateException("No topic defined for container " + config.getAssignedContainer() + "."));
         
         while (running.get()) {
             fillRecords(records, topic);            
