@@ -1,14 +1,14 @@
 package com.azure.cosmos.kafka.connect.source;
 
-import org.apache.kafka.common.config.ConfigDef;
-import org.apache.kafka.common.config.ConfigDef.Importance;
-import org.apache.kafka.common.config.ConfigDef.Type;
-import org.apache.kafka.common.config.ConfigDef.Width;
-
 import java.util.Arrays;
 import java.util.Map;
 
 import com.azure.cosmos.kafka.connect.CosmosDBConfig;
+
+import org.apache.kafka.common.config.ConfigDef;
+import org.apache.kafka.common.config.ConfigDef.Importance;
+import org.apache.kafka.common.config.ConfigDef.Type;
+import org.apache.kafka.common.config.ConfigDef.Width;
 
 /**
  * Contains settings for the Kafka ComsosDB Source Connector
