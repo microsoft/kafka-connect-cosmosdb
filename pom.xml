@@ -177,6 +177,17 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>3.2.1</version>
                 <executions>
@@ -201,7 +212,7 @@
                             <relocations>
                                 <relocation>
                                     <pattern>io.netty</pattern>
-                                    <shadedPattern>com.microsoft.shaded.io.netty</shadedPattern>
+                                    <shadedPattern>shaded.io.netty</shadedPattern>
                                     <includes>
                                         <include>io.netty.**</include>
                                     </includes>
@@ -221,10 +232,10 @@
                             <goal>kafka-connect</goal>
                         </goals>
                         <configuration>
-                            <title>Kafka Connect Azure Cosmos DB Source and Sink Connectors</title>
+                            <title>Azure Cosmos DB Connector</title>
                             <documentationUrl>https://github.com/microsoft/kafka-connect-cosmosdb</documentationUrl>
                             <description>
-                                The Cosmos DB connectors allow moving data between Azure Cosmos DB and Kafka. 
+                                The Azure Cosmos DB connectors allow moving data between Azure Cosmos DB and Kafka. 
                                 
                                 The Cosmos DB Sink connctor writes data from a Kafka topic  to a Cosmos DB container. 
                                 The Cosmos DB Source connector writes changes from a Cosmos DB container to a Kafka topic.
