@@ -1,5 +1,8 @@
 package com.azure.cosmos.kafka.connect.source;
 
+import static java.lang.Thread.sleep;
+import static java.util.Collections.singletonMap;
+
 import com.azure.cosmos.*;
 import com.azure.cosmos.models.*;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -13,8 +16,6 @@ import org.apache.kafka.connect.data.SchemaAndValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import reactor.core.scheduler.Schedulers;
-
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,8 +25,7 @@ import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static java.lang.Thread.sleep;
-import static java.util.Collections.singletonMap;
+import reactor.core.scheduler.Schedulers;
 
 public class CosmosDBSourceTask extends SourceTask {
 
@@ -72,10 +72,9 @@ public class CosmosDBSourceTask extends SourceTask {
         // If NOT using the latest offset, reset lease container token to earliest possible value
         if (!config.useLatestOffset()) {
             updateContinuationToken(ZERO_CONTINUATION_TOKEN);
-        }
-        // Check for previous offset and compare with lease container token
-        // If there's a mismatch, rewind lease container token to offset value
-        else if (offset != null) {
+        } else if (offset != null) {
+            // Check for previous offset and compare with lease container token
+            // If there's a mismatch, rewind lease container token to offset value
             String lastOffsetToken = (String) offset.get(OFFSET_KEY);
             String continuationToken = getContinuationToken();
 
@@ -93,7 +92,7 @@ public class CosmosDBSourceTask extends SourceTask {
                 .doOnSuccess(aVoid -> running.set(true))
                 .subscribe();
 
-        while(!running.get()){
+        while (!running.get()) {
             try {
                 sleep(500);
             } catch (InterruptedException e) {
@@ -101,7 +100,7 @@ public class CosmosDBSourceTask extends SourceTask {
                 // Restore interrupted state...
                 Thread.currentThread().interrupt();                
             }
-        }// Wait for ChangeFeedProcessor to start.
+        } // Wait for ChangeFeedProcessor to start.
 
         logger.info("Started CosmosDB source task.");
     }
@@ -144,7 +143,7 @@ public class CosmosDBSourceTask extends SourceTask {
 
         TopicContainerMap topicContainerMap = config.getTopicContainerMap();
         String topic = topicContainerMap.getTopicForContainer(config.getAssignedContainer()).orElseThrow(
-                () -> new IllegalStateException("No topic defined for container " + config.getAssignedContainer() + "."));
+            () -> new IllegalStateException("No topic defined for container " + config.getAssignedContainer() + "."));
         
         while (running.get()) {
             fillRecords(records, topic);            
@@ -164,10 +163,12 @@ public class CosmosDBSourceTask extends SourceTask {
         long maxWaitTime = System.currentTimeMillis() + config.getTaskTimeout();
 
         int count = 0;
-        while ( bufferSize > 0 && count < batchSize && System.currentTimeMillis() < maxWaitTime ) {
+        while (bufferSize > 0 && count < batchSize && System.currentTimeMillis() < maxWaitTime) {
             JsonNode node = this.queue.poll(config.getTaskPollInterval(), TimeUnit.MILLISECONDS);
             
-            if (node == null) {continue;}
+            if (node == null) { 
+                continue; 
+            }
             
             try {                
                 // Set the Kafka message key if option is enabled and field is configured in document
@@ -192,15 +193,14 @@ public class CosmosDBSourceTask extends SourceTask {
                 bufferSize -= sourceRecord.value().toString().getBytes().length;
 
                 // If the buffer Size exceeds then do not remove the node .
-                if (bufferSize <=0){
+                if (bufferSize <= 0) {
                     this.queue.add(node);
                     break;
                 }
                 
                 records.add(sourceRecord);
                 count++;
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 logger.error("Failed to fill Source Records for Topic {}", topic);
                 throw e;
             }
@@ -210,7 +210,7 @@ public class CosmosDBSourceTask extends SourceTask {
     @Override
     public void stop() {
         logger.info("Stopping CosmosDB source task.");
-        while(!this.queue.isEmpty()){
+        while (!this.queue.isEmpty()) {
             // Wait till the items are drained by poll before stopping.
             try {
                 sleep(500);
@@ -226,11 +226,6 @@ public class CosmosDBSourceTask extends SourceTask {
         if (changeFeedProcessor != null) {
             changeFeedProcessor.stop();
             changeFeedProcessor = null;
-        }
-
-        if (client != null) {
-            client.close();
-            client = null;
         }
     }
 

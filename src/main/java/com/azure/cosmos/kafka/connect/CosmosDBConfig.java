@@ -25,8 +25,8 @@ public class CosmosDBConfig extends AbstractConfig {
 
     public static final String COSMOS_CONTAINER_TOPIC_MAP_CONF = "connect.cosmosdb.containers.topicmap";
     private static final String COSMOS_CONTAINER_TOPIC_MAP_DOC = 
-        "A comma delimited list of Kafka topics mapped to Cosmos DB containers.\n" +
-        "For example: topic1#con1,topic2#con2.";
+        "A comma delimited list of Kafka topics mapped to Cosmos DB containers.\n" 
+        + "For example: topic1#con1,topic2#con2.";
     private static final String COSMOS_CONTAINER_TOPIC_MAP_DISPLAY = "Topic-Container map";
 
     public static final int COSMOS_DATABASE_GROUP_ORDER = 2;

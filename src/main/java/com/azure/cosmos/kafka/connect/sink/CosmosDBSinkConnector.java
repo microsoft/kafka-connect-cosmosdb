@@ -37,7 +37,7 @@ public class CosmosDBSinkConnector extends SinkConnector {
             configs.add(configProps);
         }
         return configs;
-      }
+    }
 
     @Override
     public void stop() {
