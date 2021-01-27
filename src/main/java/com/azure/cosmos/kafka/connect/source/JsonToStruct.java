@@ -1,14 +1,6 @@
 package com.azure.cosmos.kafka.connect.source;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
-import org.apache.kafka.connect.data.Schema;
-import org.apache.kafka.connect.data.SchemaBuilder;
-import org.apache.kafka.connect.data.Struct;
-import org.apache.kafka.connect.data.SchemaAndValue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import static java.lang.String.format;
 import static org.apache.kafka.connect.data.Values.convertToByte;
 import static org.apache.kafka.connect.data.Values.convertToDouble;
 import static org.apache.kafka.connect.data.Values.convertToFloat;
@@ -16,37 +8,46 @@ import static org.apache.kafka.connect.data.Values.convertToInteger;
 import static org.apache.kafka.connect.data.Values.convertToLong;
 import static org.apache.kafka.connect.data.Values.convertToShort;
 
-import static java.lang.String.format;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
+import org.apache.kafka.connect.data.Schema;
+import org.apache.kafka.connect.data.SchemaAndValue;
+import org.apache.kafka.connect.data.SchemaBuilder;
+import org.apache.kafka.connect.data.Struct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class JsonToStruct {
-    private static final Logger logger = LoggerFactory.getLogger(CosmosDBSourceTask.class);
+    private static final Logger logger = LoggerFactory.getLogger(JsonToStruct.class);
     private static final String SCHEMA_NAME_TEMPLATE = "inferred_name_%s";
 
     public SchemaAndValue recordToSchemaAndValue(final JsonNode node) {
         Schema nodeSchema = inferSchema(node);
         Struct struct = new Struct(nodeSchema);
 
-        nodeSchema.fields().forEach(field -> {
-            JsonNode fieldValue = node.get(field.name());
-            if (fieldValue != null) {
-                SchemaAndValue schemaAndValue = toSchemaAndValue(field.schema(), fieldValue);
-                struct.put(field, schemaAndValue.value());
-            } else {
-                boolean optionalField = field.schema().isOptional();
-                Object defaultValue = field.schema().defaultValue();
-                if (optionalField || defaultValue != null) {
-                    struct.put(field, defaultValue);
+        if (nodeSchema != null) {
+            nodeSchema.fields().forEach(field -> {
+                JsonNode fieldValue = node.get(field.name());
+                if (fieldValue != null) {
+                    SchemaAndValue schemaAndValue = toSchemaAndValue(field.schema(), fieldValue);
+                    struct.put(field, schemaAndValue.value());
                 } else {
-                    logger.error("Missing value for field {}", field.name());
+                    boolean optionalField = field.schema().isOptional();
+                    Object defaultValue = field.schema().defaultValue();
+                    if (optionalField || defaultValue != null) {
+                        struct.put(field, defaultValue);
+                    } else {
+                        logger.error("Missing value for field {}", field.name());
+                    }
                 }
-            }
-        });
+            });
+        }
         return new SchemaAndValue(nodeSchema, struct);
     }
 
@@ -65,14 +66,12 @@ public class JsonToStruct {
             case ARRAY:
                 List<JsonNode> jsonValues = new ArrayList<>();
                 SchemaBuilder arrayBuilder;
-                jsonNode.forEach(jn -> {
-                    jsonValues.add(jn);
-                });
+                jsonNode.forEach(jn -> jsonValues.add(jn));
 
                 Schema firstItemSchema = jsonValues.isEmpty() ? Schema.OPTIONAL_STRING_SCHEMA
                         : inferSchema(jsonValues.get(0));
-                if (jsonValues.isEmpty()
-                        || jsonValues.stream().anyMatch(jv -> !Objects.equals(inferSchema(jv), firstItemSchema))) {
+                if (jsonValues.isEmpty() || jsonValues.stream()
+                        .anyMatch(jv -> !Objects.equals(inferSchema(jv), firstItemSchema))) {
                     // If array is emtpy or it contains elements with different schema types
                     arrayBuilder = SchemaBuilder.array(Schema.OPTIONAL_STRING_SCHEMA);
                     arrayBuilder.name(generateName(arrayBuilder));
@@ -138,7 +137,7 @@ public class JsonToStruct {
                 schemaAndValue = recordToSchemaAndValue(node);
                 break;
             default:
-                logger.error("Unsupported Schema type: %s", schema.type());
+                logger.error("Unsupported Schema type: {}", schema.type());
         }
         return schemaAndValue;
     }
@@ -155,12 +154,12 @@ public class JsonToStruct {
 
     private SchemaAndValue arrayToSchemaAndValue(final Schema schema, final JsonNode nodeValue) {
         if (!nodeValue.isArray()) {
-            logger.error("Unexpted value %s for Schma %s", nodeValue, schema);
+            logger.error("Unexpted value %s for Schma {} {}", nodeValue, schema);
         }
         List<Object> values = new ArrayList<>();
-        nodeValue.forEach(v -> {
-            values.add(toSchemaAndValue(schema.valueSchema(), v).value());
-        });
+        nodeValue.forEach(v -> 
+            values.add(toSchemaAndValue(schema.valueSchema(), v).value())
+        );
         return new SchemaAndValue(schema, values);
     }
 
@@ -173,7 +172,7 @@ public class JsonToStruct {
                 value = nodeValue.doubleValue();
             }
         } else {
-            logger.error("Unexpted value %s for Schma %s", nodeValue, schema.type());
+            logger.error("Unexpted value %s for Schma {} {}", nodeValue, schema.type());
         }
 
         switch (schema.type()) {
@@ -196,7 +195,7 @@ public class JsonToStruct {
                 value = convertToDouble(schema, value);
                 break;
             default:
-                logger.error("Unsupported Schema type: %s", schema.type());
+                logger.error("Unsupported Schema type: {}", schema.type());
         }
         return new SchemaAndValue(schema, value);
     }

@@ -40,7 +40,9 @@ public class TopicContainerMap {
             BidiMap<String, String> map = new DualHashBidiMap<>();
             keyValuePairs.forEach(pair -> map.put(pair[0], pair[1]));
             return new TopicContainerMap(map);
-        } else throw new IllegalArgumentException("Invalid topic container map.");
+        } else {
+            throw new IllegalArgumentException("Invalid topic container map.");
+        }
     }
 
     /**
