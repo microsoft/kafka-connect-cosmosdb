@@ -1,0 +1,2 @@
+# ignore test resource configs
+resources/*.json
