@@ -114,6 +114,14 @@ Navigate to root project directory and execute the integration tests
 ```bash
 
 cd kafka-connect-cosmosdb
+
+# copy the template connector configs into src/test/resources
+# you will need to update the configs for the Cosmos values as mentioned above
+
+cp src/docker/resources/sink.example.json src/test/resources/sink.config.json
+cp src/docker/resources/source.example.json src/test/resources/source.config.json
+
+# run the integration tests
 mvn clean test-compile failsafe:integration-test
 
 ```

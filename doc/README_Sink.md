@@ -165,7 +165,7 @@ To delete the created Azure Cosmos DB service and its resource group using Azure
 
 ## Sink configuration properties
 
-The following settings are used to configure the Cosmos DB Kafka Sink Connector. These configuration values determine which Kafka topics data is consumed, which Cosmos DB containers data is written into and formats to serialize the data. For an example configuration file with the default values, refer to [this config](../src/docker/resources/sink.config.json).
+The following settings are used to configure the Cosmos DB Kafka Sink Connector. These configuration values determine which Kafka topics data is consumed, which Cosmos DB containers data is written into and formats to serialize the data. For an example configuration file with the default values, refer to [this config](../src/docker/resources/sink.example.json).
 
 | Name | Type | Description | Required/Optional |
 | :--- | :--- | :--- | :--- |

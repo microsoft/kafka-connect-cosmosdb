@@ -1,3 +1,6 @@
 connectors/
 log.txt
-# resources/
+
+# Exclude all temporary files in resources
+resources/
+!resources/*example
