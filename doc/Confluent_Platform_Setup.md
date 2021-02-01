@@ -83,6 +83,13 @@ If you instead would like to run Kafka Connect as `standalone mode`, which is us
 
 cd $REPO_ROOT/src/docker/resources
 
+# create copies of template files
+# you will need to update the configs for the Cosmos values as mentioned above
+
+cp source.example.properties source.properties
+cp sink.example.properties sink.properties
+cp standalone.example.properties standalone.properties
+
 # Setup a Cosmos source connector
 connect-standalone standalone.properties source.properties
 
