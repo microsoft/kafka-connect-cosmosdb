@@ -7,7 +7,7 @@
 
     <groupId>com.azure.cosmos.kafka</groupId>
     <artifactId>kafka-connect-cosmos</artifactId>
-    <version>1.0-beta</version>
+    <version>1.0.2-beta</version>
 
     <name> kafka-connect-cosmos</name>
     <url>https://github.com/microsoft/kafka-connect-cosmosdb</url>
