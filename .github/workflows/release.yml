@@ -1,8 +1,7 @@
 on:
   push:
-    # tags:
-    #   - v*
-    branches: [test-release]
+    tags:
+      - v*
 
 name: Build and create release
 
@@ -10,7 +9,7 @@ jobs:
   build:
 
     name: Build and upload release binary
-    # if: github.event.base_ref == 'refs/heads/main' # only run if on master branch
+    if: github.event.base_ref == 'refs/heads/main' # only run if on master branch
     runs-on: ubuntu-latest
 
     steps:
@@ -27,8 +26,8 @@ jobs:
           echo "::set-output name=VERSION::$BUILD_VERSION"
       - name: Build with Maven
         run: mvn -B package --file pom.xml
-      # - name: Run Unit Tests
-      #   run: mvn clean test
+      - name: Run Unit Tests
+        run: mvn clean test
       - name: Run Integration Test
         shell: pwsh
         run: ./src/docker/startup.ps1
