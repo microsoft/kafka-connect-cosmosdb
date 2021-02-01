@@ -1,7 +1,8 @@
 on:
   push:
-    tags:
-      - v*
+    # tags:
+    #   - v*
+    branches: [test-release]
 
 name: Build and create release
 
@@ -9,7 +10,7 @@ jobs:
   build:
 
     name: Build and upload release binary
-    if: github.event.base_ref == 'refs/heads/main' # only run if on master branch
+    # if: github.event.base_ref == 'refs/heads/main' # only run if on master branch
     runs-on: ubuntu-latest
 
     steps:
@@ -20,13 +21,14 @@ jobs:
         with:
           java-version: 11
       - name: Get java-version
+        id: get-version
         run: |
           BUILD_VERSION=$( mvn help:evaluate -Dexpression=project.version -q -DforceStdout )
-          echo "::set-env name=VERSION::$BUILD_VERSION"
+          echo "::set-output name=VERSION::$BUILD_VERSION"
       - name: Build with Maven
         run: mvn -B package --file pom.xml
-      - name: Run Unit Tests
-        run: mvn clean test
+      # - name: Run Unit Tests
+      #   run: mvn clean test
       - name: Run Integration Test
         shell: pwsh
         run: ./src/docker/startup.ps1
@@ -47,6 +49,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./target/cosmosdb.kafka.connect-${{env.VERSION}}-SNAPSHOT-jar-with-dependencies.jar
-          asset_name: cosmosdb.kafka.connect-${{env.VERSION}}-jar-with-dependencies.jar
+          asset_path: ./target/cosmosdb.kafka.connect-${{steps.get-version.outputs.VERSION}}-SNAPSHOT-jar-with-dependencies.jar
+          asset_name: cosmosdb.kafka.connect-${{steps.get-version.outputs.VERSION}}-jar-with-dependencies.jar
           asset_content_type: application/java-archive
