@@ -7,15 +7,15 @@
 
     <groupId>com.azure.cosmos.kafka</groupId>
     <artifactId>kafka-connect-cosmos</artifactId>
-    <version>1.0-beta</version>
+    <version>1.0.2-beta</version>
 
     <name> kafka-connect-cosmos</name>
     <url>https://github.com/microsoft/kafka-connect-cosmosdb</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
         <kafka.version>2.7.0</kafka.version>
         <log4j.version>2.14.0</log4j.version>
         <slf4j.version>1.7.30</slf4j.version>
@@ -112,10 +112,47 @@
             <version>3.1.0</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>io.confluent</groupId>
+            <artifactId>kafka-avro-serializer</artifactId>
+            <version>6.0.1</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>3.1.1</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.puppycrawl.tools</groupId>
+                        <artifactId>checkstyle</artifactId>
+                        <version>8.29</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <configLocation>google_checks.xml</configLocation>
+                    <suppressionsLocation>checkstyle-suppresions.xml</suppressionsLocation>
+                    <encoding>UTF-8</encoding>
+                    <consoleOutput>true</consoleOutput>
+                    <failsOnError>true</failsOnError>
+                    <linkXRef>false</linkXRef>
+                    <failOnViolation>true</failOnViolation>
+                    <violationSeverity>warning</violationSeverity>
+                </configuration>
+                <executions>
+                    <execution>
+                    <id>validate</id>
+                    <phase>compile</phase>
+                    <goals>
+                        <goal>check</goal>
+                    </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>com.github.spotbugs</groupId>
                 <artifactId>spotbugs-maven-plugin</artifactId>
@@ -140,20 +177,48 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.3.0</version>
+                <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
+                    <archive>
+                        <manifest>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                        </manifest>
+                    </archive>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.1</version>
                 <executions>
                     <execution>
-                        <id>assemble-all</id>
                         <phase>package</phase>
                         <goals>
-                            <goal>single</goal>
+                            <goal>shade</goal>
                         </goals>
+                        <configuration>
+                            <finalName>${project.artifactId}-${project.version}-jar-with-dependencies</finalName>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/maven/**</exclude>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                            <relocations>
+                                <relocation>
+                                    <pattern>io.netty</pattern>
+                                    <shadedPattern>shaded.io.netty</shadedPattern>
+                                    <includes>
+                                        <include>io.netty.**</include>
+                                    </includes>
+                                </relocation>
+                            </relocations>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -167,10 +232,10 @@
                             <goal>kafka-connect</goal>
                         </goals>
                         <configuration>
-                            <title>Kafka Connect Azure Cosmos DB Source and Sink Connectors</title>
+                            <title>Azure Cosmos DB Connector</title>
                             <documentationUrl>https://github.com/microsoft/kafka-connect-cosmosdb</documentationUrl>
                             <description>
-                                The Cosmos DB connectors allow moving data between Azure Cosmos DB and Kafka. 
+                                The Azure Cosmos DB connectors allow moving data between Azure Cosmos DB and Kafka. 
                                 
                                 The Cosmos DB Sink connctor writes data from a Kafka topic  to a Cosmos DB container. 
                                 The Cosmos DB Source connector writes changes from a Cosmos DB container to a Kafka topic.

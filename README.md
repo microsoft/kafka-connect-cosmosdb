@@ -2,9 +2,11 @@
 
 [![Open Source Love svg2](https://badges.frapsoft.com/os/v2/open-source.svg?v=103)](https://github.com/microsoft/kafka-connect-cosmosdb/blob/dev/CODE_OF_CONDUCT.MD) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/microsoft/kafka-connect-cosmosdb/blob/dev/CONTRIBUTING.md) [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/microsoft/kafka-connect-cosmosdb/pulse) 
 
-[![Java CI with Maven](https://github.com/microsoft/kafka-connect-cosmosdb/workflows/Java%20CI%20with%20Maven/badge.svg)](https://github.com/microsoft/kafka-connect-cosmosdb/actions?query=workflow%3A%22Java+CI+with+Maven%22) [![Release](https://img.shields.io/github/v/release/microsoft/kafka-connect-cosmosdb?include_prereleases&label=Latest%20Release)](https://github.com/microsoft/kafka-connect-cosmosdb/releases)
+[![Java CI with Maven](https://github.com/microsoft/kafka-connect-cosmosdb/workflows/Java%20CI%20with%20Maven/badge.svg)](https://github.com/microsoft/kafka-connect-cosmosdb/actions?query=workflow%3A%22Java+CI+with+Maven%22) [![Release](https://img.shields.io/github/v/release/microsoft/kafka-connect-cosmosdb?include_prereleases&label=Latest%20Release)](https://github.com/microsoft/kafka-connect-cosmosdb/releases/)
 
 ## Introduction
+
+This project is pre-production. File any issues / feature requests / questions etc. you may have in the [Issues](https://github.com/microsoft/kafka-connect-cosmosdb/issues) for this repo. 
 
 This project provides connectors for [Kafka Connect](http://kafka.apache.org/documentation.html#connect) to read from and write data to [Azure Cosmos DB](https://azure.microsoft.com/en-us/services/cosmos-db/).
 
@@ -16,7 +18,7 @@ The sink & source connectors are configurable in order to support:
 | :----------- | :---------- |
 | JSON (Pain) | JSON record structure without any attached schema. |
 | JSON with Schema | JSON record structure with explicit schema information to ensure the data matches the expected format. |
-| AVRO | An open source serialization system that provides a compact binary format and a JSON-like API. Integrates with the [Confluent Schema Registry](https://www.confluent.io/confluent-schema-registry) to manage schema definitions.
+| AVRO | A row-oriented remote procedure call and data serialization framework developed within Apache's Hadoop project. It uses JSON for defining data types and protocols, and serializes data in a compact binary format. 
 
 Since key and value settings, including the format and serialization, can be independently configured in Kafka, it is possible to work with different data formats for records' keys and values respectively.
 
@@ -78,7 +80,13 @@ To cater for this there is converter configuration for both *key.converter* and 
 
 #### AVRO
 
-- To use the AvroConverter with [Schema Registry](https://docs.confluent.io/platform/current/schema-registry/connect.html), you specify the `key.converter` and `value.converter` properties in the worker configuration. An additional converter property must also be added that provides the Schema Registry URL. The example below shows the AvroConverter key and value properties that are added to the configuration:
+- This connector supports AVRO. To use AVRO you need to configure a AvroConverter so that Kafka Connect knows how to work with AVRO data. This connector has been tested with the [AvroConverter](https://www.confluent.io/hub/confluentinc/kafka-connect-avro-converter) supplied by Confluent, under Apache 2.0 license, but another custom converter can be used in its place instead if you prefer. 
+
+- Kafka deals with keys and values independently, you need to specify the `key.converter` and `value.converter` properties as required in the worker configuration. 
+
+- An additional converter property must also be added, when using  AvroConverter, that provides the URL for the Schema Registry. 
+
+The example below shows the AvroConverter key and value properties that are added to the configuration:
 
   ```properties
   key.converter=io.confluent.connect.avro.AvroConverter

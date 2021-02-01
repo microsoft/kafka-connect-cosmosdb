@@ -47,18 +47,17 @@ public class CosmosDBSinkConfig extends CosmosDBConfig {
         final String databaseGroupName = "Database";
         int databaseGroupOrder = CosmosDBConfig.COSMOS_DATABASE_GROUP_ORDER;
         
-        result
-            .define(
-                COSMOS_USE_UPSERT_CONF,
-                Type.BOOLEAN,
-                COSMOS_USE_UPSERT_DEFAULT,
-                Importance.MEDIUM,
-                COSMOS_USE_UPSERT_DOC,
-                databaseGroupName,
-                ++databaseGroupOrder,
-                Width.MEDIUM,
-                COSMOS_USE_UPSERT_DISPLAY
-            );
+        result.define(
+            COSMOS_USE_UPSERT_CONF,
+            Type.BOOLEAN,
+            COSMOS_USE_UPSERT_DEFAULT,
+            Importance.MEDIUM,
+            COSMOS_USE_UPSERT_DOC,
+            databaseGroupName,
+            ++databaseGroupOrder,
+            Width.MEDIUM,
+            COSMOS_USE_UPSERT_DISPLAY
+        );
     }
   
     public Boolean getUseUpsert() {

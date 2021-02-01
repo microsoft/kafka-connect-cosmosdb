@@ -67,6 +67,37 @@ docker-compose ps
 
 Your Confluent Platform setup is now ready to use!
 
+### Running Kafka Connect standalone mode
+
+The Kafka Connect container that is included with the Confluent Platform setup runs as Kafka connect as `distributed mode`. Using Kafka Connect as `distributed mode` is *recommended* since you can interact with connectors using the Control Center UI.
+
+If you instead would like to run Kafka Connect as `standalone mode`, which is useful for quick testing, continue through this section. For more information on Kafka Conenct standalone and distributed modes, refer to these [Confluent docs](https://docs.confluent.io/home/connect/userguide.html#standalone-vs-distributed-mode).
+
+> NOTE: This step will only work if you're using Codespaces or Dev Containers.
+>
+> You will also need to fill out the values for `connect.cosmosdb.connection.endpoint` and `connect.cosmosdb.master.key` in the `sink.properties` and/or `source.properties` files, which you should have saved from the [Cosmos DB setup guide](./CosmosDB_Setup.md)
+
+```bash
+
+### skip this step if using Kafka Connect as distributed mode (recommended)
+
+cd $REPO_ROOT/src/docker/resources
+
+# create copies of template files
+# you will need to update the configs for the Cosmos values as mentioned above
+
+cp source.example.properties source.properties
+cp sink.example.properties sink.properties
+cp standalone.example.properties standalone.properties
+
+# Setup a Cosmos source connector
+connect-standalone standalone.properties source.properties
+
+# Setup a Cosmos sink connector
+connect-standalone standalone.properties sink.properties
+
+```
+
 ### Access Confluent Platform components
 
 All of the Confluent Platform services should now be accessible on `localhost`. You can also access the web interfaces for some services as shown below.
@@ -79,7 +110,7 @@ All of the Confluent Platform services should now be accessible on `localhost`. 
 
 | Name | Address | Description |
 | --- | --- | --- |
-| Control Center | <http://localhost:9021> | The main webpage for all Confluent services where you can create topics, configure connectors, interact with the Connect cluster and more. |
+| Control Center | <http://localhost:9021> | The main webpage for all Confluent services where you can create topics, configure connectors, interact with the Connect cluster (only for distributed mode) and more. |
 | Kafka Topics UI | <http://localhost:9000> | Useful to viewing Kafka topics and the messages within them. |
 | Schema Registry UI | <http://localhost:9001> | Can view and create new schemas, ideal for interacting with Avro data.  |
 | ZooNavigator | <http://localhost:9004> | Web interface for Zookeeper. Refer to the [docs](https://zoonavigator.elkozmon.com/en/stable/) for more information. |

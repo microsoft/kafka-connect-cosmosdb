@@ -15,8 +15,8 @@ The connector polls data from Kafka to write to container(s) in the database bas
 
 ### Prerequisites
 
-- Confluent Platform (recommended to use this [setup](./Confluent_Platform_Setup.md))
-  - If you plan on using a separate Confluent Platform instance, you will need to install the Cosmos DB connectors manually.
+- It is recommended to start with the Confluent Platform (recommended to use this [setup](./Confluent_Platform_Setup.md)) as this gives you a complete environment to work with. 
+  - If you do not wish to use Confluent Platform, then you need to install and configure Zookeper, Apache Kafka, Kafka Connect, yourself. You will also need to install and configure the  Cosmos DB connectors manually.
 - Cosmos DB Instance ([setup guide](./CosmosDB_Setup.md))
 - Bash shell (tested on Github Codespaces, Mac, Ubuntu, Windows with WSL2)
   - Will not work in Cloud Shell or WSL1
@@ -26,13 +26,12 @@ The connector polls data from Kafka to write to container(s) in the database bas
 ### Install sink connector
 
 If you are using the Confluent Platform setup from this repo, the Cosmos DB Sink Connector is included in the installation and you can skip this step.
-
+  
 Otherwise, you can download the JAR file from the latest [Release](https://github.com/microsoft/kafka-connect-cosmosdb/releases) or package this repo to create a new JAR file. To install the connector manually using the JAR file, refer to these [instructions](https://docs.confluent.io/current/connect/managing/install.html#install-connector-manually).
-
+  
 You can also package a new JAR file from the source code.
 
 ```bash
-
 # clone the kafka-connect-cosmosdb repo if you haven't done so already
 git clone https://github.com/microsoft/kafka-connect-cosmosdb.git
 cd kafka-connect-cosmosdb
@@ -40,14 +39,20 @@ cd kafka-connect-cosmosdb
 # package the source code into a JAR file
 mvn clean package
 
-# include the following JAR file in Confluent Platform installation
+# include the following JAR file in Kafka Connect installation
 ls target/*dependencies.jar
-
 ```
 
 ### Create Kafka topic and write data
 
-Create a Kafka topic using Confluent Control Center and write a few messages into the topic. For this quickstart, we will create a Kafka topic named `hotels` and will write JSON data (non-schema embedded) to the topic.
+If you are using the Confluent Platform, the easiest way to create a Kafka topic is by using the supplied Control Center UX. 
+Otherwise, you can create a Kafka topic manually using the following syntax:
+
+```bash
+./kafka-topics.sh --create --zookeeper <ZOOKEEPER_URL:PORT> --replication-factor <NO_OF_REPLICATIONS> --partitions <NO_OF_PARTITIONS> --topic <TOPIC_NAME>
+```
+
+For this quickstart, we will create a Kafka topic named `hotels` and will write JSON data (non-schema embedded) to the topic.
 
 To create a topic inside Control Center, see [here](https://docs.confluent.io/platform/current/quickstart/ce-docker-quickstart.html#step-2-create-ak-topics).
 
@@ -152,17 +157,15 @@ To delete the connector from the Control Center, navigate to the sink connector 
 Alternatively, use the Connect REST API.
 
 ```bash
-
 # Curl to Kafka connect service
 curl -X DELETE http://localhost:8083/connectors/cosmosdb-sink-connector
-
 ```
 
 To delete the created Azure Cosmos DB service and its resource group using Azure CLI, refer to these [steps](./CosmosDB_Setup.md#cleanup).
 
 ## Sink configuration properties
 
-The following settings are used to configure the Cosmos DB Kafka Sink Connector. These configuration values determine which Kafka topics data is consumed, which Cosmos DB containers data is written into and formats to serialize the data. For an example configuration file with the default values, refer to [this config](../src/docker/resources/sink.config.json).
+The following settings are used to configure the Cosmos DB Kafka Sink Connector. These configuration values determine which Kafka topics data is consumed, which Cosmos DB containers data is written into and formats to serialize the data. For an example configuration file with the default values, refer to [this config](../src/docker/resources/sink.example.json).
 
 | Name | Type | Description | Required/Optional |
 | :--- | :--- | :--- | :--- |

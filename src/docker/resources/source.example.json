@@ -1,16 +1,18 @@
 {
-  "name": "cosmosdb-sink-connector",
+  "name": "cosmosdb-source-connector",
   "config": {
-    "connector.class": "com.azure.cosmos.kafka.connect.sink.CosmosDBSinkConnector",
+    "connector.class": "com.azure.cosmos.kafka.connect.source.CosmosDBSourceConnector",
     "tasks.max": "1",
-    "topics": "connect-test",
     "value.converter": "org.apache.kafka.connect.json.JsonConverter",
     "value.converter.schemas.enable": "false",
     "key.converter": "org.apache.kafka.connect.json.JsonConverter",
     "key.converter.schemas.enable": "false",
+    "connect.cosmosdb.task.poll.interval": "1000",
+    "connect.cosmosdb.offset.useLatest": false,
+    "connect.cosmosdb.containers": "kafka",
     "connect.cosmosdb.connection.endpoint": "https://<cosmosinstance-name>.documents.azure.com:443/",
     "connect.cosmosdb.master.key": "<cosmosdbprimarykey>",
     "connect.cosmosdb.databasename": "kafkaconnect",
-    "connect.cosmosdb.containers.topicmap": "connect-test#kafka"
+    "connect.cosmosdb.containers.topicmap": "source-test#kafka"
   }
 }

@@ -5,13 +5,6 @@ import com.azure.cosmos.CosmosClientBuilder;
 import com.azure.cosmos.CosmosContainer;
 import com.azure.cosmos.implementation.BadRequestException;
 import com.azure.cosmos.kafka.connect.CosmosDBConfig;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.kafka.connect.sink.SinkRecord;
-import org.apache.kafka.connect.sink.SinkTask;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.apache.kafka.connect.data.Struct;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -19,6 +12,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.kafka.connect.data.Struct;
+import org.apache.kafka.connect.sink.SinkRecord;
+import org.apache.kafka.connect.sink.SinkTask;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implements the Kafka Task for the CosmosDB Sink Connector
@@ -39,7 +39,9 @@ public class CosmosDBSinkTask extends SinkTask {
         logger.trace("Sink task started.");
         this.config = new CosmosDBSinkConfig(map);
 
-        this.client = new CosmosClientBuilder().endpoint(config.getConnEndpoint()).key(config.getConnKey())
+        this.client = new CosmosClientBuilder()
+                .endpoint(config.getConnEndpoint())
+                .key(config.getConnKey())
                 .userAgentSuffix(CosmosDBConfig.COSMOS_CLIENT_USER_AGENT_SUFFIX + version()).buildClient();
 
         client.createDatabaseIfNotExists(config.getDatabaseName());
@@ -57,7 +59,8 @@ public class CosmosDBSinkTask extends SinkTask {
         Map<String, List<SinkRecord>> recordsByContainer = records.stream()
                 // Find target collection for each record
                 .collect(Collectors.groupingBy(record -> config.getTopicContainerMap()
-                        .getContainerForTopic(record.topic()).orElseThrow(() -> new IllegalStateException(
+                        .getContainerForTopic(record.topic())
+                        .orElseThrow(() -> new IllegalStateException(
                                 String.format("No container defined for topic %s .", record.topic())))));
 
         for (Map.Entry<String, List<SinkRecord>> entry : recordsByContainer.entrySet()) {
