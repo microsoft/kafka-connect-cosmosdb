@@ -1,3 +1,12 @@
+---
+name: Epic
+about: Used to track larger-scope initiative
+title: 'Epic: '
+labels: ''
+assignees: ''
+
+---
+
 ### Gate/Entrance Criteria:
 _In order to begin this epic, the following item(s) must be completed)_
 - [ ] Criteria 1
