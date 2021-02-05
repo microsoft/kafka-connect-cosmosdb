@@ -252,7 +252,7 @@ public class CosmosDBSourceTask extends SourceTask {
 
         return new ChangeFeedProcessorBuilder()
                 .options(changeFeedProcessorOptions)
-                .hostName(hostName  + RandomUtils.nextLong(1L, 9999999L) + "")
+                .hostName(hostName + RandomUtils.nextLong(1L, 9999999L) + "")
                 .feedContainer(feedContainer)
                 .leaseContainer(leaseContainer)
                 .handleChanges(this::handleCosmosDbChanges)
