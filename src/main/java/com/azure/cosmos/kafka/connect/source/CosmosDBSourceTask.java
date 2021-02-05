@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.azure.cosmos.kafka.connect.TopicContainerMap;
 import com.azure.cosmos.kafka.connect.CosmosDBConfig;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.apache.commons.lang3.RandomUtils;
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.source.SourceRecord;
 import org.apache.kafka.connect.source.SourceTask;
@@ -247,10 +248,11 @@ public class CosmosDBSourceTask extends SourceTask {
         ChangeFeedProcessorOptions changeFeedProcessorOptions = new ChangeFeedProcessorOptions();
         changeFeedProcessorOptions.setFeedPollDelay(Duration.ofMillis(config.getTaskPollInterval()));
         changeFeedProcessorOptions.setMaxItemCount(config.getTaskBatchSize().intValue());
+        changeFeedProcessorOptions.setLeasePrefix(config.getTopicContainerMap() + "" + config.getDatabaseName());
 
         return new ChangeFeedProcessorBuilder()
                 .options(changeFeedProcessorOptions)
-                .hostName(hostName)
+                .hostName(hostName  + RandomUtils.nextLong(1L, 9999999L) + "")
                 .feedContainer(feedContainer)
                 .leaseContainer(leaseContainer)
                 .handleChanges(this::handleCosmosDbChanges)
