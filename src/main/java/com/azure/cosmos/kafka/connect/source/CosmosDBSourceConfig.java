@@ -237,17 +237,9 @@ public class CosmosDBSourceConfig extends CosmosDBConfig {
         return this.useLatestOffset.booleanValue();
     }
 
-    // public void setAssignedContainer(String assignedContainer) {
-    //     this.assignedContainer = assignedContainer;
-    // }
-
     public String getAssignedContainer() {
         return this.assignedContainer;
     }
-
-    // public void setWorkerName(String workerName) {
-    //     this.workerName = workerName;
-    // }
 
     public String getWorkerName() {
         return this.workerName;
