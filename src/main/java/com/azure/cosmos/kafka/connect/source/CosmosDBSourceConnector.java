@@ -1,5 +1,6 @@
 package com.azure.cosmos.kafka.connect.source;
 
+import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.common.config.ConfigException;
@@ -52,7 +53,9 @@ public class CosmosDBSourceConnector extends SourceConnector {
             taskProps.put(CosmosDBSourceConfig.COSMOS_ASSIGNED_CONTAINER_CONF,
                           containerList.get(i % containerList.size()));
             taskProps.put(CosmosDBSourceConfig.COSMOS_WORKER_NAME_CONF, 
-                          CosmosDBSourceConfig.COSMOS_WORKER_NAME_DEFAULT + i);
+                          String.format("%s-%d-%d", 
+                                CosmosDBSourceConfig.COSMOS_WORKER_NAME_DEFAULT,
+                                RandomUtils.nextLong(1L, 9999999L), i));
             taskConfigs.add(taskProps);
         }
 
