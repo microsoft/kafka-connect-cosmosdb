@@ -247,6 +247,7 @@ public class CosmosDBSourceTask extends SourceTask {
         ChangeFeedProcessorOptions changeFeedProcessorOptions = new ChangeFeedProcessorOptions();
         changeFeedProcessorOptions.setFeedPollDelay(Duration.ofMillis(config.getTaskPollInterval()));
         changeFeedProcessorOptions.setMaxItemCount(config.getTaskBatchSize().intValue());
+        changeFeedProcessorOptions.setLeasePrefix(config.getAssignedContainer() + config.getDatabaseName() + ".");
 
         return new ChangeFeedProcessorBuilder()
                 .options(changeFeedProcessorOptions)
