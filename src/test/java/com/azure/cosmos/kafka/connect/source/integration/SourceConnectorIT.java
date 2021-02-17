@@ -183,7 +183,6 @@ public class SourceConnectorIT {
             .withConfig("key.converter.schemas.enable", config.get("key.converter.schemas.enable").textValue())
             .withConfig("connect.cosmosdb.task.poll.interval", config.get("connect.cosmosdb.task.poll.interval").textValue())
             .withConfig("connect.cosmosdb.offset.useLatest", config.get("connect.cosmosdb.offset.useLatest").booleanValue())
-            .withConfig("connect.cosmosdb.containers", config.get("connect.cosmosdb.containers").textValue())
             .withConfig("connect.cosmosdb.connection.endpoint", config.get("connect.cosmosdb.connection.endpoint").textValue())
             .withConfig("connect.cosmosdb.master.key", config.get("connect.cosmosdb.master.key").textValue())
             .withConfig("connect.cosmosdb.databasename", config.get("connect.cosmosdb.databasename").textValue())
@@ -443,9 +442,6 @@ public class SourceConnectorIT {
         Map<String, String> currentParams = connectConfig.build().getConfig();
         Builder multiWorkerConfigBuilder = connectConfig
             .withConfig("tasks.max", 2)
-            .withConfig("connect.cosmosdb.containers", 
-                currentParams.get("connect.cosmosdb.containers") 
-                + String.format(",%s", SECOND_COSMOS_CONTAINER))
             .withConfig("connect.cosmosdb.containers.topicmap", 
                 currentParams.get("connect.cosmosdb.containers.topicmap") 
                 + String.format(",%s#%s", SECOND_KAFKA_TOPIC, SECOND_COSMOS_CONTAINER));

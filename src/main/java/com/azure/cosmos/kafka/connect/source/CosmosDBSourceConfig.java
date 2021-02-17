@@ -41,21 +41,6 @@ public class CosmosDBSourceConfig extends CosmosDBConfig {
         "The polling interval in milliseconds that a source task polls for changes.";
     private static final String COSMOS_SOURCE_TASK_POLL_INTERVAL_DISPLAY = "Task poll interval";
 
-    static final String COSMOS_CONTAINERS_LIST_CONF = "connect.cosmosdb.containers";
-    private static final String COSMOS_CONTAINERS_LIST_DOC = 
-        "A comma delimited list of source Cosmos DB container names.";
-    private static final String COSMOS_CONTAINERS_LIST_DISPLAY = "Cosmos Container Names List";
-
-    static final String COSMOS_ASSIGNED_CONTAINER_CONF = "connect.cosmosdb.assigned.container";
-    private static final String COSMOS_ASSIGNED_CONTAINER_DOC = 
-        "The Cosmos DB Feed Container assigned to the task.";
-    private static final String COSMOS_ASSIGNED_CONTAINER_DISPLAY = "Cosmos Assigned Container";
-
-    static final String COSMOS_WORKER_NAME_CONF = "connect.cosmosdb.worker.name";
-    private static final String COSMOS_WORKER_NAME_DEFAULT = "worker";
-    private static final String COSMOS_WORKER_NAME_DOC = "The Cosmos DB worker name";
-    private static final String COSMOS_WORKER_NAME_DISPLAY = "Cosmos Worker name";
-
     static final String COSMOS_MESSAGE_KEY_ENABLED_CONF = "connect.cosmosdb.messagekey.enabled";
     private static final String COSMOS_MESSAGE_KEY_ENABLED_DEFAULT = "true";
     private static final String COSMOS_MESSAGE_KEY_ENABLED_DOC = "Whether to set the Kafka message key.";
@@ -75,16 +60,24 @@ public class CosmosDBSourceConfig extends CosmosDBConfig {
         + "  was monitored by a source task.";
     private static final String COSMOS_USE_LATEST_OFFSET_DISPLAY = "Use latest offset";
 
+
+    static final String COSMOS_ASSIGNED_CONTAINER_CONF = "connect.cosmosdb.assigned.container";
+
+    static final String COSMOS_WORKER_NAME_CONF = "connect.cosmosdb.worker.name";
+    static final String COSMOS_WORKER_NAME_DEFAULT = "worker";
+
+    // Variables defined as Connect configs
     private Long timeout;
     private Long bufferSize;
     private Long batchSize;
     private Long pollInterval;
-    private String containersList;
-    private String assignedContainer;
-    private String workerName;
     private Boolean messageKeyEnabled;
     private String messageKeyField;
     private Boolean useLatestOffset;
+
+    // Variables not defined as Connect configs, should not be exposed when creating connector
+    private String workerName;
+    private String assignedContainer;
 
     public CosmosDBSourceConfig(ConfigDef config, Map<String, String> parsedConfig) {
         super(config, parsedConfig);
@@ -97,12 +90,13 @@ public class CosmosDBSourceConfig extends CosmosDBConfig {
         bufferSize = this.getLong(COSMOS_SOURCE_TASK_BUFFER_SIZE_CONF);
         batchSize = this.getLong(COSMOS_SOURCE_TASK_BATCH_SIZE_CONF);
         pollInterval = this.getLong(COSMOS_SOURCE_TASK_POLL_INTERVAL_CONF);
-        containersList = this.getString(COSMOS_CONTAINERS_LIST_CONF);
-        assignedContainer = this.getString(COSMOS_ASSIGNED_CONTAINER_CONF);
-        workerName = this.getString(COSMOS_WORKER_NAME_CONF);
         messageKeyEnabled = this.getBoolean(COSMOS_MESSAGE_KEY_ENABLED_CONF);
         messageKeyField = this.getString(COSMOS_MESSAGE_KEY_FIELD_CONF);
         useLatestOffset = this.getBoolean(COSMOS_USE_LATEST_OFFSET_CONF);
+
+        // Since variables are not defined as Connect configs, grab values directly from Map
+        assignedContainer = parsedConfig.get(COSMOS_ASSIGNED_CONTAINER_CONF);
+        workerName = parsedConfig.get(COSMOS_WORKER_NAME_CONF);
     }
 
     public static ConfigDef getConfig() {
@@ -173,17 +167,6 @@ public class CosmosDBSourceConfig extends CosmosDBConfig {
         
         result
             .define(
-                COSMOS_CONTAINERS_LIST_CONF,
-                Type.STRING,
-                ConfigDef.NO_DEFAULT_VALUE,
-                Importance.HIGH,
-                COSMOS_CONTAINERS_LIST_DOC,
-                databaseGroupName,
-                ++databaseGroupOrder,
-                Width.MEDIUM,
-                COSMOS_CONTAINERS_LIST_DISPLAY
-            )
-            .define(
                 COSMOS_USE_LATEST_OFFSET_CONF,
                 Type.BOOLEAN,
                 COSMOS_USE_LATEST_OFFSET_DEFAULT,
@@ -193,28 +176,6 @@ public class CosmosDBSourceConfig extends CosmosDBConfig {
                 ++databaseGroupOrder,
                 Width.MEDIUM,
                 COSMOS_USE_LATEST_OFFSET_DISPLAY
-            )
-            .define(
-                COSMOS_ASSIGNED_CONTAINER_CONF,
-                Type.STRING,
-                "",
-                Importance.MEDIUM,
-                COSMOS_ASSIGNED_CONTAINER_DOC,
-                databaseGroupName,
-                ++databaseGroupOrder,
-                Width.MEDIUM,
-                COSMOS_ASSIGNED_CONTAINER_DISPLAY
-            )
-            .define(
-                COSMOS_WORKER_NAME_CONF,
-                Type.STRING,
-                COSMOS_WORKER_NAME_DEFAULT,
-                Importance.MEDIUM,
-                COSMOS_WORKER_NAME_DOC,
-                databaseGroupName,
-                ++databaseGroupOrder,
-                Width.MEDIUM,
-                COSMOS_WORKER_NAME_DISPLAY
             );
     }
 
@@ -248,18 +209,6 @@ public class CosmosDBSourceConfig extends CosmosDBConfig {
             );
     }
 
-    public String getContainerList() {
-        return this.containersList;
-    }
-
-    public String getAssignedContainer() {
-        return this.assignedContainer;
-    }
-
-    public String getWorkerName() {
-        return this.workerName;
-    }
-
     public Long getTaskTimeout() {
         return this.timeout;
     }
@@ -286,5 +235,13 @@ public class CosmosDBSourceConfig extends CosmosDBConfig {
 
     public boolean useLatestOffset() {
         return this.useLatestOffset.booleanValue();
+    }
+
+    public String getAssignedContainer() {
+        return this.assignedContainer;
+    }
+
+    public String getWorkerName() {
+        return this.workerName;
     }
 }
