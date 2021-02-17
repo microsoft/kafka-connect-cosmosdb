@@ -237,7 +237,7 @@
                             <description>
                                 The Azure Cosmos DB connectors allow moving data between Azure Cosmos DB and Kafka. 
                                 
-                                The Cosmos DB Sink connctor writes data from a Kafka topic  to a Cosmos DB container. 
+                                The Cosmos DB Sink connector writes data from a Kafka topic to a Cosmos DB container. 
                                 The Cosmos DB Source connector writes changes from a Cosmos DB container to a Kafka topic.
                             </description>
                             <version>${project.version}</version>
