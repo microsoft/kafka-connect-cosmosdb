@@ -38,10 +38,10 @@ public class CosmosDBSourceConnector extends SourceConnector {
     @Override
     public List<Map<String, String>> taskConfigs(int maxTasks) {
         logger.info("Creating the task Configs");
-        String[] containerList = StringUtils.split(config.getContainerList(), ",");
+        List<String> containerList = config.getTopicContainerMap().getContainerList();
         List<Map<String, String>> taskConfigs = new ArrayList<>(maxTasks);
 
-        if (containerList.length == 0) {
+        if (containerList.size() == 0) {
             logger.debug("Container list is not specified");
             return taskConfigs;
         }
@@ -50,8 +50,9 @@ public class CosmosDBSourceConnector extends SourceConnector {
             // Equally distribute workers by assigning workers to containers in round robin fashion.
             Map<String, String> taskProps = config.originalsStrings();
             taskProps.put(CosmosDBSourceConfig.COSMOS_ASSIGNED_CONTAINER_CONF,
-                          containerList[i % containerList.length]);
-            taskProps.put(CosmosDBSourceConfig.COSMOS_WORKER_NAME_CONF, config.getWorkerName() + i);
+                          containerList.get(i % containerList.size()));
+            taskProps.put(CosmosDBSourceConfig.COSMOS_WORKER_NAME_CONF, 
+                          CosmosDBSourceConfig.COSMOS_WORKER_NAME_DEFAULT + i);
             taskConfigs.add(taskProps);
         }
 

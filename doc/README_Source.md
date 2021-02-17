@@ -73,7 +73,6 @@ Refer to the [source properties](#source-configuration-properties) section for m
     "connect.cosmosdb.master.key": "<cosmosdbprimarykey>",
     "connect.cosmosdb.databasename": "kafkaconnect",
     "connect.cosmosdb.containers.topicmap": "apparels#kafka",
-    "connect.cosmosdb.containers": "kafka",
     "connect.cosmosdb.offset.useLatest": false,
     "value.converter.schemas.enable": "false",
     "key.converter.schemas.enable": "false"
@@ -173,7 +172,6 @@ The following settings are used to configure the Cosmos DB Kafka Source Connecto
 | connect.cosmosdb.master.key | string | the configured master key for Cosmos DB | Required |
 | connect.cosmosdb.connection.endpoint | uri | the endpoint for the Cosmos DB Account | Required |
 | connect.cosmosdb.containers.topicmap | string | comma separeted topic to collection mapping, eg. topic1#coll1,topic2#coll2 | Required |
-| connect.cosmosdb.containers | string | list of collections to monitor |  Required |
 | connect.cosmosdb.messagekey.enabled | boolean | set if the Kafka message key should be set. Default is `true` | Required |
 | connect.cosmosdb.messagekey.field | string | use the field's value from the document as the message key. Default is `id` | Required |
 | connect.cosmosdb.offset.useLatest | boolean |  Set to `"true"` to use the latest (most recent) source offset, `"false"` to use the earliest recorded offset. Default is `false` | Required |

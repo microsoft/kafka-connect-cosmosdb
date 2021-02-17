@@ -16,6 +16,7 @@ import static org.junit.Assert.*;
 public class CosmosDBSourceConnectorTest {
 
     private static final String ASSIGNED_CONTAINER = CosmosDBSourceConfig.COSMOS_ASSIGNED_CONTAINER_CONF;
+    private static final String WORKER_NAME = CosmosDBSourceConfig.COSMOS_WORKER_NAME_CONF;
     private static final String BATCH_SETTING_NAME = CosmosDBSourceConfig.COSMOS_SOURCE_TASK_BATCH_SIZE_CONF;
     private static final Long BATCH_SETTING = new CosmosDBSourceConfig(CosmosDBSourceConfigTest.setupConfigs()).getTaskBatchSize();
 
@@ -35,7 +36,7 @@ public class CosmosDBSourceConnectorTest {
     public void testAbsentDefaults(){
         //Containers list is set in connector and does not have a default setting. Let's see if the configdef does
         assertNull(new CosmosDBSourceConnector().config().defaultValues()
-            .get(CosmosDBSourceConfig.COSMOS_CONTAINERS_LIST_CONF));
+            .get(ASSIGNED_CONTAINER));
     }
 
     @Test
@@ -69,17 +70,34 @@ public class CosmosDBSourceConnectorTest {
     @Test
     public void testValidTaskConfigContainerAssignment(){
         Map<String, String> settingAssignment = CosmosDBSourceConfigTest.setupConfigs();
-        settingAssignment.put(CosmosDBSourceConfig.COSMOS_CONTAINERS_LIST_CONF, "C1,C2,C3,C4");
+        settingAssignment.put(CosmosDBSourceConfig.COSMOS_CONTAINER_TOPIC_MAP_CONF, "T1#C1,T2#C2,T3#C3,T4#C4");
         CosmosDBSourceConnector sourceConnector = new CosmosDBSourceConnector();
         sourceConnector.start(settingAssignment);
         List<Map<String, String>> taskConfigs = sourceConnector.taskConfigs(6);
 
         assertEquals(6, taskConfigs.size());
-        assertEquals("C1", taskConfigs.get(0).get(ASSIGNED_CONTAINER));
-        assertEquals("C2", taskConfigs.get(1).get(ASSIGNED_CONTAINER));
-        assertEquals("C3", taskConfigs.get(2).get(ASSIGNED_CONTAINER));
-        assertEquals("C4", taskConfigs.get(3).get(ASSIGNED_CONTAINER));
-        assertEquals("C1", taskConfigs.get(4).get(ASSIGNED_CONTAINER));
-        assertEquals("C2", taskConfigs.get(5).get(ASSIGNED_CONTAINER));
+        assertEquals("C4", taskConfigs.get(0).get(ASSIGNED_CONTAINER));
+        assertEquals("C1", taskConfigs.get(1).get(ASSIGNED_CONTAINER));
+        assertEquals("C2", taskConfigs.get(2).get(ASSIGNED_CONTAINER));
+        assertEquals("C3", taskConfigs.get(3).get(ASSIGNED_CONTAINER));
+        assertEquals("C4", taskConfigs.get(4).get(ASSIGNED_CONTAINER));
+        assertEquals("C1", taskConfigs.get(5).get(ASSIGNED_CONTAINER));
+    }
+
+    @Test
+    public void testValidTaskConfigWorkerNameAssignment(){
+        Map<String, String> settingAssignment = CosmosDBSourceConfigTest.setupConfigs();
+        settingAssignment.put(CosmosDBSourceConfig.COSMOS_CONTAINER_TOPIC_MAP_CONF, "T1#C1");
+        CosmosDBSourceConnector sourceConnector = new CosmosDBSourceConnector();
+        sourceConnector.start(settingAssignment);
+        List<Map<String, String>> taskConfigs = sourceConnector.taskConfigs(6);
+
+        assertEquals(6, taskConfigs.size());
+        assertEquals("worker0", taskConfigs.get(0).get(WORKER_NAME));
+        assertEquals("worker1", taskConfigs.get(1).get(WORKER_NAME));
+        assertEquals("worker2", taskConfigs.get(2).get(WORKER_NAME));
+        assertEquals("worker3", taskConfigs.get(3).get(WORKER_NAME));
+        assertEquals("worker4", taskConfigs.get(4).get(WORKER_NAME));
+        assertEquals("worker5", taskConfigs.get(5).get(WORKER_NAME));
     }
 }
