@@ -186,7 +186,7 @@ The following settings are used to configure the Cosmos DB Kafka Sink Connector.
 Data will always be written to the Cosmos DB as JSON without any schema.
 
 ## Supported Data Types
-Azure Cosmos DB sink connector converts SinkRecord in to JSON Document supporting below schema types out of valid [Schema.Types](https://kafka.apache.org/21/javadoc/org/apache/kafka/connect/data/Schema.Type.html)
+Azure Cosmos DB sink connector converts SinkRecord in to JSON Document supporting below schema types from listed valid [Schema.Types](https://kafka.apache.org/21/javadoc/org/apache/kafka/connect/data/Schema.Type.html)
 
 | Schema Type | JSON Data Type |
 | :--- | :--- |
