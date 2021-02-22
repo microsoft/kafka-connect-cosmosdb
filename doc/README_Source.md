@@ -6,6 +6,7 @@ The Azure Cosmos DB Source connector provides the capability to read data from t
 
 - [Quickstart](#quickstart)
 - [Source configuration properties](#source-configuration-properties)
+- [Supported Data Types](supported-data-types)
 
 ## Quickstart
 
@@ -181,3 +182,15 @@ The following settings are used to configure the Cosmos DB Kafka Source Connecto
 | key.converter.schemas.enable | string | Set to `"true"` if the key data has embedded schema | Optional |
 | value.converter.schemas.enable | string | Set to `"true"` if the key data has embedded schema | Optional |
 | tasks.max | int | Maximum number of connector sink tasks. Default is `1` | Optional |
+
+## Supported Data Types
+Azure Cosmos DB source connector converts JSON Document to Schema supporting all valid JSON data types.
+
+| JSON Data Type | Schema Type |
+| :--- | :--- |
+| Array | Array |
+| Boolean | Boolean | 
+| Number | Float32<br>Float64<br>Int8<br>Int16<br>Int32<br>Int64|
+| Null | String |
+| Object (JSON)| Struct|
+| String | String |

@@ -7,6 +7,7 @@ The connector polls data from Kafka to write to container(s) in the database bas
 
 - [Quickstart](#quickstart)
 - [Sink configuration properties](#sink-configuration-properties)
+- [Supported Data Types](#supported-data-types)
 - [Single Message Transforms (SMTs)](#single-message-transforms)
 - [Troubleshooting common issues](#troubleshooting-common-issues)
 - [Limitations](#limitations)
@@ -183,6 +184,33 @@ The following settings are used to configure the Cosmos DB Kafka Sink Connector.
 | tasks.max | int | Maximum number of connector sink tasks. Default is `1` | Optional |
 
 Data will always be written to the Cosmos DB as JSON without any schema.
+
+## Supported Data Types
+Azure Cosmos DB sink connector converts SinkRecord in to JSON Document supporting below schema types out of valid [Schema.Types](https://kafka.apache.org/21/javadoc/org/apache/kafka/connect/data/Schema.Type.html)
+
+| Schema Type | JSON Data Type |
+| :--- | :--- |
+| Array | Array |
+| Boolean | Boolean | 
+| Float32 | Number |
+| Float64 | Number |
+| Int8 | Number |
+| Int16 | Number |
+| Int32 | Number |
+| Int64 | Number|
+| Map | Object (JSON)|
+| String | String<br> Null |
+| Struct | Object (JSON) |
+
+Cosmos DB sink Connector also supports the following AVRO logical types:
+
+| Schema Type | JSON Data Type |
+| :--- | :--- |
+| Date | Number |
+| Time | Number |
+| Timestamp | Number |
+
+>**Note:** Byte deserialization is currently not supported by Azure Cosmos DB sink connector.
 
 ## Single Message Transforms
 
