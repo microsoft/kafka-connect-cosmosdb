@@ -268,8 +268,7 @@
                             <confluentControlCenterIntegration>true</confluentControlCenterIntegration>
                             <supportProviderName>Microsoft</supportProviderName>
                             <supportUrl>https://github.com/microsoft/kafka-connect-cosmosdb/issues</supportUrl>                            
-                            <supportProviderName>Microsoft
-                            </supportProviderName>
+                            <supportProviderName>Microsoft</supportProviderName>
                             <supportSummary>This project is in preview. File any issues, feature requests, or questions under issues (https://github.com/microsoft/kafka-connect-cosmosdb/issues).
                             </supportSummary>
                         </configuration>
