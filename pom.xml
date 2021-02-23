@@ -28,6 +28,14 @@
             <url>http://packages.confluent.io/maven/</url>
         </repository>
     </repositories>
+         
+    <licenses>
+         <license>
+            <name>MIT License</name>
+            <url>https://mit-license.org/</url>
+            <distribution>repo</distribution>
+         </license>
+    </licenses>
 
     <dependencies>
         <dependency>
@@ -236,7 +244,6 @@
                             <documentationUrl>https://github.com/microsoft/kafka-connect-cosmosdb</documentationUrl>
                             <description>
                                 The Azure Cosmos DB connectors allow moving data between Azure Cosmos DB and Kafka. 
-                                
                                 The Cosmos DB Sink connector writes data from a Kafka topic to a Cosmos DB container. 
                                 The Cosmos DB Source connector writes changes from a Cosmos DB container to a Kafka topic.
                             </description>
