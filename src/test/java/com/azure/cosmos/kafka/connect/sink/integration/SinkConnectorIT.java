@@ -86,19 +86,19 @@ public class SinkConnectorIT {
         JsonNode config = new ObjectMapper().readTree(configFileUrl);
         connectorName = config.get("name").textValue();
         config = config.get("config");
-        String topicContainerMap = config.get("connect.cosmosdb.containers.topicmap").textValue();
+        String topicContainerMap = config.get("connect.cosmos.containers.topicmap").textValue();
         kafkaTopicJson = StringUtils.substringBefore(topicContainerMap, "#");
         String containerName = StringUtils.substringAfter(topicContainerMap, "#");
 
         // Setup Cosmos Client
         logger.debug("Setting up the Cosmos DB client");
         cosmosClient = new CosmosClientBuilder()
-                .endpoint(config.get("connect.cosmosdb.connection.endpoint").textValue())
-                .key(config.get("connect.cosmosdb.master.key").textValue())
+                .endpoint(config.get("connect.cosmos.connection.endpoint").textValue())
+                .key(config.get("connect.cosmos.master.key").textValue())
                 .buildClient();
 
         // Create CosmosDB database if not exists
-        databaseName = config.get("connect.cosmosdb.databasename").textValue();
+        databaseName = config.get("connect.cosmos.databasename").textValue();
         cosmosClient.createDatabaseIfNotExists(databaseName);
         CosmosDatabase targetDatabase = cosmosClient.getDatabase(databaseName);
 
@@ -154,10 +154,10 @@ public class SinkConnectorIT {
             .withConfig("value.converter.schemas.enable", config.get("value.converter.schemas.enable").textValue())
             .withConfig("key.converter", config.get("key.converter").textValue())
             .withConfig("key.converter.schemas.enable", config.get("key.converter.schemas.enable").textValue())
-            .withConfig("connect.cosmosdb.connection.endpoint", config.get("connect.cosmosdb.connection.endpoint").textValue())
-            .withConfig("connect.cosmosdb.master.key", config.get("connect.cosmosdb.master.key").textValue())
-            .withConfig("connect.cosmosdb.databasename", config.get("connect.cosmosdb.databasename").textValue())
-            .withConfig("connect.cosmosdb.containers.topicmap", config.get("connect.cosmosdb.containers.topicmap").textValue());
+            .withConfig("connect.cosmos.connection.endpoint", config.get("connect.cosmos.connection.endpoint").textValue())
+            .withConfig("connect.cosmos.master.key", config.get("connect.cosmos.master.key").textValue())
+            .withConfig("connect.cosmos.databasename", config.get("connect.cosmos.databasename").textValue())
+            .withConfig("connect.cosmos.containers.topicmap", config.get("connect.cosmos.containers.topicmap").textValue());
     }
 
     /**
@@ -221,7 +221,7 @@ public class SinkConnectorIT {
         connectClient.addConnector(connectConfig
             .withConfig("value.converter.schemas.enable", "true")
             .withConfig("topics", KAFKA_TOPIC_JSON_SCHEMA)
-            .withConfig("connect.cosmosdb.containers.topicmap", KAFKA_TOPIC_JSON_SCHEMA+"#kafka")
+            .withConfig("connect.cosmos.containers.topicmap", KAFKA_TOPIC_JSON_SCHEMA+"#kafka")
             .build());
 
         // Send Kafka message to topic
@@ -272,7 +272,7 @@ public class SinkConnectorIT {
             .withConfig("key.converter.schemas.enable", "true")
             .withConfig("key.converter.schema.registry.url", AVRO_SCHEMA_REGISTRY)
             .withConfig("topics", KAFKA_TOPIC_AVRO)
-            .withConfig("connect.cosmosdb.containers.topicmap", KAFKA_TOPIC_AVRO+"#kafka")
+            .withConfig("connect.cosmos.containers.topicmap", KAFKA_TOPIC_AVRO+"#kafka")
             .build());
 
         // Send Kafka message to topic

@@ -57,7 +57,7 @@ public class CosmosDBSinkTask extends SinkTask {
         logger.info("Sending {} records to be written", records.size());
 
         Map<String, List<SinkRecord>> recordsByContainer = records.stream()
-                // Find target collection for each record
+                // Find target container for each record
                 .collect(Collectors.groupingBy(record -> config.getTopicContainerMap()
                         .getContainerForTopic(record.topic())
                         .orElseThrow(() -> new IllegalStateException(
