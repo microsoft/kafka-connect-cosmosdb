@@ -250,7 +250,7 @@
                             <version>${project.version}</version>
                             <ownerUsername>microsoftcorporation</ownerUsername>
                             <ownerName>Microsoft Corporation</ownerName>
-                            <ownerLogo>images/microsoft.png</ownerLogo>
+                            <ownerLogo>doc/images/microsoft.png</ownerLogo>
                             <componentTypes>
                                 <componentType>source</componentType>
                                 <componentType>sink</componentType>
@@ -267,7 +267,7 @@
                             <confluentControlCenterIntegration>true</confluentControlCenterIntegration>
                             <supportProviderName>Microsoft</supportProviderName>
                             <supportUrl>https://github.com/microsoft/kafka-connect-cosmosdb/issues</supportUrl>
-                            <logo>images/microsoft.png</logo>
+                            <logo>doc/images/microsoft.png</logo>
 
                             <supportProviderName>Microsoft
                             </supportProviderName>
