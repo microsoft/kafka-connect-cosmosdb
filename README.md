@@ -22,7 +22,7 @@ The sink & source connectors are configurable in order to support:
 
 | Format Name  | Description |
 | :----------- | :---------- |
-| JSON (Pain) | JSON record structure without any attached schema. |
+| JSON (Plain) | JSON record structure without any attached schema. |
 | JSON with Schema | JSON record structure with explicit schema information to ensure the data matches the expected format. |
 | AVRO | A row-oriented remote procedure call and data serialization framework developed within Apache's Hadoop project. It uses JSON for defining data types and protocols, and serializes data in a compact binary format. 
 
