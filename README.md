@@ -12,9 +12,9 @@ This project provides connectors for [Kafka Connect](http://kafka.apache.org/doc
 
 ## Exactly-Once Support
 - **Source** Connector
-  - For the time being, this connector supports "at least once" with multiple tasks and "exactly once" for single tasks.
+  - For the time being, this connector supports at-least once with multiple tasks and exactly-once for single tasks.
 - **Sink** Connector
-  - The sink connector fully supports "exactly once" semantics.
+  - The sink connector fully supports exactly-once semantics.
 
 ## Supported Data Formats
 
