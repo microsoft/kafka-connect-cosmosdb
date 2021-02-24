@@ -2,7 +2,6 @@ on:
   push:
     tags:
       - v*
-    branches: [release-assets]
 
 name: Build and create release
 
@@ -10,7 +9,7 @@ jobs:
   build:
 
     name: Build and upload release binary
-    #if: github.event.base_ref == 'refs/heads/main' # only run if on master branch
+    if: github.event.base_ref == 'refs/heads/main' # only run if on master branch
     runs-on: ubuntu-latest
 
     steps:
