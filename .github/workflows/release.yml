@@ -2,6 +2,8 @@ on:
   push:
     tags:
       - v*
+  push:
+      branches: [release-assets]
 
 name: Build and create release
 
@@ -41,8 +43,8 @@ jobs:
           release_name: Release ${{ github.ref }}
           draft: false
           prerelease: false
-      - name: Upload Release Asset
-        id: upload-release-asset 
+      - name: Upload Release Asset 1
+        id: upload-release-asset-1
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -51,3 +53,13 @@ jobs:
           asset_path: ./target/kafka-connect-cosmos-${{steps.get-version.outputs.VERSION}}-jar-with-dependencies.jar
           asset_name: kafka-connect-cosmos-${{steps.get-version.outputs.VERSION}}-jar-with-dependencies.jar
           asset_content_type: application/java-archive
+      - name: Upload Release Asset 2
+        id: upload-release-asset-2
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./target/components/packages/microsoftcorporation-kafka-connect-cosmos-${{steps.get-version.outputs.VERSION}}.zip
+          asset_name: microsoftcorporation-kafka-connect-cosmos-${{steps.get-version.outputs.VERSION}}.zip
+          asset_content_type: application/zip
