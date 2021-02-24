@@ -35,7 +35,7 @@ public class CosmosDBSinkConfigTest {
     public void shouldHaveDefaultValues() {
         // Adding required Configuration with no default value.
         CosmosDBSinkConfig config = new CosmosDBSinkConfig(setupConfigs());
-        assertFalse(config.getUseUpsert().booleanValue());
+        assertTrue(config.getUseUpsert().equalsIgnoreCase("false"));
     }
 
     @Test

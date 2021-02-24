@@ -70,7 +70,7 @@ public class CosmosDBSourceTask extends SourceTask {
         
         Map<String, Object> offset = context.offsetStorageReader().offset(partitionMap);
         // If NOT using the latest offset, reset lease container token to earliest possible value
-        if (!config.useLatestOffset()) {
+        if (config.useLatestOffset().equalsIgnoreCase("false")) {
             updateContinuationToken(ZERO_CONTINUATION_TOKEN);
         } else if (offset != null) {
             // Check for previous offset and compare with lease container token

@@ -23,7 +23,7 @@ public class CosmosDBSinkConfig extends CosmosDBConfig {
         + " 'true' changes the behaviour to use Upsert operation.";
     private static final String COSMOS_USE_UPSERT_DISPLAY = "Use Cosmos Upsert";
 
-    private Boolean useUpsert;
+    private String useUpsert;
 
     public CosmosDBSinkConfig(ConfigDef config, Map<String, String> parsedConfig) {
         super(config, parsedConfig);
@@ -32,7 +32,7 @@ public class CosmosDBSinkConfig extends CosmosDBConfig {
     public CosmosDBSinkConfig(Map<String, String> parsedConfig) {
         super(getConfig(), parsedConfig);
 
-        useUpsert = this.getBoolean(COSMOS_USE_UPSERT_CONF);
+        useUpsert = this.getString(COSMOS_USE_UPSERT_CONF);
     }
 
     public static ConfigDef getConfig() {
@@ -49,18 +49,20 @@ public class CosmosDBSinkConfig extends CosmosDBConfig {
         
         result.define(
             COSMOS_USE_UPSERT_CONF,
-            Type.BOOLEAN,
+            Type.STRING,
             COSMOS_USE_UPSERT_DEFAULT,
+            BOOLEAN_RECOMMENDER,
             Importance.MEDIUM,
             COSMOS_USE_UPSERT_DOC,
             databaseGroupName,
             ++databaseGroupOrder,
             Width.MEDIUM,
-            COSMOS_USE_UPSERT_DISPLAY
+            COSMOS_USE_UPSERT_DISPLAY,
+            BOOLEAN_RECOMMENDER
         );
     }
   
-    public Boolean getUseUpsert() {
+    public String getUseUpsert() {
         return this.useUpsert;
     }
 }
