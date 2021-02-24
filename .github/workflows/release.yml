@@ -2,8 +2,7 @@ on:
   push:
     tags:
       - v*
-  push:
-      branches: [release-assets]
+    branches: [release-assets]
 
 name: Build and create release
 
