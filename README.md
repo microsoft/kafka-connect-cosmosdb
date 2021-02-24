@@ -122,10 +122,10 @@ The Sink and Source connectors share the following common configuration properti
 
 | Name | Type | Description | Required/Optional |
 | :--- | :--- | :--- | :--- |
-| connect.cosmosdb.connection.endpoint | uri | Cosmos DB endpoint URI string | Required |
-| connect.cosmosdb.master.key | string | The Cosmos DB primary key that the sink connects with | Required |
-| connect.cosmosdb.databasename | string | The name of the Cosmos DB database the sink writes to | Required |
-| connect.cosmosdb.containers.topicmap | string | Mapping between Kafka Topics and Cosmos DB Containers, formatted using CSV as shown: `topic#container,topic2#container2` | Required |
+| connect.cosmos.connection.endpoint | uri | Cosmos endpoint URI string | Required |
+| connect.cosmos.master.key | string | The Cosmos primary key that the sink connects with | Required |
+| connect.cosmos.databasename | string | The name of the Cosmos database the sink writes to | Required |
+| connect.cosmos.containers.topicmap | string | Mapping between Kafka Topics and Cosmos Containers, formatted using CSV as shown: `topic#container,topic2#container2` | Required |
 
 For Sink connector specific configuration, please refer to the [Sink Connector Documentation](./doc/README_Sink.md)
 
