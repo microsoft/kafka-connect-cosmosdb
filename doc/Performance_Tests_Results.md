@@ -5,7 +5,7 @@
 In order to easily and quickly deploy and tear-down the testing workloads, we've used a Kubernetes Cluster (specifically an Azure Kubernetes Service cluster) as the foundation. The following is a list of specifications for the AKS Cluster.
 
 - 3 nodes each with VM flavor `Standard_F4s_v2`
-- `Standard_F4s_v2` consists of 4 vCPUs, 8 GiB memory, 32 GB SSD storage. More info can be found in these [docs](https://docs.microsoft.com/en-us/azure/virtual-machines/fsv2-series)
+- `Standard_F4s_v2` consists of 4 vCPUs, 8 GiB memory, 32 GB SSD storage. More info can be found in these [docs](https://docs.microsoft.com/en-us/azure/virtual-machines/fsv2-series).
 - Kubernetes Version: `1.19.6`
 - Helm version: `v3.3.4`
 
@@ -176,6 +176,6 @@ In the selected time slice of the Cosmos graph below, we see the total RU usage 
 
 ![Source Performance Cosmos Usage](./images/perf-source-cosmos-chart.png "Source Performance Cosmos Usage")
 
-For the same time slice in Grafana, the number of incoming messages into Kafka topics totalled 253 msgs/s. If we take away the message rate from the load client at 150 msgs/s, this rounds out to about 100 msgs/sec that are coming from the Source connector, which is consistent with the results from the first graph.
+For the same time slice in Grafana, the number of incoming messages into Kafka topics totalled 253 msgs/s. If we take away the message rate from the load client at 150 msgs/s, this rounds out to about 100 msgs/sec that are coming from the Source connector, which is approximately consistent with the results from the first graph.
 
 ![Overall Topic Incoming Messages Per Second](./images/perf-source-kafka-chart.png "Overall Topic Incoming Messages Per Second")
