@@ -10,6 +10,9 @@ This project is pre-production. File any issues / feature requests / questions e
 
 This project provides connectors for [Kafka Connect](http://kafka.apache.org/documentation.html#connect) to read from and write data to [Azure Cosmos DB](https://azure.microsoft.com/en-us/services/cosmos-db/).
 
+## Exactly-Once Support
+For the time being, this connector supports "at least once" with multiple tasks and "exactly once" for single tasks.
+
 ## Supported Data Formats
 
 The sink & source connectors are configurable in order to support:
