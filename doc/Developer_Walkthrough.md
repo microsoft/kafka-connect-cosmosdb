@@ -107,7 +107,7 @@ To run the integration tests, you will need to first setup the following resourc
 - [Confluent Platform](Confluent_Platform_Setup.md)
 - [Setting up an Azure Cosmos DB Instance](CosmosDB_Setup.md)
 
-Update the sink and source connectors configuration files located in `src/test/resources` by filling out the values for `connect.cosmosdb.connection.endpoint` and `connect.cosmosdb.master.key`, which you should have saved from the [Cosmos DB setup guide](CosmosDB_Setup.md).
+Update the sink and source connectors configuration files located in `src/test/resources` by filling out the values for `connect.cosmos.connection.endpoint` and `connect.cosmos.master.key`, which you should have saved from the [Cosmos DB setup guide](CosmosDB_Setup.md).
 
 Navigate to root project directory and execute the integration tests
 

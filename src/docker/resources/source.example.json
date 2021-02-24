@@ -7,12 +7,11 @@
     "value.converter.schemas.enable": "false",
     "key.converter": "org.apache.kafka.connect.json.JsonConverter",
     "key.converter.schemas.enable": "false",
-    "connect.cosmosdb.task.poll.interval": "1000",
-    "connect.cosmosdb.offset.useLatest": false,
-    "connect.cosmosdb.containers": "kafka",
-    "connect.cosmosdb.connection.endpoint": "https://<cosmosinstance-name>.documents.azure.com:443/",
-    "connect.cosmosdb.master.key": "<cosmosdbprimarykey>",
-    "connect.cosmosdb.databasename": "kafkaconnect",
-    "connect.cosmosdb.containers.topicmap": "source-test#kafka"
+    "connect.cosmos.task.poll.interval": "1000",
+    "connect.cosmos.offset.useLatest": false,
+    "connect.cosmos.connection.endpoint": "https://<cosmosinstance-name>.documents.azure.com:443/",
+    "connect.cosmos.master.key": "<cosmosdbprimarykey>",
+    "connect.cosmos.databasename": "kafkaconnect",
+    "connect.cosmos.containers.topicmap": "source-test#kafka"
   }
 }

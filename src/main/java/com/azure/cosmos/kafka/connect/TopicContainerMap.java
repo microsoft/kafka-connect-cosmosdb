@@ -5,7 +5,9 @@ import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -78,6 +80,10 @@ public class TopicContainerMap {
 
     public Optional<String> getTopicForContainer(String containerName) {
         return Optional.ofNullable(map.inverseBidiMap().get(containerName));
+    }
+
+    public List<String> getContainerList() {
+        return new ArrayList<String>(map.values());
     }
 
 }

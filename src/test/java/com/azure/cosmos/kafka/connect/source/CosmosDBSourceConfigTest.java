@@ -16,7 +16,6 @@ public class CosmosDBSourceConfigTest {
         configs.put(CosmosDBSourceConfig.COSMOS_CONN_KEY_CONF, "mykey");
         configs.put(CosmosDBSourceConfig.COSMOS_DATABASE_NAME_CONF, "mydb");
         configs.put(CosmosDBSourceConfig.COSMOS_CONTAINER_TOPIC_MAP_CONF, "mytopic5#mycontainer6");
-        configs.put(CosmosDBSourceConfig.COSMOS_CONTAINERS_LIST_CONF, "mycontainer6");
         return configs;
     }
 
@@ -29,7 +28,6 @@ public class CosmosDBSourceConfigTest {
         assertEquals("mykey", config.getConnKey());
         assertEquals("mydb", config.getDatabaseName());
         assertEquals("mycontainer6", config.getTopicContainerMap().getContainerForTopic("mytopic5").get());
-        assertEquals("mycontainer6", config.getContainerList());
     }
 
     @Test
@@ -40,8 +38,6 @@ public class CosmosDBSourceConfigTest {
         assertEquals(10000L, config.getTaskBufferSize().longValue());
         assertEquals(100L, config.getTaskBatchSize().longValue());
         assertEquals(1000L, config.getTaskPollInterval().longValue());
-        assertEquals("", config.getAssignedContainer());
-        assertEquals("worker", config.getWorkerName());
         assertFalse(config.useLatestOffset());
     }
 

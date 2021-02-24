@@ -7,6 +7,7 @@ The connector polls data from Kafka to write to container(s) in the database bas
 
 - [Quickstart](#quickstart)
 - [Sink configuration properties](#sink-configuration-properties)
+- [Supported Data Types](#supported-data-types)
 - [Single Message Transforms (SMTs)](#single-message-transforms)
 - [Troubleshooting common issues](#troubleshooting-common-issues)
 - [Limitations](#limitations)
@@ -90,7 +91,7 @@ Create the Cosmos DB Sink Connector in Kafka Connect
 
 The following JSON body defines the config for the Cosmos DB Sink Connector.
 
-> Note: You will need to fill out the values for `connect.cosmosdb.connection.endpoint` and `connect.cosmosdb.master.key`, which you should have saved from the [Cosmos DB setup guide](./CosmosDB_Setup.md).
+> Note: You will need to fill out the values for `connect.cosmos.connection.endpoint` and `connect.cosmos.master.key`, which you should have saved from the [Cosmos DB setup guide](./CosmosDB_Setup.md).
 
 Refer to the [sink properties](#sink-configuration-properties) section for more information on each of these configuration properties.
 
@@ -108,10 +109,10 @@ Refer to the [sink properties](#sink-configuration-properties) section for more 
     "value.converter.schemas.enable": "false",
     "key.converter": "org.apache.kafka.connect.json.JsonConverter",
     "key.converter.schemas.enable": "false",
-    "connect.cosmosdb.connection.endpoint": "https://<cosmosinstance-name>.documents.azure.com:443/",
-    "connect.cosmosdb.master.key": "<cosmosdbprimarykey>",
-    "connect.cosmosdb.databasename": "kafkaconnect",
-    "connect.cosmosdb.containers.topicmap": "hotels#kafka"
+    "connect.cosmos.connection.endpoint": "https://<cosmosinstance-name>.documents.azure.com:443/",
+    "connect.cosmos.master.key": "<cosmosdbprimarykey>",
+    "connect.cosmos.databasename": "kafkaconnect",
+    "connect.cosmos.containers.topicmap": "hotels#kafka"
   }
 }
 
@@ -171,11 +172,11 @@ The following settings are used to configure the Cosmos DB Kafka Sink Connector.
 | :--- | :--- | :--- | :--- |
 | topics | list | A list of Kafka topics to watch | Required |
 | connector.class | string | Classname of the Cosmos DB sink. Should be set to `com.azure.cosmos.kafka.connect.sink.CosmosDBSinkConnector` | Required |
-| connect.cosmosdb.connection.endpoint | uri | Cosmos DB endpoint URI string | Required |
-| connect.cosmosdb.master.key | string | The Cosmos DB primary key that the sink connects with | Required |
-| connect.cosmosdb.databasename | string | The name of the Cosmos DB database the sink writes to | Required |
-| connect.cosmosdb.containers.topicmap | string | Mapping between Kafka Topics and Cosmos DB Containers, formatted using CSV as shown: `topic#container,topic2#container2` | Required |
-| connect.cosmosdb.sink.useUpsert | boolean | Whether to upsert items into Cosmos DB. Default is `false`. | Optional |
+| connect.cosmos.connection.endpoint | uri | Cosmos endpoint URI string | Required |
+| connect.cosmos.master.key | string | The Cosmos primary key that the sink connects with | Required |
+| connect.cosmos.databasename | string | The name of the Cosmos database the sink writes to | Required |
+| connect.cosmos.containers.topicmap | string | Mapping between Kafka Topics and Cosmos Containers, formatted using CSV as shown: `topic#container,topic2#container2` | Required |
+| connect.cosmos.sink.useUpsert | boolean | Whether to upsert items into Cosmos DB. Default is `false`. | Optional |
 | key.converter | string | Serialization format for the key data written into Kafka topic | Required |
 | value.converter | string | Serialization format for the value data written into the Kafka topic | Required |
 | key.converter.schemas.enable | string | Set to `"true"` if the key data has embedded schema | Optional |
@@ -183,6 +184,33 @@ The following settings are used to configure the Cosmos DB Kafka Sink Connector.
 | tasks.max | int | Maximum number of connector sink tasks. Default is `1` | Optional |
 
 Data will always be written to the Cosmos DB as JSON without any schema.
+
+## Supported Data Types
+Azure Cosmos DB sink connector converts SinkRecord in to JSON Document supporting below schema types from listed valid [Schema.Types](https://kafka.apache.org/21/javadoc/org/apache/kafka/connect/data/Schema.Type.html)
+
+| Schema Type | JSON Data Type |
+| :--- | :--- |
+| Array | Array |
+| Boolean | Boolean | 
+| Float32 | Number |
+| Float64 | Number |
+| Int8 | Number |
+| Int16 | Number |
+| Int32 | Number |
+| Int64 | Number|
+| Map | Object (JSON)|
+| String | String<br> Null |
+| Struct | Object (JSON) |
+
+Cosmos DB sink Connector also supports the following AVRO logical types:
+
+| Schema Type | JSON Data Type |
+| :--- | :--- |
+| Date | Number |
+| Time | Number |
+| Timestamp | Number |
+
+>**Note:** Byte deserialization is currently not supported by Azure Cosmos DB sink connector.
 
 ## Single Message Transforms
 

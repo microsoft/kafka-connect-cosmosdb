@@ -87,19 +87,19 @@ public class SourceConnectorIT {
         JsonNode config = new ObjectMapper().readTree(configFileUrl);
         connectorName = config.get("name").textValue();
         config = config.get("config");
-        String topicContainerMap = config.get("connect.cosmosdb.containers.topicmap").textValue();
+        String topicContainerMap = config.get("connect.cosmos.containers.topicmap").textValue();
         String topic = StringUtils.substringBefore(topicContainerMap, "#");
         String containerName = StringUtils.substringAfter(topicContainerMap, "#");
 
         // Setup Cosmos Client
         logger.debug("Setting up the Cosmos DB client");
         cosmosClient = new CosmosClientBuilder()
-                .endpoint(config.get("connect.cosmosdb.connection.endpoint").textValue())
-                .key(config.get("connect.cosmosdb.master.key").textValue())
+                .endpoint(config.get("connect.cosmos.connection.endpoint").textValue())
+                .key(config.get("connect.cosmos.master.key").textValue())
                 .buildClient();
         
         // Create CosmosDB database if not exists
-        databaseName = config.get("connect.cosmosdb.databasename").textValue();
+        databaseName = config.get("connect.cosmos.databasename").textValue();
         cosmosClient.createDatabaseIfNotExists(databaseName);
         CosmosDatabase targetDatabase = cosmosClient.getDatabase(databaseName);
 
@@ -181,13 +181,12 @@ public class SourceConnectorIT {
             .withConfig("value.converter.schemas.enable", config.get("value.converter.schemas.enable").textValue())
             .withConfig("key.converter", config.get("key.converter").textValue())
             .withConfig("key.converter.schemas.enable", config.get("key.converter.schemas.enable").textValue())
-            .withConfig("connect.cosmosdb.task.poll.interval", config.get("connect.cosmosdb.task.poll.interval").textValue())
-            .withConfig("connect.cosmosdb.offset.useLatest", config.get("connect.cosmosdb.offset.useLatest").booleanValue())
-            .withConfig("connect.cosmosdb.containers", config.get("connect.cosmosdb.containers").textValue())
-            .withConfig("connect.cosmosdb.connection.endpoint", config.get("connect.cosmosdb.connection.endpoint").textValue())
-            .withConfig("connect.cosmosdb.master.key", config.get("connect.cosmosdb.master.key").textValue())
-            .withConfig("connect.cosmosdb.databasename", config.get("connect.cosmosdb.databasename").textValue())
-            .withConfig("connect.cosmosdb.containers.topicmap", config.get("connect.cosmosdb.containers.topicmap").textValue());
+            .withConfig("connect.cosmos.task.poll.interval", config.get("connect.cosmos.task.poll.interval").textValue())
+            .withConfig("connect.cosmos.offset.useLatest", config.get("connect.cosmos.offset.useLatest").booleanValue())
+            .withConfig("connect.cosmos.connection.endpoint", config.get("connect.cosmos.connection.endpoint").textValue())
+            .withConfig("connect.cosmos.master.key", config.get("connect.cosmos.master.key").textValue())
+            .withConfig("connect.cosmos.databasename", config.get("connect.cosmos.databasename").textValue())
+            .withConfig("connect.cosmos.containers.topicmap", config.get("connect.cosmos.containers.topicmap").textValue());
     }
 
      /**
@@ -316,7 +315,7 @@ public class SourceConnectorIT {
             .withConfig("key.converter", AVRO_CONVERTER)
             .withConfig("key.converter.schema.registry.url", AVRO_SCHEMA_REGISTRY)
             .withConfig("key.converter.schemas.enable", "true")
-            .withConfig("connect.cosmosdb.containers.topicmap", AVRO_KAFKA_TOPIC+"#kafka")
+            .withConfig("connect.cosmos.containers.topicmap", AVRO_KAFKA_TOPIC+"#kafka")
             .build());
         
         // Allow time for Source connector to setup resources
@@ -362,7 +361,7 @@ public class SourceConnectorIT {
 
         // Create connector with long timeout
         connectClient.addConnector(connectConfig
-            .withConfig("connect.cosmosdb.task.timeout", 300000L)
+            .withConfig("connect.cosmos.task.timeout", 300000L)
             .build());
 
         // Create item in Cosmos DB
@@ -379,7 +378,7 @@ public class SourceConnectorIT {
 
         // Recreate connector with default settings
         connectClient.addConnector(connectConfig
-            .withConfig("connect.cosmosdb.task.timeout", 5000L)
+            .withConfig("connect.cosmos.task.timeout", 5000L)
             .build());
 
         // Allow connector to process records
@@ -401,8 +400,8 @@ public class SourceConnectorIT {
         
         // Allow time for Source connector to start up, but delete it quickly so it won't process data
         connectClient.addConnector(connectConfig
-            .withConfig("connect.cosmosdb.task.timeout", 300000L)
-            .withConfig("connect.cosmosdb.offset.useLatest", true)
+            .withConfig("connect.cosmos.task.timeout", 300000L)
+            .withConfig("connect.cosmos.offset.useLatest", true)
             .build());
         sleep(10000);
         connectClient.deleteConnector(connectorName);
@@ -413,8 +412,8 @@ public class SourceConnectorIT {
 
         // Recreate connector with default settings
         connectClient.addConnector(connectConfig
-            .withConfig("connect.cosmosdb.task.timeout", 5000L)
-            .withConfig("connect.cosmosdb.offset.useLatest", true)
+            .withConfig("connect.cosmos.task.timeout", 5000L)
+            .withConfig("connect.cosmos.offset.useLatest", true)
             .build());
 
         // Allow connector to process records
@@ -443,11 +442,8 @@ public class SourceConnectorIT {
         Map<String, String> currentParams = connectConfig.build().getConfig();
         Builder multiWorkerConfigBuilder = connectConfig
             .withConfig("tasks.max", 2)
-            .withConfig("connect.cosmosdb.containers", 
-                currentParams.get("connect.cosmosdb.containers") 
-                + String.format(",%s", SECOND_COSMOS_CONTAINER))
-            .withConfig("connect.cosmosdb.containers.topicmap", 
-                currentParams.get("connect.cosmosdb.containers.topicmap") 
+            .withConfig("connect.cosmos.containers.topicmap", 
+                currentParams.get("connect.cosmos.containers.topicmap") 
                 + String.format(",%s#%s", SECOND_KAFKA_TOPIC, SECOND_COSMOS_CONTAINER));
         connectClient.addConnector(multiWorkerConfigBuilder.build());
         
@@ -468,8 +464,8 @@ public class SourceConnectorIT {
 
         // Allow time for Source connector to start up, but delete it quickly so it won't process data
         connectClient.addConnector(multiWorkerConfigBuilder
-            .withConfig("connect.cosmosdb.task.timeout", 300000L)
-            .withConfig("connect.cosmosdb.offset.useLatest", true)
+            .withConfig("connect.cosmos.task.timeout", 300000L)
+            .withConfig("connect.cosmos.offset.useLatest", true)
             .build());
         sleep(10000);
         connectClient.deleteConnector(connectorName);
@@ -482,8 +478,8 @@ public class SourceConnectorIT {
 
         // Recreate connector with default settings
         connectClient.addConnector(connectConfig
-            .withConfig("connect.cosmosdb.task.timeout", 5000L)
-            .withConfig("connect.cosmosdb.offset.useLatest", true)
+            .withConfig("connect.cosmos.task.timeout", 5000L)
+            .withConfig("connect.cosmos.offset.useLatest", true)
             .build());
 
         // Allow connector to process records

@@ -10,13 +10,19 @@ This project is pre-production. File any issues / feature requests / questions e
 
 This project provides connectors for [Kafka Connect](http://kafka.apache.org/documentation.html#connect) to read from and write data to [Azure Cosmos DB](https://azure.microsoft.com/en-us/services/cosmos-db/).
 
+## Exactly-Once Support
+- **Source** Connector
+  - For the time being, this connector supports at-least once with multiple tasks and exactly-once for single tasks.
+- **Sink** Connector
+  - The sink connector fully supports exactly-once semantics.
+
 ## Supported Data Formats
 
 The sink & source connectors are configurable in order to support:
 
 | Format Name  | Description |
 | :----------- | :---------- |
-| JSON (Pain) | JSON record structure without any attached schema. |
+| JSON (Plain) | JSON record structure without any attached schema. |
 | JSON with Schema | JSON record structure with explicit schema information to ensure the data matches the expected format. |
 | AVRO | A row-oriented remote procedure call and data serialization framework developed within Apache's Hadoop project. It uses JSON for defining data types and protocols, and serializes data in a compact binary format. 
 
@@ -122,10 +128,10 @@ The Sink and Source connectors share the following common configuration properti
 
 | Name | Type | Description | Required/Optional |
 | :--- | :--- | :--- | :--- |
-| connect.cosmosdb.connection.endpoint | uri | Cosmos DB endpoint URI string | Required |
-| connect.cosmosdb.master.key | string | The Cosmos DB primary key that the sink connects with | Required |
-| connect.cosmosdb.databasename | string | The name of the Cosmos DB database the sink writes to | Required |
-| connect.cosmosdb.containers.topicmap | string | Mapping between Kafka Topics and Cosmos DB Containers, formatted using CSV as shown: `topic#container,topic2#container2` | Required |
+| connect.cosmos.connection.endpoint | uri | Cosmos endpoint URI string | Required |
+| connect.cosmos.master.key | string | The Cosmos primary key that the sink connects with | Required |
+| connect.cosmos.databasename | string | The name of the Cosmos database the sink writes to | Required |
+| connect.cosmos.containers.topicmap | string | Mapping between Kafka Topics and Cosmos Containers, formatted using CSV as shown: `topic#container,topic2#container2` | Required |
 
 For Sink connector specific configuration, please refer to the [Sink Connector Documentation](./doc/README_Sink.md)
 

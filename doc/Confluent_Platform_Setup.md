@@ -75,7 +75,7 @@ If you instead would like to run Kafka Connect as `standalone mode`, which is us
 
 > NOTE: This step will only work if you're using Codespaces or Dev Containers.
 >
-> You will also need to fill out the values for `connect.cosmosdb.connection.endpoint` and `connect.cosmosdb.master.key` in the `sink.properties` and/or `source.properties` files, which you should have saved from the [Cosmos DB setup guide](./CosmosDB_Setup.md)
+> You will also need to fill out the values for `connect.cosmos.connection.endpoint` and `connect.cosmos.master.key` in the `sink.properties` and/or `source.properties` files, which you should have saved from the [Cosmos DB setup guide](./CosmosDB_Setup.md)
 
 ```bash
 

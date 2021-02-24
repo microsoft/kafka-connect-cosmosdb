@@ -11,21 +11,21 @@ import java.util.Map;
 @SuppressWarnings ({"squid:S1854", "squid:S2160"})  // suppress unneeded int *groupOrder variables, equals method
 public class CosmosDBConfig extends AbstractConfig {
     
-    public static final String COSMOS_CONN_ENDPOINT_CONF = "connect.cosmosdb.connection.endpoint";
-    private static final String COSMOS_CONN_ENDPOINT_DOC = "Cosmos DB endpoint URL.";
-    private static final String COSMOS_CONN_ENDPOINT_DISPLAY = "Cosmos DB Endpoint";
+    public static final String COSMOS_CONN_ENDPOINT_CONF = "connect.cosmos.connection.endpoint";
+    private static final String COSMOS_CONN_ENDPOINT_DOC = "Cosmos endpoint URL.";
+    private static final String COSMOS_CONN_ENDPOINT_DISPLAY = "Cosmos Endpoint";
 
-    public static final String COSMOS_CONN_KEY_CONF = "connect.cosmosdb.master.key";
-    private static final String COSMOS_CONN_KEY_DOC = "Cosmos DB connection master (primary) key.";
-    private static final String COSMOS_CONN_KEY_DISPLAY = "Cosmos DB Connection Key";
+    public static final String COSMOS_CONN_KEY_CONF = "connect.cosmos.master.key";
+    private static final String COSMOS_CONN_KEY_DOC = "Cosmos connection master (primary) key.";
+    private static final String COSMOS_CONN_KEY_DISPLAY = "Cosmos Connection Key";
 
-    public static final String COSMOS_DATABASE_NAME_CONF = "connect.cosmosdb.databasename";
-    private static final String COSMOS_DATABASE_NAME_DOC = "Cosmos DB target database to write records into.";
-    private static final String COSMOS_DATABASE_NAME_DISPLAY = "Cosmos DB Database name";
+    public static final String COSMOS_DATABASE_NAME_CONF = "connect.cosmos.databasename";
+    private static final String COSMOS_DATABASE_NAME_DOC = "Cosmos target database to write records into.";
+    private static final String COSMOS_DATABASE_NAME_DISPLAY = "Cosmos Database name";
 
-    public static final String COSMOS_CONTAINER_TOPIC_MAP_CONF = "connect.cosmosdb.containers.topicmap";
+    public static final String COSMOS_CONTAINER_TOPIC_MAP_CONF = "connect.cosmos.containers.topicmap";
     private static final String COSMOS_CONTAINER_TOPIC_MAP_DOC = 
-        "A comma delimited list of Kafka topics mapped to Cosmos DB containers.\n" 
+        "A comma delimited list of Kafka topics mapped to Cosmos containers.\n" 
         + "For example: topic1#con1,topic2#con2.";
     private static final String COSMOS_CONTAINER_TOPIC_MAP_DISPLAY = "Topic-Container map";
 
