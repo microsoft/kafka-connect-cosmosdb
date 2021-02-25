@@ -35,7 +35,7 @@ public class CosmosDBSinkConnectorConfigTest {
     @Test
     public void testPresentDefaults(){
         //The task useUpsert has a default setting. Let's see if the configdef does
-        Boolean useUpsert = new CosmosDBSinkConfig(CosmosDBSinkConfigTest.setupConfigs()).getUseUpsert();
+        String useUpsert = new CosmosDBSinkConfig(CosmosDBSinkConfigTest.setupConfigs()).getUseUpsert();
         assertNotNull(useUpsert);
         assertEquals(useUpsert, new CosmosDBSinkConnector().config().defaultValues()
             .get(CosmosDBSinkConfig.COSMOS_USE_UPSERT_CONF));
