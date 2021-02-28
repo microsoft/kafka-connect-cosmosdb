@@ -3,7 +3,7 @@ name: Bug report
 about: For reporting an issue in code or documentation for improvement
 title: ''
 labels: bug
-assignees: ''
+assignees: '@microsoft/kafka-connect-cosmosdb-devs'
 
 ---
 
