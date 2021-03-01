@@ -90,7 +90,7 @@ public class CosmosDBSinkTask extends SinkTask {
     }
 
     private void addItemToContainer(CosmosContainer container, Object recordValue) {
-        if (Boolean.TRUE.equals(config.getUseUpsert())) {
+        if (config.getUseUpsert().equalsIgnoreCase(CosmosDBConfig.BooleanValues.TRUE.toString())) {
             container.upsertItem(recordValue);
         } else {
             container.createItem(recordValue);

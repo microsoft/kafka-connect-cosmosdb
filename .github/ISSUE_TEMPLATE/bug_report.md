@@ -2,8 +2,8 @@
 name: Bug report
 about: For reporting an issue in code or documentation for improvement
 title: ''
-labels: Bug
-assignees: ''
+labels: bug
+assignees: '@microsoft/kafka-connect-cosmosdb-devs'
 
 ---
 
