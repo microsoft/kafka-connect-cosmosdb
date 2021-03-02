@@ -403,5 +403,5 @@ In all following examples, assume there is a Cosmos DB instance named `kafka-per
 - Run a sink connector test, with a 400 RUs Cosmos SQL Database, 1 sink topic partition and load sent at 1 message per second for 300 seconds.
 `./perf-driver.sh -n kafka-perf-test -g kafka-cosmos-perf -t 400 -s sink -p 1 -l 1 -d 300`
 
-- Run a source connector test, with a 1000 RUs Cosmos SQL Database, 5 sink topic partition and load sending at 100 messages per second for 1000 seconds.
+- Run a source connector test, with a 1000 RUs Cosmos SQL Database, 5 sink topic partitions and load sending at 100 messages per second for 1000 seconds. The source topic where records will be written to will be defined by the `source.json` configuration in the `src/perf/cluster/manifests` directory.
 `./perf-driver.sh -n kafka-perf-test -g kafka-cosmos-perf -t 1000 -s source -p 5 -l 100 -d 1000`
