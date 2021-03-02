@@ -1,0 +1,28 @@
+# Default values for Kafka Connect.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+image: mssivamu/kafka-connect-cosmosdb
+imageTag: perf
+
+heapOptions: "-Xms512M -Xmx2g"
+
+resources:
+  # Limits based on the Connect Performance Verification Guide defined in Page 19:
+  # https://assets.confluent.io/m/28c7ffcc359a13c0/original/20200325-VIP_Connect-Verification_Guide.pdf
+  limits:
+    cpu: 2666m
+    memory: 2Gi
+  requests:
+    cpu: 2666m
+    memory: 2Gi
+
+prometheus:
+  jmx:
+    enabled: true
+
+kafka:
+  bootstrapServers: "PLAINTEXT://kafka-cp-kafka-headless.kafka:9092"
+
+cp-schema-registry:
+  url: "kafka-cp-schema-registry.kafka:8081"

@@ -1,0 +1,9 @@
+replicaCount: 1
+
+params:
+  topic: connect-test
+  totalRecords: '10000000'
+  throughput: 10
+  # Valid values are: small (100b), medium (1kb) or large (50kb)
+  payload: small
+  brokerEndpoint: kafka-cp-kafka-headless.kafka:9092

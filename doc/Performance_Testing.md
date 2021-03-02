@@ -1,6 +1,6 @@
-# Cosmos DB Connectors Performance Testing and Results
+# Cosmos DB Connectors Performance Testing
 
-## Test Environment
+## Test Infrastructure
 
 In order to easily and quickly deploy and tear-down the testing workloads, we've used a Kubernetes Cluster (specifically an Azure Kubernetes Service cluster) as the foundation. The following is a list of specifications for the AKS Cluster.
 
@@ -9,7 +9,15 @@ In order to easily and quickly deploy and tear-down the testing workloads, we've
 - Kubernetes Version: `1.19.6`
 - Helm version: `v3.3.4`
 
-### Kafka Installation
+The AKS cluster consists of three main components needed for the testing:
+
+1. Kafka Service
+2. Kafka Connect Cluster
+3. Load Client (Sink Load Generator and implicitly a Source load generator as well)
+
+In addition, a Cosmos DB instance is used in the tests. Refer to the [setup guide](./CosmosDB_Setup.md) for more information for creating an instance.
+
+### Kafka Service
 
 The main Kafka backend was installed via the upstream [Confluent Inc. helm charts](https://github.com/confluentinc/cp-helm-charts) using the default values. However, only the following subset of the Kafka services were included in the installation:
 
@@ -20,17 +28,25 @@ The main Kafka backend was installed via the upstream [Confluent Inc. helm chart
 
 In addition, we installed Prometheus and Grafana to monitor relevant Kafka metrics. We used the upstream [Confluent Inc. dashboard template](https://github.com/confluentinc/cp-helm-charts/tree/master/grafana-dashboard) to visualize the standard Kafka components in Grafana.
 
-### Kafka Connect Installation
+### Kafka Connect
 
 The connect cluster used for the performance testing consists of **three** workers (pods in the k8s context). Each worker pod has the following specifications:
 
-- 2.66 CPUs (approx. 8 cores across all 3 workers)
+- 2.66 cores (approx. 8 cores across all 3 workers)
 - 2Gib Memory
 - 2GB Heap
 
 The worker pods are built with a [custom Docker image](../src/docker/Dockerfile), created using the upstream Kafka connect image as a base and the Cosmos DB connectors code installed on top.
 
-The steps for installing Kafka and the Connect cluster can be found in this [documentation](https://github.com/microsoft/kafka-connect-cosmosdb/tree/perf-testing/perf#deploy-kafka-and-kafka-connect-with-helm).
+The steps for installing Kafka and the Connect cluster can be found in this [documentation](../src/perf/README.md#deploy-kafka-and-kafka-connect-with-helm).
+
+### Load Client
+
+We used the `kafka-producer-perf-test` CLI to generate load into a single Kafka topic. This CLI is included in within a [custom Docker image](../src/docker/Dockerfile.sinkperf), created using the upstream Kafka client image as a base. The custom image is built with JSON payload files (from 100B to 50kB for each message) that are used for generating the load. Similarly to installing the Kafka connect cluster, the load client can be deployed using a Helm chart (steps can be found [here](../src/perf/README.md#deploy-kafka-load-client)). One thing to note is that load client is installed in the same namespace that the Kafka pods are installed such that the traffic is sent via the local network.
+
+The load client directly works with the Sink connector since load is generated into a Kafka topic and the connector can ingest this traffic. We also use the same load client with the source connector and this approach is a bit more implicit.
+
+For example, we have the load client sending messages into a Kafka topic, and a sink connector is setup to send these records into Cosmos at a certain throughput. Essentially, we are sending load into Cosmos at a specific rate, which is ideal for testing the source connector. While there certainly are alternatives in generating load into a Cosmos instance, we decided to adopt the same load client so that the load going into the sink and the source connectors are identical. This also ensures that the performance results between the both types of connectors are consistent and comparable.
 
 ## Sink Connector Performance
 
@@ -38,9 +54,13 @@ The steps for installing Kafka and the Connect cluster can be found in this [doc
 
 By sending load to a single kafka topic and setting up a sink connector on the same topic, we can test the performance of the connector. The target would be for the sink connector to keep up with the incoming traffic into the Kafka topic and stream these messages into Cosmos DB at the same rate.
 
+The following shows the setup used for the Sink connector test:
+
+![Sink Testing Layout](./images/perf-sink-test-layout.svg "Sink Testing Layout")
+
 #### Load Client and Cosmos Setup for Sink
 
-We used the `kafka-producer-perf-test` CLI to generate load into a single Kafka topic. The load is also sent for a duration of 10 minutes. One thing to note is that load client is run as a pod in the same namespace that the Kafka pods are installed, so the traffic is sent via the local network.
+These are the parameters used when configuring the load client. The load is also sent for a duration of 10 minutes.
 
 - Single Topic
 - Message Size: 100 Bytes of JSON data
@@ -48,7 +68,7 @@ We used the `kafka-producer-perf-test` CLI to generate load into a single Kafka 
 - Number of topic partitions: 60
 - Topic Replication factor: 3
 
-We setup a Cosmos DB SQL Database with throughput fixed at 20K RU/s. Given the number of records sent during the load (3000 msgs/s), this throughput is ideal such that the Cosmos database won’t be throttling any requests.
+For this load configuration, CosmosDB is scaled up so that it is not a constraint on publishing from the connector. We setup a Cosmos DB SQL Database with throughput fixed at 20K RU/s that should handle the number of records sent during the load of 3000 msgs/s.
 
 #### Sink Connector Config
 
@@ -94,11 +114,15 @@ For the selected time slice, the total RU usage was 1.13M and number of requests
 
 ### Source Test setup
 
-The setup for the source test is similar to the sink but with an additional step. We'll still be sending load into a single Kafka topic and have a sink connector streaming these messages into a Cosmos DB container. Now, we'll setup a source connector to monitor the same Cosmos DB container and record any changes into a different Kafka topic. The goal is for the source connector to transfer messages from Cosmos DB into it's own topic at the same rate the sink connector is adding records into Cosmos DB (same as the rate as load is generated into the sink topic).
+As mentioned above in the [load client](#load-client) discussion, we will use the same load client to implicitly send messages into Cosmos DB by using a sink connector in between. We'll setup a source connector to pull the load going into Cosmos (via the change feed processor) and transfer it into a Kafka topic. The goal is for the source connector to transfer messages from Cosmos DB into a Kafka topic at the same rate load is incoming into the database.
+
+The following illustrates the layout for the Source connector test:
+
+![Source Testing Layout](./images/perf-source-test-layout.svg "Source Testing Layout")
 
 #### Load Client and Cosmos Setup for Source
 
-We used the `kafka-producer-perf-test` CLI to generate load into a single Kafka topic for the sink connector. The load is also sent for a duration of 10 minutes.
+These are the parameters used when configuring the load client. The load is also sent for a duration of 10 minutes.
 
 - Single Topic (for sink connector)
 - Message Size: 100 Bytes of JSON data

@@ -1,0 +1,30 @@
+# Default values for Kafka.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+cp-zookeeper:
+  enabled: true
+  servers: 3
+  persistence:
+    enabled: false
+
+cp-kafka:
+  enabled: true
+  servers: 3
+  persistence:
+    enabled: false
+
+cp-schema-registry:
+  enabled: true
+
+cp-kafka-rest:
+  enabled: true
+
+cp-kafka-connect:
+  enabled: false
+
+cp-ksql-server:
+  enabled: false
+
+cp-control-center:
+  enabled: false
