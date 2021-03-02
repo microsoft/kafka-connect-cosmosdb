@@ -38,11 +38,11 @@ The connect cluster used for the performance testing consists of **three** worke
 
 The worker pods are built with a [custom Docker image](../src/docker/Dockerfile), created using the upstream Kafka connect image as a base and the Cosmos DB connectors code installed on top.
 
-The steps for installing Kafka and the Connect cluster can be found in this [documentation](https://github.com/microsoft/kafka-connect-cosmosdb/tree/perf-testing/perf#deploy-kafka-and-kafka-connect-with-helm).
+The steps for installing Kafka and the Connect cluster can be found in this [documentation](../src/perf/README.md#deploy-kafka-and-kafka-connect-with-helm).
 
 ### Load Client
 
-We used the `kafka-producer-perf-test` CLI to generate load into a single Kafka topic. This CLI is included in within a [custom Docker image](../src/docker/Dockerfile.sinkperf), created using the upstream Kafka client image as a base. The custom image is built with JSON payload files (from 100B to 50kB for each message) that are used for generating the load. Similarly to installing the Kafka connect cluster, the load client can be deployed using a Helm chart (steps can be found [here](https://github.com/microsoft/kafka-connect-cosmosdb/tree/perf-testing/perf#deploy-kafka-load-client)). One thing to note is that load client is installed in the same namespace that the Kafka pods are installed such that the traffic is sent via the local network.
+We used the `kafka-producer-perf-test` CLI to generate load into a single Kafka topic. This CLI is included in within a [custom Docker image](../src/docker/Dockerfile.sinkperf), created using the upstream Kafka client image as a base. The custom image is built with JSON payload files (from 100B to 50kB for each message) that are used for generating the load. Similarly to installing the Kafka connect cluster, the load client can be deployed using a Helm chart (steps can be found [here](../src/perf/README.md#deploy-kafka-load-client)). One thing to note is that load client is installed in the same namespace that the Kafka pods are installed such that the traffic is sent via the local network.
 
 The load client directly works with the Sink connector since load is generated into a Kafka topic and the connector can ingest this traffic. We also use the same load client with the source connector and this approach is a bit more implicit.
 

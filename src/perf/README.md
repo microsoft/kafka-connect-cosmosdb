@@ -1,4 +1,4 @@
-# Deployment Walk Through
+# Performance Environment Setup
 
 ## Background
 
@@ -205,7 +205,7 @@ The `helm-config.yaml` file can be used as an override to the default values dur
 
 ```bash
 
-cd $REPO_ROOT/perf/cluster/manifests
+cd $REPO_ROOT/src/perf/cluster/manifests
 
 # Install Kafka using the Kafka Helm chart with local config file
 kubectl create namespace kafka
@@ -220,7 +220,7 @@ Deploy Kafka Connect workers to setup the Connect cluster.
 
 ```bash
 
-cd $REPO_ROOT/perf/cluster/charts
+cd $REPO_ROOT/src/perf/cluster/charts
 
 # Install Kafka Connect using the provided Kafka Connect Helm chart
 kubectl create namespace connect
@@ -248,7 +248,7 @@ Create the sink connector using the Connect REST API. This connector will read m
 
 ```bash
 
-cd $REPO_ROOT/perf/cluster/manifests
+cd $REPO_ROOT/src/perf/cluster/manifests
 cp $REPO_ROOT/src/docker/resources/sink-uuid-smt.example.json sink.json
 
 # Fill out the Cosmos DB Endpoint and Connection Key in the sink.json file
@@ -262,7 +262,7 @@ Create the source connector using the Connect REST API. This connector will read
 
 ```bash
 
-cd $REPO_ROOT/perf/cluster/manifests
+cd $REPO_ROOT/src/perf/cluster/manifests
 cp $REPO_ROOT/src/docker/resources/source.example.json source.json
 
 # Fill out the Cosmos DB Endpoint and Connection Key in the source.json file
@@ -278,7 +278,7 @@ Deploy Kafka Sink Load Client to push messages to a Kafka topic.
 
 ```bash
 
-cd $REPO_ROOT/perf/cluster/charts
+cd $REPO_ROOT/src/perf/cluster/charts
 
 kubectl create namespace perf
 
@@ -381,7 +381,7 @@ Here's the script usage:
 
 ```bash
 
-cd $REPO_ROOT/perf
+cd $REPO_ROOT/src/perf
 
 Args (all are required):
   -n    Name of the Cosmos DB instance to create resources within
