@@ -13,6 +13,7 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.spy;
@@ -36,7 +37,7 @@ public class CosmosDBSinkConnectorTest {
     CosmosDBSinkConnector connector = spy(CosmosDBSinkConnector.class);
     doThrow(new IllegalArgumentException())
         .when(connector)
-        .readAllDatabases(anyString(), anyString());
+        .createClient(anyString(), anyString());
 
     Config config = connector.validate(ImmutableMap.of(
         CosmosDBSinkConfig.COSMOS_CONN_ENDPOINT_CONF, "https://endpoint:port/",
@@ -53,9 +54,9 @@ public class CosmosDBSinkConnectorTest {
   @Test
   public void testValidateHappyPath() {
     CosmosDBSinkConnector connector = spy(CosmosDBSinkConnector.class);
-    doReturn(null)
+    doNothing()
         .when(connector)
-        .readAllDatabases(anyString(), anyString());
+        .createClient(anyString(), anyString());
 
     Config config = connector.validate(ImmutableMap.of(
         CosmosDBSinkConfig.COSMOS_CONN_ENDPOINT_CONF, "https://endpoint:port/",
@@ -72,9 +73,9 @@ public class CosmosDBSinkConnectorTest {
   @Test
   public void testValidateTopicMapValidFormat() {
     CosmosDBSinkConnector connector = spy(CosmosDBSinkConnector.class);
-    doReturn(null)
+    doNothing()
         .when(connector)
-        .readAllDatabases(anyString(), anyString());
+        .createClient(anyString(), anyString());
 
     invalidTopicMapString(connector, "topicOnly");
     invalidTopicMapString(connector, "#containerOnly");

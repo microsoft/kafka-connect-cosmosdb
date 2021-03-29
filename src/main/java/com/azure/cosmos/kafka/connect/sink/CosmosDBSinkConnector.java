@@ -6,11 +6,10 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.CosmosClientBuilder;
 import com.azure.cosmos.kafka.connect.CosmosDBConfig;
 import com.azure.cosmos.kafka.connect.TopicContainerMap;
-import com.azure.cosmos.models.CosmosDatabaseProperties;
-import com.azure.cosmos.util.CosmosPagedIterable;
 import org.apache.kafka.common.config.Config;
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.common.config.ConfigValue;
@@ -88,7 +87,7 @@ public class CosmosDBSinkConnector extends SinkConnector {
         String endpoint = connectorConfigs.get(CosmosDBSinkConfig.COSMOS_CONN_ENDPOINT_CONF);
         String key = connectorConfigs.get(CosmosDBSinkConfig.COSMOS_CONN_KEY_CONF);
         try {
-            readAllDatabases(endpoint, key);
+            createClient(endpoint, key);
         } catch (Exception e) {
             configValues.get(CosmosDBSinkConfig.COSMOS_CONN_ENDPOINT_CONF)
                 .addErrorMessage("Could not connect to endpoint with error: " + e.getMessage());
@@ -110,13 +109,14 @@ public class CosmosDBSinkConnector extends SinkConnector {
     }
 
     // visible for testing
-    CosmosPagedIterable<CosmosDatabaseProperties> readAllDatabases(String endpoint, String key) {
-        return new CosmosClientBuilder()
+    void createClient(String endpoint, String key) {
+        try (CosmosClient unused = new CosmosClientBuilder()
             .endpoint(endpoint)
             .key(key)
             .userAgentSuffix(CosmosDBConfig.COSMOS_CLIENT_USER_AGENT_SUFFIX + version())
-            .buildClient()
-            .readAllDatabases();
+            .buildClient()) {
+            // Just try to create the client to validate connectivity to the endpoint with key.
+        }
     }
 }
 
