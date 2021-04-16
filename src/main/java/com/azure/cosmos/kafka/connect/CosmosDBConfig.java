@@ -92,7 +92,6 @@ public class CosmosDBConfig extends AbstractConfig {
                 COSMOS_CONN_KEY_CONF,
                 Type.PASSWORD,
                 ConfigDef.NO_DEFAULT_VALUE,
-                NON_EMPTY_STRING,
                 Importance.HIGH,
                 COSMOS_CONN_KEY_DOC,
                 connectionGroupName,
