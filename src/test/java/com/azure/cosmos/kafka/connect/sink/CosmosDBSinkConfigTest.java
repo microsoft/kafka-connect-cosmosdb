@@ -52,7 +52,6 @@ public class CosmosDBSinkConfigTest {
     public void shouldThrowExceptionWhenRequiredFieldsEmpty() {
         HashMap<String, String> settings = new HashMap<>();
         settings.put(CosmosDBSinkConfig.COSMOS_CONN_ENDPOINT_CONF, "");
-        settings.put(CosmosDBSinkConfig.COSMOS_CONN_KEY_CONF, "");
         settings.put(CosmosDBSinkConfig.COSMOS_DATABASE_NAME_CONF, "");
         settings.put(CosmosDBSinkConfig.COSMOS_CONTAINER_TOPIC_MAP_CONF, "");
 
