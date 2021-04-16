@@ -3,7 +3,9 @@ package com.azure.cosmos.kafka.connect;
 import org.apache.kafka.common.config.AbstractConfig;
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.common.config.ConfigDef.Importance;
+import org.apache.kafka.common.config.ConfigDef.NonEmptyString;
 import org.apache.kafka.common.config.ConfigDef.Type;
+import org.apache.kafka.common.config.ConfigDef.Validator;
 import org.apache.kafka.common.config.ConfigDef.Width;
 
 import io.confluent.kafka.schemaregistry.utils.EnumRecommender;
@@ -12,6 +14,7 @@ import java.util.Map;
 
 @SuppressWarnings ({"squid:S1854", "squid:S2160"})  // suppress unneeded int *groupOrder variables, equals method
 public class CosmosDBConfig extends AbstractConfig {
+    private static final Validator NON_EMPTY_STRING = new NonEmptyString();
     
     public static final String COSMOS_CONN_ENDPOINT_CONF = "connect.cosmos.connection.endpoint";
     private static final String COSMOS_CONN_ENDPOINT_DOC = "Cosmos endpoint URL.";
@@ -77,6 +80,7 @@ public class CosmosDBConfig extends AbstractConfig {
                 COSMOS_CONN_ENDPOINT_CONF,
                 Type.STRING,
                 ConfigDef.NO_DEFAULT_VALUE,
+                NON_EMPTY_STRING,
                 Importance.HIGH,
                 COSMOS_CONN_ENDPOINT_DOC,
                 connectionGroupName,
@@ -88,6 +92,7 @@ public class CosmosDBConfig extends AbstractConfig {
                 COSMOS_CONN_KEY_CONF,
                 Type.PASSWORD,
                 ConfigDef.NO_DEFAULT_VALUE,
+                NON_EMPTY_STRING,
                 Importance.HIGH,
                 COSMOS_CONN_KEY_DOC,
                 connectionGroupName,
@@ -109,6 +114,7 @@ public class CosmosDBConfig extends AbstractConfig {
                 COSMOS_DATABASE_NAME_CONF,
                 Type.STRING,
                 ConfigDef.NO_DEFAULT_VALUE,
+                NON_EMPTY_STRING,
                 Importance.HIGH,
                 COSMOS_DATABASE_NAME_DOC,
                 databaseGroupName,
@@ -120,6 +126,7 @@ public class CosmosDBConfig extends AbstractConfig {
                 COSMOS_CONTAINER_TOPIC_MAP_CONF,
                 Type.STRING,
                 ConfigDef.NO_DEFAULT_VALUE,
+                NON_EMPTY_STRING,
                 Importance.HIGH,
                 COSMOS_CONTAINER_TOPIC_MAP_DOC,
                 databaseGroupName,
