@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kafka-perf-client
+spec:
+  containers:
+  - name: kafka-perf-client
+    image: mssivamu/kafka-sink-perf-cosmosdb:latest
+    args:
+      - --topic
+      - sink
+      - --num-records
+      - '4500'
+      - --payload-file
+      - /etc/payload/small.txt
+      - --throughput 
+      - '15'
+      - --producer-props
+      - bootstrap.servers=kafka-cp-kafka-headless:9092
+      - buffer.memory=67108864
+      - batch.size=8196
+  restartPolicy: Never

@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "sink-perf.name" . }}
+  labels:
+    app: {{ template "sink-perf.name" . }}
+    chart: {{ template "sink-perf.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "sink-perf.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "sink-perf.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: sink-perf-client
+          image: mssivamu/kafka-sink-perf-cosmosdb:latest
+          imagePullPolicy: Always
+          env:
+            - name: PAYLOAD_SIZE
+              value: {{ .Values.params.payload }}
+          args:
+            - --topic
+            - {{ .Values.params.topic }}
+            - --num-records
+            - {{ .Values.params.totalRecords | quote }}
+            - --payload-file
+            - "/etc/payload/{{ .Values.params.payload }}.txt"
+            - --throughput 
+            - {{ .Values.params.throughput | quote }}
+            - --producer-props
+            - bootstrap.servers={{ .Values.params.brokerEndpoint }}
+            - buffer.memory=67108864
+            - batch.size=8196

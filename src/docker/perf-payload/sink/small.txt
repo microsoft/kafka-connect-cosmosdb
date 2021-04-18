@@ -1,0 +1,7 @@
+{"HotelName": "Marriott", "Description": "Marriott description"}
+{"HotelName": "HolidayInn", "Description": "HolidayInn description"}
+{"HotelName": "Motel8", "Description": "Motel8 description"}
+{"HotelName": "Ramada", "Description": "Ramada description"}
+{"HotelName": "Hyatt", "Description": "Hyatt description"}
+{"HotelName": "Hilton", "Description": "Hilton description"}
+{"HotelName": "ComfortInn", "Description": "ComfortInn description"}
