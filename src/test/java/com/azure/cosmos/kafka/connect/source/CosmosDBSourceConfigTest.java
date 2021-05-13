@@ -38,7 +38,7 @@ public class CosmosDBSourceConfigTest {
         assertEquals(10000L, config.getTaskBufferSize().longValue());
         assertEquals(100L, config.getTaskBatchSize().longValue());
         assertEquals(1000L, config.getTaskPollInterval().longValue());
-        assertTrue(config.useLatestOffset().equalsIgnoreCase("false"));
+        assertFalse(config.useLatestOffset());
     }
 
     @Test

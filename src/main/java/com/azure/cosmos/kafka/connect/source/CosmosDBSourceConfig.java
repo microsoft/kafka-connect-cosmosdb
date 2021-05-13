@@ -70,9 +70,9 @@ public class CosmosDBSourceConfig extends CosmosDBConfig {
     private Long bufferSize;
     private Long batchSize;
     private Long pollInterval;
-    private String messageKeyEnabled;
+    private boolean messageKeyEnabled;
     private String messageKeyField;
-    private String useLatestOffset;
+    private boolean useLatestOffset;
 
     // Variables not defined as Connect configs, should not be exposed when creating connector
     private String workerName;
@@ -89,9 +89,9 @@ public class CosmosDBSourceConfig extends CosmosDBConfig {
         bufferSize = this.getLong(COSMOS_SOURCE_TASK_BUFFER_SIZE_CONF);
         batchSize = this.getLong(COSMOS_SOURCE_TASK_BATCH_SIZE_CONF);
         pollInterval = this.getLong(COSMOS_SOURCE_TASK_POLL_INTERVAL_CONF);
-        messageKeyEnabled = this.getString(COSMOS_MESSAGE_KEY_ENABLED_CONF);
+        messageKeyEnabled = this.getBoolean(COSMOS_MESSAGE_KEY_ENABLED_CONF);
         messageKeyField = this.getString(COSMOS_MESSAGE_KEY_FIELD_CONF);
-        useLatestOffset = this.getString(COSMOS_USE_LATEST_OFFSET_CONF);
+        useLatestOffset = this.getBoolean(COSMOS_USE_LATEST_OFFSET_CONF);
 
         // Since variables are not defined as Connect configs, grab values directly from Map
         assignedContainer = parsedConfig.get(COSMOS_ASSIGNED_CONTAINER_CONF);
@@ -166,16 +166,14 @@ public class CosmosDBSourceConfig extends CosmosDBConfig {
         result
             .define(
                 COSMOS_USE_LATEST_OFFSET_CONF,
-                Type.STRING,
+                Type.BOOLEAN,
                 COSMOS_USE_LATEST_OFFSET_DEFAULT,
-                BOOLEAN_RECOMMENDER,
                 Importance.HIGH,
                 COSMOS_USE_LATEST_OFFSET_DOC,
                 databaseGroupName,
                 ++databaseGroupOrder,
                 Width.MEDIUM,
-                COSMOS_USE_LATEST_OFFSET_DISPLAY,
-                BOOLEAN_RECOMMENDER
+                COSMOS_USE_LATEST_OFFSET_DISPLAY
             );
     }
 
@@ -186,16 +184,14 @@ public class CosmosDBSourceConfig extends CosmosDBConfig {
         result
             .define(
                 COSMOS_MESSAGE_KEY_ENABLED_CONF,
-                Type.STRING,
+                Type.BOOLEAN,
                 COSMOS_MESSAGE_KEY_ENABLED_DEFAULT,
-                BOOLEAN_RECOMMENDER,
                 Importance.MEDIUM,
                 COSMOS_MESSAGE_KEY_ENABLED_DOC,
                 messageGroupName,
                 messageGroupOrder++,
                 Width.SHORT,
-                COSMOS_MESSAGE_KEY_ENABLED_DISPLAY,
-                BOOLEAN_RECOMMENDER
+                COSMOS_MESSAGE_KEY_ENABLED_DISPLAY
             )
             .define(
                 COSMOS_MESSAGE_KEY_FIELD_CONF,
@@ -227,7 +223,7 @@ public class CosmosDBSourceConfig extends CosmosDBConfig {
         return this.pollInterval;
     }
 
-    public String isMessageKeyEnabled() {
+    public boolean isMessageKeyEnabled() {
         return this.messageKeyEnabled;
     }
 
@@ -235,7 +231,7 @@ public class CosmosDBSourceConfig extends CosmosDBConfig {
         return this.messageKeyField;
     }
 
-    public String useLatestOffset() {
+    public boolean useLatestOffset() {
         return this.useLatestOffset;
     }
 

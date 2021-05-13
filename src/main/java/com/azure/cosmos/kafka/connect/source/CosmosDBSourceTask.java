@@ -70,7 +70,7 @@ public class CosmosDBSourceTask extends SourceTask {
         
         Map<String, Object> offset = context.offsetStorageReader().offset(partitionMap);
         // If NOT using the latest offset, reset lease container token to earliest possible value
-        if (config.useLatestOffset().equalsIgnoreCase(CosmosDBConfig.BooleanValues.FALSE.toString())) {
+        if (!config.useLatestOffset()) {
             updateContinuationToken(ZERO_CONTINUATION_TOKEN);
         } else if (offset != null) {
             // Check for previous offset and compare with lease container token
@@ -173,7 +173,7 @@ public class CosmosDBSourceTask extends SourceTask {
             try {                
                 // Set the Kafka message key if option is enabled and field is configured in document
                 String messageKey = "";
-                if (config.isMessageKeyEnabled().equalsIgnoreCase(CosmosDBConfig.BooleanValues.TRUE.toString())) {
+                if (config.isMessageKeyEnabled()) {
                     JsonNode messageKeyFieldNode = node.get(config.getMessageKeyField());
                     messageKey = (messageKeyFieldNode != null) ? messageKeyFieldNode.toString() : "";
                 }
