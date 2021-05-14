@@ -8,8 +8,6 @@ import org.apache.kafka.common.config.ConfigDef.Type;
 import org.apache.kafka.common.config.ConfigDef.Validator;
 import org.apache.kafka.common.config.ConfigDef.Width;
 
-import io.confluent.kafka.schemaregistry.utils.EnumRecommender;
-
 import java.util.Map;
 
 @SuppressWarnings ({"squid:S1854", "squid:S2160"})  // suppress unneeded int *groupOrder variables, equals method
@@ -36,13 +34,6 @@ public class CosmosDBConfig extends AbstractConfig {
 
     public static final int COSMOS_DATABASE_GROUP_ORDER = 2;
     public static final String COSMOS_CLIENT_USER_AGENT_SUFFIX = "APN/1.0 Microsoft/1.0 KafkaConnect/";
-
-    public static final EnumRecommender BOOLEAN_RECOMMENDER = EnumRecommender.in(BooleanValues.values());
-
-    public enum BooleanValues {
-        TRUE,
-        FALSE
-    }
 
     private String connEndpoint;
     private String connKey;

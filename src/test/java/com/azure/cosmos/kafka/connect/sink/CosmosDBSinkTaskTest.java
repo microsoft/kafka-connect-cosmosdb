@@ -42,7 +42,6 @@ public class CosmosDBSinkTaskTest {
         Map<String, String> settingAssignment = CosmosDBSinkConfigTest.setupConfigs();
         settingAssignment.put(CosmosDBSinkConfig.COSMOS_CONTAINER_TOPIC_MAP_CONF, topicName + "#" + containerName);
         settingAssignment.put(CosmosDBSinkConfig.COSMOS_DATABASE_NAME_CONF, databaseName);
-        settingAssignment.put(CosmosDBSinkConfig.COSMOS_USE_UPSERT_CONF, upsertFalse);
         CosmosDBSinkConfig config = new CosmosDBSinkConfig(settingAssignment);
         FieldUtils.writeField(testTask, "config", config, true);
 
@@ -64,7 +63,7 @@ public class CosmosDBSinkTaskTest {
         assertNotNull(record.value());
 
         //Make mock connector to serialize a non-JSON payload
-        when(mockContainer.createItem(any())).then((invocation) -> {
+        when(mockContainer.upsertItem(any())).then((invocation) -> {
             Object item = invocation.getArgument(0);
             //Will throw exception:
             try {
@@ -85,7 +84,7 @@ public class CosmosDBSinkTaskTest {
             fail("Expected ConnectException, but got: " + t.getClass().getName());
         }
 
-        verify(mockContainer, times(1)).createItem("foo");
+        verify(mockContainer, times(1)).upsertItem("foo");
     }
 
     @Test
@@ -98,7 +97,7 @@ public class CosmosDBSinkTaskTest {
         SinkRecord record = new SinkRecord(topicName, 1, stringSchema, "nokey", mapSchema, map, 0L);
         assertNotNull(record.value());
         testTask.put(Arrays.asList(record));
-        verify(mockContainer, times(1)).createItem(map);
+        verify(mockContainer, times(1)).upsertItem(map);
     }
 }
 

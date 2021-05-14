@@ -33,15 +33,6 @@ public class CosmosDBSinkConnectorConfigTest {
     }
 
     @Test
-    public void testPresentDefaults(){
-        //The task useUpsert has a default setting. Let's see if the configdef does
-        String useUpsert = new CosmosDBSinkConfig(CosmosDBSinkConfigTest.setupConfigs()).getUseUpsert();
-        assertNotNull(useUpsert);
-        assertEquals(useUpsert, new CosmosDBSinkConnector().config().defaultValues()
-            .get(CosmosDBSinkConfig.COSMOS_USE_UPSERT_CONF));
-    }
-
-    @Test
     public void testTaskConfigs(){
         Map<String, String> settingAssignment = CosmosDBSinkConfigTest.setupConfigs();
         CosmosDBSinkConnector sinkConnector = new CosmosDBSinkConnector();

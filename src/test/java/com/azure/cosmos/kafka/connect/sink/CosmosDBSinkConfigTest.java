@@ -32,13 +32,6 @@ public class CosmosDBSinkConfigTest {
     }
 
     @Test
-    public void shouldHaveDefaultValues() {
-        // Adding required Configuration with no default value.
-        CosmosDBSinkConfig config = new CosmosDBSinkConfig(setupConfigs());
-        assertTrue(config.getUseUpsert().equalsIgnoreCase("false"));
-    }
-
-    @Test
     public void shouldThrowExceptionWhenCosmosEndpointNotGiven() {
         // Adding required Configuration with no default value.
         HashMap<String, String> settings = setupConfigs();
