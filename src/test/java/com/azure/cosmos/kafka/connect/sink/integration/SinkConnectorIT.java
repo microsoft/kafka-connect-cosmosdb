@@ -4,6 +4,7 @@ import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.CosmosClientBuilder;
 import com.azure.cosmos.CosmosContainer;
 import com.azure.cosmos.CosmosDatabase;
+import com.azure.cosmos.kafka.connect.sink.id.strategy.TemplateStrategy;
 import com.azure.cosmos.models.CosmosContainerProperties;
 import com.azure.cosmos.models.CosmosQueryRequestOptions;
 import com.azure.cosmos.models.ThroughputProperties;
@@ -81,6 +82,7 @@ public class SinkConnectorIT {
      */
     @Before
     public void before() throws URISyntaxException, IOException {
+
         // Load the sink.config.json config file
         URL configFileUrl = SinkConnectorIT.class.getClassLoader().getResource("sink.config.json");
         JsonNode config = new ObjectMapper().readTree(configFileUrl);
@@ -202,6 +204,38 @@ public class SinkConnectorIT {
         String sql = String.format("SELECT * FROM c where c.id = '%s'", person.getId());
         CosmosPagedIterable<Person> readResponse = targetContainer.queryItems(sql, new CosmosQueryRequestOptions(), Person.class);
         Optional<Person> retrievedPerson = readResponse.stream().filter(p -> p.getId().equals(person.getId())).findFirst();
+
+        Assert.assertNotNull("Person could not be retrieved", retrievedPerson.orElse(null));
+    }
+
+    @Test
+    public void testPostJsonMessageWithTemplateId() throws InterruptedException, ExecutionException {
+        // Configure Kafka Config
+        Properties kafkaProperties = createKafkaProducerProperties();
+        kafkaProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class.getName());
+        producer = new KafkaProducer<>(kafkaProperties);
+
+        // Create sink connector with template ID strategy
+        connectConfig
+            .withConfig("id.strategy", TemplateStrategy.class.getName())
+            .withConfig("id.strategy.template", "${topic}-${key}");
+        connectClient.addConnector(connectConfig.build());
+
+        // Send Kafka message to topic
+        logger.debug("Sending Kafka message to " + kafkaProperties.getProperty("bootstrap.servers"));
+        Person person = new Person("Lucy Ferr", RandomUtils.nextLong(1L, 9999999L) +"");
+        ObjectMapper om = new ObjectMapper();
+        ProducerRecord<String, JsonNode> personRecord = new ProducerRecord<>(kafkaTopicJson, person.getId() + "", om.valueToTree(person));
+        producer.send(personRecord).get();
+
+        // Wait a few seconds for the sink connector to push data to Cosmos DB
+        sleep(8000);
+
+        // Query Cosmos DB for data
+        String id = kafkaTopicJson + "-" + person.getId();
+        String sql = String.format("SELECT * FROM c where c.id = '%s'", id);
+        CosmosPagedIterable<Person> readResponse = targetContainer.queryItems(sql, new CosmosQueryRequestOptions(), Person.class);
+        Optional<Person> retrievedPerson = readResponse.stream().filter(p -> p.getId().equals(id)).findFirst();
 
         Assert.assertNotNull("Person could not be retrieved", retrievedPerson.orElse(null));
     }

@@ -5,6 +5,8 @@ import com.azure.cosmos.CosmosClientBuilder;
 import com.azure.cosmos.CosmosContainer;
 import com.azure.cosmos.implementation.BadRequestException;
 import com.azure.cosmos.kafka.connect.CosmosDBConfig;
+import com.azure.cosmos.kafka.connect.sink.id.strategy.AbstractIdStrategyConfig;
+import com.azure.cosmos.kafka.connect.sink.id.strategy.IdStrategy;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -80,6 +82,9 @@ public class CosmosDBSinkTask extends SinkTask {
                     recordValue = record.value();
                 }
 
+                maybeInsertId(recordValue, record);
+                logger.debug("Value after inserting ID: {}", recordValue);
+
                 try {
                     addItemToContainer(container, recordValue);
                 } catch (BadRequestException bre) {
@@ -87,6 +92,15 @@ public class CosmosDBSinkTask extends SinkTask {
                 }
             }
         }
+    }
+
+    private void maybeInsertId(Object recordValue, SinkRecord sinkRecord) {
+        if (!(recordValue instanceof Map)) {
+            return;
+        }
+        Map<String, Object> recordMap = (Map<String, Object>) recordValue;
+        IdStrategy idStrategy = config.idStrategy();
+        recordMap.put(AbstractIdStrategyConfig.ID, idStrategy.generateId(sinkRecord));
     }
 
     private void addItemToContainer(CosmosContainer container, Object recordValue) {
