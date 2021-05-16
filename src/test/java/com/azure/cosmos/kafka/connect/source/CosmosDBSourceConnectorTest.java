@@ -16,7 +16,6 @@ import static org.junit.Assert.*;
 public class CosmosDBSourceConnectorTest {
 
     private static final String ASSIGNED_CONTAINER = CosmosDBSourceConfig.COSMOS_ASSIGNED_CONTAINER_CONF;
-    private static final String WORKER_NAME = CosmosDBSourceConfig.COSMOS_WORKER_NAME_CONF;
     private static final String BATCH_SETTING_NAME = CosmosDBSourceConfig.COSMOS_SOURCE_TASK_BATCH_SIZE_CONF;
     private static final Long BATCH_SETTING = new CosmosDBSourceConfig(CosmosDBSourceConfigTest.setupConfigs()).getTaskBatchSize();
 
