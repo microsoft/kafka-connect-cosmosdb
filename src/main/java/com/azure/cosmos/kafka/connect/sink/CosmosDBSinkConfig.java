@@ -21,7 +21,17 @@ import org.apache.kafka.common.config.ConfigException;
 public class CosmosDBSinkConfig extends CosmosDBConfig {
     public static final String ID_STRATEGY_CONFIG = AbstractIdStrategyConfig.ID_STRATEGY;
     public static final Class<?> ID_STRATEGY_DEFAULT = ProvidedInValueStrategy.class;
-    public static final String ID_STRATEGY_DOC = "";
+    public static final String ID_STRATEGY_DOC =
+        "A strategy used to populate the document with an ``id``. Valid strategies are: "
+            + "``TemplateStrategy``, ``FullKeyStrategy``, ``KafkaMetadataStrategy``, "
+            + "``ProvidedInKeyStrategy``, ``ProvidedInValueStrategy``. For each strategy, the full "
+            + "name of the strategy must be specified, e.g. "
+            + "com.azure.cosmos.kafka.connect.sink.id.strategy.TemplateStrategy. Configuration "
+            + "properties prefixed with``id.strategy`` are passed through to the strategy. For "
+            + "example, when using"
+            + "``id.strategy=com.azure.cosmos.kafka.connect.sink.id.strategy.TemplateStrategy.class`` , "
+            + "the property ``id.strategy.template`` is passed through to the template strategy "
+            + "and used to specify the template string to be used in constructing the ``id``.";
     public static final String TEMPLATE_CONFIG_DISPLAY = "ID Strategy";
 
     private IdStrategy idStrategy;

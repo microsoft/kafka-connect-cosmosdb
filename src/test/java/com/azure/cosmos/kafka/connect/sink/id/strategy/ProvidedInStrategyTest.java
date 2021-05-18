@@ -14,6 +14,7 @@ import org.junit.runners.Parameterized;
 import org.mockito.Mock;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -177,5 +178,13 @@ public class ProvidedInStrategyTest {
         assertEquals(
             "[{\"id\":0,\"name\":\"cosmos kramer\",\"occupation\":\"unknown\"},{\"id\":1,\"name\":\"franz kafka\",\"occupation\":\"writer\"}]",
             strategy.generateId(record));
+    }
+
+    @Test
+    public void generatedIdSanitized() {
+        returnOnKeyOrValue(null, ImmutableMap.of("id", "#my/special\\id?"));
+
+        String id = strategy.generateId(record);
+        assertEquals("_my_special_id_", id);
     }
 }
