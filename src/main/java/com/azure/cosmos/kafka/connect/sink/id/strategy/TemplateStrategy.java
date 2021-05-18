@@ -18,6 +18,7 @@ public class TemplateStrategy extends AbstractIdStrategy {
     private static final String OFFSET = "offset";
 
     private static final String PATTERN_TEMPLATE = "\\$\\{(%s)\\}";
+    private static final Pattern PATTERN;
 
     private TemplateStrategyConfig config;
 
@@ -26,11 +27,14 @@ public class TemplateStrategy extends AbstractIdStrategy {
     static {
         ImmutableMap.Builder<String, Function<SinkRecord, String>> builder = ImmutableMap.builder();
         builder.put(KEY, (r) -> Values.convertToString(r.keySchema(), r.key()));
-        builder.put(VALUE, (r) -> Values.convertToString(r.valueSchema(), r.value()));
         builder.put(TOPIC, SinkRecord::topic);
         builder.put(PARTITION, (r) -> r.kafkaPartition().toString());
         builder.put(OFFSET, (r) -> Long.toString(r.kafkaOffset()));
         METHODS_BY_VARIABLE = builder.build();
+
+        String pattern = String.format(PATTERN_TEMPLATE,
+            METHODS_BY_VARIABLE.keySet().stream().collect(Collectors.joining("|")));
+        PATTERN = Pattern.compile(pattern);
     }
 
     @Override
@@ -47,11 +51,9 @@ public class TemplateStrategy extends AbstractIdStrategy {
     }
 
     private String resolveAll(String template, SinkRecord record) {
-        String pattern = String.format(PATTERN_TEMPLATE,
-                METHODS_BY_VARIABLE.keySet().stream().collect(Collectors.joining("|")));
         int lastIndex = 0;
         StringBuilder output = new StringBuilder();
-        Matcher matcher = Pattern.compile(pattern).matcher(template);
+        Matcher matcher = PATTERN.matcher(template);
         while (matcher.find()) {
             output.append(template, lastIndex, matcher.start())
                     .append(METHODS_BY_VARIABLE.get(matcher.group(1)).apply(record));

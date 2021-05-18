@@ -105,28 +105,6 @@ public class TemplateStrategyTest {
     }
 
     @Test
-    public void fullValueStrategyUsesFullValue() {
-        strategy = new FullValueStrategy();
-        strategy.configure(ImmutableMap.of());
-        SinkRecord record = mock(SinkRecord.class);
-        Schema schema = SchemaBuilder.struct()
-                .field("string_field", Schema.STRING_SCHEMA)
-                .field("int64_field", Schema.INT64_SCHEMA)
-                .build();
-        Struct value = new Struct(schema)
-                .put("string_field", "value")
-                .put("int64_field", 0L);
-
-        when(record.valueSchema()).thenReturn(schema);
-        when(record.value()).thenReturn(value);
-
-        String id = strategy.generateId(record);
-        assertEquals(
-                "{\"string_field\":\"value\",\"int64_field\":0}",
-                id);
-    }
-
-    @Test
     public void fullKeyStrategyUsesFullKey() {
         strategy = new FullKeyStrategy();
         strategy.configure(ImmutableMap.of());
