@@ -30,7 +30,7 @@ class ProvidedInStrategy extends AbstractIdStrategy {
             : Values.convertToString(record.valueSchema(), record.value());
         try {
             Object object = JsonPath.parse(value).read(config.jsonPath());
-            return Values.convertToString(null, object);
+            return sanitizeId(Values.convertToString(null, object));
         } catch (Exception e) {
             throw new ConnectException("Could not evaluate JsonPath " + config.jsonPath(), e);
         }

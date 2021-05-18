@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 
 public class TemplateStrategy extends AbstractIdStrategy {
     private static final String KEY = "key";
-    private static final String VALUE = "value";
     private static final String TOPIC = "topic";
     private static final String PARTITION = "partition";
     private static final String OFFSET = "offset";
@@ -40,7 +39,7 @@ public class TemplateStrategy extends AbstractIdStrategy {
     @Override
     public String generateId(SinkRecord record) {
         String template = config.template();
-        return resolveAll(template, record);
+        return sanitizeId(resolveAll(template, record));
     }
 
     @Override

@@ -102,4 +102,15 @@ public class TemplateStrategyTest {
         String id = strategy.generateId(record);
         assertEquals("topic_0_1", id);
     }
+
+    @Test
+    public void generatedIdSanitized() {
+        strategy = new TemplateStrategy();
+        strategy.configure(
+            ImmutableMap.of(TemplateStrategyConfig.TEMPLATE_CONFIG, "#my/special\\id?"));
+        SinkRecord record = mock(SinkRecord.class);
+
+        String id = strategy.generateId(record);
+        assertEquals("_my_special_id_", id);
+    }
 }
