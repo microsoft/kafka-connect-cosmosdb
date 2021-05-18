@@ -29,7 +29,7 @@ public class CosmosDBSinkConfig extends CosmosDBConfig {
             + "com.azure.cosmos.kafka.connect.sink.id.strategy.TemplateStrategy. Configuration "
             + "properties prefixed with``id.strategy`` are passed through to the strategy. For "
             + "example, when using"
-            + "``id.strategy=com.azure.cosmos.kafka.connect.sink.id.strategy.TemplateStrategy.class`` , "
+            + "``id.strategy=com.azure.cosmos.kafka.connect.sink.id.strategy.TemplateStrategy`` , "
             + "the property ``id.strategy.template`` is passed through to the template strategy "
             + "and used to specify the template string to be used in constructing the ``id``.";
     public static final String TEMPLATE_CONFIG_DISPLAY = "ID Strategy";

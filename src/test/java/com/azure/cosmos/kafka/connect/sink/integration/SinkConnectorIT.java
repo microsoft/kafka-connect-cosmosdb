@@ -4,6 +4,8 @@ import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.CosmosClientBuilder;
 import com.azure.cosmos.CosmosContainer;
 import com.azure.cosmos.CosmosDatabase;
+import com.azure.cosmos.kafka.connect.sink.id.strategy.ProvidedInKeyStrategy;
+import com.azure.cosmos.kafka.connect.sink.id.strategy.ProvidedInValueStrategy;
 import com.azure.cosmos.kafka.connect.sink.id.strategy.TemplateStrategy;
 import com.azure.cosmos.models.CosmosContainerProperties;
 import com.azure.cosmos.models.CosmosQueryRequestOptions;
@@ -162,6 +164,18 @@ public class SinkConnectorIT {
             .withConfig("connect.cosmos.containers.topicmap", config.get("connect.cosmos.containers.topicmap").textValue());
     }
 
+    private void addAvroConfigs() {
+        connectConfig
+            .withConfig("value.converter", AVRO_CONVERTER)
+            .withConfig("value.converter.schemas.enable", "true")
+            .withConfig("value.converter.schema.registry.url", AVRO_SCHEMA_REGISTRY)
+            .withConfig("key.converter", AVRO_CONVERTER)
+            .withConfig("key.converter.schemas.enable", "true")
+            .withConfig("key.converter.schema.registry.url", AVRO_SCHEMA_REGISTRY)
+            .withConfig("topics", KAFKA_TOPIC_AVRO)
+            .withConfig("connect.cosmos.containers.topicmap", KAFKA_TOPIC_AVRO+"#kafka");
+    }
+
     /**
      * Create a properties map for Kafka Producer
      */
@@ -209,7 +223,7 @@ public class SinkConnectorIT {
     }
 
     @Test
-    public void testPostJsonMessageWithTemplateId() throws InterruptedException, ExecutionException {
+    public void testPostJsonMessageWithTemplateIdStrategy() throws InterruptedException, ExecutionException {
         // Configure Kafka Config
         Properties kafkaProperties = createKafkaProducerProperties();
         kafkaProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class.getName());
@@ -233,6 +247,38 @@ public class SinkConnectorIT {
 
         // Query Cosmos DB for data
         String id = kafkaTopicJson + "-" + person.getId();
+        String sql = String.format("SELECT * FROM c where c.id = '%s'", id);
+        CosmosPagedIterable<Person> readResponse = targetContainer.queryItems(sql, new CosmosQueryRequestOptions(), Person.class);
+        Optional<Person> retrievedPerson = readResponse.stream().filter(p -> p.getId().equals(id)).findFirst();
+
+        Assert.assertNotNull("Person could not be retrieved", retrievedPerson.orElse(null));
+    }
+
+    @Test
+    public void testPostJsonMessageWithJsonPathInProvidedInValueStrategy() throws InterruptedException, ExecutionException {
+        // Configure Kafka Config
+        Properties kafkaProperties = createKafkaProducerProperties();
+        kafkaProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class.getName());
+        producer = new KafkaProducer<>(kafkaProperties);
+
+        // Create sink connector with provided in value ID strategy and a json path
+        connectConfig
+            .withConfig("id.strategy", ProvidedInValueStrategy.class.getName())
+            .withConfig("id.strategy.jsonPath", "$.name");
+        connectClient.addConnector(connectConfig.build());
+
+        // Send Kafka message to topic
+        logger.debug("Sending Kafka message to " + kafkaProperties.getProperty("bootstrap.servers"));
+        Person person = new Person("Lucy Ferr", RandomUtils.nextLong(1L, 9999999L) +"");
+        ObjectMapper om = new ObjectMapper();
+        ProducerRecord<String, JsonNode> personRecord = new ProducerRecord<>(kafkaTopicJson, person.getId() + "", om.valueToTree(person));
+        producer.send(personRecord).get();
+
+        // Wait a few seconds for the sink connector to push data to Cosmos DB
+        sleep(8000);
+
+        // Query Cosmos DB for data
+        String id = person.getName();
         String sql = String.format("SELECT * FROM c where c.id = '%s'", id);
         CosmosPagedIterable<Person> readResponse = targetContainer.queryItems(sql, new CosmosQueryRequestOptions(), Person.class);
         Optional<Person> retrievedPerson = readResponse.stream().filter(p -> p.getId().equals(id)).findFirst();
@@ -298,16 +344,8 @@ public class SinkConnectorIT {
         avroProducer = new KafkaProducer<>(kafkaProperties);
 
         // Create sink connector with AVRO config
-        connectClient.addConnector(connectConfig
-            .withConfig("value.converter", AVRO_CONVERTER)
-            .withConfig("value.converter.schemas.enable", "true")
-            .withConfig("value.converter.schema.registry.url", AVRO_SCHEMA_REGISTRY)
-            .withConfig("key.converter", AVRO_CONVERTER)
-            .withConfig("key.converter.schemas.enable", "true")
-            .withConfig("key.converter.schema.registry.url", AVRO_SCHEMA_REGISTRY)
-            .withConfig("topics", KAFKA_TOPIC_AVRO)
-            .withConfig("connect.cosmos.containers.topicmap", KAFKA_TOPIC_AVRO+"#kafka")
-            .build());
+        addAvroConfigs();
+        connectClient.addConnector(connectConfig.build());
 
         // Send Kafka message to topic
         logger.debug("Sending Kafka message to " + kafkaProperties.getProperty("bootstrap.servers"));
@@ -317,10 +355,10 @@ public class SinkConnectorIT {
 
         String keySchema = "{\"type\": \"record\",\"name\": \"key\",\"fields\":[{\"type\": \"string\",\"name\": \"key\"}]}}";
         String valueSchema = "{\"type\": \"record\",\"fields\": " +
-                        " [{\"type\": \"string\",\"name\": \"id\"}, "+
-                        " {\"type\": \"string\",\"name\": \"name\"}], "+
-                        " \"optional\": false,\"name\": \"record\"}";
-        
+            " [{\"type\": \"string\",\"name\": \"id\"}, "+
+            " {\"type\": \"string\",\"name\": \"name\"}], "+
+            " \"optional\": false,\"name\": \"record\"}";
+
         Schema.Parser parserKey = new Schema.Parser();
         Schema schemaKey = parserKey.parse(keySchema);
         GenericRecord avroKeyRecord = new GenericData.Record(schemaKey);
@@ -342,6 +380,114 @@ public class SinkConnectorIT {
         String sql = String.format("SELECT * FROM c where c.id = '%s'", person.getId()+ "");
         CosmosPagedIterable<Person> readResponse = targetContainer.queryItems(sql, new CosmosQueryRequestOptions(), Person.class);
         Optional<Person> retrievedPerson = readResponse.stream().filter(p -> p.getId().equals(person.getId())).findFirst();
+
+        Assert.assertNotNull("Person could not be retrieved", retrievedPerson.orElse(null));
+    }
+
+    @Test
+    public void testPostAvroMessageWithTemplateIdStrategy() throws InterruptedException, ExecutionException {
+        // Configure Kafka Config for AVRO message
+        Properties kafkaProperties = createKafkaProducerProperties();
+        kafkaProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class.getName());
+        kafkaProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class.getName());
+        kafkaProperties.put("schema.registry.url", SCHEMA_REGISTRY_URL);
+        avroProducer = new KafkaProducer<>(kafkaProperties);
+
+        addAvroConfigs();
+        // Create sink connector with template ID strategy
+        connectConfig
+            .withConfig("id.strategy", TemplateStrategy.class.getName())
+            .withConfig("id.strategy.template", "${topic}-${key}");
+        connectClient.addConnector(connectConfig.build());
+
+        // Send Kafka message to topic
+        logger.debug("Sending Kafka message to " + kafkaProperties.getProperty("bootstrap.servers"));
+
+        String id = RandomUtils.nextLong(1L, 9999999L) + "";
+        Person person = new Person("Lucy Ferr", id + "");
+
+        String keySchema = "{\"type\": \"record\",\"name\": \"key\",\"fields\":[{\"type\": \"string\",\"name\": \"key\"}]}}";
+        String valueSchema = "{\"type\": \"record\",\"fields\": " +
+            " [{\"type\": \"string\",\"name\": \"id\"}, "+
+            " {\"type\": \"string\",\"name\": \"name\"}], "+
+            " \"optional\": false,\"name\": \"record\"}";
+
+        Schema.Parser parserKey = new Schema.Parser();
+        Schema schemaKey = parserKey.parse(keySchema);
+        GenericRecord avroKeyRecord = new GenericData.Record(schemaKey);
+        avroKeyRecord.put("key", person.getId()+ "");
+
+        Schema.Parser parser = new Schema.Parser();
+        Schema schemaValue = parser.parse(valueSchema);
+        GenericRecord avroValueRecord = new GenericData.Record(schemaValue);
+        avroValueRecord.put("id", person.getId()+ "");
+        avroValueRecord.put("name", person.getName());
+
+        ProducerRecord<GenericRecord, GenericRecord> personRecord = new ProducerRecord<>(KAFKA_TOPIC_AVRO, avroKeyRecord, avroValueRecord);
+        avroProducer.send(personRecord).get();
+
+        // Wait a few seconds for the sink connector to push data to Cosmos DB
+        sleep(8000);
+
+        // Query Cosmos DB for data
+        String cosmosId = KAFKA_TOPIC_AVRO + "-{\"key\":\"" + person.getId() + "\"}";
+        String sql = String.format("SELECT * FROM c where c.id = '%s'", cosmosId);
+        CosmosPagedIterable<Person> readResponse = targetContainer.queryItems(sql, new CosmosQueryRequestOptions(), Person.class);
+        Optional<Person> retrievedPerson = readResponse.stream().filter(p -> p.getId().equals(cosmosId)).findFirst();
+
+        Assert.assertNotNull("Person could not be retrieved", retrievedPerson.orElse(null));
+    }
+
+    @Test
+    public void testPostAvroMessageWithJsonPathInProvidedInKeyStrategy() throws InterruptedException, ExecutionException {
+        // Configure Kafka Config for AVRO message
+        Properties kafkaProperties = createKafkaProducerProperties();
+        kafkaProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class.getName());
+        kafkaProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class.getName());
+        kafkaProperties.put("schema.registry.url", SCHEMA_REGISTRY_URL);
+        avroProducer = new KafkaProducer<>(kafkaProperties);
+
+        addAvroConfigs();
+        // Create sink connector with template ID strategy
+        connectConfig
+            .withConfig("id.strategy", ProvidedInKeyStrategy.class.getName())
+            .withConfig("id.strategy.jsonPath", "$.key");
+        connectClient.addConnector(connectConfig.build());
+
+        // Send Kafka message to topic
+        logger.debug("Sending Kafka message to " + kafkaProperties.getProperty("bootstrap.servers"));
+
+        String id = RandomUtils.nextLong(1L, 9999999L) + "";
+        Person person = new Person("Lucy Ferr", id + "");
+
+        String keySchema = "{\"type\": \"record\",\"name\": \"key\",\"fields\":[{\"type\": \"string\",\"name\": \"key\"}]}}";
+        String valueSchema = "{\"type\": \"record\",\"fields\": " +
+            " [{\"type\": \"string\",\"name\": \"id\"}, "+
+            " {\"type\": \"string\",\"name\": \"name\"}], "+
+            " \"optional\": false,\"name\": \"record\"}";
+
+        Schema.Parser parserKey = new Schema.Parser();
+        Schema schemaKey = parserKey.parse(keySchema);
+        GenericRecord avroKeyRecord = new GenericData.Record(schemaKey);
+        avroKeyRecord.put("key", person.getId()+ "");
+
+        Schema.Parser parser = new Schema.Parser();
+        Schema schemaValue = parser.parse(valueSchema);
+        GenericRecord avroValueRecord = new GenericData.Record(schemaValue);
+        avroValueRecord.put("id", person.getId()+ "");
+        avroValueRecord.put("name", person.getName());
+
+        ProducerRecord<GenericRecord, GenericRecord> personRecord = new ProducerRecord<>(KAFKA_TOPIC_AVRO, avroKeyRecord, avroValueRecord);
+        avroProducer.send(personRecord).get();
+
+        // Wait a few seconds for the sink connector to push data to Cosmos DB
+        sleep(8000);
+
+        // Query Cosmos DB for data
+        String cosmosId = person.getId();
+        String sql = String.format("SELECT * FROM c where c.id = '%s'", cosmosId);
+        CosmosPagedIterable<Person> readResponse = targetContainer.queryItems(sql, new CosmosQueryRequestOptions(), Person.class);
+        Optional<Person> retrievedPerson = readResponse.stream().filter(p -> p.getId().equals(cosmosId)).findFirst();
 
         Assert.assertNotNull("Person could not be retrieved", retrievedPerson.orElse(null));
     }

@@ -7,8 +7,6 @@ import com.azure.cosmos.implementation.BadRequestException;
 import com.azure.cosmos.kafka.connect.CosmosDBConfig;
 import com.azure.cosmos.kafka.connect.sink.id.strategy.AbstractIdStrategyConfig;
 import com.azure.cosmos.kafka.connect.sink.id.strategy.IdStrategy;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.Collection;
 import java.util.List;
@@ -29,7 +27,6 @@ public class CosmosDBSinkTask extends SinkTask {
     private static final Logger logger = LoggerFactory.getLogger(CosmosDBSinkTask.class);
     private CosmosClient client = null;
     private CosmosDBSinkConfig config;
-    ObjectMapper mapper = new ObjectMapper();
 
     @Override
     public String version() {
@@ -76,8 +73,7 @@ public class CosmosDBSinkTask extends SinkTask {
 
                 Object recordValue;
                 if (record.value() instanceof Struct) {
-                    Map<String, Object> jsonMap = StructToJsonMap.toJsonMap((Struct) record.value());
-                    recordValue = mapper.convertValue(jsonMap, JsonNode.class);
+                    recordValue = StructToJsonMap.toJsonMap((Struct) record.value());
                 } else {
                     recordValue = record.value();
                 }
