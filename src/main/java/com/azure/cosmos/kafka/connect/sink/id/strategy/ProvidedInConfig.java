@@ -7,8 +7,8 @@ import java.util.Map;
 public class ProvidedInConfig extends AbstractIdStrategyConfig {
     public static final String JSON_PATH_CONFIG = "jsonPath";
     public static final String JSON_PATH_CONFIG_DEFAULT = "$.id";
-    public static final String JSON_PATH_CONFIG_DOC = "The template string to use for determining the `id`";
-    public static final String JSON_PATH_CONFIG_DISPLAY = "Template";
+    public static final String JSON_PATH_CONFIG_DOC = "A JsonPath expression to select the desired component to use as ``id``";
+    public static final String JSON_PATH_CONFIG_DISPLAY = "JSON Path";
     private final String jsonPath;
 
     public ProvidedInConfig(Map<String, ?> props) {

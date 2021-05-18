@@ -7,7 +7,12 @@ import java.util.Map;
 public class TemplateStrategyConfig extends AbstractIdStrategyConfig {
     public static final String TEMPLATE_CONFIG = "template";
     public static final String TEMPLATE_CONFIG_DEFAULT = "";
-    public static final String TEMPLATE_CONFIG_DOC = "The template string to use for determining the `id`";
+    public static final String TEMPLATE_CONFIG_DOC =
+        "The template string to use for determining the ``id``. The template can contain the "
+            + "following variables that are bound to their values on the Kafka record:"
+            + "${topic}, ${partition}, ${offset}, ${key}. For example, the template "
+            + "``${topic}-${key}`` would use the topic name and the entire key in the ``id``, "
+            + "separated by '-'";
     public static final String TEMPLATE_CONFIG_DISPLAY = "Template";
     private final String template;
 
