@@ -1,5 +1,6 @@
 package com.azure.cosmos.kafka.connect.sink.id.strategy;
 
+import com.jayway.jsonpath.JsonPath;
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.data.Values;
@@ -16,28 +17,28 @@ class ProvidedInStrategy extends AbstractIdStrategy {
 
     private final ProvidedIn where;
 
+    private ProvidedInConfig config;
+
     ProvidedInStrategy(ProvidedIn where) {
         this.where = where;
     }
 
     @Override
     public String generateId(SinkRecord record) {
-        Object value = where == ProvidedIn.KEY ? record.key() : record.value();
-        Schema idSchema = null;
-        Object idValue;
-
-        if (value instanceof Struct) {
-            idSchema = ((Struct) value).schema().field(AbstractIdStrategyConfig.ID).schema();
-            idValue = ((Struct) value).get(AbstractIdStrategyConfig.ID);
-        } else if (value instanceof Map) {
-            idValue = ((Map) value).get(AbstractIdStrategyConfig.ID);
-        } else {
-            throw new ConnectException("Expected " + where + " to be of struct or map type to use ProvidedIn strategy");
+        String value = where == ProvidedIn.KEY
+            ? Values.convertToString(record.keySchema(), record.key())
+            : Values.convertToString(record.valueSchema(), record.value());
+        try {
+            Object object = JsonPath.parse(value).read(config.jsonPath());
+            return Values.convertToString(null, object);
+        } catch (Exception e) {
+            throw new ConnectException("Could not evaluate JsonPath " + config.jsonPath(), e);
         }
+    }
 
-        if (idValue == null) {
-            throw new ConnectException("Cannot find id in " + where + ": " + value);
-        }
-        return Values.convertToString(idSchema, idValue);
+    @Override
+    public void configure(Map<String, ?> configs) {
+        config = new ProvidedInConfig(configs);
+        super.configure(configs);
     }
 }

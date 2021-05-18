@@ -26,17 +26,6 @@ public class TemplateStrategyTest {
     }
 
     @Test
-    public void simpleValue() {
-        strategy.configure(ImmutableMap.of(TemplateStrategyConfig.TEMPLATE_CONFIG, "${value}"));
-        SinkRecord record = mock(SinkRecord.class);
-        when(record.valueSchema()).thenReturn(Schema.INT64_SCHEMA);
-        when(record.value()).thenReturn(1024);
-
-        String id = strategy.generateId(record);
-        assertEquals("1024", id);
-    }
-
-    @Test
     public void kafkaMetadata() {
         strategy.configure(ImmutableMap.of(TemplateStrategyConfig.TEMPLATE_CONFIG, "${topic}-${partition}-${offset}"));
         SinkRecord record = mock(SinkRecord.class);
@@ -49,31 +38,6 @@ public class TemplateStrategyTest {
     }
 
     @Test
-    public void complexKeyValue() {
-        strategy.configure(ImmutableMap.of(TemplateStrategyConfig.TEMPLATE_CONFIG, "${key}-${value}"));
-        SinkRecord record = mock(SinkRecord.class);
-        Schema schema = SchemaBuilder.struct()
-                .field("string_field", Schema.STRING_SCHEMA)
-                .field("int_field", Schema.INT32_SCHEMA)
-                .build();
-        Struct key = new Struct(schema)
-                .put("string_field", "key")
-                .put("int_field", 0);
-        Struct value = new Struct(schema)
-                .put("string_field", "value")
-                .put("int_field", 1);
-        when(record.keySchema()).thenReturn(schema);
-        when(record.valueSchema()).thenReturn(schema);
-        when(record.key()).thenReturn(key);
-        when(record.value()).thenReturn(value);
-
-        String id = strategy.generateId(record);
-        assertEquals(
-                "{\"string_field\":\"key\",\"int_field\":0}-{\"string_field\":\"value\",\"int_field\":1}",
-                id);
-    }
-
-    @Test
     public void unknownVariablePreserved() {
         strategy.configure(ImmutableMap.of(TemplateStrategyConfig.TEMPLATE_CONFIG, "${unknown}"));
         String id = strategy.generateId(mock(SinkRecord.class));
@@ -82,7 +46,7 @@ public class TemplateStrategyTest {
 
     @Test
     public void nestedStruct() {
-        strategy.configure(ImmutableMap.of(TemplateStrategyConfig.TEMPLATE_CONFIG, "${value}"));
+        strategy.configure(ImmutableMap.of(TemplateStrategyConfig.TEMPLATE_CONFIG, "${key}"));
         SinkRecord record = mock(SinkRecord.class);
         Schema nestedSchema = SchemaBuilder.struct()
                 .field("nested_field", Schema.STRING_SCHEMA)
@@ -95,8 +59,8 @@ public class TemplateStrategyTest {
                 .put("string_field", "value")
                 .put("struct_field",
                         new Struct(nestedSchema).put("nested_field", "a nest"));
-        when(record.valueSchema()).thenReturn(schema);
-        when(record.value()).thenReturn(value);
+        when(record.keySchema()).thenReturn(schema);
+        when(record.key()).thenReturn(value);
 
         String id = strategy.generateId(record);
         assertEquals(
