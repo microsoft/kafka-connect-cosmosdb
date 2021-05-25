@@ -88,7 +88,7 @@ public class CosmosDBSourceTask extends SourceTask {
         // Initiate Cosmos change feed processor
         changeFeedProcessor = getChangeFeedProcessor(config.getWorkerName(),feedContainer,leaseContainer);
         changeFeedProcessor.start()
-                .subscribeOn(Schedulers.elastic())
+                .subscribeOn(Schedulers.boundedElastic())
                 .doOnSuccess(aVoid -> running.set(true))
                 .subscribe();
 

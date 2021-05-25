@@ -86,11 +86,9 @@ public class StructToJsonMapTest {
         assertEquals(now, converted.get("timestamp"));
         assertEquals(ten, converted.get("decimal"));
         assertEquals(quickBrownFox, converted.get("string"));
-        assertEquals(quickBrownFox,
-            ((Map<String, Object>) converted.get("struct")).get("embedded_string"));
+        assertEquals(quickBrownFox, ((Map<String, Object>) converted.get("struct")).get("embedded_string"));
         assertEquals(false, ((List<Boolean>) converted.get("array_of_boolean")).get(0));
-        assertEquals(ImmutableMap.of("embedded_string", quickBrownFox),
-            ((List<Struct>) converted.get("array_of_struct")).get(0));
+        assertEquals(ImmutableMap.of("embedded_string", quickBrownFox), ((List<Struct>) converted.get("array_of_struct")).get(0));
         assertNull(converted.get("optional_string"));
     }
 }

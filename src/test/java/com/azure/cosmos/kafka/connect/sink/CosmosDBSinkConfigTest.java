@@ -1,5 +1,7 @@
 package com.azure.cosmos.kafka.connect.sink;
 
+import com.azure.cosmos.kafka.connect.sink.id.strategy.AbstractIdStrategyConfig;
+import com.azure.cosmos.kafka.connect.sink.id.strategy.KafkaMetadataStrategy;
 import org.apache.kafka.common.config.ConfigException;
 import org.junit.Test;
 
@@ -17,6 +19,7 @@ public class CosmosDBSinkConfigTest {
         configs.put(CosmosDBSinkConfig.COSMOS_CONN_KEY_CONF, "mykey");
         configs.put(CosmosDBSinkConfig.COSMOS_DATABASE_NAME_CONF, "mydb");
         configs.put(CosmosDBSinkConfig.COSMOS_CONTAINER_TOPIC_MAP_CONF, "mytopic#mycontainer");
+        configs.put(AbstractIdStrategyConfig.ID_STRATEGY, KafkaMetadataStrategy.class.getName());
         return configs;
     }
 

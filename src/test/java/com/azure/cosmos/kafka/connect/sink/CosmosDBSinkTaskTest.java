@@ -29,7 +29,6 @@ public class CosmosDBSinkTaskTest {
     private final String topicName = "testtopic";
     private final String containerName = "container666";
     private final String databaseName = "fakeDatabase312";
-    private final String upsertFalse = "false";
     private CosmosDBSinkTask testTask;
     private CosmosClient mockCosmosClient;
     private CosmosContainer mockContainer;
