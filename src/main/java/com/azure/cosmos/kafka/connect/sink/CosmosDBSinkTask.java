@@ -69,7 +69,7 @@ public class CosmosDBSinkTask extends SinkTask {
                 logger.debug("Writing record, value type: {}", record.value().getClass().getName());
                 logger.debug("Key Schema: {}", record.keySchema());
                 logger.debug("Value schema: {}", record.valueSchema());
-                logger.debug("Value.toString(): {}", record.value() != null ? record.value().toString() : "<null>");
+                logger.trace("Value.toString(): {}", record.value() != null ? record.value().toString() : "<null>");
 
                 Object recordValue;
                 if (record.value() instanceof Struct) {
@@ -79,7 +79,7 @@ public class CosmosDBSinkTask extends SinkTask {
                 }
 
                 maybeInsertId(recordValue, record);
-                logger.debug("Value after inserting ID: {}", recordValue);
+                logger.trace("Value after inserting ID: {}", recordValue);
 
                 try {
                     addItemToContainer(container, recordValue);
