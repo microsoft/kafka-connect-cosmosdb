@@ -69,7 +69,7 @@ public class CosmosDBSinkTask extends SinkTask {
                 logger.debug("Writing record, value type: {}", record.value().getClass().getName());
                 logger.debug("Key Schema: {}", record.keySchema());
                 logger.debug("Value schema: {}", record.valueSchema());
-                logger.trace("Value.toString(): {}", record.value() != null ? record.value().toString() : "<null>");
+                logger.trace("Value.toString(): {}", record.value());
 
                 Object recordValue;
                 if (record.value() instanceof Struct) {
