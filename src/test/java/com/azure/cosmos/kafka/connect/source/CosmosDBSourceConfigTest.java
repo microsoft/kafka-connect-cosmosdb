@@ -28,8 +28,9 @@ public class CosmosDBSourceConfigTest {
         assertEquals("mykey", config.getConnKey());
         assertEquals("mydb", config.getDatabaseName());
         assertEquals("mycontainer6", config.getTopicContainerMap().getContainerForTopic("mytopic5").get());
+        assertEquals("myprovider", config.getProviderName());
     }
-
+    
     @Test
     public void shouldHaveDefaultValues() {
         // Adding required Configuration with no default value.
@@ -38,6 +39,7 @@ public class CosmosDBSourceConfigTest {
         assertEquals(10000L, config.getTaskBufferSize().longValue());
         assertEquals(100L, config.getTaskBatchSize().longValue());
         assertEquals(1000L, config.getTaskPollInterval().longValue());
+        assertEquals(null, config.getProviderName());
         assertFalse(config.useLatestOffset());
     }
 

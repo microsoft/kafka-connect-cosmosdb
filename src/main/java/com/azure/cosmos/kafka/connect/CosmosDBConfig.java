@@ -32,12 +32,18 @@ public class CosmosDBConfig extends AbstractConfig {
         + "For example: topic1#con1,topic2#con2.";
     private static final String COSMOS_CONTAINER_TOPIC_MAP_DISPLAY = "Topic-Container map";
 
+    public static final String COSMOS_PROVIDER_NAME_CONF = "connect.cosmos.provider.name";
+    private static final String COSMOS_PROVIDER_NAME_DISPLAY = "Name of  provider";
+    private static final String COSMOS_PROVIDER_NAME_DEFAULT = null;
+    private static final String COSMOS_PROVIDER_NAME_DOC = "This is used for internal metrics to distinguish between self-managed and ConfluentCloud providers.";
+
     public static final int COSMOS_DATABASE_GROUP_ORDER = 2;
     public static final String COSMOS_CLIENT_USER_AGENT_SUFFIX = "APN/1.0 Microsoft/1.0 KafkaConnect/";
-
+    
     private String connEndpoint;
     private String connKey;
     private String databaseName;
+    private String providerName;
     private TopicContainerMap topicContainerMap = TopicContainerMap.empty();
 
     public CosmosDBConfig(ConfigDef config, Map<String, String> parsedConfig) {
@@ -142,6 +148,9 @@ public class CosmosDBConfig extends AbstractConfig {
         return this.topicContainerMap;
     }
 
+    public String getProviderName() {
+        return this.providerName;
+    }
 }
 
 
