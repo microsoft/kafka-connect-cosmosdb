@@ -1,5 +1,6 @@
 package com.azure.cosmos.kafka.connect;
 
+import org.apache.commons.lang3.ObjectUtils.Null;
 import org.apache.kafka.common.config.AbstractConfig;
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.common.config.ConfigDef.Importance;
@@ -32,12 +33,16 @@ public class CosmosDBConfig extends AbstractConfig {
         + "For example: topic1#con1,topic2#con2.";
     private static final String COSMOS_CONTAINER_TOPIC_MAP_DISPLAY = "Topic-Container map";
 
+    public static final String  COSMOS_PROVIDER_NAME_CONF = "connect.cosmos.provider.name";
+    private static final String COSMOS_PROVIDER_NAME_DEFAULT = null;
+
     public static final int COSMOS_DATABASE_GROUP_ORDER = 2;
     public static final String COSMOS_CLIENT_USER_AGENT_SUFFIX = "APN/1.0 Microsoft/1.0 KafkaConnect/";
-
+    
     private String connEndpoint;
     private String connKey;
     private String databaseName;
+    private String providerName;
     private TopicContainerMap topicContainerMap = TopicContainerMap.empty();
 
     public CosmosDBConfig(ConfigDef config, Map<String, String> parsedConfig) {
@@ -47,6 +52,7 @@ public class CosmosDBConfig extends AbstractConfig {
         connKey = this.getPassword(COSMOS_CONN_KEY_CONF).value();
         databaseName = this.getString(COSMOS_DATABASE_NAME_CONF);
         topicContainerMap = TopicContainerMap.deserialize(this.getString(COSMOS_CONTAINER_TOPIC_MAP_CONF));
+        providerName = this.getString(COSMOS_PROVIDER_NAME_CONF);
     }
 
     public CosmosDBConfig(Map<String, String> parsedConfig) {
@@ -89,6 +95,12 @@ public class CosmosDBConfig extends AbstractConfig {
                 connectionGroupOrder++,
                 Width.LONG,
                 COSMOS_CONN_KEY_DISPLAY
+            )
+            .defineInternal(
+                COSMOS_PROVIDER_NAME_CONF, 
+                Type.STRING, 
+                COSMOS_PROVIDER_NAME_DEFAULT,
+                Importance.LOW        
             );
     }
 
@@ -142,6 +154,9 @@ public class CosmosDBConfig extends AbstractConfig {
         return this.topicContainerMap;
     }
 
+    public String getProviderName() {
+        return this.providerName;
+    }
 }
 
 
