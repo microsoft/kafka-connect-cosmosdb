@@ -42,6 +42,7 @@ public class CosmosDBSinkConnectorTest {
         CosmosDBSinkConfig.COSMOS_CONN_ENDPOINT_CONF, "https://endpoint:port/",
         CosmosDBSinkConfig.COSMOS_CONN_KEY_CONF, "superSecretPassword",
         CosmosDBSinkConfig.COSMOS_DATABASE_NAME_CONF, "superAwesomeDatabase",
+        CosmosDBSinkConfig.COSMOS_PROVIDER_NAME_CONF, "superAwesomeProvider",
         CosmosDBSinkConfig.COSMOS_CONTAINER_TOPIC_MAP_CONF, "topic#container"
     ));
     Map<String, List<String>> errorMessages = config.configValues().stream()
@@ -61,6 +62,7 @@ public class CosmosDBSinkConnectorTest {
         CosmosDBSinkConfig.COSMOS_CONN_ENDPOINT_CONF, "https://endpoint:port/",
         CosmosDBSinkConfig.COSMOS_CONN_KEY_CONF, "superSecretPassword",
         CosmosDBSinkConfig.COSMOS_DATABASE_NAME_CONF, "superAwesomeDatabase",
+        CosmosDBSinkConfig.COSMOS_PROVIDER_NAME_CONF, "superAwesomeProvider",
         CosmosDBSinkConfig.COSMOS_CONTAINER_TOPIC_MAP_CONF, "topic#container"
     ));
     for (ConfigValue value : config.configValues()) {

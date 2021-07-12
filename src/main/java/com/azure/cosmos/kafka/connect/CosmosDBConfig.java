@@ -1,5 +1,6 @@
 package com.azure.cosmos.kafka.connect;
 
+import org.apache.commons.lang3.ObjectUtils.Null;
 import org.apache.kafka.common.config.AbstractConfig;
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.common.config.ConfigDef.Importance;
@@ -33,6 +34,7 @@ public class CosmosDBConfig extends AbstractConfig {
     private static final String COSMOS_CONTAINER_TOPIC_MAP_DISPLAY = "Topic-Container map";
 
     public static final String  COSMOS_PROVIDER_NAME_CONF = "connect.cosmos.provider.name";
+    private static final String COSMOS_PROVIDER_NAME_DEFAULT = null;
 
     public static final int COSMOS_DATABASE_GROUP_ORDER = 2;
     public static final String COSMOS_CLIENT_USER_AGENT_SUFFIX = "APN/1.0 Microsoft/1.0 KafkaConnect/";
@@ -97,7 +99,7 @@ public class CosmosDBConfig extends AbstractConfig {
             .defineInternal(
                 COSMOS_PROVIDER_NAME_CONF, 
                 Type.STRING, 
-                ConfigDef.NO_DEFAULT_VALUE,
+                COSMOS_PROVIDER_NAME_DEFAULT,
                 Importance.LOW        
             );
     }

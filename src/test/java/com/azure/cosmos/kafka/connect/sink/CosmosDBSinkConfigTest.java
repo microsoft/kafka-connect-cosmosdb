@@ -19,7 +19,6 @@ public class CosmosDBSinkConfigTest {
         configs.put(CosmosDBSinkConfig.COSMOS_CONN_KEY_CONF, "mykey");
         configs.put(CosmosDBSinkConfig.COSMOS_DATABASE_NAME_CONF, "mydb");
         configs.put(CosmosDBSinkConfig.COSMOS_CONTAINER_TOPIC_MAP_CONF, "mytopic#mycontainer");
-        configs.put(CosmosDBSinkConfig.COSMOS_PROVIDER_NAME_CONF, "myprovider");
         configs.put(AbstractIdStrategyConfig.ID_STRATEGY, KafkaMetadataStrategy.class.getName());
         return configs;
     }
@@ -32,7 +31,6 @@ public class CosmosDBSinkConfigTest {
         assertEquals(COSMOS_URL, config.getConnEndpoint());
         assertEquals("mykey", config.getConnKey());
         assertEquals("mydb", config.getDatabaseName());
-        assertEquals("myprovider", config.getProviderName());
         assertEquals("mycontainer", config.getTopicContainerMap().getContainerForTopic("mytopic").get());
     }
 
