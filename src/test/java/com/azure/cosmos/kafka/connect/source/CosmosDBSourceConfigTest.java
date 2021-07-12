@@ -16,6 +16,7 @@ public class CosmosDBSourceConfigTest {
         configs.put(CosmosDBSourceConfig.COSMOS_CONN_KEY_CONF, "mykey");
         configs.put(CosmosDBSourceConfig.COSMOS_DATABASE_NAME_CONF, "mydb");
         configs.put(CosmosDBSourceConfig.COSMOS_CONTAINER_TOPIC_MAP_CONF, "mytopic5#mycontainer6");
+        configs.put(CosmosDBSinkConfig.COSMOS_PROVIDER_NAME_CONF, "myprovider");
         return configs;
     }
 
@@ -30,7 +31,7 @@ public class CosmosDBSourceConfigTest {
         assertEquals("mycontainer6", config.getTopicContainerMap().getContainerForTopic("mytopic5").get());
         assertEquals("myprovider", config.getProviderName());
     }
-    
+
     @Test
     public void shouldHaveDefaultValues() {
         // Adding required Configuration with no default value.

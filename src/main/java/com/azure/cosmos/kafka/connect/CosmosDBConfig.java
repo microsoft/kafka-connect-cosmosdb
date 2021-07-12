@@ -32,9 +32,9 @@ public class CosmosDBConfig extends AbstractConfig {
         + "For example: topic1#con1,topic2#con2.";
     private static final String COSMOS_CONTAINER_TOPIC_MAP_DISPLAY = "Topic-Container map";
 
-    public static final String COSMOS_PROVIDER_NAME_CONF = "connect.cosmos.provider.name";
-    private static final String COSMOS_PROVIDER_NAME_DISPLAY = "Name of  provider";
-    private static final String COSMOS_PROVIDER_NAME_DEFAULT = null;
+    public static final String  COSMOS_PROVIDER_NAME_CONF = "connect.cosmos.provider.name";
+    private static final String COSMOS_PROVIDER_NAME_DISPLAY = "Name of provider";
+    private static final String COSMOS_PROVIDER_NAME_DEFAULT = "self-managed";
     private static final String COSMOS_PROVIDER_NAME_DOC = "This is used for internal metrics to distinguish between self-managed and ConfluentCloud providers.";
 
     public static final int COSMOS_DATABASE_GROUP_ORDER = 2;
@@ -53,6 +53,7 @@ public class CosmosDBConfig extends AbstractConfig {
         connKey = this.getPassword(COSMOS_CONN_KEY_CONF).value();
         databaseName = this.getString(COSMOS_DATABASE_NAME_CONF);
         topicContainerMap = TopicContainerMap.deserialize(this.getString(COSMOS_CONTAINER_TOPIC_MAP_CONF));
+        providerName = this.getString(COSMOS_PROVIDER_NAME_CONF);
     }
 
     public CosmosDBConfig(Map<String, String> parsedConfig) {
