@@ -33,9 +33,6 @@ public class CosmosDBConfig extends AbstractConfig {
     private static final String COSMOS_CONTAINER_TOPIC_MAP_DISPLAY = "Topic-Container map";
 
     public static final String  COSMOS_PROVIDER_NAME_CONF = "connect.cosmos.provider.name";
-    private static final String COSMOS_PROVIDER_NAME_DISPLAY = "Name of provider";
-    private static final String COSMOS_PROVIDER_NAME_DEFAULT = "self-managed";
-    private static final String COSMOS_PROVIDER_NAME_DOC = "This is used for internal metrics to distinguish between self-managed and ConfluentCloud providers.";
 
     public static final int COSMOS_DATABASE_GROUP_ORDER = 2;
     public static final String COSMOS_CLIENT_USER_AGENT_SUFFIX = "APN/1.0 Microsoft/1.0 KafkaConnect/";
@@ -96,6 +93,12 @@ public class CosmosDBConfig extends AbstractConfig {
                 connectionGroupOrder++,
                 Width.LONG,
                 COSMOS_CONN_KEY_DISPLAY
+            )
+            .defineInternal(
+                COSMOS_PROVIDER_NAME_CONF, 
+                Type.STRING, 
+                ConfigDef.NO_DEFAULT_VALUE,
+                Importance.LOW        
             );
     }
 
