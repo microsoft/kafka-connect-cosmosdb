@@ -2,7 +2,7 @@
 
 ### 1.2.1 (2021-12-10)
 #### New Features
-* Upgraded log4j2 to 2.15.0 to address the security volnerebility
+* Upgraded log4j2 to 2.15.0 to address the security vulnerability
   https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-44228 
 
 ### 1.2.0 (2021-11-22)
