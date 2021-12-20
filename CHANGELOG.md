@@ -1,5 +1,10 @@
 ## Release History
 
+### 1.2.3 (2021-12-20)
+#### Key Bug Fixes
+* Upgraded log4j2 to 2.17.0 to address the security vulnerability
+  https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-45105
+
 ### 1.2.2 (2021-12-14)
 #### Key Bug Fixes
 * Upgraded log4j2 to 2.16.0 to address the security vulnerability
