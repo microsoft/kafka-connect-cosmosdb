@@ -1,5 +1,9 @@
 ## Release History
 
+### 1.2.5 (2022-02-01)
+#### Key Bug Fixes
+* Fixed NullPointerException issue with nullable structs. See this [PR 439](https://github.com/microsoft/kafka-connect-cosmosdb/pull/439).
+
 ### 1.2.4 (2022-01-05)
 #### Key Bug Fixes
 * Upgraded log4j2 to 2.17.1 to address the security vulnerability
