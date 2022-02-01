@@ -15,6 +15,9 @@ import org.apache.kafka.connect.data.Timestamp;
 public class StructToJsonMap {
 
     public static Map<String, Object> toJsonMap(Struct struct) {
+        if (struct == null) {
+            return null;
+        }
         Map<String, Object> jsonMap = new HashMap<String, Object>(0);
         List<Field> fields = struct.schema().fields();
         for (Field field : fields) {
