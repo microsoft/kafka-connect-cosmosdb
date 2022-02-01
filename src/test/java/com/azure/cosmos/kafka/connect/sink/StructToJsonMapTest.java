@@ -19,59 +19,60 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 public class StructToJsonMapTest {
+
     @Test
     public void emptyStructToEmptyMap() {
         Schema schema = SchemaBuilder.struct()
-            .build();
+                .build();
         Struct struct = new Struct(schema);
         assertEquals(ImmutableMap.of(), StructToJsonMap.toJsonMap(struct));
     }
 
     @Test
-    public void complextStructToMap() {
+    public void complexStructToMap() {
         Schema embeddedSchema = SchemaBuilder.struct()
-            .field("embedded_string", Schema.STRING_SCHEMA)
-            .build();
+                .field("embedded_string", Schema.STRING_SCHEMA)
+                .build();
         Schema schema = SchemaBuilder.struct()
-            .field("boolean", Schema.BOOLEAN_SCHEMA)
-            .field("int8", Schema.INT8_SCHEMA)
-            .field("int16", Schema.INT16_SCHEMA)
-            .field("int32", Schema.INT32_SCHEMA)
-            .field("int64", Schema.INT64_SCHEMA)
-            .field("float32", Schema.FLOAT32_SCHEMA)
-            .field("float64", Schema.FLOAT64_SCHEMA)
-            .field("date", Date.SCHEMA)
-            .field("time", Time.SCHEMA)
-            .field("timestamp", Timestamp.SCHEMA)
-            .field("decimal", Decimal.schema(10))
-            .field("string", Schema.STRING_SCHEMA)
-            .field("struct", embeddedSchema)
-            .field("array_of_boolean", SchemaBuilder.array(Schema.BOOLEAN_SCHEMA).build())
-            .field("array_of_struct", SchemaBuilder.array(embeddedSchema).build())
-            .field("optional_string", Schema.OPTIONAL_STRING_SCHEMA)
-            .build();
+                .field("boolean", Schema.BOOLEAN_SCHEMA)
+                .field("int8", Schema.INT8_SCHEMA)
+                .field("int16", Schema.INT16_SCHEMA)
+                .field("int32", Schema.INT32_SCHEMA)
+                .field("int64", Schema.INT64_SCHEMA)
+                .field("float32", Schema.FLOAT32_SCHEMA)
+                .field("float64", Schema.FLOAT64_SCHEMA)
+                .field("date", Date.SCHEMA)
+                .field("time", Time.SCHEMA)
+                .field("timestamp", Timestamp.SCHEMA)
+                .field("decimal", Decimal.schema(10))
+                .field("string", Schema.STRING_SCHEMA)
+                .field("struct", embeddedSchema)
+                .field("array_of_boolean", SchemaBuilder.array(Schema.BOOLEAN_SCHEMA).build())
+                .field("array_of_struct", SchemaBuilder.array(embeddedSchema).build())
+                .field("optional_string", Schema.OPTIONAL_STRING_SCHEMA)
+                .build();
 
         java.util.Date now = new java.util.Date();
         BigDecimal ten = new BigDecimal(10).setScale(10);
         String quickBrownFox = "The quick brown fox jumps over the lazy dog";
         Struct struct = new Struct(schema)
-            .put("boolean", false)
-            .put("int8", (byte) 0)
-            .put("int16", (short) 1)
-            .put("int32", 2)
-            .put("int64", (long) 3)
-            .put("float32", (float) 4.0)
-            .put("float64", (double) 5.0)
-            .put("date", now)
-            .put("time", now)
-            .put("timestamp", now)
-            .put("decimal", ten)
-            .put("string", quickBrownFox)
-            .put("struct", new Struct(embeddedSchema)
-                .put("embedded_string", quickBrownFox))
-            .put("array_of_boolean", ImmutableList.of(false))
-            .put("array_of_struct", ImmutableList.of(
-                new Struct(embeddedSchema).put("embedded_string", quickBrownFox)));
+                .put("boolean", false)
+                .put("int8", (byte) 0)
+                .put("int16", (short) 1)
+                .put("int32", 2)
+                .put("int64", (long) 3)
+                .put("float32", (float) 4.0)
+                .put("float64", (double) 5.0)
+                .put("date", now)
+                .put("time", now)
+                .put("timestamp", now)
+                .put("decimal", ten)
+                .put("string", quickBrownFox)
+                .put("struct", new Struct(embeddedSchema)
+                        .put("embedded_string", quickBrownFox))
+                .put("array_of_boolean", ImmutableList.of(false))
+                .put("array_of_struct", ImmutableList.of(
+                        new Struct(embeddedSchema).put("embedded_string", quickBrownFox)));
 
         Map<String, Object> converted = StructToJsonMap.toJsonMap(struct);
         assertEquals(false, converted.get("boolean"));
@@ -91,4 +92,26 @@ public class StructToJsonMapTest {
         assertEquals(ImmutableMap.of("embedded_string", quickBrownFox), ((List<Struct>) converted.get("array_of_struct")).get(0));
         assertNull(converted.get("optional_string"));
     }
+
+    @Test
+    public void nullableStructTest() {
+        Schema embeddedSchema = SchemaBuilder.struct()
+                .optional()
+                .field("embedded_string", Schema.STRING_SCHEMA)
+                .field("embedded_int", Schema.INT32_SCHEMA)
+                .build();
+        Schema schema = SchemaBuilder.struct()
+                .field("struct", embeddedSchema)
+                .field("string", Schema.STRING_SCHEMA)
+                .build();
+
+        Struct struct = new Struct(schema)
+                .put("struct", null)
+                .put("string", "string_value");
+
+        Map<String, Object> converted = StructToJsonMap.toJsonMap(struct);
+        assertEquals("string_value", converted.get("string"));
+        assertNull(converted.get("struct"));
+    }
+
 }
