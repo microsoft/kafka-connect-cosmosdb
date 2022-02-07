@@ -11,37 +11,29 @@ import org.apache.kafka.common.config.ConfigDef.Width;
 
 import java.util.Map;
 
-@SuppressWarnings ({"squid:S1854", "squid:S2160"})  // suppress unneeded int *groupOrder variables, equals method
+@SuppressWarnings({"squid:S1854", "squid:S2160"})  // suppress unneeded int *groupOrder variables, equals method
 public class CosmosDBConfig extends AbstractConfig {
-    private static final Validator NON_EMPTY_STRING = new NonEmptyString();
-    
     public static final String COSMOS_CONN_ENDPOINT_CONF = "connect.cosmos.connection.endpoint";
+    public static final String COSMOS_CONN_KEY_CONF = "connect.cosmos.master.key";
+    public static final String COSMOS_DATABASE_NAME_CONF = "connect.cosmos.databasename";
+    public static final String COSMOS_CONTAINER_TOPIC_MAP_CONF = "connect.cosmos.containers.topicmap";
+    public static final String COSMOS_PROVIDER_NAME_CONF = "connect.cosmos.provider.name";
+    public static final int COSMOS_DATABASE_GROUP_ORDER = 2;
+    public static final String COSMOS_CLIENT_USER_AGENT_SUFFIX = "APN/1.0 Microsoft/1.0 KafkaConnect/";
+    public static final String TOLERANCE_ON_ERROR_CONFIG = "tolerance.error";
+    public static final String TOLERANCE_ON_ERROR_DOC = "Tolerance level. None for failing on error. All for log and continue";
+    private static final Validator NON_EMPTY_STRING = new NonEmptyString();
     private static final String COSMOS_CONN_ENDPOINT_DOC = "Cosmos endpoint URL.";
     private static final String COSMOS_CONN_ENDPOINT_DISPLAY = "Cosmos Endpoint";
-
-    public static final String COSMOS_CONN_KEY_CONF = "connect.cosmos.master.key";
     private static final String COSMOS_CONN_KEY_DOC = "Cosmos connection master (primary) key.";
     private static final String COSMOS_CONN_KEY_DISPLAY = "Cosmos Connection Key";
-
-    public static final String COSMOS_DATABASE_NAME_CONF = "connect.cosmos.databasename";
     private static final String COSMOS_DATABASE_NAME_DOC = "Cosmos target database to write records into.";
     private static final String COSMOS_DATABASE_NAME_DISPLAY = "Cosmos Database name";
-
-    public static final String COSMOS_CONTAINER_TOPIC_MAP_CONF = "connect.cosmos.containers.topicmap";
     private static final String COSMOS_CONTAINER_TOPIC_MAP_DOC =
             "A comma delimited list of Kafka topics mapped to Cosmos containers.\n"
                     + "For example: topic1#con1,topic2#con2.";
     private static final String COSMOS_CONTAINER_TOPIC_MAP_DISPLAY = "Topic-Container map";
-
-    public static final String  COSMOS_PROVIDER_NAME_CONF = "connect.cosmos.provider.name";
     private static final String COSMOS_PROVIDER_NAME_DEFAULT = null;
-
-    public static final int COSMOS_DATABASE_GROUP_ORDER = 2;
-    public static final String COSMOS_CLIENT_USER_AGENT_SUFFIX = "APN/1.0 Microsoft/1.0 KafkaConnect/";
-
-    public static final String TOLERANCE_ON_ERROR_CONFIG = "tolerance.error";
-    public static final String TOLERANCE_ON_ERROR_DOC = "Tolerance level. None for failing on error. All for log and continue";
-
     private String connEndpoint;
     private String connKey;
     private String databaseName;
