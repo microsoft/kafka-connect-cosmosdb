@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.CosmosClientBuilder;
 import com.azure.cosmos.CosmosContainer;
+import com.azure.cosmos.CosmosException;
 import com.azure.cosmos.implementation.BadRequestException;
 import com.azure.cosmos.kafka.connect.CosmosDBConfig;
 import com.azure.cosmos.kafka.connect.sink.id.strategy.AbstractIdStrategyConfig;
@@ -15,6 +16,7 @@ import com.azure.cosmos.kafka.connect.sink.id.strategy.IdStrategy;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.kafka.connect.data.Struct;
+import org.apache.kafka.connect.errors.ConnectException;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.apache.kafka.connect.sink.SinkTask;
 import org.slf4j.Logger;
@@ -89,7 +91,7 @@ public class CosmosDBSinkTask extends SinkTask {
 
                 try {
                     addItemToContainer(container, recordValue);
-                } catch (BadRequestException bre) {
+                } catch (CosmosException | ConnectException bre) {
                     if (config.getString(TOLERANCE_ON_ERROR_CONFIG).equalsIgnoreCase("all")) {
                         logger.error("Could not upload record to CosmosDb, but tolerance is set to all. Value: {}."
                                 + " Error: {}", recordValue.toString(), bre.getMessage());
