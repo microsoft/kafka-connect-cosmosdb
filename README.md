@@ -148,6 +148,9 @@ For more information on the performance tests run for the Sink and Source connec
 
 Refer to the [Performance Environment Setup](./src/perf/README.md) for exact steps on deploying the performance test environment for the Connectors.
 
+## Dead Letter Queue
+We introduced the standard dead level queue from Kafka. For more info see: https://www.confluent.io/blog/kafka-connect-deep-dive-error-handling-dead-letter-queues
+
 ## Resources
 
 - [Kafka Connect](http://kafka.apache.org/documentation.html#connect)

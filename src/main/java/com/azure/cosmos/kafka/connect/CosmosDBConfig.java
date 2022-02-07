@@ -20,8 +20,8 @@ public class CosmosDBConfig extends AbstractConfig {
     public static final String COSMOS_PROVIDER_NAME_CONF = "connect.cosmos.provider.name";
     public static final int COSMOS_DATABASE_GROUP_ORDER = 2;
     public static final String COSMOS_CLIENT_USER_AGENT_SUFFIX = "APN/1.0 Microsoft/1.0 KafkaConnect/";
-    public static final String TOLERANCE_ON_ERROR_CONFIG = "tolerance.error";
-    public static final String TOLERANCE_ON_ERROR_DOC = "Tolerance level. None for failing on error. All for log and continue";
+    public static final String TOLERANCE_ON_ERROR_CONFIG = "errors.tolerance";
+    public static final String TOLERANCE_ON_ERROR_DOC = "Tolerance level. 'none' for failing on error. 'all' for log and continue";
     private static final Validator NON_EMPTY_STRING = new NonEmptyString();
     private static final String COSMOS_CONN_ENDPOINT_DOC = "Cosmos endpoint URL.";
     private static final String COSMOS_CONN_ENDPOINT_DISPLAY = "Cosmos Endpoint";
@@ -93,7 +93,7 @@ public class CosmosDBConfig extends AbstractConfig {
                 ).define(
                         TOLERANCE_ON_ERROR_CONFIG,
                         Type.STRING,
-                        "None",
+                        "none",
                         Importance.MEDIUM,
                         TOLERANCE_ON_ERROR_DOC
                 )

@@ -43,6 +43,7 @@ public class CosmosDBSinkTask extends SinkTask {
         logger.trace("Sink task started.");
         this.config = new CosmosDBSinkConfig(map);
 
+
         this.client = new CosmosClientBuilder()
                 .endpoint(config.getConnEndpoint())
                 .key(config.getConnKey())
@@ -92,15 +93,32 @@ public class CosmosDBSinkTask extends SinkTask {
                 try {
                     addItemToContainer(container, recordValue);
                 } catch (CosmosException | ConnectException bre) {
-                    if (config.getString(TOLERANCE_ON_ERROR_CONFIG).equalsIgnoreCase("all")) {
-                        logger.error("Could not upload record to CosmosDb, but tolerance is set to all. Value: {}."
-                                + " Error: {}", recordValue.toString(), bre.getMessage());
-                    } else {
-                        throw new CosmosDBWriteException(record, bre);
-                    }
+                    sendToDlqIfConfigured(record, bre);
                 } finally {
                     MDC.clear();
                 }
+            }
+        }
+    }
+
+    /**
+     * Sends data to a dead letter queue
+     *
+     * @param record the kafka record that contains error
+     */
+    private void sendToDlqIfConfigured(SinkRecord record, RuntimeException exception) {
+
+        if (context != null && context.errantRecordReporter() != null) {
+            context.errantRecordReporter().report(record, exception);
+            if (!config.getString(TOLERANCE_ON_ERROR_CONFIG).equalsIgnoreCase("all")) {
+                throw exception;
+            }
+        } else {
+            if (config.getString(TOLERANCE_ON_ERROR_CONFIG).equalsIgnoreCase("all")) {
+                logger.error("Could not upload record to CosmosDb, but tolerance is set to all. Value: {}."
+                        + " Error: {}", record.toString(), exception.getMessage());
+            } else {
+                throw new CosmosDBWriteException(record, exception);
             }
         }
     }
