@@ -38,6 +38,9 @@ public class CosmosDBConfig extends AbstractConfig {
 
     public static final int COSMOS_DATABASE_GROUP_ORDER = 2;
     public static final String COSMOS_CLIENT_USER_AGENT_SUFFIX = "APN/1.0 Microsoft/1.0 KafkaConnect/";
+
+    public static final String TOLERANCE_ON_ERROR_CONFIG = "tolerance.error";
+    public static final String TOLERANCE_ON_ERROR_DOC = "Tolerance level. None for failing on error. All for log and continue";
     
     private String connEndpoint;
     private String connKey;
@@ -95,6 +98,12 @@ public class CosmosDBConfig extends AbstractConfig {
                 connectionGroupOrder++,
                 Width.LONG,
                 COSMOS_CONN_KEY_DISPLAY
+            ).define(
+                TOLERANCE_ON_ERROR_CONFIG,
+                Type.STRING,
+                "None",
+                Importance.MEDIUM,
+                TOLERANCE_ON_ERROR_DOC
             )
             .defineInternal(
                 COSMOS_PROVIDER_NAME_CONF, 

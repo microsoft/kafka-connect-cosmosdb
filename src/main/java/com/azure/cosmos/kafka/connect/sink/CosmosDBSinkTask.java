@@ -1,5 +1,10 @@
 package com.azure.cosmos.kafka.connect.sink;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.CosmosClientBuilder;
 import com.azure.cosmos.CosmosContainer;
@@ -7,11 +12,6 @@ import com.azure.cosmos.implementation.BadRequestException;
 import com.azure.cosmos.kafka.connect.CosmosDBConfig;
 import com.azure.cosmos.kafka.connect.sink.id.strategy.AbstractIdStrategyConfig;
 import com.azure.cosmos.kafka.connect.sink.id.strategy.IdStrategy;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.kafka.connect.data.Struct;
@@ -84,6 +84,7 @@ public class CosmosDBSinkTask extends SinkTask {
                 try {
                     addItemToContainer(container, recordValue);
                 } catch (BadRequestException bre) {
+                    if (config.getString(TOLERANCE_ON_ERROR_CONFIG))
                     throw new CosmosDBWriteException(record, bre);
                 }
             }
