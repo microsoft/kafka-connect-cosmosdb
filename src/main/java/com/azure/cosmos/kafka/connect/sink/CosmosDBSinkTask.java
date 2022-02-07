@@ -91,8 +91,8 @@ public class CosmosDBSinkTask extends SinkTask {
                     addItemToContainer(container, recordValue);
                 } catch (BadRequestException bre) {
                     if (config.getString(TOLERANCE_ON_ERROR_CONFIG).equalsIgnoreCase("all")) {
-                        logger.error("Could not upload record to CosmosDb, but tolerance is set to all. Value: {},"
-                                + " error: {}", recordValue.toString(), bre.getMessage());
+                        logger.error("Could not upload record to CosmosDb, but tolerance is set to all. Value: {}."
+                                + " Error: {}", recordValue.toString(), bre.getMessage());
                     } else {
                         throw new CosmosDBWriteException(record, bre);
                     }

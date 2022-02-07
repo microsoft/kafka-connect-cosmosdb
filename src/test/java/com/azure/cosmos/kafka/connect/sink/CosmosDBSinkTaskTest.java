@@ -6,6 +6,7 @@ import com.azure.cosmos.CosmosContainer;
 import com.azure.cosmos.CosmosDatabase;
 import com.azure.cosmos.implementation.BadRequestException;
 import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.reflect.FieldUtils;
@@ -41,6 +42,7 @@ public class CosmosDBSinkTaskTest {
         Map<String, String> settingAssignment = CosmosDBSinkConfigTest.setupConfigs();
         settingAssignment.put(CosmosDBSinkConfig.COSMOS_CONTAINER_TOPIC_MAP_CONF, topicName + "#" + containerName);
         settingAssignment.put(CosmosDBSinkConfig.COSMOS_DATABASE_NAME_CONF, databaseName);
+        settingAssignment.put(CosmosDBSinkConfig.TOLERANCE_ON_ERROR_CONFIG, "All");
         CosmosDBSinkConfig config = new CosmosDBSinkConfig(settingAssignment);
         FieldUtils.writeField(testTask, "config", config, true);
 
@@ -97,6 +99,17 @@ public class CosmosDBSinkTaskTest {
         assertNotNull(record.value());
         testTask.put(Arrays.asList(record));
         verify(mockContainer, times(1)).upsertItem(map);
+    }
+
+    @Test
+    public void testPutMapThatFailsDoesNotStopTask() throws JsonProcessingException {
+        Schema stringSchema = new ConnectSchema(Schema.Type.STRING);
+        Schema mapSchema = new ConnectSchema(Schema.Type.MAP);
+        when(mockContainer.upsertItem(any())).thenThrow(new BadRequestException("Something"));
+        SinkRecord record = new SinkRecord(topicName, 1, stringSchema, "nokey", mapSchema, "{", 0L);
+
+        testTask.put(Arrays.asList(record));
+
     }
 }
 
