@@ -28,9 +28,9 @@ public class CosmosDBConfig extends AbstractConfig {
     private static final String COSMOS_DATABASE_NAME_DISPLAY = "Cosmos Database name";
 
     public static final String COSMOS_CONTAINER_TOPIC_MAP_CONF = "connect.cosmos.containers.topicmap";
-    private static final String COSMOS_CONTAINER_TOPIC_MAP_DOC = 
-        "A comma delimited list of Kafka topics mapped to Cosmos containers.\n" 
-        + "For example: topic1#con1,topic2#con2.";
+    private static final String COSMOS_CONTAINER_TOPIC_MAP_DOC =
+            "A comma delimited list of Kafka topics mapped to Cosmos containers.\n"
+                    + "For example: topic1#con1,topic2#con2.";
     private static final String COSMOS_CONTAINER_TOPIC_MAP_DISPLAY = "Topic-Container map";
 
     public static final String  COSMOS_PROVIDER_NAME_CONF = "connect.cosmos.provider.name";
@@ -41,7 +41,7 @@ public class CosmosDBConfig extends AbstractConfig {
 
     public static final String TOLERANCE_ON_ERROR_CONFIG = "tolerance.error";
     public static final String TOLERANCE_ON_ERROR_DOC = "Tolerance level. None for failing on error. All for log and continue";
-    
+
     private String connEndpoint;
     private String connKey;
     private String databaseName;
@@ -64,7 +64,7 @@ public class CosmosDBConfig extends AbstractConfig {
 
     public static ConfigDef getConfig() {
         ConfigDef result = new ConfigDef();
-        
+
         defineConnectionConfigs(result);
         defineDatabaseConfigs(result);
 
@@ -74,77 +74,77 @@ public class CosmosDBConfig extends AbstractConfig {
     private static void defineConnectionConfigs(ConfigDef result) {
         final String connectionGroupName = "Connection";
         int connectionGroupOrder = 0;
-        
+
         result
-            .define(
-                COSMOS_CONN_ENDPOINT_CONF,
-                Type.STRING,
-                ConfigDef.NO_DEFAULT_VALUE,
-                NON_EMPTY_STRING,
-                Importance.HIGH,
-                COSMOS_CONN_ENDPOINT_DOC,
-                connectionGroupName,
-                connectionGroupOrder++,
-                Width.LONG,
-                COSMOS_CONN_ENDPOINT_DISPLAY
-            )
-            .define(
-                COSMOS_CONN_KEY_CONF,
-                Type.PASSWORD,
-                ConfigDef.NO_DEFAULT_VALUE,
-                Importance.HIGH,
-                COSMOS_CONN_KEY_DOC,
-                connectionGroupName,
-                connectionGroupOrder++,
-                Width.LONG,
-                COSMOS_CONN_KEY_DISPLAY
-            ).define(
-                TOLERANCE_ON_ERROR_CONFIG,
-                Type.STRING,
-                "None",
-                Importance.MEDIUM,
-                TOLERANCE_ON_ERROR_DOC
-            )
-            .defineInternal(
-                COSMOS_PROVIDER_NAME_CONF, 
-                Type.STRING, 
-                COSMOS_PROVIDER_NAME_DEFAULT,
-                Importance.LOW        
-            );
+                .define(
+                        COSMOS_CONN_ENDPOINT_CONF,
+                        Type.STRING,
+                        ConfigDef.NO_DEFAULT_VALUE,
+                        NON_EMPTY_STRING,
+                        Importance.HIGH,
+                        COSMOS_CONN_ENDPOINT_DOC,
+                        connectionGroupName,
+                        connectionGroupOrder++,
+                        Width.LONG,
+                        COSMOS_CONN_ENDPOINT_DISPLAY
+                )
+                .define(
+                        COSMOS_CONN_KEY_CONF,
+                        Type.PASSWORD,
+                        ConfigDef.NO_DEFAULT_VALUE,
+                        Importance.HIGH,
+                        COSMOS_CONN_KEY_DOC,
+                        connectionGroupName,
+                        connectionGroupOrder++,
+                        Width.LONG,
+                        COSMOS_CONN_KEY_DISPLAY
+                ).define(
+                        TOLERANCE_ON_ERROR_CONFIG,
+                        Type.STRING,
+                        "None",
+                        Importance.MEDIUM,
+                        TOLERANCE_ON_ERROR_DOC
+                )
+                .defineInternal(
+                        COSMOS_PROVIDER_NAME_CONF,
+                        Type.STRING,
+                        COSMOS_PROVIDER_NAME_DEFAULT,
+                        Importance.LOW
+                );
     }
 
     private static void defineDatabaseConfigs(ConfigDef result) {
         final String databaseGroupName = "Database";
         int databaseGroupOrder = 0;
-        
+
         // When adding new config defines below, update COSMOS_DATABASE_GROUP_ORDER
         // This way, the source/sink configs will resume order from the right position.
 
         result
-            .define(
-                COSMOS_DATABASE_NAME_CONF,
-                Type.STRING,
-                ConfigDef.NO_DEFAULT_VALUE,
-                NON_EMPTY_STRING,
-                Importance.HIGH,
-                COSMOS_DATABASE_NAME_DOC,
-                databaseGroupName,
-                databaseGroupOrder++,
-                Width.MEDIUM,
-                COSMOS_DATABASE_NAME_DISPLAY
-            )
-            .define(
-                COSMOS_CONTAINER_TOPIC_MAP_CONF,
-                Type.STRING,
-                ConfigDef.NO_DEFAULT_VALUE,
-                NON_EMPTY_STRING,
-                Importance.HIGH,
-                COSMOS_CONTAINER_TOPIC_MAP_DOC,
-                databaseGroupName,
-                databaseGroupOrder++,
-                Width.MEDIUM,
-                COSMOS_CONTAINER_TOPIC_MAP_DISPLAY
-            );
+                .define(
+                        COSMOS_DATABASE_NAME_CONF,
+                        Type.STRING,
+                        ConfigDef.NO_DEFAULT_VALUE,
+                        NON_EMPTY_STRING,
+                        Importance.HIGH,
+                        COSMOS_DATABASE_NAME_DOC,
+                        databaseGroupName,
+                        databaseGroupOrder++,
+                        Width.MEDIUM,
+                        COSMOS_DATABASE_NAME_DISPLAY
+                )
+                .define(
+                        COSMOS_CONTAINER_TOPIC_MAP_CONF,
+                        Type.STRING,
+                        ConfigDef.NO_DEFAULT_VALUE,
+                        NON_EMPTY_STRING,
+                        Importance.HIGH,
+                        COSMOS_CONTAINER_TOPIC_MAP_DOC,
+                        databaseGroupName,
+                        databaseGroupOrder++,
+                        Width.MEDIUM,
+                        COSMOS_CONTAINER_TOPIC_MAP_DISPLAY
+                );
     }
 
     public String getConnEndpoint() {

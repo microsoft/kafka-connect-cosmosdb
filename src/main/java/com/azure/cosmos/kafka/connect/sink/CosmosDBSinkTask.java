@@ -19,6 +19,9 @@ import org.apache.kafka.connect.sink.SinkRecord;
 import org.apache.kafka.connect.sink.SinkTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+
+import static com.azure.cosmos.kafka.connect.CosmosDBConfig.TOLERANCE_ON_ERROR_CONFIG;
 
 /**
  * Implements the Kafka Task for the CosmosDB Sink Connector
@@ -66,6 +69,9 @@ public class CosmosDBSinkTask extends SinkTask {
             String containerName = entry.getKey();
             CosmosContainer container = client.getDatabase(config.getDatabaseName()).getContainer(containerName);
             for (SinkRecord record : entry.getValue()) {
+                if (record.key() != null) {
+                    MDC.put(String.format("CosmosDbSink-%s", containerName), record.key().toString());
+                }
                 logger.debug("Writing record, value type: {}", record.value().getClass().getName());
                 logger.debug("Key Schema: {}", record.keySchema());
                 logger.debug("Value schema: {}", record.valueSchema());
@@ -84,8 +90,14 @@ public class CosmosDBSinkTask extends SinkTask {
                 try {
                     addItemToContainer(container, recordValue);
                 } catch (BadRequestException bre) {
-                    if (config.getString(TOLERANCE_ON_ERROR_CONFIG))
-                    throw new CosmosDBWriteException(record, bre);
+                    if (config.getString(TOLERANCE_ON_ERROR_CONFIG).equalsIgnoreCase("all")) {
+                        logger.error("Could not upload record to CosmosDb, but tolerance is set to all. Value: {}," +
+                                " error: {}", recordValue.toString(), bre.getMessage());
+                    } else {
+                        throw new CosmosDBWriteException(record, bre);
+                    }
+                } finally {
+                    MDC.clear();
                 }
             }
         }
