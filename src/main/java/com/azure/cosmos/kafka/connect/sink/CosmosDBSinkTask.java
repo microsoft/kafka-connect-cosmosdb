@@ -1,24 +1,29 @@
 package com.azure.cosmos.kafka.connect.sink;
 
-import com.azure.cosmos.CosmosClient;
-import com.azure.cosmos.CosmosClientBuilder;
-import com.azure.cosmos.CosmosContainer;
-import com.azure.cosmos.implementation.BadRequestException;
-import com.azure.cosmos.kafka.connect.CosmosDBConfig;
-import com.azure.cosmos.kafka.connect.sink.id.strategy.AbstractIdStrategyConfig;
-import com.azure.cosmos.kafka.connect.sink.id.strategy.IdStrategy;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.azure.cosmos.CosmosClient;
+import com.azure.cosmos.CosmosClientBuilder;
+import com.azure.cosmos.CosmosContainer;
+import com.azure.cosmos.CosmosException;
+import com.azure.cosmos.implementation.BadRequestException;
+import com.azure.cosmos.kafka.connect.CosmosDBConfig;
+import com.azure.cosmos.kafka.connect.sink.id.strategy.AbstractIdStrategyConfig;
+import com.azure.cosmos.kafka.connect.sink.id.strategy.IdStrategy;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.kafka.connect.data.Struct;
+import org.apache.kafka.connect.errors.ConnectException;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.apache.kafka.connect.sink.SinkTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+
+import static com.azure.cosmos.kafka.connect.CosmosDBConfig.TOLERANCE_ON_ERROR_CONFIG;
 
 /**
  * Implements the Kafka Task for the CosmosDB Sink Connector
@@ -37,6 +42,7 @@ public class CosmosDBSinkTask extends SinkTask {
     public void start(Map<String, String> map) {
         logger.trace("Sink task started.");
         this.config = new CosmosDBSinkConfig(map);
+
 
         this.client = new CosmosClientBuilder()
                 .endpoint(config.getConnEndpoint())
@@ -66,6 +72,9 @@ public class CosmosDBSinkTask extends SinkTask {
             String containerName = entry.getKey();
             CosmosContainer container = client.getDatabase(config.getDatabaseName()).getContainer(containerName);
             for (SinkRecord record : entry.getValue()) {
+                if (record.key() != null) {
+                    MDC.put(String.format("CosmosDbSink-%s", containerName), record.key().toString());
+                }
                 logger.debug("Writing record, value type: {}", record.value().getClass().getName());
                 logger.debug("Key Schema: {}", record.keySchema());
                 logger.debug("Value schema: {}", record.valueSchema());
@@ -83,9 +92,33 @@ public class CosmosDBSinkTask extends SinkTask {
 
                 try {
                     addItemToContainer(container, recordValue);
-                } catch (BadRequestException bre) {
-                    throw new CosmosDBWriteException(record, bre);
+                } catch (CosmosException | ConnectException bre) {
+                    sendToDlqIfConfigured(record, bre);
+                } finally {
+                    MDC.clear();
                 }
+            }
+        }
+    }
+
+    /**
+     * Sends data to a dead letter queue
+     *
+     * @param record the kafka record that contains error
+     */
+    private void sendToDlqIfConfigured(SinkRecord record, RuntimeException exception) {
+
+        if (context != null && context.errantRecordReporter() != null) {
+            context.errantRecordReporter().report(record, exception);
+            if (!config.getString(TOLERANCE_ON_ERROR_CONFIG).equalsIgnoreCase("all")) {
+                throw exception;
+            }
+        } else {
+            if (config.getString(TOLERANCE_ON_ERROR_CONFIG).equalsIgnoreCase("all")) {
+                logger.error("Could not upload record to CosmosDb, but tolerance is set to all. Value: {}."
+                        + " Error: {}", record.toString(), exception.getMessage());
+            } else {
+                throw new CosmosDBWriteException(record, exception);
             }
         }
     }
