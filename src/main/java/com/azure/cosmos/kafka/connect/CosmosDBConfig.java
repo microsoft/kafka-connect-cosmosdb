@@ -21,43 +21,42 @@ import java.util.Map;
 import org.apache.kafka.common.config.ConfigException;
 import org.apache.kafka.common.config.ConfigValue;
 
-@SuppressWarnings ({"squid:S1854", "squid:S2160"})  // suppress unneeded int *groupOrder variables, equals method
+@SuppressWarnings({"squid:S1854", "squid:S2160"})  // suppress unneeded int *groupOrder variables, equals method
 public class CosmosDBConfig extends AbstractConfig {
     private static final Validator NON_EMPTY_STRING = new NonEmptyString();
-
     private static final String VALID_ENDPOINT_SCHEME = "https";
     private static final int VALID_ENDPOINT_PORT = 443;
     private static final Pattern VALID_ENDPOINT_COSMOS_INSTANCE_PATTERN = Pattern.compile("[a-z0-9\\-]{3,44}");
-
     public static final String COSMOS_CONN_ENDPOINT_CONF = "connect.cosmos.connection.endpoint";
+    public static final String COSMOS_CONN_KEY_CONF = "connect.cosmos.master.key";
+    public static final String COSMOS_DATABASE_NAME_CONF = "connect.cosmos.databasename";
+    public static final String COSMOS_CONTAINER_TOPIC_MAP_CONF = "connect.cosmos.containers.topicmap";
+    public static final String COSMOS_PROVIDER_NAME_CONF = "connect.cosmos.provider.name";
+    public static final int COSMOS_DATABASE_GROUP_ORDER = 2;
+    public static final String COSMOS_CLIENT_USER_AGENT_SUFFIX = "APN/1.0 Microsoft/1.0 KafkaConnect/";
+    public static final String TOLERANCE_ON_ERROR_CONFIG = "errors.tolerance";
+    public static final String TOLERANCE_ON_ERROR_DOC = "Tolerance level. 'none' for failing on error. 'all' for log and continue";
+    private static final Validator NON_EMPTY_STRING = new NonEmptyString();
     private static final String COSMOS_CONN_ENDPOINT_DOC = "Cosmos endpoint URL.";
     private static final String COSMOS_CONN_ENDPOINT_DISPLAY = "Cosmos Endpoint";
-
-    public static final String COSMOS_CONN_KEY_CONF = "connect.cosmos.master.key";
     private static final String COSMOS_CONN_KEY_DOC = "Cosmos connection master (primary) key.";
     private static final String COSMOS_CONN_KEY_DISPLAY = "Cosmos Connection Key";
-
-    public static final String COSMOS_DATABASE_NAME_CONF = "connect.cosmos.databasename";
     private static final String COSMOS_DATABASE_NAME_DOC = "Cosmos target database to write records into.";
     private static final String COSMOS_DATABASE_NAME_DISPLAY = "Cosmos Database name";
-
-    public static final String COSMOS_CONTAINER_TOPIC_MAP_CONF = "connect.cosmos.containers.topicmap";
-    private static final String COSMOS_CONTAINER_TOPIC_MAP_DOC = 
-        "A comma delimited list of Kafka topics mapped to Cosmos containers.\n" 
-        + "For example: topic1#con1,topic2#con2.";
+    private static final String COSMOS_CONTAINER_TOPIC_MAP_DOC =
+            "A comma delimited list of Kafka topics mapped to Cosmos containers.\n"
+                    + "For example: topic1#con1,topic2#con2.";
     private static final String COSMOS_CONTAINER_TOPIC_MAP_DISPLAY = "Topic-Container map";
-
-    public static final String  COSMOS_PROVIDER_NAME_CONF = "connect.cosmos.provider.name";
     private static final String COSMOS_PROVIDER_NAME_DEFAULT = null;
 
-    private static final String INVALID_TOPIC_MAP_FORMAT =
+  private static final String INVALID_TOPIC_MAP_FORMAT =
         "Invalid entry for topic-container map. The topic-container map should be a comma-delimited "
             + "list of Kafka topic to Cosmos containers. Each mapping should be a pair of Kafka "
             + "topic and Cosmos container separated by '#'. For example: topic1#con1,topic2#con2.";
 
     public static final int COSMOS_DATABASE_GROUP_ORDER = 2;
     public static final String COSMOS_CLIENT_USER_AGENT_SUFFIX = "APN/1.0 Microsoft/1.0 KafkaConnect/";
-    
+
     private String connEndpoint;
     private String connKey;
     private String databaseName;
@@ -80,7 +79,7 @@ public class CosmosDBConfig extends AbstractConfig {
 
     public static ConfigDef getConfig() {
         ConfigDef result = new ConfigDef();
-        
+
         defineConnectionConfigs(result);
         defineDatabaseConfigs(result);
 
@@ -90,71 +89,77 @@ public class CosmosDBConfig extends AbstractConfig {
     private static void defineConnectionConfigs(ConfigDef result) {
         final String connectionGroupName = "Connection";
         int connectionGroupOrder = 0;
-        
+
         result
-            .define(
-                COSMOS_CONN_ENDPOINT_CONF,
-                Type.STRING,
-                ConfigDef.NO_DEFAULT_VALUE,
-                NON_EMPTY_STRING,
-                Importance.HIGH,
-                COSMOS_CONN_ENDPOINT_DOC,
-                connectionGroupName,
-                connectionGroupOrder++,
-                Width.LONG,
-                COSMOS_CONN_ENDPOINT_DISPLAY
-            )
-            .define(
-                COSMOS_CONN_KEY_CONF,
-                Type.PASSWORD,
-                ConfigDef.NO_DEFAULT_VALUE,
-                Importance.HIGH,
-                COSMOS_CONN_KEY_DOC,
-                connectionGroupName,
-                connectionGroupOrder++,
-                Width.LONG,
-                COSMOS_CONN_KEY_DISPLAY
-            )
-            .defineInternal(
-                COSMOS_PROVIDER_NAME_CONF, 
-                Type.STRING, 
-                COSMOS_PROVIDER_NAME_DEFAULT,
-                Importance.LOW        
-            );
+                .define(
+                        COSMOS_CONN_ENDPOINT_CONF,
+                        Type.STRING,
+                        ConfigDef.NO_DEFAULT_VALUE,
+                        NON_EMPTY_STRING,
+                        Importance.HIGH,
+                        COSMOS_CONN_ENDPOINT_DOC,
+                        connectionGroupName,
+                        connectionGroupOrder++,
+                        Width.LONG,
+                        COSMOS_CONN_ENDPOINT_DISPLAY
+                )
+                .define(
+                        COSMOS_CONN_KEY_CONF,
+                        Type.PASSWORD,
+                        ConfigDef.NO_DEFAULT_VALUE,
+                        Importance.HIGH,
+                        COSMOS_CONN_KEY_DOC,
+                        connectionGroupName,
+                        connectionGroupOrder++,
+                        Width.LONG,
+                        COSMOS_CONN_KEY_DISPLAY
+                ).define(
+                        TOLERANCE_ON_ERROR_CONFIG,
+                        Type.STRING,
+                        "none",
+                        Importance.MEDIUM,
+                        TOLERANCE_ON_ERROR_DOC
+                )
+                .defineInternal(
+                        COSMOS_PROVIDER_NAME_CONF,
+                        Type.STRING,
+                        COSMOS_PROVIDER_NAME_DEFAULT,
+                        Importance.LOW
+                );
     }
 
     private static void defineDatabaseConfigs(ConfigDef result) {
         final String databaseGroupName = "Database";
         int databaseGroupOrder = 0;
-        
+
         // When adding new config defines below, update COSMOS_DATABASE_GROUP_ORDER
         // This way, the source/sink configs will resume order from the right position.
 
         result
-            .define(
-                COSMOS_DATABASE_NAME_CONF,
-                Type.STRING,
-                ConfigDef.NO_DEFAULT_VALUE,
-                NON_EMPTY_STRING,
-                Importance.HIGH,
-                COSMOS_DATABASE_NAME_DOC,
-                databaseGroupName,
-                databaseGroupOrder++,
-                Width.MEDIUM,
-                COSMOS_DATABASE_NAME_DISPLAY
-            )
-            .define(
-                COSMOS_CONTAINER_TOPIC_MAP_CONF,
-                Type.STRING,
-                ConfigDef.NO_DEFAULT_VALUE,
-                NON_EMPTY_STRING,
-                Importance.HIGH,
-                COSMOS_CONTAINER_TOPIC_MAP_DOC,
-                databaseGroupName,
-                databaseGroupOrder++,
-                Width.MEDIUM,
-                COSMOS_CONTAINER_TOPIC_MAP_DISPLAY
-            );
+                .define(
+                        COSMOS_DATABASE_NAME_CONF,
+                        Type.STRING,
+                        ConfigDef.NO_DEFAULT_VALUE,
+                        NON_EMPTY_STRING,
+                        Importance.HIGH,
+                        COSMOS_DATABASE_NAME_DOC,
+                        databaseGroupName,
+                        databaseGroupOrder++,
+                        Width.MEDIUM,
+                        COSMOS_DATABASE_NAME_DISPLAY
+                )
+                .define(
+                        COSMOS_CONTAINER_TOPIC_MAP_CONF,
+                        Type.STRING,
+                        ConfigDef.NO_DEFAULT_VALUE,
+                        NON_EMPTY_STRING,
+                        Importance.HIGH,
+                        COSMOS_CONTAINER_TOPIC_MAP_DOC,
+                        databaseGroupName,
+                        databaseGroupOrder++,
+                        Width.MEDIUM,
+                        COSMOS_CONTAINER_TOPIC_MAP_DISPLAY
+                );
     }
 
     public String getConnEndpoint() {
