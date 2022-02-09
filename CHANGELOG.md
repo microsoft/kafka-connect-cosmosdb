@@ -1,5 +1,9 @@
 ## Release History
 
+
+#### New Features
+* Added error tolerance config into CosmosDBSink - [PR 443](https://github.com/microsoft/kafka-connect-cosmosdb/pull/443)
+  
 ### 1.2.5 (2022-02-01)
 #### Key Bug Fixes
 * Fixed NullPointerException issue with nullable structs. See this [PR 439](https://github.com/microsoft/kafka-connect-cosmosdb/pull/439).
