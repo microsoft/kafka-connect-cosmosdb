@@ -1,8 +1,15 @@
 package com.azure.cosmos.kafka.connect.source;
 
+import static com.azure.cosmos.kafka.connect.CosmosDBConfig.validateConnection;
+import static com.azure.cosmos.kafka.connect.CosmosDBConfig.validateTopicMap;
+
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.RandomUtils;
+import org.apache.kafka.common.config.Config;
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.common.config.ConfigException;
+import org.apache.kafka.common.config.ConfigValue;
 import org.apache.kafka.connect.connector.Task;
 import org.apache.kafka.connect.errors.ConnectException;
 import org.apache.kafka.connect.source.SourceConnector;
@@ -74,5 +81,21 @@ public class CosmosDBSourceConnector extends SourceConnector {
     @Override
     public String version() {
         return this.getClass().getPackage().getImplementationVersion();
+    }
+
+    @Override
+    public Config validate(Map<String, String> connectorConfigs) {
+        Config config = super.validate(connectorConfigs);
+        if (config.configValues().stream().anyMatch(cv -> !cv.errorMessages().isEmpty())) {
+            return config;
+        }
+
+        Map<String, ConfigValue> configValues = config.configValues().stream().collect(
+            Collectors.toMap(ConfigValue::name, Function.identity()));
+
+        validateConnection(connectorConfigs, configValues);
+        validateTopicMap(connectorConfigs, configValues);
+
+        return config;
     }
 }

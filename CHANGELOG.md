@@ -1,5 +1,12 @@
 ## Release History
 
+### 1.3.0 (2022-02-09)
+#### New Features
+* Added error tolerance config into CosmosDBSink - [PR 443](https://github.com/microsoft/kafka-connect-cosmosdb/pull/443)
+* Added endpoint/key config validation - [PR 446](https://github.com/microsoft/kafka-connect-cosmosdb/pull/446)
+* Updated `kafka-connect` version to 2.8.1.
+* Updated `azure-cosmos` version to 4.25.0.
+
 ### 1.2.5 (2022-02-01)
 #### Key Bug Fixes
 * Fixed NullPointerException issue with nullable structs. See this [PR 439](https://github.com/microsoft/kafka-connect-cosmosdb/pull/439).

@@ -6,7 +6,7 @@
 
 ## Introduction
 
-This project is pre-production. File any issues / feature requests / questions etc. you may have in the [Issues](https://github.com/microsoft/kafka-connect-cosmosdb/issues) for this repo.
+File any issues / feature requests / questions etc. you may have in the [Issues](https://github.com/microsoft/kafka-connect-cosmosdb/issues) for this repo.
 
 This project provides connectors for [Kafka Connect](http://kafka.apache.org/documentation.html#connect) to read from and write data to [Azure Cosmos DB](https://azure.microsoft.com/en-us/services/cosmos-db/).
 
@@ -147,6 +147,9 @@ Please refer [Developer Walkthrough and Project Setup](./doc/Developer_Walkthrou
 For more information on the performance tests run for the Sink and Source connectors, refer to the [Performance testing document](./doc/Performance_Testing.md).
 
 Refer to the [Performance Environment Setup](./src/perf/README.md) for exact steps on deploying the performance test environment for the Connectors.
+
+## Dead Letter Queue
+We introduced the standard dead level queue from Kafka. For more info see: https://www.confluent.io/blog/kafka-connect-deep-dive-error-handling-dead-letter-queues
 
 ## Resources
 
