@@ -170,6 +170,8 @@ public class JsonToStruct {
                 value = nodeValue.intValue();
             } else if (nodeValue.isDouble()) {
                 value = nodeValue.doubleValue();
+            } else if (nodeValue.isLong()) {
+                value = nodeValue.longValue();
             }
         } else {
             logger.error("Unexpted value %s for Schma {} {}", nodeValue, schema.type());

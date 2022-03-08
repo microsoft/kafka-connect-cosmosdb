@@ -1,5 +1,9 @@
 ## Release History
 
+### 1.3.1 (2022-03-08)
+#### Key Bug Fixes
+* Fixed parsing of 64 bit values - [PR 451](https://github.com/microsoft/kafka-connect-cosmosdb/pull/451)
+
 ### 1.3.0 (2022-02-09)
 #### New Features
 * Added error tolerance config into CosmosDBSink - [PR 443](https://github.com/microsoft/kafka-connect-cosmosdb/pull/443)
