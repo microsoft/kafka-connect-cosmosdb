@@ -263,7 +263,7 @@ public class CosmosDBSourceTask extends SourceTask {
             // Blocks for each transfer till it is processed by the poll method.
             // If we fail before checkpointing then the new worker starts again.
             try {
-                logger.debug("Queuing document : {}", document);
+                logger.trace("Queuing document");
 
                 this.queue.transfer(document);
             } catch (InterruptedException e) {

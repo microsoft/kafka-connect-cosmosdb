@@ -78,7 +78,6 @@ public class CosmosDBSinkTask extends SinkTask {
                 logger.debug("Writing record, value type: {}", record.value().getClass().getName());
                 logger.debug("Key Schema: {}", record.keySchema());
                 logger.debug("Value schema: {}", record.valueSchema());
-                logger.trace("Value.toString(): {}", record.value());
 
                 Object recordValue;
                 if (record.value() instanceof Struct) {
@@ -88,7 +87,6 @@ public class CosmosDBSinkTask extends SinkTask {
                 }
 
                 maybeInsertId(recordValue, record);
-                logger.trace("Value after inserting ID: {}", recordValue);
 
                 try {
                     addItemToContainer(container, recordValue);
@@ -115,8 +113,7 @@ public class CosmosDBSinkTask extends SinkTask {
             }
         } else {
             if (config.getString(TOLERANCE_ON_ERROR_CONFIG).equalsIgnoreCase("all")) {
-                logger.error("Could not upload record to CosmosDb, but tolerance is set to all. Value: {}."
-                        + " Error: {}", record.toString(), exception.getMessage());
+                logger.error("Could not upload record to CosmosDb, but tolerance is set to all.", exception);
             } else {
                 throw new CosmosDBWriteException(record, exception);
             }

@@ -154,7 +154,7 @@ public class JsonToStruct {
 
     private SchemaAndValue arrayToSchemaAndValue(final Schema schema, final JsonNode nodeValue) {
         if (!nodeValue.isArray()) {
-            logger.error("Unexpted value %s for Schma {} {}", nodeValue, schema);
+            logger.error("Unexpected array value for schema {}", schema);
         }
         List<Object> values = new ArrayList<>();
         nodeValue.forEach(v -> 
@@ -174,7 +174,7 @@ public class JsonToStruct {
                 value = nodeValue.longValue();
             }
         } else {
-            logger.error("Unexpted value %s for Schma {} {}", nodeValue, schema.type());
+            logger.error("Unexpected value for schema {}", schema);
         }
 
         switch (schema.type()) {
