@@ -159,7 +159,7 @@ public class CosmosDBSourceTaskTest {
         }).start();
 
         List<SourceRecord>  result=testTask.poll();
-        Assert.assertEquals(0, result.size());
+        Assert.assertEquals(1, result.size());
     }
 
 
