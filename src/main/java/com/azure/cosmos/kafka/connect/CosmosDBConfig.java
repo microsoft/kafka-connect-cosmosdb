@@ -211,10 +211,6 @@ public class CosmosDBConfig extends AbstractConfig {
         if (!VALID_ENDPOINT_COSMOS_INSTANCE_PATTERN.matcher(cosmosInstance).matches()) {
             throw new ConfigException("Invalid cosmos instance: " + cosmosInstance);
         }
-        InetAddress ia = InetAddress.getByName(host);
-        if (ia.isLoopbackAddress() || ia.isLoopbackAddress() || ia.isSiteLocalAddress()) {
-            throw new ConfigException("Invalid host: " + host);
-        }
     }
 
     public static void validateConnection(Map<String, String> connectorConfigs, Map<String, ConfigValue> configValues) {
