@@ -3,6 +3,8 @@ package com.azure.cosmos.kafka.connect;
 import org.apache.kafka.common.config.ConfigException;
 import org.junit.Test;
 
+import java.net.URISyntaxException;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 
 import static org.junit.Assert.*;
@@ -43,5 +45,38 @@ public class CosmosConfigTest {
         // Adding required Configuration with no default value.
         CosmosDBConfig config = new CosmosDBConfig(setupConfigsWithProvider());
         assertEquals("myprovider", config.getProviderName());
-    }    
+    }
+
+    @Test
+    public void validateEndpoint() throws UnknownHostException, URISyntaxException {
+        // Valid endpoints
+        CosmosDBConfig.validateEndpoint("https://test-account.documents.azure.com:443/");
+        CosmosDBConfig.validateEndpoint("https://localhost:443/");
+
+        // invalid endpoints
+        assertThrows(
+                "Endpoint must have scheme: https",
+                ConfigException.class,
+                () -> CosmosDBConfig.validateEndpoint("http://test-account.documents.azure.com:443/"));
+
+        assertThrows(
+                "Endpoint must have port: 443",
+                ConfigException.class,
+                () -> CosmosDBConfig.validateEndpoint("https://test-account.documents.azure.com:8080/"));
+
+        assertThrows(
+                "Endpoint must not contain path: test",
+                ConfigException.class,
+                () -> CosmosDBConfig.validateEndpoint("https://test-account.documents.azure.com:443/test"));
+
+        assertThrows(
+                "Endpoint must not contain query component: query=test",
+                ConfigException.class,
+                () -> CosmosDBConfig.validateEndpoint("https://test-account.documents.azure.com:443/?query=test"));
+
+        assertThrows(
+                "Endpoint must not contain fragment: query=test",
+                ConfigException.class,
+                () -> CosmosDBConfig.validateEndpoint("https://test-account.documents.azure.com:443/#query=test"));
+    }
 }
