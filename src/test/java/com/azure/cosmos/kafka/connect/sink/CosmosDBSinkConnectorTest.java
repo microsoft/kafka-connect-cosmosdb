@@ -145,12 +145,10 @@ public class CosmosDBSinkConnectorTest {
         () -> {CosmosDBConfig.validateEndpoint("https://longlonglonglonglonglonglonglonglonglonglonglonglonglonginstance.documents.azure.com:443/");
     });
     assertThrows(ConfigException.class,
-        () -> {CosmosDBConfig.validateEndpoint("https://localhost:443/");
-    });
-    assertThrows(ConfigException.class,
         () -> {CosmosDBConfig.validateEndpoint("https://[::1]:443/");
     });
 
+    CosmosDBConfig.validateEndpoint("https://localhost:443/");
     CosmosDBConfig.validateEndpoint("https://cosmos-instance.documents.azure.com:443/");
     CosmosDBConfig.validateEndpoint("https://cosmos-instance.documents.azure.com:443");
   }
