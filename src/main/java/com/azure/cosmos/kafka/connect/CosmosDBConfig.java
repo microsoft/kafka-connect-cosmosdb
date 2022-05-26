@@ -188,44 +188,8 @@ public class CosmosDBConfig extends AbstractConfig {
         return this.providerName;
     }
 
-    // VisibleForTesting
-    public static void validateEndpoint(String endpoint) throws URISyntaxException, UnknownHostException {
-        URI uri = new URI(endpoint);
-        if (!VALID_ENDPOINT_SCHEME.equalsIgnoreCase(uri.getScheme())) {
-            throw new ConfigException("Endpoint must have scheme: " + VALID_ENDPOINT_SCHEME);
-        }
-        if (uri.getPort() != -1 && VALID_ENDPOINT_PORT != uri.getPort()) {
-            throw new ConfigException("Endpoint must have port: " + VALID_ENDPOINT_PORT);
-        }
-        if (uri.getPath() != null && !uri.getPath().isEmpty() && !uri.getPath().equalsIgnoreCase("/")) {
-            throw new ConfigException("Endpoint must not contain path: " + uri.getPath());
-        }
-        if (uri.getQuery() != null) {
-            throw new ConfigException("Endpoint must not contain query component: " + uri.getQuery());
-        }
-        if (uri.getFragment() != null) {
-            throw new ConfigException("Endpoint must not contain fragment: " + uri.getFragment());
-        }
-        String host = uri.getHost();
-        String cosmosInstance = host.split("\\.")[0];
-        if (!VALID_ENDPOINT_COSMOS_INSTANCE_PATTERN.matcher(cosmosInstance).matches()) {
-            throw new ConfigException("Invalid cosmos instance: " + cosmosInstance);
-        }
-        InetAddress ia = InetAddress.getByName(host);
-        if (ia.isLoopbackAddress() || ia.isLoopbackAddress() || ia.isSiteLocalAddress()) {
-            throw new ConfigException("Invalid host: " + host);
-        }
-    }
-
     public static void validateConnection(Map<String, String> connectorConfigs, Map<String, ConfigValue> configValues) {
         String endpoint = connectorConfigs.get(CosmosDBSinkConfig.COSMOS_CONN_ENDPOINT_CONF);
-        try {
-            validateEndpoint(endpoint);
-        } catch (Exception e) {
-            configValues.get(CosmosDBSinkConfig.COSMOS_CONN_ENDPOINT_CONF)
-                .addErrorMessage("Invalid endpoint: " + e.getMessage());
-        }
-
         String key = connectorConfigs.get(CosmosDBSinkConfig.COSMOS_CONN_KEY_CONF);
         try {
             createClient(endpoint, key);
