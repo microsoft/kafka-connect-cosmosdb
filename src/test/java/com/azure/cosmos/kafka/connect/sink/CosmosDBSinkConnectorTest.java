@@ -116,40 +116,4 @@ public class CosmosDBSinkConnectorTest {
         .collect(Collectors.toMap(ConfigValue::name, ConfigValue::errorMessages));
     assertThat(errorMessages.get(CosmosDBSinkConfig.COSMOS_CONTAINER_TOPIC_MAP_CONF), not(empty()));
   }
-
-  @Test
-  public void testValidateEndpoint() throws Exception {
-    assertThrows(ConfigException.class,
-        () -> {
-          CosmosDBConfig.validateEndpoint("http://not.valid.schema");
-    });
-    assertThrows(ConfigException.class,
-        () -> {CosmosDBConfig.validateEndpoint("https://not.valid.port:1024");
-    });
-    assertThrows(ConfigException.class,
-        () -> {CosmosDBConfig.validateEndpoint("https://not.valid.path:443/not/valid/path");
-    });
-    assertThrows(ConfigException.class,
-        () -> {CosmosDBConfig.validateEndpoint("https://not.valid.query:443/?query=not-valid");
-    });
-    assertThrows(ConfigException.class,
-        () -> {CosmosDBConfig.validateEndpoint("https://not.valid.query:443/#fragement-not-valid");
-    });
-    assertThrows(ConfigException.class,
-        () -> {CosmosDBConfig.validateEndpoint("https://INSTANCE.documents.azure.com:443/");
-    });
-    assertThrows(ConfigException.class,
-        () -> {CosmosDBConfig.validateEndpoint("https://1.documents.azure.com:443/");
-    });
-    assertThrows(ConfigException.class,
-        () -> {CosmosDBConfig.validateEndpoint("https://longlonglonglonglonglonglonglonglonglonglonglonglonglonginstance.documents.azure.com:443/");
-    });
-    assertThrows(ConfigException.class,
-        () -> {CosmosDBConfig.validateEndpoint("https://[::1]:443/");
-    });
-
-    CosmosDBConfig.validateEndpoint("https://localhost:443/");
-    CosmosDBConfig.validateEndpoint("https://cosmos-instance.documents.azure.com:443/");
-    CosmosDBConfig.validateEndpoint("https://cosmos-instance.documents.azure.com:443");
-  }
 }
