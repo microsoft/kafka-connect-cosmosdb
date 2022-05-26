@@ -1,5 +1,13 @@
 ## Release History
 
+### 1.4.0 (2022-05-26)
+#### New Features
+* Updated `azure-cosmos` version to 4.30.0.
+
+#### Key Bug Fixes
+* Fixed an issue of missing records in Kafka topic if record size is larger than `connect.cosmos.task.buffer.size` - [PR 457](https://github.com/microsoft/kafka-connect-cosmosdb/pull/457)
+* Fixed an issue of getting `Invalid endpoint` exception when endpoint is valid - [PR 459](https://github.com/microsoft/kafka-connect-cosmosdb/pull/459)
+
 ### 1.3.1 (2022-03-08)
 #### Key Bug Fixes
 * Fixed parsing of 64 bit values - [PR 451](https://github.com/microsoft/kafka-connect-cosmosdb/pull/451)

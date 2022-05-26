@@ -3,6 +3,8 @@ package com.azure.cosmos.kafka.connect;
 import org.apache.kafka.common.config.ConfigException;
 import org.junit.Test;
 
+import java.net.URISyntaxException;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 
 import static org.junit.Assert.*;
@@ -43,5 +45,5 @@ public class CosmosConfigTest {
         // Adding required Configuration with no default value.
         CosmosDBConfig config = new CosmosDBConfig(setupConfigsWithProvider());
         assertEquals("myprovider", config.getProviderName());
-    }    
+    }
 }

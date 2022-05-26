@@ -148,7 +148,7 @@ public class CosmosDBSourceTask extends SourceTask {
         while (running.get()) {
             fillRecords(records, topic);            
             if (records.isEmpty() || System.currentTimeMillis() > maxWaitTime) {
-                logger.debug("Sending {} documents.", records.size());
+                logger.info("Sending {} documents.", records.size());
                 break;
             }
         }
@@ -179,9 +179,13 @@ public class CosmosDBSourceTask extends SourceTask {
                 }
 
                 // Get the latest token and record as offset
+                // TODO: The continuationToken here is picked from any lease with owner, so maybe a little bit random
+                // change to show the continuationToken for the leases processed by the current worker
                 Map<String, Object> sourceOffset = singletonMap(OFFSET_KEY, getContinuationToken());
-                logger.debug("Latest offset is {}.", sourceOffset.get(OFFSET_KEY));
 
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Latest offset is {}.", sourceOffset.get(OFFSET_KEY));
+                }
                 // Convert JSON to Kafka Connect struct and JSON schema
                 SchemaAndValue schemaAndValue = jsonToStruct.recordToSchemaAndValue(node);
 
@@ -192,14 +196,19 @@ public class CosmosDBSourceTask extends SourceTask {
 
                 bufferSize -= sourceRecord.value().toString().getBytes().length;
 
-                // If the buffer Size exceeds then do not remove the node .
-                if (bufferSize <= 0) {
+                // Add the item to buffer if either conditions met:
+                // it is the first record, or adding this record does not exceed the buffer size
+                if (records.size() == 0 || bufferSize >= 0) {
+                    records.add(sourceRecord);
+                    count++;
+                } else {
+                    // If the buffer Size exceeds then do not remove the node.
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Adding record back to the queue since adding it exceeds the allowed buffer size {}", config.getTaskBufferSize());
+                    }
                     this.queue.add(node);
                     break;
                 }
-                
-                records.add(sourceRecord);
-                count++;
             } catch (Exception e) {
                 logger.error("Failed to fill Source Records for Topic {}", topic);
                 throw e;
@@ -263,7 +272,7 @@ public class CosmosDBSourceTask extends SourceTask {
             // Blocks for each transfer till it is processed by the poll method.
             // If we fail before checkpointing then the new worker starts again.
             try {
-                logger.debug("Queuing document : {}", document);
+                logger.trace("Queuing document");
 
                 this.queue.transfer(document);
             } catch (InterruptedException e) {
