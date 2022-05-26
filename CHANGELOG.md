@@ -1,14 +1,9 @@
 ## Release History
 
-### 1.3.2-beta.1 (Unreleased)
-
-#### New Features
-
+### 1.3.2 (2022-05-26)
 #### Key Bug Fixes
 * Fixed an issue of missing records in Kafka topic if record size is larger than `connect.cosmos.task.buffer.size` - [PR 457](https://github.com/microsoft/kafka-connect-cosmosdb/pull/457)
 * Fixed an issue of getting `Invalid endpoint` exception when endpoint is valid - [PR 459](https://github.com/microsoft/kafka-connect-cosmosdb/pull/459)
-
-#### Other Changes
 
 ### 1.3.1 (2022-03-08)
 #### Key Bug Fixes
