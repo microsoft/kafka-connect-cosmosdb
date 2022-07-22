@@ -28,6 +28,19 @@ public class StructToJsonMapTest {
         assertEquals(ImmutableMap.of(), StructToJsonMap.toJsonMap(struct));
     }
 
+
+    @Test
+    public void structWithEmptyArrayToMap() {
+        Schema schema = SchemaBuilder.struct()
+                .field("array_of_boolean", SchemaBuilder.array(Schema.BOOLEAN_SCHEMA).build());
+
+        Struct struct = new Struct(schema)
+                .put("array_of_boolean", ImmutableList.of());
+
+        Map<String, Object> converted = StructToJsonMap.toJsonMap(struct);
+        assertEquals(ImmutableList.of(), ((List<Boolean>) converted.get("array_of_boolean")));
+    }
+
     @Test
     public void complexStructToMap() {
         Schema embeddedSchema = SchemaBuilder.struct()
