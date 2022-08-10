@@ -2,7 +2,7 @@
 
 ### 1.4.0-beta.1 (Unreleased)
 #### Key Bug Fixes
-* Updated `CosmosDBSinkConnector` to be more tolerance about burst traffic by increasing retry count for throttling exceptions.  
+* Updated `CosmosDBSinkConnector` to keep retrying for throttled requests. [PR 472](https://github.com/microsoft/kafka-connect-cosmosdb/pull/472)
 
 ### 1.3.1 (2022-03-08)
 #### Key Bug Fixes
