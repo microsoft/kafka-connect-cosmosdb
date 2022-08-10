@@ -1,5 +1,6 @@
 package com.azure.cosmos.kafka.connect.sink;
 
+import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +10,7 @@ import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.CosmosClientBuilder;
 import com.azure.cosmos.CosmosContainer;
 import com.azure.cosmos.CosmosException;
+import com.azure.cosmos.ThrottlingRetryOptions;
 import com.azure.cosmos.implementation.BadRequestException;
 import com.azure.cosmos.kafka.connect.CosmosDBConfig;
 import com.azure.cosmos.kafka.connect.sink.id.strategy.AbstractIdStrategyConfig;
@@ -43,11 +45,15 @@ public class CosmosDBSinkTask extends SinkTask {
         logger.trace("Sink task started.");
         this.config = new CosmosDBSinkConfig(map);
 
-
         this.client = new CosmosClientBuilder()
                 .endpoint(config.getConnEndpoint())
                 .key(config.getConnKey())
-                .userAgentSuffix(CosmosDBConfig.COSMOS_CLIENT_USER_AGENT_SUFFIX + version()).buildClient();
+                .userAgentSuffix(CosmosDBConfig.COSMOS_CLIENT_USER_AGENT_SUFFIX + version())
+                .throttlingRetryOptions(
+                        new ThrottlingRetryOptions()
+                            .setMaxRetryAttemptsOnThrottledRequests(Integer.MAX_VALUE)
+                            .setMaxRetryWaitTime(Duration.ofSeconds((Integer.MAX_VALUE/1000) - 1)))
+                .buildClient();
 
         client.createDatabaseIfNotExists(config.getDatabaseName());
     }

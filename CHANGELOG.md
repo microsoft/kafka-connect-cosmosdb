@@ -1,5 +1,9 @@
 ## Release History
 
+### 1.4.0-beta.1 (Unreleased)
+#### Key Bug Fixes
+* Updated `CosmosDBSinkConnector` to be more tolerance about burst traffic by increasing retry count for throttling exceptions.  
+
 ### 1.3.1 (2022-03-08)
 #### Key Bug Fixes
 * Fixed parsing of 64 bit values - [PR 451](https://github.com/microsoft/kafka-connect-cosmosdb/pull/451)
