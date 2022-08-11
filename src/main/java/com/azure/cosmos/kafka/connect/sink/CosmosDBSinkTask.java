@@ -52,7 +52,7 @@ public class CosmosDBSinkTask extends SinkTask {
                 .throttlingRetryOptions(
                         new ThrottlingRetryOptions()
                             .setMaxRetryAttemptsOnThrottledRequests(Integer.MAX_VALUE)
-                            .setMaxRetryWaitTime(Duration.ofSeconds((Integer.MAX_VALUE/1000) - 1)))
+                            .setMaxRetryWaitTime(Duration.ofSeconds((Integer.MAX_VALUE / 1000) - 1)))
                 .buildClient();
 
         client.createDatabaseIfNotExists(config.getDatabaseName());
