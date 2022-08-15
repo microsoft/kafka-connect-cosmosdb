@@ -54,7 +54,7 @@ public class CosmosDBSourceConnector extends SourceConnector {
         }
 
         for (int i = 0; i < maxTasks; i++) {
-            // Equally distribute workers by assigning workers to containers in round robin fashion.
+            // Equally distribute workers by assigning workers to containers in round-robin fashion.
             Map<String, String> taskProps = config.originalsStrings();
             taskProps.put(CosmosDBSourceConfig.COSMOS_ASSIGNED_CONTAINER_CONF,
                           containerList.get(i % containerList.size()));
