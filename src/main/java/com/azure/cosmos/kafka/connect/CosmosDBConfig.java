@@ -53,9 +53,9 @@ public class CosmosDBConfig extends AbstractConfig {
                     + "For example: topic1#con1,topic2#con2.";
 
     public static final String COSMOS_CLIENT_TELEMETRY_ENABLED_CONF = "connect.cosmos.clientTelemetry.enabled";
-    public static final String COSMOS_CLIENT_TELEMETRY_ENABLED_DISPLAY = "Enable cosmos client telemetry";
+    public static final String COSMOS_CLIENT_TELEMETRY_ENABLED_DISPLAY = "Cosmos client telemetry enabled flag";
     private static final String COSMOS_CLIENT_TELEMETRY_ENABLED_DOC =
-            "Enable cosmos client telemetry";
+            "Cosmos client telemetry enabled flag";
 
     public static final String COSMOS_CLIENT_TELEMETRY_ENDPOINT_CONF = "connect.cosmos.clientTelemetry.endpoint";
     public static final String COSMOS_CLIENT_TELEMETRY_ENDPOINT_DISPLAY = "Cosmos client telemetry endpoint";
