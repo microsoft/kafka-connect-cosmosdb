@@ -45,10 +45,20 @@ public class CosmosDBSinkTask extends SinkTask {
         logger.trace("Sink task started.");
         this.config = new CosmosDBSinkConfig(map);
 
+        boolean clientTelemetryEnabled = this.config.isClientTelemetryEnabled();
+        if (clientTelemetryEnabled) {
+            String clientTelemetryEndpoint = this.config.getClientTelemetryEndpoint();
+            int clientTelemetrySchedulingInSeconds = this.config.getClientTelemetrySchedulingInSeconds();
+
+            System.setProperty("COSMOS.CLIENT_TELEMETRY_ENDPOINT", clientTelemetryEndpoint);
+            System.setProperty("COSMOS.CLIENT_TELEMETRY_SCHEDULING_IN_SECONDS", String.valueOf(clientTelemetrySchedulingInSeconds));
+        }
+
         this.client = new CosmosClientBuilder()
                 .endpoint(config.getConnEndpoint())
                 .key(config.getConnKey())
                 .userAgentSuffix(CosmosDBConfig.COSMOS_CLIENT_USER_AGENT_SUFFIX + version())
+                .clientTelemetryEnabled(clientTelemetryEnabled)
                 .throttlingRetryOptions(
                         new ThrottlingRetryOptions()
                             .setMaxRetryAttemptsOnThrottledRequests(Integer.MAX_VALUE)

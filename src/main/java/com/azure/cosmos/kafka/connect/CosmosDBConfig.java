@@ -50,7 +50,21 @@ public class CosmosDBConfig extends AbstractConfig {
     private static final String COSMOS_CONTAINER_TOPIC_MAP_DISPLAY = "Topic-Container map";
     private static final String COSMOS_CONTAINER_TOPIC_MAP_DOC =
             "A comma delimited list of Kafka topics mapped to Cosmos containers.\n"
-                    + "For example: topic1#con1,topic2#con2.";    
+                    + "For example: topic1#con1,topic2#con2.";
+
+    public static final String COSMOS_CLIENT_TELEMETRY_ENABLED_CONF = "connect.cosmos.clientTelemetry.enabled";
+    public static final String COSMOS_CLIENT_TELEMETRY_ENABLED_DISPLAY = "Enable cosmos client telemetry";
+    private static final String COSMOS_CLIENT_TELEMETRY_ENABLED_DOC =
+            "Enable cosmos client telemetry";
+
+    public static final String COSMOS_CLIENT_TELEMETRY_ENDPOINT_CONF = "connect.cosmos.clientTelemetry.endpoint";
+    public static final String COSMOS_CLIENT_TELEMETRY_ENDPOINT_DISPLAY = "Cosmos client telemetry endpoint";
+    private static final String COSMOS_CLIENT_TELEMETRY_ENDPOINT_DOC =
+            "Cosmos client telemetry endpoint";
+
+    public static final String COSMOS_CLIENT_TELEMETRY_SCHEDULING_IN_SECONDS_CONF = "connect.cosmos.clientTelemetry.schedulingInSeconds";
+    public static final String COSMOS_CLIENT_TELEMETRY_SCHEDULING_IN_SECONDS_DISPLAY = "Cosmos client telemetry scheduling in seconds";
+    private static final String COSMOS_CLIENT_TELEMETRY_SCHEDULING_IN_SECONDS_DOC = "Cosmos client telemetry scheduling in seconds";
         
     public static final String COSMOS_PROVIDER_NAME_CONF = "connect.cosmos.provider.name";
     private static final String COSMOS_PROVIDER_NAME_DEFAULT = null;
@@ -67,6 +81,9 @@ public class CosmosDBConfig extends AbstractConfig {
     private String connKey;
     private String databaseName;
     private String providerName;
+    private boolean clientTelemetryEnabled;
+    private String clientTelemetryEndpoint;
+    private int clientTelemetrySchedulingInSeconds;
     private TopicContainerMap topicContainerMap = TopicContainerMap.empty();
 
     public CosmosDBConfig(ConfigDef config, Map<String, String> parsedConfig) {
@@ -77,6 +94,9 @@ public class CosmosDBConfig extends AbstractConfig {
         databaseName = this.getString(COSMOS_DATABASE_NAME_CONF);
         topicContainerMap = TopicContainerMap.deserialize(this.getString(COSMOS_CONTAINER_TOPIC_MAP_CONF));
         providerName = this.getString(COSMOS_PROVIDER_NAME_CONF);
+        clientTelemetryEnabled = this.getBoolean(COSMOS_CLIENT_TELEMETRY_ENABLED_CONF);
+        clientTelemetryEndpoint = this.getString(COSMOS_CLIENT_TELEMETRY_ENDPOINT_CONF);
+        clientTelemetrySchedulingInSeconds = this.getInt(COSMOS_CLIENT_TELEMETRY_SCHEDULING_IN_SECONDS_CONF);
     }
 
     public CosmosDBConfig(Map<String, String> parsedConfig) {
@@ -125,6 +145,27 @@ public class CosmosDBConfig extends AbstractConfig {
                         "none",
                         Importance.MEDIUM,
                         TOLERANCE_ON_ERROR_DOC
+                )
+                .define(
+                        COSMOS_CLIENT_TELEMETRY_ENABLED_CONF,
+                        Type.BOOLEAN,
+                        false,
+                        Importance.LOW,
+                        COSMOS_CLIENT_TELEMETRY_ENABLED_DOC
+                )
+                .define(
+                        COSMOS_CLIENT_TELEMETRY_ENDPOINT_CONF,
+                        Type.STRING,
+                        "https://tools.cosmos.azure.com/api/clienttelemetry/trace",
+                        Importance.LOW,
+                        COSMOS_CLIENT_TELEMETRY_ENDPOINT_DOC
+                )
+                .define(
+                        COSMOS_CLIENT_TELEMETRY_SCHEDULING_IN_SECONDS_CONF,
+                        Type.INT,
+                        600,
+                        Importance.LOW,
+                        COSMOS_CLIENT_TELEMETRY_SCHEDULING_IN_SECONDS_DOC
                 )
                 .defineInternal(
                         COSMOS_PROVIDER_NAME_CONF,
@@ -186,6 +227,30 @@ public class CosmosDBConfig extends AbstractConfig {
 
     public String getProviderName() {
         return this.providerName;
+    }
+
+    public boolean isClientTelemetryEnabled() {
+        return clientTelemetryEnabled;
+    }
+
+    public void setClientTelemetryEnabled(boolean clientTelemetryEnabled) {
+        this.clientTelemetryEnabled = clientTelemetryEnabled;
+    }
+
+    public String getClientTelemetryEndpoint() {
+        return clientTelemetryEndpoint;
+    }
+
+    public void setClientTelemetryEndpoint(String clientTelemetryEndpoint) {
+        this.clientTelemetryEndpoint = clientTelemetryEndpoint;
+    }
+
+    public int getClientTelemetrySchedulingInSeconds() {
+        return clientTelemetrySchedulingInSeconds;
+    }
+
+    public void setClientTelemetrySchedulingInSeconds(int clientTelemetrySchedulingInSeconds) {
+        this.clientTelemetrySchedulingInSeconds = clientTelemetrySchedulingInSeconds;
     }
 
     public static void validateConnection(Map<String, String> connectorConfigs, Map<String, ConfigValue> configValues) {
