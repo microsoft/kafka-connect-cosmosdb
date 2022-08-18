@@ -4,10 +4,7 @@ import static com.azure.cosmos.kafka.connect.CosmosDBConfig.CosmosClientBuilder.
 
 import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.kafka.connect.sink.CosmosDBSinkConfig;
-import java.net.InetAddress;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.UnknownHostException;
+
 import java.util.regex.Pattern;
 import org.apache.kafka.common.config.AbstractConfig;
 import org.apache.kafka.common.config.ConfigDef;
@@ -18,7 +15,7 @@ import org.apache.kafka.common.config.ConfigDef.Validator;
 import org.apache.kafka.common.config.ConfigDef.Width;
 
 import java.util.Map;
-import org.apache.kafka.common.config.ConfigException;
+
 import org.apache.kafka.common.config.ConfigValue;
 
 @SuppressWarnings({"squid:S1854", "squid:S2160"})  // suppress unneeded int *groupOrder variables, equals method
@@ -53,9 +50,9 @@ public class CosmosDBConfig extends AbstractConfig {
                     + "For example: topic1#con1,topic2#con2.";
 
     public static final String COSMOS_CLIENT_TELEMETRY_ENABLED_CONF = "connect.cosmos.clientTelemetry.enabled";
-    public static final String COSMOS_CLIENT_TELEMETRY_ENABLED_DISPLAY = "Enable cosmos client telemetry";
+    public static final String COSMOS_CLIENT_TELEMETRY_ENABLED_DISPLAY = "Cosmos client telemetry enabled flag";
     private static final String COSMOS_CLIENT_TELEMETRY_ENABLED_DOC =
-            "Enable cosmos client telemetry";
+            "Cosmos client telemetry enabled flag";
 
     public static final String COSMOS_CLIENT_TELEMETRY_ENDPOINT_CONF = "connect.cosmos.clientTelemetry.endpoint";
     public static final String COSMOS_CLIENT_TELEMETRY_ENDPOINT_DISPLAY = "Cosmos client telemetry endpoint";
@@ -65,6 +62,10 @@ public class CosmosDBConfig extends AbstractConfig {
     public static final String COSMOS_CLIENT_TELEMETRY_SCHEDULING_IN_SECONDS_CONF = "connect.cosmos.clientTelemetry.schedulingInSeconds";
     public static final String COSMOS_CLIENT_TELEMETRY_SCHEDULING_IN_SECONDS_DISPLAY = "Cosmos client telemetry scheduling in seconds";
     private static final String COSMOS_CLIENT_TELEMETRY_SCHEDULING_IN_SECONDS_DOC = "Cosmos client telemetry scheduling in seconds";
+
+    public static final String COSMOS_SINK_BULK_ENABLED_CONF = "connect.cosmos.sink.bulk.enabled";
+    public static final String COSMOS_SINK_BULK_ENABLED_DISPLAY = "Cosmos DB sink bulk mode enabled";
+    private static final String COSMOS_SINK_BULK_ENABLED_DOC = "Cosmos DB sink bulk mode enabled";
         
     public static final String COSMOS_PROVIDER_NAME_CONF = "connect.cosmos.provider.name";
     private static final String COSMOS_PROVIDER_NAME_DEFAULT = null;
@@ -84,6 +85,8 @@ public class CosmosDBConfig extends AbstractConfig {
     private boolean clientTelemetryEnabled;
     private String clientTelemetryEndpoint;
     private int clientTelemetrySchedulingInSeconds;
+    // TODO: consider split the config based on source/sink
+    private boolean bulkModeEnabled;
     private TopicContainerMap topicContainerMap = TopicContainerMap.empty();
 
     public CosmosDBConfig(ConfigDef config, Map<String, String> parsedConfig) {
@@ -97,6 +100,7 @@ public class CosmosDBConfig extends AbstractConfig {
         clientTelemetryEnabled = this.getBoolean(COSMOS_CLIENT_TELEMETRY_ENABLED_CONF);
         clientTelemetryEndpoint = this.getString(COSMOS_CLIENT_TELEMETRY_ENDPOINT_CONF);
         clientTelemetrySchedulingInSeconds = this.getInt(COSMOS_CLIENT_TELEMETRY_SCHEDULING_IN_SECONDS_CONF);
+        bulkModeEnabled = this.getBoolean(COSMOS_SINK_BULK_ENABLED_CONF);
     }
 
     public CosmosDBConfig(Map<String, String> parsedConfig) {
@@ -166,6 +170,13 @@ public class CosmosDBConfig extends AbstractConfig {
                         600,
                         Importance.LOW,
                         COSMOS_CLIENT_TELEMETRY_SCHEDULING_IN_SECONDS_DOC
+                )
+                .define(
+                        COSMOS_SINK_BULK_ENABLED_CONF,
+                        Type.BOOLEAN,
+                        true,
+                        Importance.LOW,
+                        COSMOS_SINK_BULK_ENABLED_DOC
                 )
                 .defineInternal(
                         COSMOS_PROVIDER_NAME_CONF,
@@ -251,6 +262,14 @@ public class CosmosDBConfig extends AbstractConfig {
 
     public void setClientTelemetrySchedulingInSeconds(int clientTelemetrySchedulingInSeconds) {
         this.clientTelemetrySchedulingInSeconds = clientTelemetrySchedulingInSeconds;
+    }
+
+    public boolean isBulkModeEnabled() {
+        return bulkModeEnabled;
+    }
+
+    public void setBulkModeEnabled(boolean bulkModeEnabled) {
+        this.bulkModeEnabled = bulkModeEnabled;
     }
 
     public static void validateConnection(Map<String, String> connectorConfigs, Map<String, ConfigValue> configValues) {
