@@ -1,8 +1,6 @@
 package com.azure.cosmos.kafka.connect.sink.id.strategy;
 
 import com.jayway.jsonpath.JsonPath;
-import org.apache.kafka.connect.data.Schema;
-import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.data.Values;
 import org.apache.kafka.connect.errors.ConnectException;
 import org.apache.kafka.connect.sink.SinkRecord;

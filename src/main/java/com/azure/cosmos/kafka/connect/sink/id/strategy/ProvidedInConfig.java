@@ -1,10 +1,13 @@
 package com.azure.cosmos.kafka.connect.sink.id.strategy;
 
 import org.apache.kafka.common.config.ConfigDef;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
 public class ProvidedInConfig extends AbstractIdStrategyConfig {
+    private static final Logger logger = LoggerFactory.getLogger(ProvidedInConfig.class);
     public static final String JSON_PATH_CONFIG = "jsonPath";
     public static final String JSON_PATH_CONFIG_DEFAULT = "$.id";
     public static final String JSON_PATH_CONFIG_DOC = "A JsonPath expression to select the desired component to use as ``id``";

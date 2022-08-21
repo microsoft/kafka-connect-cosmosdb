@@ -1,20 +1,30 @@
 package com.azure.cosmos.kafka.connect.source;
 
-import static java.lang.Thread.sleep;
-import static java.util.Collections.singletonMap;
-
-import com.azure.cosmos.*;
-import com.azure.cosmos.models.*;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.azure.cosmos.kafka.connect.TopicContainerMap;
+import com.azure.cosmos.ChangeFeedProcessor;
+import com.azure.cosmos.ChangeFeedProcessorBuilder;
+import com.azure.cosmos.ConsistencyLevel;
+import com.azure.cosmos.CosmosAsyncClient;
+import com.azure.cosmos.CosmosAsyncContainer;
+import com.azure.cosmos.CosmosAsyncDatabase;
+import com.azure.cosmos.CosmosClientBuilder;
+import com.azure.cosmos.CosmosException;
 import com.azure.cosmos.kafka.connect.CosmosDBConfig;
+import com.azure.cosmos.kafka.connect.TopicContainerMap;
+import com.azure.cosmos.models.ChangeFeedProcessorOptions;
+import com.azure.cosmos.models.CosmosContainerProperties;
+import com.azure.cosmos.models.CosmosContainerRequestOptions;
+import com.azure.cosmos.models.CosmosContainerResponse;
+import com.azure.cosmos.models.CosmosQueryRequestOptions;
+import com.azure.cosmos.models.ThroughputProperties;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.kafka.connect.data.Schema;
+import org.apache.kafka.connect.data.SchemaAndValue;
 import org.apache.kafka.connect.source.SourceRecord;
 import org.apache.kafka.connect.source.SourceTask;
-import org.apache.kafka.connect.data.SchemaAndValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import reactor.core.scheduler.Schedulers;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -25,7 +35,8 @@ import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import reactor.core.scheduler.Schedulers;
+import static java.lang.Thread.sleep;
+import static java.util.Collections.singletonMap;
 
 public class CosmosDBSourceTask extends SourceTask {
 
@@ -69,7 +80,7 @@ public class CosmosDBSourceTask extends SourceTask {
         partitionMap.put("Container", config.getAssignedContainer());
         
         Map<String, Object> offset = context.offsetStorageReader().offset(partitionMap);
-        // If NOT using the latest offset, reset lease container token to earliest possible value
+        // If NOT using the latest offset, reset lease container token to the earliest possible value
         if (!config.useLatestOffset()) {
             updateContinuationToken(ZERO_CONTINUATION_TOKEN);
         } else if (offset != null) {
@@ -127,6 +138,7 @@ public class CosmosDBSourceTask extends SourceTask {
         return leaseRecord.get(CONTINUATION_TOKEN).textValue();
     }
 
+    //  TODO: This only updates the continuation token of a random lease
     private void updateContinuationToken(String newToken) {        
         JsonNode leaseRecord = getLeaseContainerRecord();
         if (leaseRecord != null) {
@@ -233,7 +245,7 @@ public class CosmosDBSourceTask extends SourceTask {
         
         // Release all the resources.
         if (changeFeedProcessor != null) {
-            changeFeedProcessor.stop();
+            changeFeedProcessor.stop().subscribe();
             changeFeedProcessor = null;
         }
     }

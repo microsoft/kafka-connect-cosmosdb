@@ -1,19 +1,14 @@
 package com.azure.cosmos.kafka.connect.sink;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import com.azure.cosmos.CosmosClient;
+import com.azure.cosmos.CosmosAsyncClient;
+import com.azure.cosmos.CosmosAsyncContainer;
 import com.azure.cosmos.CosmosClientBuilder;
 import com.azure.cosmos.CosmosContainer;
 import com.azure.cosmos.CosmosException;
-import com.azure.cosmos.implementation.BadRequestException;
+import com.azure.cosmos.ThrottlingRetryOptions;
 import com.azure.cosmos.kafka.connect.CosmosDBConfig;
 import com.azure.cosmos.kafka.connect.sink.id.strategy.AbstractIdStrategyConfig;
 import com.azure.cosmos.kafka.connect.sink.id.strategy.IdStrategy;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.errors.ConnectException;
@@ -22,6 +17,14 @@ import org.apache.kafka.connect.sink.SinkTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
+
+import java.time.Duration;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.azure.cosmos.kafka.connect.CosmosDBConfig.TOLERANCE_ON_ERROR_CONFIG;
 
@@ -30,7 +33,7 @@ import static com.azure.cosmos.kafka.connect.CosmosDBConfig.TOLERANCE_ON_ERROR_C
  */
 public class CosmosDBSinkTask extends SinkTask {
     private static final Logger logger = LoggerFactory.getLogger(CosmosDBSinkTask.class);
-    private CosmosClient client = null;
+    private CosmosAsyncClient client = null;
     private CosmosDBSinkConfig config;
 
     @Override
@@ -43,13 +46,28 @@ public class CosmosDBSinkTask extends SinkTask {
         logger.trace("Sink task started.");
         this.config = new CosmosDBSinkConfig(map);
 
+        boolean clientTelemetryEnabled = this.config.isClientTelemetryEnabled();
+        if (clientTelemetryEnabled) {
+            String clientTelemetryEndpoint = this.config.getClientTelemetryEndpoint();
+            int clientTelemetrySchedulingInSeconds = this.config.getClientTelemetrySchedulingInSeconds();
+
+            System.setProperty("COSMOS.CLIENT_TELEMETRY_ENDPOINT", clientTelemetryEndpoint);
+            System.setProperty("COSMOS.CLIENT_TELEMETRY_SCHEDULING_IN_SECONDS", String.valueOf(clientTelemetrySchedulingInSeconds));
+        }
+
 
         this.client = new CosmosClientBuilder()
                 .endpoint(config.getConnEndpoint())
                 .key(config.getConnKey())
-                .userAgentSuffix(CosmosDBConfig.COSMOS_CLIENT_USER_AGENT_SUFFIX + version()).buildClient();
+                .userAgentSuffix(CosmosDBConfig.COSMOS_CLIENT_USER_AGENT_SUFFIX + version())
+                .clientTelemetryEnabled(clientTelemetryEnabled)
+                .throttlingRetryOptions(
+                    new ThrottlingRetryOptions()
+                        .setMaxRetryAttemptsOnThrottledRequests(Integer.MAX_VALUE)
+                        .setMaxRetryWaitTime(Duration.ofSeconds((Integer.MAX_VALUE / 1000) - 1)))
+                .buildAsyncClient();
 
-        client.createDatabaseIfNotExists(config.getDatabaseName());
+        client.createDatabaseIfNotExists(config.getDatabaseName()).block();
     }
 
     @Override
@@ -70,7 +88,7 @@ public class CosmosDBSinkTask extends SinkTask {
 
         for (Map.Entry<String, List<SinkRecord>> entry : recordsByContainer.entrySet()) {
             String containerName = entry.getKey();
-            CosmosContainer container = client.getDatabase(config.getDatabaseName()).getContainer(containerName);
+            CosmosAsyncContainer container = client.getDatabase(config.getDatabaseName()).getContainer(containerName);
             for (SinkRecord record : entry.getValue()) {
                 if (record.key() != null) {
                     MDC.put(String.format("CosmosDbSink-%s", containerName), record.key().toString());
@@ -89,9 +107,26 @@ public class CosmosDBSinkTask extends SinkTask {
                 maybeInsertId(recordValue, record);
 
                 try {
-                    addItemToContainer(container, recordValue);
-                } catch (CosmosException | ConnectException bre) {
-                    sendToDlqIfConfigured(record, bre);
+                    logger.info("adding item to container");
+//                    addItemToContainer(container, recordValue);
+//                } catch (CosmosException | ConnectException bre) {
+//                    sendToDlqIfConfigured(record, bre);
+                    container.upsertItem(recordValue)
+                             .onErrorResume(throwable -> {
+                                 RuntimeException exception;
+                                 if (throwable instanceof CosmosException) {
+                                     exception = (CosmosException) throwable;
+                                 } else if (throwable instanceof ConnectException) {
+                                     exception = (ConnectException) throwable;
+                                 } else {
+                                     return Mono.error(throwable);
+                                 }
+                                 sendToDlqIfConfigured(record, exception);
+                                 return Mono.empty();
+                             })
+                             // TODO: Should we use boundedElastic() here? as parallel() is bound by number of cores.
+                             .subscribeOn(Schedulers.boundedElastic())
+                             .subscribe();
                 } finally {
                     MDC.clear();
                 }
@@ -141,8 +176,5 @@ public class CosmosDBSinkTask extends SinkTask {
             client.close();
             client = null;
         }
-
-        client = null;
-
     }
 }
