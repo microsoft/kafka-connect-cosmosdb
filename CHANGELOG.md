@@ -3,8 +3,8 @@
 ### 1.5.0-beta.1 (Unreleased)
 #### Key Bug Fixes
 * Fixed parsing for empty arrays. [PR 466](https://github.com/microsoft/kafka-connect-cosmosdb/pull/466)
-* Updated `CosmosDBSinkConnector` to keep retrying for throttled requests. [PR 473](https://github.com/microsoft/kafka-connect-cosmosdb/pull/473)
-* Updated `CosmosDBSinkConnector` to use async I/O APIs. [PR 473](https://github.com/microsoft/kafka-connect-cosmosdb/pull/473)
+* Updated `CosmosDBSinkConnector` to keep retrying for throttled requests. [PR 478](https://github.com/microsoft/kafka-connect-cosmosdb/pull/478)
+* Updated `CosmosDBSinkConnector` to use async I/O APIs. [PR 478](https://github.com/microsoft/kafka-connect-cosmosdb/pull/478)
 
 ### 1.4.0 (2022-05-26)
 #### New Features
