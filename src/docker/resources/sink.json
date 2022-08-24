@@ -1,0 +1,21 @@
+{
+  "name": "cosmosdb-sink-connector",
+  "config": {
+    "connector.class": "com.azure.cosmos.kafka.connect.sink.CosmosDBSinkConnector",
+    "tasks.max": "1",
+    "topics": [
+      "hotels"
+    ],
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": "false",
+    "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "key.converter.schemas.enable": "false",
+    "connect.cosmos.connection.endpoint": "https://sdk-generic-test-lx.documents.azure.com:443/",
+    "connect.cosmos.master.key": "QEfQCSewc9c64vE3TcyBbIgYyifF3ohcESUYyJQ0r9edbxMLJ4KmB95aAeNmYFLyo74xrim4GUurqGf8iCyy4Q==",
+    "connect.cosmos.databasename": "kafkaconnect",
+    "connect.cosmos.containers.topicmap": "hotels#kafka",
+    "connect.cosmos.clientTelemetry.enabled": "true",
+    "connect.cosmos.clientTelemetry.schedulingInSeconds": "10"
+    
+  }
+}
