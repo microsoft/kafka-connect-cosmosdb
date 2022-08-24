@@ -1,20 +1,33 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 package com.azure.cosmos.kafka.connect.sink;
 
-import com.azure.cosmos.CosmosAsyncContainer;
-import org.apache.kafka.clients.consumer.OffsetAndMetadata;
-import org.apache.kafka.common.TopicPartition;
+import com.azure.cosmos.CosmosContainer;
+import com.azure.cosmos.CosmosException;
+import org.apache.kafka.connect.sink.SinkRecord;
 
-import java.util.Map;
+import java.util.List;
+import java.util.function.BiConsumer;
 
 public class PointWriter implements IWriter {
+    private final CosmosContainer container;
+    private final BiConsumer<SinkRecord, CosmosException> fallbackErrorHandling;
 
-    @Override
-    public void scheduleWrite(CosmosAsyncContainer container, Object recordValue, SinkOperationContext operationContext) {
-            container.upsertItem(recordValue).block();
+    public PointWriter(CosmosContainer container, BiConsumer<SinkRecord, CosmosException> fallbackErrorHandling) {
+        this.container = container;
+        this.fallbackErrorHandling = fallbackErrorHandling;
     }
 
     @Override
-    public void flush(Map<TopicPartition, OffsetAndMetadata> currentOffsets) {
-        //no-op
+    public void write(List<SinkOperation> sinkOperations) {
+
+        for (SinkOperation sinkOperation : sinkOperations) {
+            try {
+                container.upsertItem(sinkOperation.getRecordValue());
+            } catch (CosmosException e) {
+                this.fallbackErrorHandling.accept(sinkOperation.getSinkOperationContext().getSinkRecord(), e);
+            }
+        }
     }
 }

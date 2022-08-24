@@ -1,13 +1,30 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 package com.azure.cosmos.kafka.connect.sink;
 
-public class SinkOperationContext {
-    private final long kafkaOffset;
-    private final Integer kafkaPartition;
-    private final String topic;
+import org.apache.kafka.connect.sink.SinkRecord;
 
-    public SinkOperationContext(long kafkaOffset, Integer kafkaPartition, String topic) {
-        this.kafkaOffset = kafkaOffset;
-        this.kafkaPartition = kafkaPartition;
-        this.topic = topic;
+public class SinkOperationContext {
+    private final SinkRecord sinkRecord;
+
+    public SinkOperationContext(SinkRecord sinkRecord) {
+        this.sinkRecord = sinkRecord;
+    }
+
+    public SinkRecord getSinkRecord() {
+        return sinkRecord;
+    }
+
+    public long getKafkaOffset() {
+        return this.sinkRecord.kafkaOffset();
+    }
+
+    public Integer getKafkaPartition() {
+        return this.sinkRecord.kafkaPartition();
+    }
+
+    public String getTopic() {
+        return this.sinkRecord.topic();
     }
 }

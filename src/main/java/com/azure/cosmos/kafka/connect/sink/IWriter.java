@@ -1,12 +1,10 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 package com.azure.cosmos.kafka.connect.sink;
 
-import com.azure.cosmos.CosmosAsyncContainer;
-import org.apache.kafka.clients.consumer.OffsetAndMetadata;
-import org.apache.kafka.common.TopicPartition;
-
-import java.util.Map;
+import java.util.List;
 
 public interface IWriter {
-    void scheduleWrite(CosmosAsyncContainer container, Object recordValue, SinkOperationContext operationContext);
-    void flush(Map<TopicPartition, OffsetAndMetadata> currentOffsets);
+    void write(List<SinkOperation> sinkRecords);
 }
