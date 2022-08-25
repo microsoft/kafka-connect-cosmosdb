@@ -110,9 +110,9 @@ public class CosmosDBSinkTask extends SinkTask {
                 if (record.key() != null) {
                     MDC.put(String.format("CosmosDbSink-%s", containerName), record.key().toString());
                 }
-//                logger.debug("Writing record, value type: {}", record.value().getClass().getName());
-//                logger.debug("Key Schema: {}", record.keySchema());
-//                logger.debug("Value schema: {}", record.valueSchema());
+                logger.debug("Writing record, value type: {}", record.value().getClass().getName());
+                logger.debug("Key Schema: {}", record.keySchema());
+                logger.debug("Value schema: {}", record.valueSchema());
 
                 Object recordValue;
                 if (record.value() instanceof Struct) {
