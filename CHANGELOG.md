@@ -1,5 +1,10 @@
 ## Release History
 
+### 1.5.0-beta.1 (Unreleased)
+#### Key Bug Fixes
+* Fixed parsing for empty arrays. [PR 466](https://github.com/microsoft/kafka-connect-cosmosdb/pull/466)
+* Updated `CosmosDBSinkConnector` to keep retrying for throttled requests. [PR 472](https://github.com/microsoft/kafka-connect-cosmosdb/pull/472)
+
 ### 1.4.0 (2022-05-26)
 #### New Features
 * Updated `azure-cosmos` version to 4.30.0.
