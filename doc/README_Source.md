@@ -88,7 +88,7 @@ Once you have all the values filled out, save the JSON file somewhere locally. Y
 
 An easy option to create the connector is by going through the Control Center webpage.
 
-Follow this [guide](https://docs.confluent.io/platform/current/quickstart/ce-docker-quickstart.html#step-3-install-a-ak-connector-and-generate-sample-data) to create a connector from Control Center but instead of using the `DatagenConnector` option, use the `CosmosDBSourceConnector` tile instead. When configuring the sink connector, fill out the values as you have filled in the JSON file.
+Follow this [guide](https://docs.confluent.io/platform/current/quickstart/ce-docker-quickstart.html#step-3-install-a-ak-connector-and-generate-sample-data) to create a connector from Control Center but instead of using the `DatagenConnector` option, use the `CosmosDBSourceConnector` tile instead. When configuring the source connector, fill out the values as you have filled in the JSON file.
 
 Alternatively, in the connectors page, you can upload the JSON file from earlier by using the `Upload connector config file` option.
 
@@ -166,22 +166,22 @@ To delete the created Azure Cosmos DB service and its resource group using Azure
 
 The following settings are used to configure the Cosmos DB Kafka Source Connector. These configuration values determine which Cosmos DB container is consumed, which Kafka topics data is written into and formats to serialize the data. For an example configuration file with the default values, refer to [this config](../src/docker/resources/source.example.json).
 
-| Name | Type | Description | Required/Optional |
-| :--- | :--- | :--- | :--- |
-| connector.class | string | Classname of the Cosmos DB sink. Should be set to `com.azure.cosmos.kafka.connect.sink.CosmosDBSourceConnector` | Required |
-| connect.cosmos.databasename | string | name of the database to read from | Required |
-| connect.cosmos.master.key | string | the configured master key for Cosmos | Required |
-| connect.cosmos.connection.endpoint | uri | the endpoint for the Cosmos Account | Required |
-| connect.cosmos.containers.topicmap | string | comma separated topic to container mapping, eg. topic1#coll1,topic2#coll2 | Required |
-| connect.cosmos.messagekey.enabled | boolean | set if the Kafka message key should be set. Default is `true` | Required |
-| connect.cosmos.messagekey.field | string | use the field's value from the document as the message key. Default is `id` | Required |
-| connect.cosmos.offset.useLatest | boolean |  Set to `"true"` to use the latest (most recent) source offset, `"false"` to use the earliest recorded offset. Default is `false` | Required |
-| connect.cosmos.task.poll.interval | int | interval to poll the changefeedcontainer for changes | Required |
-| key.converter | string | Serialization format for the key data written into Kafka topic | Required |
-| value.converter | string | Serialization format for the value data written into the Kafka topic | Required |
-| key.converter.schemas.enable | string | Set to `"true"` if the key data has embedded schema | Optional |
-| value.converter.schemas.enable | string | Set to `"true"` if the key data has embedded schema | Optional |
-| tasks.max | int | Maximum number of connector sink tasks. Default is `1` | Optional |
+| Name | Type | Description                                                                                                                                                           | Required/Optional |
+| :--- | :--- |:----------------------------------------------------------------------------------------------------------------------------------------------------------------------| :--- |
+| connector.class | string | Classname of the Cosmos DB source. Should be set to `com.azure.cosmos.kafka.connect.source.CosmosDBSourceConnector`                                                   | Required |
+| connect.cosmos.databasename | string | name of the database to read from                                                                                                                                     | Required |
+| connect.cosmos.master.key | string | the configured master key for Cosmos                                                                                                                                  | Required |
+| connect.cosmos.connection.endpoint | uri | the endpoint for the Cosmos Account                                                                                                                                   | Required |
+| connect.cosmos.containers.topicmap | string | comma separated topic to container mapping, eg. topic1#coll1,topic2#coll2                                                                                             | Required |
+| connect.cosmos.messagekey.enabled | boolean | set if the Kafka message key should be set. Default is `true`                                                                                                         | Required |
+| connect.cosmos.messagekey.field | string | use the field's value from the document as the message key. Default is `id`                                                                                           | Required |
+| connect.cosmos.offset.useLatest | boolean | Set to `"true"` to use the latest (most recent) source offset, `"false"` to use the earliest recorded offset. Default is `false`                                      | Required |
+| connect.cosmos.task.poll.interval | int | interval to poll the changefeedcontainer for changes                                                                                                                  | Required |
+| key.converter | string | Serialization format for the key data written into Kafka topic                                                                                                        | Required |
+| value.converter | string | Serialization format for the value data written into the Kafka topic                                                                                                  | Required |
+| key.converter.schemas.enable | string | Set to `"true"` if the key data has embedded schema                                                                                                                   | Optional |
+| value.converter.schemas.enable | string | Set to `"true"` if the key data has embedded schema                                                                                                                   | Optional |
+| tasks.max | int | Maximum number of connector source tasks. Default is `1`. This should be set to equal to or greater than the number of containers specified in the topicmap property. | Optional |
 
 ## Supported Data Types
 Azure Cosmos DB source connector converts JSON Document to Schema supporting all valid JSON data types.
