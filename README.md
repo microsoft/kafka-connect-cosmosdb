@@ -1,4 +1,4 @@
-# Kafka Connect for Azure Cosmos DB
+# Kafka Connect for Azure Cosmos DB (SQL API)
 
 [![Open Source Love svg2](https://badges.frapsoft.com/os/v2/open-source.svg?v=103)](https://github.com/microsoft/kafka-connect-cosmosdb/blob/dev/CODE_OF_CONDUCT.MD) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/microsoft/kafka-connect-cosmosdb/blob/dev/CONTRIBUTING.md) [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/microsoft/kafka-connect-cosmosdb/pulse)
 
@@ -8,7 +8,13 @@
 
 File any issues / feature requests / questions etc. you may have in the [Issues](https://github.com/microsoft/kafka-connect-cosmosdb/issues) for this repo.
 
-This project provides connectors for [Kafka Connect](http://kafka.apache.org/documentation.html#connect) to read from and write data to [Azure Cosmos DB](https://azure.microsoft.com/en-us/services/cosmos-db/).
+This project provides connectors for [Kafka Connect](http://kafka.apache.org/documentation.html#connect) to read from and write data to [Azure Cosmos DB](https://azure.microsoft.com/en-us/services/cosmos-db/)(SQL API).
+
+The connectors in this reposiotry are specifically for the Cosmos DB **SQL API**. 
+If you are using Cosmos DB with other APIs then there is likely a specific connector for that API, but it's not this one. 
+- Mongo API - [MongoDB Kafka Connector](https://www.mongodb.com/docs/kafka-connector/current/)
+- Cassandra API - [Cassandra Sink Conenctor](https://docs.confluent.io/kafka-connect-cassandra/current/overview.html)
+- Gremlin API - [Kafka Connect connector for Cosmos DB Gremlin API](https://github.com/Azure/kafka-connect-cosmosdb-graph)
 
 ## Exactly-Once Support
 

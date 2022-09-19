@@ -56,7 +56,7 @@ public class StructToJsonMap {
                     break;
                 case ARRAY:
                     List<Object> fieldArray = struct.getArray(fieldName);
-                    if (fieldArray.get(0) instanceof Struct) {
+                    if (fieldArray != null && !fieldArray.isEmpty() && fieldArray.get(0) instanceof Struct) {
                         // If Array contains list of Structs
                         List<Object> jsonArray = new ArrayList<>();
                         fieldArray.forEach(item -> {
