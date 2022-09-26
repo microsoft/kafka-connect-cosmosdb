@@ -29,7 +29,7 @@ import static com.azure.cosmos.implementation.guava25.base.Preconditions.checkAr
 import static com.azure.cosmos.implementation.guava25.base.Preconditions.checkNotNull;
 
 public class BulkWriter extends SinkWriterBase {
-    private final static Logger logger = LoggerFactory.getLogger(BulkWriter.class);
+    private static final Logger logger = LoggerFactory.getLogger(BulkWriter.class);
 
     private final CosmosContainer cosmosContainer;
     private final PartitionKeyDefinition partitionKeyDefinition;
