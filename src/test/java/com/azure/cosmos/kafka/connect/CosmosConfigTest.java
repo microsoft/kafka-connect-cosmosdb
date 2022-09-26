@@ -1,13 +1,14 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 package com.azure.cosmos.kafka.connect;
 
-import org.apache.kafka.common.config.ConfigException;
 import org.junit.Test;
 
-import java.net.URISyntaxException;
-import java.net.UnknownHostException;
 import java.util.HashMap;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class CosmosConfigTest {
     private static final String COSMOS_URL = "https://<cosmosinstance-name>.documents.azure.com:443/";
