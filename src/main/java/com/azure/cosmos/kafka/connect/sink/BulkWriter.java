@@ -58,7 +58,6 @@ public class BulkWriter extends SinkWriterBase {
 
         List<CosmosItemOperation> itemOperations = new ArrayList<>();
         for (SinkRecord sinkRecord : sinkRecords) {
-            logger.info("Bulk write record: " + sinkRecord);
             CosmosItemOperation cosmosItemOperation = CosmosBulkOperations.getUpsertItemOperation(
                     sinkRecord.value(),
                     this.getPartitionKeyValue(sinkRecord.value()),
