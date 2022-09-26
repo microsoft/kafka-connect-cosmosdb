@@ -220,7 +220,9 @@ public class CosmosDBConfig extends AbstractConfig {
         return this.bulkModeEnabled;
     }
 
-    public int getMaxRetryCount() { return this.maxRetryCount; }
+    public int getMaxRetryCount() {
+        return this.maxRetryCount;
+    }
 
     public static void validateConnection(Map<String, String> connectorConfigs, Map<String, ConfigValue> configValues) {
         String endpoint = connectorConfigs.get(CosmosDBSinkConfig.COSMOS_CONN_ENDPOINT_CONF);

@@ -11,10 +11,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public abstract class SinkWriterBase implements IWriter {
-    private final static Logger logger = LoggerFactory.getLogger(SinkWriterBase.class);
+    private static final Logger logger = LoggerFactory.getLogger(SinkWriterBase.class);
     private final int maxRetryCount;
 
-    public SinkWriterBase(int maxRetryCount){
+    public SinkWriterBase(int maxRetryCount) {
         this.maxRetryCount = maxRetryCount;
     }
 
@@ -27,7 +27,7 @@ public abstract class SinkWriterBase implements IWriter {
         int retryCount = 0;
 
         List<SinkRecord> toBeRetriedRecords;
-        while(shouldRetry(retryCount, sinkWriteResponse)) {
+        while (shouldRetry(retryCount, sinkWriteResponse)) {
             toBeRetriedRecords = sinkWriteResponse.getFailedRecordResponses().stream().map(SinkOperationFailedResponse::getSinkRecord).collect(Collectors.toList());
             SinkWriteResponse retryResponse = writeCore(toBeRetriedRecords);
             sinkWriteResponse.getSucceededRecords().addAll(retryResponse.getSucceededRecords());
