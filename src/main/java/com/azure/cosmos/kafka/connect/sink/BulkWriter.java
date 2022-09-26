@@ -17,6 +17,8 @@ import com.azure.cosmos.models.PartitionKey;
 import com.azure.cosmos.models.PartitionKeyDefinition;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.connect.sink.SinkRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,6 +29,8 @@ import static com.azure.cosmos.implementation.guava25.base.Preconditions.checkAr
 import static com.azure.cosmos.implementation.guava25.base.Preconditions.checkNotNull;
 
 public class BulkWriter extends SinkWriterBase {
+    private final static Logger logger = LoggerFactory.getLogger(BulkWriter.class);
+
     private final CosmosContainer cosmosContainer;
     private final PartitionKeyDefinition partitionKeyDefinition;
 
@@ -47,13 +51,14 @@ public class BulkWriter extends SinkWriterBase {
     protected SinkWriteResponse writeCore(List<SinkRecord> sinkRecords) {
 
         SinkWriteResponse sinkWriteResponse = new SinkWriteResponse();
-
         if (sinkRecords == null || sinkRecords.isEmpty()) {
             return sinkWriteResponse;
         }
 
+
         List<CosmosItemOperation> itemOperations = new ArrayList<>();
         for (SinkRecord sinkRecord : sinkRecords) {
+            logger.info("Bulk write record: " + sinkRecord);
             CosmosItemOperation cosmosItemOperation = CosmosBulkOperations.getUpsertItemOperation(
                     sinkRecord.value(),
                     this.getPartitionKeyValue(sinkRecord.value()),

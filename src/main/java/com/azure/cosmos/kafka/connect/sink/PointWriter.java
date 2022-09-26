@@ -31,9 +31,16 @@ public class PointWriter extends SinkWriterBase {
                 container.upsertItem(sinkRecord.value());
                 sinkWriteResponse.getSucceededRecords().add(sinkRecord);
             } catch (CosmosException cosmosException) {
-                sinkWriteResponse
-                        .getFailedRecordResponses()
-                        .add(new SinkOperationFailedResponse(sinkRecord, cosmosException));
+                if (ExceptionsHelper.canBeTransientFailure(cosmosException)) {
+                    sinkWriteResponse
+                            .getFailedRecordResponses()
+                            .add(new SinkOperationFailedResponse(sinkRecord, cosmosException));
+                } else {
+                    sinkWriteResponse
+                            .getFailedRecordResponses()
+                            .add(0, new SinkOperationFailedResponse(sinkRecord, cosmosException));
+                }
+
             }
         }
 
