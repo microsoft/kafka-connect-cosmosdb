@@ -31,7 +31,10 @@ public class PointWriter extends SinkWriterBase {
                 container.upsertItem(sinkRecord.value());
                 sinkWriteResponse.getSucceededRecords().add(sinkRecord);
             } catch (CosmosException cosmosException) {
-                if (ExceptionsHelper.canBeTransientFailure(cosmosException)) {
+                // Generally we would want to retry for the transient exceptions, and fail-fast for non-transient exceptions
+                // Putting the non-transient exceptions at the front of the list
+                // so later when deciding retry behavior, only examining the first exception will be enough
+                if (ExceptionsHelper.isTransientFailure(cosmosException)) {
                     sinkWriteResponse
                             .getFailedRecordResponses()
                             .add(new SinkOperationFailedResponse(sinkRecord, cosmosException));

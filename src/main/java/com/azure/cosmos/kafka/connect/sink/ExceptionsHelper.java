@@ -7,18 +7,18 @@ import com.azure.cosmos.CosmosException;
 import com.azure.cosmos.implementation.HttpConstants;
 
 public class ExceptionsHelper {
-    public static boolean canBeTransientFailure(int statusCode, int substatusCode) {
+    public static boolean isTransientFailure(int statusCode, int substatusCode) {
         return statusCode == HttpConstants.StatusCodes.GONE
                 || statusCode == HttpConstants.StatusCodes.SERVICE_UNAVAILABLE
                 || statusCode == HttpConstants.StatusCodes.INTERNAL_SERVER_ERROR
                 || statusCode == HttpConstants.StatusCodes.REQUEST_TIMEOUT
-                || (statusCode == HttpConstants.StatusCodes.NOTFOUND && substatusCode == 1002);
+                || (statusCode == HttpConstants.StatusCodes.NOTFOUND && substatusCode == HttpConstants.SubStatusCodes.READ_SESSION_NOT_AVAILABLE);
 
     }
 
-    public static boolean canBeTransientFailure(Exception e) {
+    public static boolean isTransientFailure(Exception e) {
         if (e instanceof CosmosException) {
-            return canBeTransientFailure(((CosmosException) e).getStatusCode(), ((CosmosException) e).getSubStatusCode());
+            return isTransientFailure(((CosmosException) e).getStatusCode(), ((CosmosException) e).getSubStatusCode());
         }
 
         return false;

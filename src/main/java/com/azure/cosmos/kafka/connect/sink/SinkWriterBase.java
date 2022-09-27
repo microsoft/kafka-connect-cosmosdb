@@ -28,6 +28,7 @@ public abstract class SinkWriterBase implements IWriter {
 
         List<SinkRecord> toBeRetriedRecords;
         while (shouldRetry(retryCount, sinkWriteResponse)) {
+            retryCount++;
             toBeRetriedRecords = sinkWriteResponse.getFailedRecordResponses().stream().map(SinkOperationFailedResponse::getSinkRecord).collect(Collectors.toList());
             SinkWriteResponse retryResponse = writeCore(toBeRetriedRecords);
             sinkWriteResponse.getSucceededRecords().addAll(retryResponse.getSucceededRecords());
@@ -48,10 +49,10 @@ public abstract class SinkWriterBase implements IWriter {
             return false;
         }
 
-        // If there is any non-transient exceptions, then NO retry will happen
-        // non-transient exception will be put in the front of the returned result list
+        // If there are any non-transient exceptions, then retry will NOT happen
+        // for optimization purpose, the non-transient exception will be put in the front
         // so it will be enough to only examine the first record in the list
-        if (!ExceptionsHelper.canBeTransientFailure(response.getFailedRecordResponses().get(0).getException())) {
+        if (!ExceptionsHelper.isTransientFailure(response.getFailedRecordResponses().get(0).getException())) {
             return false;
         }
 

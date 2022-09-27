@@ -60,7 +60,8 @@ public class CosmosDBConfig extends AbstractConfig {
     private static final boolean DEFAULT_COSMOS_SINK_BULK_ENABLED = true;
 
     public static final String COSMOS_SINK_MAX_RETRY_COUNT = "connect.cosmos.sink.maxRetryCount";
-    private static final String COSMOS_SINK_MAX_RETRY_COUNT_DOC = "Cosmos DB sink write max retry attempts on failure. By default, will retry on transient erros for up to 10 times.";
+    private static final String COSMOS_SINK_MAX_RETRY_COUNT_DOC =
+            "Cosmos DB max retry attempts on write failures for Sink connector. By default, the connector will retry on transient write errors for up to 10 times.";
     private static final int DEFAULT_COSMOS_SINK_MAX_RETRY_COUNT = 10;
         
     public static final String COSMOS_PROVIDER_NAME_CONF = "connect.cosmos.provider.name";
@@ -74,24 +75,24 @@ public class CosmosDBConfig extends AbstractConfig {
     public static final int COSMOS_DATABASE_GROUP_ORDER = 2;
     public static final String COSMOS_CLIENT_USER_AGENT_SUFFIX = "APN/1.0 Microsoft/1.0 KafkaConnect/";
 
-    private String connEndpoint;
-    private String connKey;
-    private String databaseName;
-    private String providerName;
-    private boolean bulkModeEnabled;
-    private int maxRetryCount;
+    private final String connEndpoint;
+    private final String connKey;
+    private final String databaseName;
+    private final String providerName;
+    private final boolean bulkModeEnabled;
+    private final int maxRetryCount;
     private TopicContainerMap topicContainerMap = TopicContainerMap.empty();
 
     public CosmosDBConfig(ConfigDef config, Map<String, String> parsedConfig) {
         super(config, parsedConfig);
 
-        connEndpoint = this.getString(COSMOS_CONN_ENDPOINT_CONF);
-        connKey = this.getPassword(COSMOS_CONN_KEY_CONF).value();
-        databaseName = this.getString(COSMOS_DATABASE_NAME_CONF);
-        topicContainerMap = TopicContainerMap.deserialize(this.getString(COSMOS_CONTAINER_TOPIC_MAP_CONF));
-        providerName = this.getString(COSMOS_PROVIDER_NAME_CONF);
-        bulkModeEnabled = this.getBoolean(COSMOS_SINK_BULK_ENABLED_CONF);
-        maxRetryCount = this.getInt(COSMOS_SINK_MAX_RETRY_COUNT);
+        this.connEndpoint = this.getString(COSMOS_CONN_ENDPOINT_CONF);
+        this.connKey = this.getPassword(COSMOS_CONN_KEY_CONF).value();
+        this.databaseName = this.getString(COSMOS_DATABASE_NAME_CONF);
+        this.topicContainerMap = TopicContainerMap.deserialize(this.getString(COSMOS_CONTAINER_TOPIC_MAP_CONF));
+        this.providerName = this.getString(COSMOS_PROVIDER_NAME_CONF);
+        this.bulkModeEnabled = this.getBoolean(COSMOS_SINK_BULK_ENABLED_CONF);
+        this.maxRetryCount = this.getInt(COSMOS_SINK_MAX_RETRY_COUNT);
     }
 
     public CosmosDBConfig(Map<String, String> parsedConfig) {

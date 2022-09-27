@@ -146,13 +146,14 @@ public class CosmosDBSinkTask extends SinkTask {
 
         StringBuilder errorMessage = new StringBuilder();
         for (SinkOperationFailedResponse failedResponse : failedResponses) {
-            errorMessage.append(
-                    String.format(
-                            "Unable to write record to CosmosDB: %s, value schema %s, exception %s",
-                            failedResponse.getSinkRecord().key(),
-                            failedResponse.getSinkRecord().valueSchema(),
-                            failedResponse.getException().getMessage()));
-            errorMessage.append("\n");
+            errorMessage
+                    .append(
+                        String.format(
+                                "Unable to write record to CosmosDB: {%s}, value schema {%s}, exception {%s}",
+                                failedResponse.getSinkRecord().key(),
+                                failedResponse.getSinkRecord().valueSchema(),
+                                failedResponse.getException().toString()))
+                    .append("\n");
         }
 
         if (this.isTolerantOnError()) {

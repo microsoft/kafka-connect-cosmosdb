@@ -55,7 +55,6 @@ public class BulkWriter extends SinkWriterBase {
             return sinkWriteResponse;
         }
 
-
         List<CosmosItemOperation> itemOperations = new ArrayList<>();
         for (SinkRecord sinkRecord : sinkRecords) {
             CosmosItemOperation cosmosItemOperation = CosmosBulkOperations.getUpsertItemOperation(
@@ -71,18 +70,23 @@ public class BulkWriter extends SinkWriterBase {
         // Non-transient exceptions will be put in the front of the list
         for (CosmosBulkOperationResponse bulkOperationResponse : responseList) {
             SinkOperationContext context = bulkOperationResponse.getOperation().getContext();
+            checkNotNull(context, "sinkOperationContext should not be null");
+
             SinkRecord sinkRecord = context.getSinkRecord();
 
             if (bulkOperationResponse.getException() != null
                     || bulkOperationResponse.getResponse() == null
                     || !bulkOperationResponse.getResponse().isSuccessStatusCode()) {
 
-                BulkOperationFailedException exception = handleNonSuccessfulStatusCode(
+                BulkOperationFailedException exception = handleErrorStatusCode(
                         bulkOperationResponse.getResponse(),
                         bulkOperationResponse.getException(),
-                        bulkOperationResponse.getOperation().getContext());
+                        context);
 
-                if (ExceptionsHelper.canBeTransientFailure(exception)) {
+                // Generally we would want to retry for the transient exceptions, and fail-fast for non-transient exceptions
+                // Putting the non-transient exceptions at the front of the list
+                // so later when deciding retry behavior, only examining the first exception will be enough
+                if (ExceptionsHelper.isTransientFailure(exception)) {
                     sinkWriteResponse.getFailedRecordResponses().add(new SinkOperationFailedResponse(sinkRecord, exception));
                 } else {
                     sinkWriteResponse.getFailedRecordResponses().add(0, new SinkOperationFailedResponse(sinkRecord, exception));
@@ -110,7 +114,7 @@ public class BulkWriter extends SinkWriterBase {
                 .toPartitionKey(partitionKeyInternal);
     }
 
-    BulkOperationFailedException handleNonSuccessfulStatusCode(
+    BulkOperationFailedException handleErrorStatusCode(
             CosmosBulkItemResponse itemResponse,
             Exception exception,
             SinkOperationContext sinkOperationContext) {
@@ -126,7 +130,7 @@ public class BulkWriter extends SinkWriterBase {
 
         String errorMessage =
                 String.format(
-                        "Request failed with effectiveStatusCode %s, effectiveSubStatusCode %s, kafkaOffset %s, kafkaPartition %s, topic %s",
+                        "Request failed with effectiveStatusCode: {%s}, effectiveSubStatusCode: {%s}, kafkaOffset: {%s}, kafkaPartition: {%s}, topic: {%s}",
                         effectiveStatusCode,
                         effectiveSubStatusCode,
                         sinkOperationContext.getKafkaOffset(),
@@ -137,7 +141,7 @@ public class BulkWriter extends SinkWriterBase {
         return new BulkOperationFailedException(effectiveStatusCode, effectiveSubStatusCode, errorMessage, exception);
     }
 
-    static class BulkOperationFailedException extends CosmosException {
+    private static class BulkOperationFailedException extends CosmosException {
         protected BulkOperationFailedException(int statusCode, int subStatusCode, String message, Throwable cause) {
             super(statusCode, message, null, cause);
             BridgeInternal.setSubStatusCode(this, subStatusCode);
