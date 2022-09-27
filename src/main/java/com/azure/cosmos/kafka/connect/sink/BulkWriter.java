@@ -68,7 +68,7 @@ public class BulkWriter extends SinkWriterBase {
         Iterable<CosmosBulkOperationResponse<Object>> responseList = cosmosContainer.executeBulkOperations(itemOperations);
 
         // Non-transient exceptions will be put in the front of the list
-        for (CosmosBulkOperationResponse bulkOperationResponse : responseList) {
+        for (CosmosBulkOperationResponse<Object> bulkOperationResponse : responseList) {
             SinkOperationContext context = bulkOperationResponse.getOperation().getContext();
             checkNotNull(context, "sinkOperationContext should not be null");
 

@@ -145,14 +145,14 @@ public class CosmosDBConfig extends AbstractConfig {
                         COSMOS_SINK_BULK_ENABLED_CONF,
                         Type.BOOLEAN,
                         DEFAULT_COSMOS_SINK_BULK_ENABLED,
-                        Importance.MEDIUM,
+                        Importance.LOW,
                         COSMOS_SINK_BULK_ENABLED_DOC
                 )
                 .define(
                         COSMOS_SINK_MAX_RETRY_COUNT,
                         Type.INT,
                         DEFAULT_COSMOS_SINK_MAX_RETRY_COUNT,
-                        Importance.MEDIUM,
+                        Importance.HIGH,
                         COSMOS_SINK_MAX_RETRY_COUNT_DOC
                 )
                 .defineInternal(
