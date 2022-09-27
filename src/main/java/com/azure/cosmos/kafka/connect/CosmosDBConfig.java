@@ -152,7 +152,7 @@ public class CosmosDBConfig extends AbstractConfig {
                         Type.INT,
                         DEFAULT_COSMOS_SINK_MAX_RETRY_COUNT,
                         Importance.MEDIUM,
-                        COSMOS_SINK_MAX_RETRY_COUNT
+                        COSMOS_SINK_MAX_RETRY_COUNT_DOC
                 )
                 .defineInternal(
                         COSMOS_PROVIDER_NAME_CONF,
