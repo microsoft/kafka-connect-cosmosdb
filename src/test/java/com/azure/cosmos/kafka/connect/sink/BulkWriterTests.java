@@ -114,7 +114,7 @@ public class BulkWriterTests {
     }
 
     @Test
-    public void testBulkWriteWithTransientException() {
+    public void testBulkWriteSucceededWithTransientException() {
         String record1Id = UUID.randomUUID().toString();
         String record2Id = UUID.randomUUID().toString();
         SinkRecord record1 = createSinkRecord(record1Id);
@@ -144,6 +144,32 @@ public class BulkWriterTests {
         assertEquals(2, Iterators.size(allParameters.get(0).iterator()));
         assertEquals(1, Iterators.size(allParameters.get(1).iterator()));
         assertEquals(1, Iterators.size(allParameters.get(2).iterator()));
+    }
+
+
+    @Test
+    public void testBulkWriteFailedWithTransientException() {
+        String record1Id = UUID.randomUUID().toString();
+        String record2Id = UUID.randomUUID().toString();
+        SinkRecord record1 = createSinkRecord(record1Id);
+        SinkRecord record2 = createSinkRecord(record2Id);
+
+        CosmosBulkOperationResponse<Object> successfulResponseForRecord1 = mockSuccessfulBulkOperationResponse(record1, record1Id);
+        CosmosBulkOperationResponse<Object> failedResponseForRecord2 = mockFailedBulkOperationResponse(record2, record2Id, new RequestTimeoutException());
+
+        Mockito.when(container.executeBulkOperations(any()))
+                .thenReturn(() -> Arrays.asList(successfulResponseForRecord1, failedResponseForRecord2).iterator())
+                .thenReturn(() -> Arrays.asList(failedResponseForRecord2).iterator())
+                .thenReturn(() -> Arrays.asList(failedResponseForRecord2).iterator());
+
+        SinkWriteResponse response = bulkWriter.write(Arrays.asList(record1, record2));
+
+        assertEquals(1, response.getSucceededRecords().size());
+        assertEquals(record1, response.getSucceededRecords().get(0));
+        assertEquals(1, response.getFailedRecordResponses().size());
+        assertEquals(record2, response.getFailedRecordResponses().get(0).getSinkRecord());
+        assertTrue(response.getFailedRecordResponses().get(0).getException() instanceof CosmosException);
+        assertEquals(HttpConstants.StatusCodes.REQUEST_TIMEOUT, ((CosmosException)response.getFailedRecordResponses().get(0).getException()).getStatusCode());
     }
 
     private SinkRecord createSinkRecord(String id) {

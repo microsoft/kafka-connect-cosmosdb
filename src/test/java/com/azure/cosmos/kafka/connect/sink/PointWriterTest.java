@@ -79,7 +79,7 @@ public class PointWriterTest {
     }
 
     @Test
-    public void testPointWriteWithTransientException() {
+    public void testPointWriteSucceededWithTransientException() {
         SinkRecord record1 = createSinkRecord();
         SinkRecord record2 = createSinkRecord();
 
@@ -97,6 +97,31 @@ public class PointWriterTest {
         assertEquals(record1, response.getSucceededRecords().get(0));
         assertEquals(record2, response.getSucceededRecords().get(1));
         assertEquals(0, response.getFailedRecordResponses().size());
+
+        verify(container, times(1)).upsertItem(record1.value());
+        verify(container, times(3)).upsertItem(record2.value());
+    }
+
+    @Test
+    public void testPointWriteFailedWithTransientException() {
+        SinkRecord record1 = createSinkRecord();
+        SinkRecord record2 = createSinkRecord();
+
+        CosmosItemResponse<Object> itemResponse = Mockito.mock(CosmosItemResponse.class);
+        Mockito.when(container.upsertItem(record1.value())).thenReturn(itemResponse);
+        Mockito
+                .when(container.upsertItem(record2.value()))
+                .thenThrow(new RequestTimeoutException())
+                .thenThrow(new RequestTimeoutException())
+                .thenThrow(new RequestTimeoutException());
+
+        SinkWriteResponse response = pointWriter.write(Arrays.asList(record1, record2));
+
+        assertEquals(1, response.getSucceededRecords().size());
+        assertEquals(record1, response.getSucceededRecords().get(0));
+        assertEquals(record2, response.getFailedRecordResponses().get(0).getSinkRecord());
+        assertTrue(response.getFailedRecordResponses().get(0).getException() instanceof CosmosException);
+        assertEquals(HttpConstants.StatusCodes.REQUEST_TIMEOUT, ((CosmosException)response.getFailedRecordResponses().get(0).getException()).getStatusCode());
 
         verify(container, times(1)).upsertItem(record1.value());
         verify(container, times(3)).upsertItem(record2.value());
