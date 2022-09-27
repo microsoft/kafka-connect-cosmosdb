@@ -56,7 +56,7 @@ public class CosmosDBConfig extends AbstractConfig {
                     + "For example: topic1#con1,topic2#con2.";
 
     public static final String COSMOS_SINK_BULK_ENABLED_CONF = "connect.cosmos.sink.bulk.enabled";
-    private static final String COSMOS_SINK_BULK_ENABLED_DOC = "Flag to indicate whether Cosmos DB sink bulk mode is enabled. By default it is true.";
+    private static final String COSMOS_SINK_BULK_ENABLED_DOC = "Flag to indicate whether Cosmos DB bulk mode is enabled for Sink connector. By default it is true.";
     private static final boolean DEFAULT_COSMOS_SINK_BULK_ENABLED = true;
 
     public static final String COSMOS_SINK_MAX_RETRY_COUNT = "connect.cosmos.sink.maxRetryCount";
