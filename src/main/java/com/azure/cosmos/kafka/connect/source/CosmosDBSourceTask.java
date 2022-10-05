@@ -58,7 +58,7 @@ public class CosmosDBSourceTask extends SourceTask {
         this.queue = new LinkedTransferQueue<>();
 
         logger.info("Creating the client.");
-        client = getCosmosClient();
+        client = getCosmosClient(config);
 
         // Initialize the database, feed and lease containers
         CosmosAsyncDatabase database = client.getDatabase(config.getDatabaseName());
@@ -241,16 +241,22 @@ public class CosmosDBSourceTask extends SourceTask {
         }
     }
 
-    private CosmosAsyncClient getCosmosClient() {
+    private CosmosAsyncClient getCosmosClient(CosmosDBSourceConfig config) {
         logger.info("Creating Cosmos Client.");
 
-        return new CosmosClientBuilder()
+        CosmosClientBuilder cosmosClientBuilder = new CosmosClientBuilder()
                 .endpoint(config.getConnEndpoint())
                 .key(config.getConnKey())
                 .consistencyLevel(ConsistencyLevel.SESSION)
                 .contentResponseOnWriteEnabled(true)
-                .userAgentSuffix(CosmosDBConfig.COSMOS_CLIENT_USER_AGENT_SUFFIX + version())
-                .buildAsyncClient();
+                .connectionSharingAcrossClientsEnabled(config.isConnectionSharingEnabled())
+                .userAgentSuffix(CosmosDBConfig.COSMOS_CLIENT_USER_AGENT_SUFFIX + version());
+
+        if (config.isGatewayModeEnabled()) {
+            cosmosClientBuilder.gatewayMode();
+        }
+
+        return cosmosClientBuilder.buildAsyncClient();
     }
 
     private ChangeFeedProcessor getChangeFeedProcessor(String hostName, CosmosAsyncContainer feedContainer, CosmosAsyncContainer leaseContainer) {
