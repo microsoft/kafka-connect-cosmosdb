@@ -8,10 +8,15 @@ import org.junit.Test;
 
 import java.util.HashMap;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
 
 public class CosmosDBSourceConfigTest {
     private static final String COSMOS_URL = "https://<cosmosinstance-name>.documents.azure.com:443/";
+    private static final boolean DEFAULT_GATEWAY_MODE_ENABLED = false;
+    private static final boolean DEFAULT_CONNECTION_SHARING_ENABLED = false;
 
     public static HashMap<String, String> setupConfigs() {
         HashMap<String, String> configs = new HashMap<>();
@@ -52,5 +57,33 @@ public class CosmosDBSourceConfigTest {
         assertThrows(ConfigException.class, () -> {
             new CosmosDBSourceConfig(settings);
         });
+    }
+
+    @Test
+    public void gatewayModeEnabledTest() {
+        HashMap<String, String> settings = setupConfigs();
+
+        // validate default max retry count
+        CosmosDBSourceConfig config = new CosmosDBSourceConfig(settings);
+        assertEquals(config.isGatewayModeEnabled(), DEFAULT_GATEWAY_MODE_ENABLED);
+
+        // validate configured max retry count
+        settings.put(CosmosDBSourceConfig.COSMOS_GATEWAY_MODE_ENABLED, "true");
+        config = new CosmosDBSourceConfig(settings);
+        assertEquals(config.isGatewayModeEnabled(), true);
+    }
+
+    @Test
+    public void connectionSharingEnabledTest() {
+        HashMap<String, String> settings = setupConfigs();
+
+        // validate default max retry count
+        CosmosDBSourceConfig config = new CosmosDBSourceConfig(settings);
+        assertEquals(config.isConnectionSharingEnabled(), DEFAULT_CONNECTION_SHARING_ENABLED);
+
+        // validate configured max retry count
+        settings.put(CosmosDBSourceConfig.COSMOS_CONNECTION_SHARING_ENABLED, "true");
+        config = new CosmosDBSourceConfig(settings);
+        assertEquals(config.isConnectionSharingEnabled(), true);
     }
 }

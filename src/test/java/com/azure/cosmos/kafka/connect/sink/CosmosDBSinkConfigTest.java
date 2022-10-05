@@ -20,6 +20,8 @@ public class CosmosDBSinkConfigTest {
     private static final String COSMOS_CONTAINER_NAME = "mycontainer";
     private static final String TOPIC_NAME = "mytopic";
     private static final int DEFAULT_MAX_RETRy = 10;
+    private static final boolean DEFAULT_GATEWAY_MODE_ENABLED = false;
+    private static final boolean DEFAULT_CONNECTION_SHARING_ENABLED = false;
 
     public static HashMap<String, String> setupConfigs() {
         HashMap<String, String> configs = new HashMap<>();
@@ -90,5 +92,33 @@ public class CosmosDBSinkConfigTest {
         settings.put(CosmosDBSinkConfig.COSMOS_SINK_MAX_RETRY_COUNT, "3");
         config = new CosmosDBSinkConfig(settings);
         assertEquals(config.getMaxRetryCount(), 3);
+    }
+
+    @Test
+    public void gatewayModeEnabledTest() {
+        HashMap<String, String> settings = setupConfigs();
+
+        // validate default max retry count
+        CosmosDBSinkConfig config = new CosmosDBSinkConfig(settings);
+        assertEquals(config.isGatewayModeEnabled(), DEFAULT_GATEWAY_MODE_ENABLED);
+
+        // validate configured max retry count
+        settings.put(CosmosDBSinkConfig.COSMOS_GATEWAY_MODE_ENABLED, "true");
+        config = new CosmosDBSinkConfig(settings);
+        assertEquals(config.isGatewayModeEnabled(), true);
+    }
+
+    @Test
+    public void connectionSharingEnabledTest() {
+        HashMap<String, String> settings = setupConfigs();
+
+        // validate default max retry count
+        CosmosDBSinkConfig config = new CosmosDBSinkConfig(settings);
+        assertEquals(config.isConnectionSharingEnabled(), DEFAULT_CONNECTION_SHARING_ENABLED);
+
+        // validate configured max retry count
+        settings.put(CosmosDBSinkConfig.COSMOS_CONNECTION_SHARING_ENABLED, "true");
+        config = new CosmosDBSinkConfig(settings);
+        assertEquals(config.isConnectionSharingEnabled(), true);
     }
 }

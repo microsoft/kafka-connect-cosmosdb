@@ -47,15 +47,21 @@ public class CosmosDBSinkTask extends SinkTask {
         logger.trace("Sink task started.");
         this.config = new CosmosDBSinkConfig(map);
 
-        this.client = new CosmosClientBuilder()
-                .endpoint(config.getConnEndpoint())
-                .key(config.getConnKey())
-                .userAgentSuffix(CosmosDBConfig.COSMOS_CLIENT_USER_AGENT_SUFFIX + version())
-                .throttlingRetryOptions(
-                        new ThrottlingRetryOptions()
-                            .setMaxRetryAttemptsOnThrottledRequests(Integer.MAX_VALUE)
-                            .setMaxRetryWaitTime(Duration.ofSeconds((Integer.MAX_VALUE / 1000) - 1)))
-                .buildClient();
+        CosmosClientBuilder cosmosClientBuilder =
+                new CosmosClientBuilder()
+                        .endpoint(config.getConnEndpoint())
+                        .key(config.getConnKey())
+                        .connectionSharingAcrossClientsEnabled(this.config.isConnectionSharingEnabled())
+                        .userAgentSuffix(CosmosDBConfig.COSMOS_CLIENT_USER_AGENT_SUFFIX + version())
+                        .throttlingRetryOptions(
+                                new ThrottlingRetryOptions()
+                                        .setMaxRetryAttemptsOnThrottledRequests(Integer.MAX_VALUE)
+                                        .setMaxRetryWaitTime(Duration.ofSeconds((Integer.MAX_VALUE / 1000) - 1)));
+        if (this.config.isGatewayModeEnabled()) {
+            cosmosClientBuilder.gatewayMode();
+        }
+
+        this.client = cosmosClientBuilder.buildClient();
 
         client.createDatabaseIfNotExists(config.getDatabaseName());
     }
@@ -98,9 +104,9 @@ public class CosmosDBSinkTask extends SinkTask {
                 if (record.key() != null) {
                     MDC.put(String.format("CosmosDbSink-%s", containerName), record.key().toString());
                 }
-                logger.debug("Writing record, value type: {}", record.value().getClass().getName());
-                logger.debug("Key Schema: {}", record.keySchema());
-                logger.debug("Value schema: {}", record.valueSchema());
+                logger.trace("Writing record, value type: {}", record.value().getClass().getName());
+                logger.trace("Key Schema: {}", record.keySchema());
+                logger.trace("Value schema: {}", record.valueSchema());
 
                 Object recordValue;
                 if (record.value() instanceof Struct) {

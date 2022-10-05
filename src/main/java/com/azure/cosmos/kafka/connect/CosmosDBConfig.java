@@ -55,6 +55,17 @@ public class CosmosDBConfig extends AbstractConfig {
             "A comma delimited list of Kafka topics mapped to Cosmos containers.\n"
                     + "For example: topic1#con1,topic2#con2.";
 
+    public static final String COSMOS_GATEWAY_MODE_ENABLED = "connect.cosmos.connection.gateway.enabled";
+    private static final String COSMOS_GATEWAY_MODE_ENABLED_DOC =
+            "Flag to indicate whether to use gateway mode. By default it is false";
+    private static final boolean DEFAULT_COSMOS_GATEWAY_MODE_ENABLED = false;
+
+    public static final String COSMOS_CONNECTION_SHARING_ENABLED = "connect.cosmos.connection.sharing.enabled";
+    private static final String COSMOS_CONNECTION_SHARING_ENABLED_DOC =
+            "If you have set 'connect.cosmos.connection.gateway.enabled' to true, then this configure will not make any difference. "
+            + "By enabling this it allows connection sharing between instances of cosmos clients on the same jvm.";
+    private static final boolean DEFAULT_COSMOS_CONNECTION_SHARING_ENABLED = false;
+
     public static final String COSMOS_SINK_BULK_ENABLED_CONF = "connect.cosmos.sink.bulk.enabled";
     private static final String COSMOS_SINK_BULK_ENABLED_DOC = "Flag to indicate whether Cosmos DB bulk mode is enabled for Sink connector. By default it is true.";
     private static final boolean DEFAULT_COSMOS_SINK_BULK_ENABLED = true;
@@ -80,6 +91,8 @@ public class CosmosDBConfig extends AbstractConfig {
     private final String databaseName;
     private final String providerName;
     private final boolean bulkModeEnabled;
+    private final boolean gatewayModeEnabled;
+    private final boolean connectionSharingEnabled;
     private final int maxRetryCount;
     private TopicContainerMap topicContainerMap = TopicContainerMap.empty();
 
@@ -93,6 +106,8 @@ public class CosmosDBConfig extends AbstractConfig {
         this.providerName = this.getString(COSMOS_PROVIDER_NAME_CONF);
         this.bulkModeEnabled = this.getBoolean(COSMOS_SINK_BULK_ENABLED_CONF);
         this.maxRetryCount = this.getInt(COSMOS_SINK_MAX_RETRY_COUNT);
+        this.gatewayModeEnabled = this.getBoolean(COSMOS_GATEWAY_MODE_ENABLED);
+        this.connectionSharingEnabled = this.getBoolean(COSMOS_CONNECTION_SHARING_ENABLED);
     }
 
     public CosmosDBConfig(Map<String, String> parsedConfig) {
@@ -154,6 +169,20 @@ public class CosmosDBConfig extends AbstractConfig {
                         DEFAULT_COSMOS_SINK_MAX_RETRY_COUNT,
                         Importance.HIGH,
                         COSMOS_SINK_MAX_RETRY_COUNT_DOC
+                )
+                .define(
+                        COSMOS_GATEWAY_MODE_ENABLED,
+                        Type.BOOLEAN,
+                        DEFAULT_COSMOS_GATEWAY_MODE_ENABLED,
+                        Importance.LOW,
+                        COSMOS_GATEWAY_MODE_ENABLED_DOC
+                )
+                .define(
+                        COSMOS_CONNECTION_SHARING_ENABLED,
+                        Type.BOOLEAN,
+                        DEFAULT_COSMOS_CONNECTION_SHARING_ENABLED,
+                        Importance.LOW,
+                        COSMOS_CONNECTION_SHARING_ENABLED_DOC
                 )
                 .defineInternal(
                         COSMOS_PROVIDER_NAME_CONF,
@@ -223,6 +252,14 @@ public class CosmosDBConfig extends AbstractConfig {
 
     public int getMaxRetryCount() {
         return this.maxRetryCount;
+    }
+
+    public boolean isGatewayModeEnabled() {
+        return gatewayModeEnabled;
+    }
+
+    public boolean isConnectionSharingEnabled() {
+        return this.connectionSharingEnabled;
     }
 
     public static void validateConnection(Map<String, String> connectorConfigs, Map<String, ConfigValue> configValues) {
