@@ -8,6 +8,7 @@
 #### Key Bug Fixes
 
 #### Other Changes
+* Added gateway mode support for `CosmosDBSinkConnector` and `CosmosDBSourceConnector`. - [PR 490](https://github.com/microsoft/kafka-connect-cosmosdb/pull/490)
 
 ### 1.5.0 (2022-09-16)
 #### New Features
