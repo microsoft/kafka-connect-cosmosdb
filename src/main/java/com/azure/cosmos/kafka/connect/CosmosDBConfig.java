@@ -63,7 +63,7 @@ public class CosmosDBConfig extends AbstractConfig {
     public static final String COSMOS_CONNECTION_SHARING_ENABLED = "connect.cosmos.connection.sharing.enabled";
     private static final String COSMOS_CONNECTION_SHARING_ENABLED_DOC =
             "If you have set 'connect.cosmos.connection.gateway.enabled' to true, then this configure will not make any difference. "
-            + "By enabling this it allows connection sharing between instances of cosmos clients on the jvm.";
+            + "By enabling this it allows connection sharing between instances of cosmos clients on the same jvm.";
     private static final boolean DEFAULT_COSMOS_CONNECTION_SHARING_ENABLED = false;
 
     public static final String COSMOS_SINK_BULK_ENABLED_CONF = "connect.cosmos.sink.bulk.enabled";
