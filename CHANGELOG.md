@@ -1,12 +1,17 @@
 ## Release History
 
+### 1.6.0 (2022-10-13)
+#### New Features
+* Added bulk support for `CosmosDBSinkConnector`. - [PR 485](https://github.com/microsoft/kafka-connect-cosmosdb/pull/485)
+* Added gateway mode support for `CosmosDBSinkConnector` and `CosmosDBSourceConnector`. - [PR 490](https://github.com/microsoft/kafka-connect-cosmosdb/pull/490)
+
 ### 1.5.0 (2022-09-16)
 #### New Features
 * Updated `azure-cosmos` version to 4.36.0.
 
 #### Key Bug Fixes
 * Fixed parsing for empty arrays. [PR 466](https://github.com/microsoft/kafka-connect-cosmosdb/pull/466)
-* Updated `CosmosDBSinkConnector` to keep retrying for throttled requests. [PR 472](https://github.com/microsoft/kafka-connect-cosmosdb/pull/472)
+* Updated `CosmosDBSinkConnector` to keep retrying for throttled requests. - [PR 472](https://github.com/microsoft/kafka-connect-cosmosdb/pull/472)
 
 ### 1.4.0 (2022-05-26)
 #### New Features

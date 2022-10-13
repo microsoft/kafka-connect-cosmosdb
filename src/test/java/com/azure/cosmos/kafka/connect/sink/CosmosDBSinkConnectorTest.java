@@ -1,22 +1,22 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 package com.azure.cosmos.kafka.connect.sink;
 
-import com.azure.cosmos.kafka.connect.CosmosDBConfig;
 import com.azure.cosmos.kafka.connect.CosmosDBConfig.CosmosClientBuilder;
 import com.google.common.collect.ImmutableMap;
 import org.apache.kafka.common.config.Config;
-import org.apache.kafka.common.config.ConfigException;
 import org.apache.kafka.common.config.ConfigValue;
 import org.junit.Test;
+import org.mockito.MockedStatic;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.mockito.MockedStatic;
 
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
-import static org.junit.Assert.assertThrows;
 import static org.mockito.AdditionalAnswers.answerVoid;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mockStatic;

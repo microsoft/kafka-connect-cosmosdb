@@ -1,29 +1,30 @@
-package com.azure.cosmos.kafka.connect.sink;
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
-import java.time.Duration;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+package com.azure.cosmos.kafka.connect.sink;
 
 import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.CosmosClientBuilder;
 import com.azure.cosmos.CosmosContainer;
-import com.azure.cosmos.CosmosException;
 import com.azure.cosmos.ThrottlingRetryOptions;
-import com.azure.cosmos.implementation.BadRequestException;
 import com.azure.cosmos.kafka.connect.CosmosDBConfig;
 import com.azure.cosmos.kafka.connect.sink.id.strategy.AbstractIdStrategyConfig;
 import com.azure.cosmos.kafka.connect.sink.id.strategy.IdStrategy;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.kafka.connect.data.Struct;
-import org.apache.kafka.connect.errors.ConnectException;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.apache.kafka.connect.sink.SinkTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import static com.azure.cosmos.kafka.connect.CosmosDBConfig.TOLERANCE_ON_ERROR_CONFIG;
 
@@ -34,6 +35,7 @@ public class CosmosDBSinkTask extends SinkTask {
     private static final Logger logger = LoggerFactory.getLogger(CosmosDBSinkTask.class);
     private CosmosClient client = null;
     private CosmosDBSinkConfig config;
+    private final ConcurrentHashMap<String, SinkWriterBase> containerWriterMap = new ConcurrentHashMap<>();
 
     @Override
     public String version() {
@@ -45,15 +47,21 @@ public class CosmosDBSinkTask extends SinkTask {
         logger.trace("Sink task started.");
         this.config = new CosmosDBSinkConfig(map);
 
-        this.client = new CosmosClientBuilder()
-                .endpoint(config.getConnEndpoint())
-                .key(config.getConnKey())
-                .userAgentSuffix(CosmosDBConfig.COSMOS_CLIENT_USER_AGENT_SUFFIX + version())
-                .throttlingRetryOptions(
-                        new ThrottlingRetryOptions()
-                            .setMaxRetryAttemptsOnThrottledRequests(Integer.MAX_VALUE)
-                            .setMaxRetryWaitTime(Duration.ofSeconds((Integer.MAX_VALUE / 1000) - 1)))
-                .buildClient();
+        CosmosClientBuilder cosmosClientBuilder =
+                new CosmosClientBuilder()
+                        .endpoint(config.getConnEndpoint())
+                        .key(config.getConnKey())
+                        .connectionSharingAcrossClientsEnabled(this.config.isConnectionSharingEnabled())
+                        .userAgentSuffix(CosmosDBConfig.COSMOS_CLIENT_USER_AGENT_SUFFIX + version())
+                        .throttlingRetryOptions(
+                                new ThrottlingRetryOptions()
+                                        .setMaxRetryAttemptsOnThrottledRequests(Integer.MAX_VALUE)
+                                        .setMaxRetryWaitTime(Duration.ofSeconds((Integer.MAX_VALUE / 1000) - 1)));
+        if (this.config.isGatewayModeEnabled()) {
+            cosmosClientBuilder.gatewayMode();
+        }
+
+        this.client = cosmosClientBuilder.buildClient();
 
         client.createDatabaseIfNotExists(config.getDatabaseName());
     }
@@ -77,13 +85,28 @@ public class CosmosDBSinkTask extends SinkTask {
         for (Map.Entry<String, List<SinkRecord>> entry : recordsByContainer.entrySet()) {
             String containerName = entry.getKey();
             CosmosContainer container = client.getDatabase(config.getDatabaseName()).getContainer(containerName);
+
+            // get the writer for this container
+            IWriter cosmosdbWriter = this.containerWriterMap.compute(containerName, (name, writer) -> {
+                if (writer == null) {
+                    if (this.config.isBulkModeEnabled()) {
+                        writer = new BulkWriter(container, this.config.getMaxRetryCount());
+                    } else {
+                        writer = new PointWriter(container, this.config.getMaxRetryCount());
+                    }
+                }
+
+                return writer;
+            });
+
+            List<SinkRecord> toBeWrittenRecordList = new ArrayList<>();
             for (SinkRecord record : entry.getValue()) {
                 if (record.key() != null) {
                     MDC.put(String.format("CosmosDbSink-%s", containerName), record.key().toString());
                 }
-                logger.debug("Writing record, value type: {}", record.value().getClass().getName());
-                logger.debug("Key Schema: {}", record.keySchema());
-                logger.debug("Value schema: {}", record.valueSchema());
+                logger.trace("Writing record, value type: {}", record.value().getClass().getName());
+                logger.trace("Key Schema: {}", record.keySchema());
+                logger.trace("Value schema: {}", record.valueSchema());
 
                 Object recordValue;
                 if (record.value() instanceof Struct) {
@@ -93,36 +116,59 @@ public class CosmosDBSinkTask extends SinkTask {
                 }
 
                 maybeInsertId(recordValue, record);
+                toBeWrittenRecordList.add(record);
+            }
 
-                try {
-                    addItemToContainer(container, recordValue);
-                } catch (CosmosException | ConnectException bre) {
-                    sendToDlqIfConfigured(record, bre);
-                } finally {
-                    MDC.clear();
+            try {
+                SinkWriteResponse response = cosmosdbWriter.write(toBeWrittenRecordList);
+
+                if (response.getFailedRecordResponses().size() == 0) {
+                    logger.debug("Sink write completed, {} records succeeded.", response.getSucceededRecords().size());
+
+                } else {
+                    this.sendToDlqIfConfigured(response.getFailedRecordResponses());
                 }
+            }  finally {
+                MDC.clear();
             }
         }
+    }
+
+    private boolean isTolerantOnError() {
+        return config.getString(TOLERANCE_ON_ERROR_CONFIG).equalsIgnoreCase("all");
     }
 
     /**
      * Sends data to a dead letter queue
      *
-     * @param record the kafka record that contains error
+     * @param failedResponses the kafka record that failed to write
      */
-    private void sendToDlqIfConfigured(SinkRecord record, RuntimeException exception) {
-
+    private void sendToDlqIfConfigured(List<SinkOperationFailedResponse> failedResponses) {
         if (context != null && context.errantRecordReporter() != null) {
-            context.errantRecordReporter().report(record, exception);
-            if (!config.getString(TOLERANCE_ON_ERROR_CONFIG).equalsIgnoreCase("all")) {
-                throw exception;
+            for (SinkOperationFailedResponse sinkRecordResponse : failedResponses) {
+                context.errantRecordReporter().report(sinkRecordResponse.getSinkRecord(), sinkRecordResponse.getException());
             }
+        }
+
+        StringBuilder errorMessage = new StringBuilder();
+        for (SinkOperationFailedResponse failedResponse : failedResponses) {
+            errorMessage
+                    .append(
+                        String.format(
+                                "Unable to write record to CosmosDB: {%s}, value schema {%s}, exception {%s}",
+                                failedResponse.getSinkRecord().key(),
+                                failedResponse.getSinkRecord().valueSchema(),
+                                failedResponse.getException().toString()))
+                    .append("\n");
+        }
+
+        if (this.isTolerantOnError()) {
+            logger.error(
+                    "Could not upload record to CosmosDb, but tolerance is set to all. Error message: {}",
+                    errorMessage);
+            return;
         } else {
-            if (config.getString(TOLERANCE_ON_ERROR_CONFIG).equalsIgnoreCase("all")) {
-                logger.error("Could not upload record to CosmosDb, but tolerance is set to all.", exception);
-            } else {
-                throw new CosmosDBWriteException(record, exception);
-            }
+            throw new CosmosDBWriteException(errorMessage.toString());
         }
     }
 
@@ -135,20 +181,14 @@ public class CosmosDBSinkTask extends SinkTask {
         recordMap.put(AbstractIdStrategyConfig.ID, idStrategy.generateId(sinkRecord));
     }
 
-    private void addItemToContainer(CosmosContainer container, Object recordValue) {
-        container.upsertItem(recordValue);
-    }
-
     @Override
     public void stop() {
         logger.trace("Stopping CosmosDB sink task");
 
         if (client != null) {
             client.close();
-            client = null;
         }
 
         client = null;
-
     }
 }
