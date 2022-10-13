@@ -1,13 +1,8 @@
 ## Release History
 
-### 1.6.0-beta.1 (Unreleased)
+### 1.6.0 (2022-10-13)
 #### New Features
 * Added bulk support for `CosmosDBSinkConnector`. - [PR 485](https://github.com/microsoft/kafka-connect-cosmosdb/pull/485)
-#### Breaking Changes
-
-#### Key Bug Fixes
-
-#### Other Changes
 * Added gateway mode support for `CosmosDBSinkConnector` and `CosmosDBSourceConnector`. - [PR 490](https://github.com/microsoft/kafka-connect-cosmosdb/pull/490)
 
 ### 1.5.0 (2022-09-16)
