@@ -1,5 +1,9 @@
 ## Release History
 
+### 1.7.0
+#### New Features
+* Updated `azure-cosmos` version to 4.41.0.
+
 ### 1.6.0 (2022-10-13)
 #### New Features
 * Added bulk support for `CosmosDBSinkConnector`. - [PR 485](https://github.com/microsoft/kafka-connect-cosmosdb/pull/485)
