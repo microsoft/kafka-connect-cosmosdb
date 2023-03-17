@@ -55,11 +55,6 @@
             <artifactId>json-path</artifactId>
             <version>2.6.0</version>
         </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>2.13.5</version>
-        </dependency>
 
         <!-- Apache commons -->
         <dependency>
@@ -135,7 +130,7 @@
         <dependency>
             <groupId>org.sourcelab</groupId>
             <artifactId>kafka-connect-client</artifactId>
-            <version>3.1.0</version>
+            <version>4.0.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>
