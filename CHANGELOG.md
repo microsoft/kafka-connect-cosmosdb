@@ -3,6 +3,7 @@
 ### 1.7.0
 #### New Features
 * Updated `azure-cosmos` version to 4.41.0.
+* Updated `kafka-connect-client` version to 4.0.3
 
 ### 1.6.0 (2022-10-13)
 #### New Features
