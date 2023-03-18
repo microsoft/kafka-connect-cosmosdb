@@ -7,7 +7,7 @@
 
     <groupId>com.azure.cosmos.kafka</groupId>
     <artifactId>kafka-connect-cosmos</artifactId>
-    <version>1.6.0</version>
+    <version>1.7.0</version>
 
     <name> kafka-connect-cosmos</name>
     <url>https://github.com/microsoft/kafka-connect-cosmosdb</url>
@@ -48,7 +48,7 @@
         <dependency>
             <groupId>com.azure</groupId>
             <artifactId>azure-cosmos</artifactId>
-            <version>4.36.0</version>
+            <version>4.41.0</version>
         </dependency>
         <dependency>
             <groupId>com.jayway.jsonpath</groupId>
@@ -130,7 +130,13 @@
         <dependency>
             <groupId>org.sourcelab</groupId>
             <artifactId>kafka-connect-client</artifactId>
-            <version>3.1.0</version>
+            <version>4.0.3</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>29.0-jre</version>
             <scope>test</scope>
         </dependency>
         <dependency>

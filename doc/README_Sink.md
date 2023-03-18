@@ -168,19 +168,23 @@ To delete the created Azure Cosmos DB service and its resource group using Azure
 
 The following settings are used to configure the Cosmos DB Kafka Sink Connector. These configuration values determine which Kafka topics data is consumed, which Cosmos DB containers data is written into and formats to serialize the data. For an example configuration file with the default values, refer to [this config](../src/docker/resources/sink.example.json).
 
-| Name | Type | Description | Required/Optional |
-| :--- | :--- | :--- | :--- |
-| topics | list | A list of Kafka topics to watch | Required |
-| connector.class | string | Classname of the Cosmos DB sink. Should be set to `com.azure.cosmos.kafka.connect.sink.CosmosDBSinkConnector` | Required |
-| connect.cosmos.connection.endpoint | uri | Cosmos endpoint URI string | Required |
-| connect.cosmos.master.key | string | The Cosmos primary key that the sink connects with | Required |
-| connect.cosmos.databasename | string | The name of the Cosmos database the sink writes to | Required |
-| connect.cosmos.containers.topicmap | string | Mapping between Kafka Topics and Cosmos Containers, formatted using CSV as shown: `topic#container,topic2#container2` | Required |
-| key.converter | string | Serialization format for the key data written into Kafka topic | Required |
-| value.converter | string | Serialization format for the value data written into the Kafka topic | Required |
-| key.converter.schemas.enable | string | Set to `"true"` if the key data has embedded schema | Optional |
-| value.converter.schemas.enable | string | Set to `"true"` if the key data has embedded schema | Optional |
-| tasks.max | int | Maximum number of connector sink tasks. Default is `1` | Optional |
+| Name | Type    | Description                                                                                                                                                  | Required/Optional |
+| :--- |:--------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------| :--- |
+| topics | list    | A list of Kafka topics to watch                                                                                                                              | Required |
+| connector.class | string  | Classname of the Cosmos DB sink. Should be set to `com.azure.cosmos.kafka.connect.sink.CosmosDBSinkConnector`                                                | Required |
+| connect.cosmos.connection.endpoint | uri     | Cosmos endpoint URI string                                                                                                                                   | Required |
+| connect.cosmos.master.key | string  | The Cosmos primary key that the sink connects with                                                                                                           | Required |
+| connect.cosmos.databasename | string  | The name of the Cosmos database the sink writes to                                                                                                           | Required |
+| connect.cosmos.containers.topicmap | string  | Mapping between Kafka Topics and Cosmos Containers, formatted using CSV as shown: `topic#container,topic2#container2`                                        | Required |
+| connect.cosmos.connection.gateway.enabled | boolean | Flag to indicate whether to use gateway mode. By default it is `false`.                                                                                      | Optional  |
+| connect.cosmos.sink.bulk.enabled | boolean | Flag to indicate whether bulk mode is enabled. By default it is `true`.                                                                                      | Optional |
+| connect.cosmos.sink.maxRetryCount | int     | Max retry attempts on transient write failures. By default it is `10` times. NOTE: This is different from max throttling retry attempts, which are infinite. | Optional |
+| connect.cosmos.connection.sharing.enabled | boolean | Flag to enable connection sharing between instances of cosmos clients on the same jvm. NOTE: If you have set 'connect.cosmos.connection.gateway.enabled' to true, then this configure will not make any difference.                                                                | Optional |
+| key.converter | string  | Serialization format for the key data written into Kafka topic                                                                                               | Required |
+| value.converter | string  | Serialization format for the value data written into the Kafka topic                                                                                         | Required |
+| key.converter.schemas.enable | string  | Set to `"true"` if the key data has embedded schema                                                                                                          | Optional |
+| value.converter.schemas.enable | string  | Set to `"true"` if the key data has embedded schema                                                                                                          | Optional |
+| tasks.max | int     | Maximum number of connector sink tasks. Default is `1`                                                                                                       | Optional |
 
 Data will always be written to the Cosmos DB as JSON without any schema.
 
