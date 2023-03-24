@@ -3,8 +3,6 @@
 
 package com.azure.cosmos.kafka.connect.sink;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import org.apache.kafka.connect.data.Date;
 import org.apache.kafka.connect.data.Decimal;
 import org.apache.kafka.connect.data.Schema;
@@ -28,7 +26,7 @@ public class StructToJsonMapTest {
         Schema schema = SchemaBuilder.struct()
                 .build();
         Struct struct = new Struct(schema);
-        assertEquals(ImmutableMap.of(), StructToJsonMap.toJsonMap(struct));
+        assertEquals(Map.of(), StructToJsonMap.toJsonMap(struct));
     }
 
 
@@ -38,10 +36,10 @@ public class StructToJsonMapTest {
                 .field("array_of_boolean", SchemaBuilder.array(Schema.BOOLEAN_SCHEMA).build());
 
         Struct struct = new Struct(schema)
-                .put("array_of_boolean", ImmutableList.of());
+                .put("array_of_boolean", Map.of());
 
         Map<String, Object> converted = StructToJsonMap.toJsonMap(struct);
-        assertEquals(ImmutableList.of(), ((List<Boolean>) converted.get("array_of_boolean")));
+        assertEquals(List.of(), converted.get("array_of_boolean"));
     }
 
     @Test
@@ -86,8 +84,8 @@ public class StructToJsonMapTest {
                 .put("string", quickBrownFox)
                 .put("struct", new Struct(embeddedSchema)
                         .put("embedded_string", quickBrownFox))
-                .put("array_of_boolean", ImmutableList.of(false))
-                .put("array_of_struct", ImmutableList.of(
+                .put("array_of_boolean", List.of(false))
+                .put("array_of_struct", List.of(
                         new Struct(embeddedSchema).put("embedded_string", quickBrownFox)));
 
         Map<String, Object> converted = StructToJsonMap.toJsonMap(struct);
@@ -105,7 +103,7 @@ public class StructToJsonMapTest {
         assertEquals(quickBrownFox, converted.get("string"));
         assertEquals(quickBrownFox, ((Map<String, Object>) converted.get("struct")).get("embedded_string"));
         assertEquals(false, ((List<Boolean>) converted.get("array_of_boolean")).get(0));
-        assertEquals(ImmutableMap.of("embedded_string", quickBrownFox), ((List<Struct>) converted.get("array_of_struct")).get(0));
+        assertEquals(Map.of("embedded_string", quickBrownFox), ((List<Struct>) converted.get("array_of_struct")).get(0));
         assertNull(converted.get("optional_string"));
     }
 

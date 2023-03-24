@@ -3,8 +3,6 @@
 
 package com.azure.cosmos.kafka.connect.sink.id.strategy;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.SchemaBuilder;
 import org.apache.kafka.connect.data.Struct;
@@ -16,6 +14,9 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.mockito.Mock;
 
+import java.util.List;
+import java.util.Map;
+
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -24,7 +25,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 public class ProvidedInStrategyTest {
     @Parameterized.Parameters(name = "{0}")
     public static Iterable<Object[]> parameters() {
-        return ImmutableList.of(
+        return List.of(
                 new Object[]{ProvidedInValueStrategy.class, new ProvidedInValueStrategy()},
                 new Object[]{ProvidedInKeyStrategy.class, new ProvidedInKeyStrategy()}
         );
@@ -43,7 +44,7 @@ public class ProvidedInStrategyTest {
     public void setUp() {
         initMocks(this);
 
-        strategy.configure(ImmutableMap.of());
+        strategy.configure(Map.of());
     }
 
     private void returnOnKeyOrValue(Schema schema, Object ret) {
@@ -64,13 +65,13 @@ public class ProvidedInStrategyTest {
 
     @Test(expected = ConnectException.class)
     public void noIdInValueShouldFail() {
-        returnOnKeyOrValue(null, ImmutableMap.of());
+        returnOnKeyOrValue(null, Map.of());
         strategy.generateId(record);
     }
 
     @Test
     public void stringIdOnMapShouldReturn() {
-        returnOnKeyOrValue(null, ImmutableMap.of(
+        returnOnKeyOrValue(null, Map.of(
                 "id", "1234567"
         ));
         assertEquals("1234567", strategy.generateId(record));
@@ -78,7 +79,7 @@ public class ProvidedInStrategyTest {
 
     @Test
     public void nonStringIdOnMapShouldReturn() {
-        returnOnKeyOrValue(null, ImmutableMap.of(
+        returnOnKeyOrValue(null, Map.of(
                 "id", 1234567
         ));
         assertEquals("1234567", strategy.generateId(record));
@@ -113,7 +114,7 @@ public class ProvidedInStrategyTest {
 
     @Test
     public void jsonPathOnStruct() {
-        strategy.configure(ImmutableMap.of(ProvidedInConfig.JSON_PATH_CONFIG, "$.id.name"));
+        strategy.configure(Map.of(ProvidedInConfig.JSON_PATH_CONFIG, "$.id.name"));
 
         Schema idSchema = SchemaBuilder.struct()
             .field("name", Schema.STRING_SCHEMA)
@@ -130,27 +131,27 @@ public class ProvidedInStrategyTest {
 
     @Test
     public void jsonPathOnMap() {
-        strategy.configure(ImmutableMap.of(ProvidedInConfig.JSON_PATH_CONFIG, "$.id.name"));
+        strategy.configure(Map.of(ProvidedInConfig.JSON_PATH_CONFIG, "$.id.name"));
         returnOnKeyOrValue(null,
-            ImmutableMap.of("id", ImmutableMap.of("name", "franz kafka")));
+            Map.of("id", Map.of("name", "franz kafka")));
 
         assertEquals("franz kafka", strategy.generateId(record));
     }
 
     @Test(expected = ConnectException.class)
     public void invalidJsonPathThrows() {
-        strategy.configure(ImmutableMap.of(ProvidedInConfig.JSON_PATH_CONFIG, "invalid.path"));
+        strategy.configure(Map.of(ProvidedInConfig.JSON_PATH_CONFIG, "invalid.path"));
         returnOnKeyOrValue(null,
-            ImmutableMap.of("id", ImmutableMap.of("name", "franz kafka")));
+            Map.of("id", Map.of("name", "franz kafka")));
 
         strategy.generateId(record);
     }
 
     @Test(expected = ConnectException.class)
     public void jsonPathNotExistThrows() {
-        strategy.configure(ImmutableMap.of(ProvidedInConfig.JSON_PATH_CONFIG, "$.id.not.exist"));
+        strategy.configure(Map.of(ProvidedInConfig.JSON_PATH_CONFIG, "$.id.not.exist"));
         returnOnKeyOrValue(null,
-            ImmutableMap.of("id", ImmutableMap.of("name", "franz kafka")));
+            Map.of("id", Map.of("name", "franz kafka")));
 
         strategy.generateId(record);
     }
@@ -158,25 +159,25 @@ public class ProvidedInStrategyTest {
     @Test
     public void complexJsonPath() {
         returnOnKeyOrValue(null,
-            ImmutableMap.of("id", ImmutableList.of(
-                ImmutableMap.of("id", 0,
+            Map.of("id", List.of(
+                Map.of("id", 0,
                     "name", "cosmos kramer",
                     "occupation", "unknown"),
-                ImmutableMap.of("id", 1,
+                Map.of("id", 1,
                     "name", "franz kafka",
                     "occupation", "writer")
             )));
 
-        strategy.configure(ImmutableMap.of(ProvidedInConfig.JSON_PATH_CONFIG, "$.id[0].name"));
+        strategy.configure(Map.of(ProvidedInConfig.JSON_PATH_CONFIG, "$.id[0].name"));
         assertEquals("cosmos kramer", strategy.generateId(record));
 
-        strategy.configure(ImmutableMap.of(ProvidedInConfig.JSON_PATH_CONFIG, "$.id[1].name"));
+        strategy.configure(Map.of(ProvidedInConfig.JSON_PATH_CONFIG, "$.id[1].name"));
         assertEquals("franz kafka", strategy.generateId(record));
 
-        strategy.configure(ImmutableMap.of(ProvidedInConfig.JSON_PATH_CONFIG, "$.id[*].id"));
+        strategy.configure(Map.of(ProvidedInConfig.JSON_PATH_CONFIG, "$.id[*].id"));
         assertEquals("[0,1]", strategy.generateId(record));
 
-        strategy.configure(ImmutableMap.of(ProvidedInConfig.JSON_PATH_CONFIG, "$.id"));
+        strategy.configure(Map.of(ProvidedInConfig.JSON_PATH_CONFIG, "$.id"));
         assertEquals(
             "[{\"id\":0,\"name\":\"cosmos kramer\",\"occupation\":\"unknown\"},{\"id\":1,\"name\":\"franz kafka\",\"occupation\":\"writer\"}]",
             strategy.generateId(record));
@@ -184,7 +185,7 @@ public class ProvidedInStrategyTest {
 
     @Test
     public void generatedIdSanitized() {
-        returnOnKeyOrValue(null, ImmutableMap.of("id", "#my/special\\id?"));
+        returnOnKeyOrValue(null, Map.of("id", "#my/special\\id?"));
 
         String id = strategy.generateId(record);
         assertEquals("_my_special_id_", id);
