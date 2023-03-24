@@ -36,7 +36,7 @@ public class StructToJsonMapTest {
                 .field("array_of_boolean", SchemaBuilder.array(Schema.BOOLEAN_SCHEMA).build());
 
         Struct struct = new Struct(schema)
-                .put("array_of_boolean", Map.of());
+                .put("array_of_boolean", List.of());
 
         Map<String, Object> converted = StructToJsonMap.toJsonMap(struct);
         assertEquals(List.of(), converted.get("array_of_boolean"));

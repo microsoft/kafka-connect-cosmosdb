@@ -14,6 +14,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.mockito.Mock;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -158,15 +159,15 @@ public class ProvidedInStrategyTest {
 
     @Test
     public void complexJsonPath() {
-        returnOnKeyOrValue(null,
-            Map.of("id", List.of(
-                Map.of("id", 0,
-                    "name", "cosmos kramer",
-                    "occupation", "unknown"),
-                Map.of("id", 1,
-                    "name", "franz kafka",
-                    "occupation", "writer")
-            )));
+        Map<String, Object> map1 = new LinkedHashMap<>();
+        map1.put("id", 0);
+        map1.put("name", "cosmos kramer");
+        map1.put("occupation", "unknown");
+        Map<String, Object> map2 = new LinkedHashMap<>();
+        map2.put("id", 1);
+        map2.put("name", "franz kafka");
+        map2.put("occupation", "writer");
+        returnOnKeyOrValue(null, Map.of("id", List.of(map1, map2)));
 
         strategy.configure(Map.of(ProvidedInConfig.JSON_PATH_CONFIG, "$.id[0].name"));
         assertEquals("cosmos kramer", strategy.generateId(record));
