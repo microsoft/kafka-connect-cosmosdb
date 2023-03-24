@@ -1,5 +1,9 @@
 ## Release History
 
+### 1.7.1 (2023-03-24)
+#### Key Bug Fixes
+* Fixed issue in Sink Converter when using `AvroConverter`. [PR 503](https://github.com/microsoft/kafka-connect-cosmosdb/pull/503)
+
 ### 1.7.0 (2023-03-17)
 #### New Features
 * Updated `azure-cosmos` version to 4.41.0.
