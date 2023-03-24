@@ -111,12 +111,26 @@ public class CosmosDBSinkTask extends SinkTask {
                 Object recordValue;
                 if (record.value() instanceof Struct) {
                     recordValue = StructToJsonMap.toJsonMap((Struct) record.value());
+                    //  TODO: Do we need to update the value schema to map or keep it struct?
                 } else {
                     recordValue = record.value();
                 }
 
                 maybeInsertId(recordValue, record);
-                toBeWrittenRecordList.add(record);
+
+                //  Create an updated record with from the current record and the updated record value
+                final SinkRecord updatedRecord = new SinkRecord(record.topic(),
+                    record.kafkaPartition(),
+                    record.keySchema(),
+                    record.key(),
+                    record.valueSchema(),
+                    recordValue,
+                    record.kafkaOffset(),
+                    record.timestamp(),
+                    record.timestampType(),
+                    record.headers());
+
+                toBeWrittenRecordList.add(updatedRecord);
             }
 
             try {

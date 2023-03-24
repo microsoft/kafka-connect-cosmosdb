@@ -3,12 +3,13 @@
 
 package com.azure.cosmos.kafka.connect.sink.id.strategy;
 
-import com.google.common.collect.ImmutableMap;
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.SchemaBuilder;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.junit.Test;
+
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -19,7 +20,7 @@ public class TemplateStrategyTest {
 
     @Test
     public void simpleKey() {
-        strategy.configure(ImmutableMap.of(TemplateStrategyConfig.TEMPLATE_CONFIG, "${key}"));
+        strategy.configure(Map.of(TemplateStrategyConfig.TEMPLATE_CONFIG, "${key}"));
         SinkRecord record = mock(SinkRecord.class);
         when(record.keySchema()).thenReturn(Schema.STRING_SCHEMA);
         when(record.key()).thenReturn("test");
@@ -30,7 +31,7 @@ public class TemplateStrategyTest {
 
     @Test
     public void kafkaMetadata() {
-        strategy.configure(ImmutableMap.of(TemplateStrategyConfig.TEMPLATE_CONFIG, "${topic}-${partition}-${offset}"));
+        strategy.configure(Map.of(TemplateStrategyConfig.TEMPLATE_CONFIG, "${topic}-${partition}-${offset}"));
         SinkRecord record = mock(SinkRecord.class);
         when(record.topic()).thenReturn("mytopic");
         when(record.kafkaPartition()).thenReturn(0);
@@ -42,14 +43,14 @@ public class TemplateStrategyTest {
 
     @Test
     public void unknownVariablePreserved() {
-        strategy.configure(ImmutableMap.of(TemplateStrategyConfig.TEMPLATE_CONFIG, "${unknown}"));
+        strategy.configure(Map.of(TemplateStrategyConfig.TEMPLATE_CONFIG, "${unknown}"));
         String id = strategy.generateId(mock(SinkRecord.class));
         assertEquals("${unknown}", id);
     }
 
     @Test
     public void nestedStruct() {
-        strategy.configure(ImmutableMap.of(TemplateStrategyConfig.TEMPLATE_CONFIG, "${key}"));
+        strategy.configure(Map.of(TemplateStrategyConfig.TEMPLATE_CONFIG, "${key}"));
         SinkRecord record = mock(SinkRecord.class);
         Schema nestedSchema = SchemaBuilder.struct()
                 .field("nested_field", Schema.STRING_SCHEMA)
@@ -74,7 +75,7 @@ public class TemplateStrategyTest {
     @Test
     public void fullKeyStrategyUsesFullKey() {
         strategy = new FullKeyStrategy();
-        strategy.configure(ImmutableMap.of());
+        strategy.configure(Map.of());
         SinkRecord record = mock(SinkRecord.class);
         Schema schema = SchemaBuilder.struct()
                 .field("string_field", Schema.STRING_SCHEMA)
@@ -96,7 +97,7 @@ public class TemplateStrategyTest {
     @Test
     public void metadataStrategyUsesMetadataWithDeliminator() {
         strategy = new KafkaMetadataStrategy();
-        strategy.configure(ImmutableMap.of(KafkaMetadataStrategyConfig.DELIMITER_CONFIG, "_"));
+        strategy.configure(Map.of(KafkaMetadataStrategyConfig.DELIMITER_CONFIG, "_"));
         SinkRecord record = mock(SinkRecord.class);
         when(record.topic()).thenReturn("topic");
         when(record.kafkaPartition()).thenReturn(0);
@@ -110,7 +111,7 @@ public class TemplateStrategyTest {
     public void generatedIdSanitized() {
         strategy = new TemplateStrategy();
         strategy.configure(
-            ImmutableMap.of(TemplateStrategyConfig.TEMPLATE_CONFIG, "#my/special\\id?"));
+            Map.of(TemplateStrategyConfig.TEMPLATE_CONFIG, "#my/special\\id?"));
         SinkRecord record = mock(SinkRecord.class);
 
         String id = strategy.generateId(record);

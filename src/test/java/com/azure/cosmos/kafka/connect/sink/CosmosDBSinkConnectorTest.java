@@ -4,12 +4,12 @@
 package com.azure.cosmos.kafka.connect.sink;
 
 import com.azure.cosmos.kafka.connect.CosmosDBConfig.CosmosClientBuilder;
-import com.google.common.collect.ImmutableMap;
 import org.apache.kafka.common.config.Config;
 import org.apache.kafka.common.config.ConfigValue;
 import org.junit.Test;
 import org.mockito.MockedStatic;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -25,7 +25,7 @@ public class CosmosDBSinkConnectorTest {
 
   @Test
   public void testValidateEmptyConfigFailsRequiredFields() {
-    Config config = new CosmosDBSinkConnector().validate(ImmutableMap.of());
+    Config config = new CosmosDBSinkConnector().validate(Collections.emptyMap());
 
     Map<String, List<String>> errorMessages = config.configValues().stream()
         .collect(Collectors.toMap(ConfigValue::name, ConfigValue::errorMessages));
@@ -46,7 +46,7 @@ public class CosmosDBSinkConnectorTest {
           .when(() -> CosmosClientBuilder.createClient(anyString(), anyString()))
           .thenThrow(IllegalArgumentException.class);
 
-      Config config = connector.validate(ImmutableMap.of(
+      Config config = connector.validate(Map.of(
           CosmosDBSinkConfig.COSMOS_CONN_ENDPOINT_CONF, "https://endpoint:port/",
           CosmosDBSinkConfig.COSMOS_CONN_KEY_CONF, "superSecretPassword",
           CosmosDBSinkConfig.COSMOS_DATABASE_NAME_CONF, "superAwesomeDatabase",
@@ -71,7 +71,7 @@ public class CosmosDBSinkConnectorTest {
           .then(answerVoid((s1, s2) -> {
           }));
 
-      Config config = connector.validate(ImmutableMap.of(
+      Config config = connector.validate(Map.of(
           CosmosDBSinkConfig.COSMOS_CONN_ENDPOINT_CONF,
           "https://cosmos-instance.documents.azure.com:443/",
           CosmosDBSinkConfig.COSMOS_CONN_KEY_CONF, "superSecretPassword",
@@ -106,7 +106,7 @@ public class CosmosDBSinkConnectorTest {
   }
 
   private void invalidTopicMapString(CosmosDBSinkConnector connector, String topicMapConfig) {
-    Config config = connector.validate(ImmutableMap.of(
+    Config config = connector.validate(Map.of(
         CosmosDBSinkConfig.COSMOS_CONN_ENDPOINT_CONF, "https://endpoint:port/",
         CosmosDBSinkConfig.COSMOS_CONN_KEY_CONF, "superSecretPassword",
         CosmosDBSinkConfig.COSMOS_DATABASE_NAME_CONF, "superAwesomeDatabase",
