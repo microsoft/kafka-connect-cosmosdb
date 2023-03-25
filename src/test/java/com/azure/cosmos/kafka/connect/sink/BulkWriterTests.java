@@ -16,7 +16,6 @@ import com.azure.cosmos.models.CosmosContainerResponse;
 import com.azure.cosmos.models.CosmosItemOperation;
 import com.azure.cosmos.models.PartitionKey;
 import com.azure.cosmos.models.PartitionKeyDefinition;
-import com.google.common.collect.Iterators;
 import org.apache.kafka.connect.data.ConnectSchema;
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.sink.SinkRecord;
@@ -32,6 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
@@ -109,8 +109,12 @@ public class BulkWriterTests {
         ArgumentCaptor<Iterable<CosmosItemOperation>> parameters = ArgumentCaptor.forClass(Iterable.class);
         verify(container, times(1)).executeBulkOperations(parameters.capture());
 
+        AtomicInteger count = new AtomicInteger();
+        parameters.getValue().forEach(cosmosItemOperation -> {
+            count.incrementAndGet();
+        });
         Iterator<CosmosItemOperation> bulkExecutionParameters = parameters.getValue().iterator();
-        assertEquals(2, Iterators.size(bulkExecutionParameters));
+        assertEquals(2, getIteratorSize(bulkExecutionParameters));
     }
 
     @Test
@@ -141,9 +145,9 @@ public class BulkWriterTests {
 
         List<Iterable<CosmosItemOperation>> allParameters = parameters.getAllValues();
         assertEquals(3, allParameters.size());
-        assertEquals(2, Iterators.size(allParameters.get(0).iterator()));
-        assertEquals(1, Iterators.size(allParameters.get(1).iterator()));
-        assertEquals(1, Iterators.size(allParameters.get(2).iterator()));
+        assertEquals(2, getIteratorSize(allParameters.get(0).iterator()));
+        assertEquals(1, getIteratorSize(allParameters.get(1).iterator()));
+        assertEquals(1, getIteratorSize(allParameters.get(2).iterator()));
     }
 
 
@@ -209,5 +213,14 @@ public class BulkWriterTests {
         Mockito.when(mockedBulkOptionResponse.getOperation()).thenReturn(itemOperation);
 
         return mockedBulkOptionResponse;
+    }
+
+    private int getIteratorSize(Iterator<?> iterator) {
+        int count = 0;
+        while (iterator.hasNext()) {
+            iterator.next();
+            count++;
+        }
+        return count;
     }
 }

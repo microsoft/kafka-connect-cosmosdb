@@ -7,7 +7,7 @@
 
     <groupId>com.azure.cosmos.kafka</groupId>
     <artifactId>kafka-connect-cosmos</artifactId>
-    <version>1.7.0</version>
+    <version>1.7.1</version>
 
     <name> kafka-connect-cosmos</name>
     <url>https://github.com/microsoft/kafka-connect-cosmosdb</url>
@@ -131,12 +131,6 @@
             <groupId>org.sourcelab</groupId>
             <artifactId>kafka-connect-client</artifactId>
             <version>4.0.3</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>29.0-jre</version>
             <scope>test</scope>
         </dependency>
         <dependency>
