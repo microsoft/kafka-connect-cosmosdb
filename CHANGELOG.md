@@ -7,7 +7,7 @@
 * Updated `kafka-connect` version to 3.4.0.
 
 #### Key Bug Fixes
-* Fixed issue in Sink Connector for nested maps in Struct types. [PR 508](https://github.com/microsoft/kafka-connect-cosmosdb/pull/508)
+* Fixed issue in Sink Connector for nested maps in Struct types. [PR 510](https://github.com/microsoft/kafka-connect-cosmosdb/pull/510)
 
 ### 1.7.1 (2023-03-24)
 #### Key Bug Fixes
