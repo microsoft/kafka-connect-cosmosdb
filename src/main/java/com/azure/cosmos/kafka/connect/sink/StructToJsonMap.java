@@ -108,8 +108,7 @@ public class StructToJsonMap {
                         jsonArray.add(handleMap((Map<String, Object>) item));
                     });
                     cacheMap.put(key, jsonArray);
-                }
-                else {
+                } else {
                     cacheMap.put(key, list);
                 }
             } else {
