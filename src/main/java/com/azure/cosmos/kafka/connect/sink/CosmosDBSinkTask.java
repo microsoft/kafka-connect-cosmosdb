@@ -112,6 +112,8 @@ public class CosmosDBSinkTask extends SinkTask {
                 if (record.value() instanceof Struct) {
                     recordValue = StructToJsonMap.toJsonMap((Struct) record.value());
                     //  TODO: Do we need to update the value schema to map or keep it struct?
+                } else if (record.value() instanceof Map) {
+                    recordValue = StructToJsonMap.handleMap((Map<String, Object>) record.value());
                 } else {
                     recordValue = record.value();
                 }
