@@ -73,11 +73,44 @@ public class StructToJsonMap {
                 case STRUCT:
                     jsonMap.put(fieldName, toJsonMap(struct.getStruct(fieldName)));
                     break;
+                case MAP:
+                    jsonMap.put(fieldName, handleMap(struct.getMap(fieldName)));
+                    break;
                 default:
                     jsonMap.put(fieldName, struct.get(fieldName));
                     break;
             }
         }
         return jsonMap;
+    }
+
+    public static Map<String, Object> handleMap(Map<String, Object> map) {
+        if (map == null) {
+            return null;
+        }
+        Map<String, Object> cacheMap = new HashMap<>();
+        map.forEach((key, value) -> {
+            if (value instanceof Map) {
+                cacheMap.put(key, handleMap((Map<String, Object>) value));
+            } else if (value instanceof Struct) {
+                cacheMap.put(key, toJsonMap((Struct) value));
+            } else if (value instanceof List) {
+                List<Object> list = (List<Object>) value;
+                List<Object> jsonArray = new ArrayList<>();
+                list.forEach(item -> {
+                    if (item instanceof Struct) {
+                        jsonArray.add(toJsonMap((Struct) item));
+                    } else if (item instanceof Map) {
+                        jsonArray.add(handleMap((Map<String, Object>) item));
+                    } else {
+                        jsonArray.add(item);
+                    }
+                });
+                cacheMap.put(key, jsonArray);
+            } else {
+                cacheMap.put(key, value);
+            }
+        });
+        return cacheMap;
     }
 }
