@@ -1,6 +1,6 @@
 ## Release History
 
-### 1.8.0 (Unreleased)
+### 1.8.0 (2023-04-12)
 #### New Features
 * Updated `azure-cosmos` version to 4.42.0.
 * Updated `json-path` version to 2.8.0.
