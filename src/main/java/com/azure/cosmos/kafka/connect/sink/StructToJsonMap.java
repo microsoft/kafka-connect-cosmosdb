@@ -96,21 +96,17 @@ public class StructToJsonMap {
                 cacheMap.put(key, toJsonMap((Struct) value));
             } else if (value instanceof List) {
                 List<Object> list = (List<Object>) value;
-                if (list.size() > 0 && list.get(0) instanceof Struct) {
-                    List<Object> jsonArray = new ArrayList<>();
-                    list.forEach(item -> {
+                List<Object> jsonArray = new ArrayList<>();
+                list.forEach(item -> {
+                    if (item instanceof Struct) {
                         jsonArray.add(toJsonMap((Struct) item));
-                    });
-                    cacheMap.put(key, jsonArray);
-                } else if (list.size() > 0 && list.get(0) instanceof Map) {
-                    List<Object> jsonArray = new ArrayList<>();
-                    list.forEach(item -> {
+                    } else if (item instanceof Map) {
                         jsonArray.add(handleMap((Map<String, Object>) item));
-                    });
-                    cacheMap.put(key, jsonArray);
-                } else {
-                    cacheMap.put(key, list);
-                }
+                    } else {
+                        jsonArray.add(item);
+                    }
+                });
+                cacheMap.put(key, jsonArray);
             } else {
                 cacheMap.put(key, value);
             }
