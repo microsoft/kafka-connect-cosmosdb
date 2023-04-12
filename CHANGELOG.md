@@ -4,7 +4,7 @@
 #### New Features
 * Updated `azure-cosmos` version to 4.42.0.
 * Updated `json-path` version to 2.8.0.
-* Updated `kafka-connect` version to 3.4.0.
+* Updated `kafka-connect` version to 2.8.2.
 
 #### Key Bug Fixes
 * Fixed issue in Sink Connector for nested maps in Struct types. [PR 510](https://github.com/microsoft/kafka-connect-cosmosdb/pull/510)
