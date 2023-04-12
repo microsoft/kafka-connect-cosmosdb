@@ -244,6 +244,69 @@ public class CosmosDBSinkTaskTest {
         }
     }
 
+    @Test
+    public void sinkWriteSucceededWithMapRecordValue() {
+        Schema stringSchema = new ConnectSchema(Schema.Type.STRING);
+        Schema mapSchema = new ConnectSchema(Schema.Type.MAP);
+        Map<String, String> map = new HashMap<>();
+        map.put("foo", "fooz");
+        map.put("bar", "baaz");
+
+
+        SinkRecord record = new SinkRecord(topicName, 1, stringSchema, "nokey", mapSchema, map, 0L);
+        assertNotNull(record.value());
+
+        SinkWriteResponse sinkWriteResponse = new SinkWriteResponse();
+        sinkWriteResponse.getSucceededRecords().add(record);
+
+        MockedConstruction<? extends SinkWriterBase> mockedWriterConstruction = null;
+        AtomicReference<List<SinkRecord>> sinkRecords = new AtomicReference<>();
+        try {
+            if (this.isBulkModeEnabled) {
+                mockedWriterConstruction = mockConstructionWithAnswer(BulkWriter.class, invocation -> {
+                    if (invocation.getMethod().equals(BulkWriter.class.getMethod("write", List.class))) {
+                        sinkRecords.set(invocation.getArgument(0));
+                        return sinkWriteResponse;
+                    }
+
+                    throw new IllegalStateException("Not implemented for method " + invocation.getMethod().getName());
+                });
+            } else {
+                mockedWriterConstruction = mockConstructionWithAnswer(PointWriter.class, invocation -> {
+                    if (invocation.getMethod().equals(PointWriter.class.getMethod("write", List.class))) {
+                        sinkRecords.set(invocation.getArgument(0));
+                        return sinkWriteResponse;
+                    }
+
+                    throw new IllegalStateException("Not implemented for method " + invocation.getMethod().getName());
+                });
+            }
+
+            try {
+                testTask.put(List.of(record));
+            } catch (ConnectException ce) {
+                fail("Expected sink write succeeded. but got: " + ce.getMessage());
+            } catch (Throwable t) {
+                fail("Expected sink write succeeded, but got: " + t.getClass().getName());
+            }
+
+            assertEquals(1, mockedWriterConstruction.constructed().size());
+
+            SinkRecord sinkRecord = sinkRecords.get().get(0);
+            assertRecordEquals(record, sinkRecord);
+
+            Object value = sinkRecord.value();
+            assertTrue(value instanceof Map);
+
+            assertEquals("fooz", ((Map<?, ?>) value).get("foo"));
+            assertEquals("baaz", ((Map<?, ?>) value).get("bar"));
+        } finally {
+            if (mockedWriterConstruction != null) {
+                mockedWriterConstruction.close();
+            }
+        }
+    }
+
     private void assertRecordEquals(SinkRecord record, SinkRecord updatedRecord) {
         assertEquals(record.kafkaOffset(), updatedRecord.kafkaOffset());
         assertEquals(record.timestamp(), updatedRecord.timestamp());
