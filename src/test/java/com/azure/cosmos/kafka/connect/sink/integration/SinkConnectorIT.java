@@ -164,7 +164,8 @@ public class SinkConnectorIT {
             .withConfig("connect.cosmos.connection.endpoint", config.get("connect.cosmos.connection.endpoint").textValue())
             .withConfig("connect.cosmos.master.key", config.get("connect.cosmos.master.key").textValue())
             .withConfig("connect.cosmos.databasename", config.get("connect.cosmos.databasename").textValue())
-            .withConfig("connect.cosmos.containers.topicmap", config.get("connect.cosmos.containers.topicmap").textValue());
+            .withConfig("connect.cosmos.containers.topicmap", config.get("connect.cosmos.containers.topicmap").textValue())
+            .withConfig("connect.cosmos.sink.bulk.no.duplicates.enabled", config.get("connect.cosmos.sink.bulk.no.duplicates.enabled").textValue());
     }
 
     private void addAvroConfigs() {
@@ -221,6 +222,44 @@ public class SinkConnectorIT {
         String sql = String.format("SELECT * FROM c where c.id = '%s'", person.getId());
         CosmosPagedIterable<Person> readResponse = targetContainer.queryItems(sql, new CosmosQueryRequestOptions(), Person.class);
         Optional<Person> retrievedPerson = readResponse.stream().filter(p -> p.getId().equals(person.getId())).findFirst();
+
+        Assert.assertNotNull("Person could not be retrieved", retrievedPerson.orElse(null));
+    }
+
+    @Test
+    public void testPostJsonMessageWithDuplicateIds() throws InterruptedException, ExecutionException {
+        // Configure Kafka Config
+        Properties kafkaProperties = createKafkaProducerProperties();
+        kafkaProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class.getName());
+        producer = new KafkaProducer<>(kafkaProperties);
+
+        // Create sink connector with default config
+        connectClient.addConnector(connectConfig.build());
+
+        // Send Kafka message to topic
+        logger.debug("Sending Kafka message to " + kafkaProperties.getProperty("bootstrap.servers"));
+        String uuid = String.valueOf(RandomUtils.nextLong(1L, 9999999L));
+        Person john = new Person("John", uuid);
+        Person adam = new Person("Adam", uuid);
+        ObjectMapper om = new ObjectMapper();
+        ProducerRecord<String, JsonNode> johnRecord = new ProducerRecord<>(kafkaTopicJson, john.getId(), om.valueToTree(john));
+        ProducerRecord<String, JsonNode> adamRecord = new ProducerRecord<>(kafkaTopicJson, adam.getId(), om.valueToTree(adam));
+        producer.send(johnRecord).get();
+        producer.send(adamRecord).get();
+
+        // Wait a few seconds for the sink connector to push data to Cosmos DB
+        sleep(8000);
+
+        // Query Cosmos DB for data
+        String sql = String.format("SELECT * FROM c where c.id = '%s'", john.getId());
+        CosmosPagedIterable<Person> readResponse = targetContainer.queryItems(sql, new CosmosQueryRequestOptions(), Person.class);
+        Optional<Person> retrievedPerson = readResponse.stream().filter(p -> p.getName().equals(john.getName())).findFirst();
+
+        Assert.assertNull("Person was retrieved", retrievedPerson.orElse(null));
+
+        sql = String.format("SELECT * FROM c where c.id = '%s'", adam.getId());
+        readResponse = targetContainer.queryItems(sql, new CosmosQueryRequestOptions(), Person.class);
+        retrievedPerson = readResponse.stream().filter(p -> p.getName().equals(adam.getName())).findFirst();
 
         Assert.assertNotNull("Person could not be retrieved", retrievedPerson.orElse(null));
     }
