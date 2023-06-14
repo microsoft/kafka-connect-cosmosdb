@@ -25,7 +25,14 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static junit.framework.TestCase.assertEquals;
@@ -37,7 +44,7 @@ import static org.mockito.Mockito.verify;
 public class BulkWriterTests {
     private final int MAX_RETRY_COUNT = 2;
     private final String TOPIC_NAME = "testtopic";
-    private final boolean NO_DUPLICATES = true;
+    private final boolean COMPRESSION_ENABLED = true;
     private CosmosContainer container;
     private BulkWriter bulkWriter;
 
@@ -53,7 +60,7 @@ public class BulkWriterTests {
         Mockito.when(mockedContainerProperties.getPartitionKeyDefinition()).thenReturn(mockedPartitionKeyDefinition);
         Mockito.when(mockedPartitionKeyDefinition.getPaths()).thenReturn(Arrays.asList("/id"));
 
-        bulkWriter = new BulkWriter(container, MAX_RETRY_COUNT, NO_DUPLICATES);
+        bulkWriter = new BulkWriter(container, MAX_RETRY_COUNT, COMPRESSION_ENABLED);
     }
 
     @Test

@@ -70,9 +70,9 @@ public class CosmosDBConfig extends AbstractConfig {
     private static final String COSMOS_SINK_BULK_ENABLED_DOC = "Flag to indicate whether Cosmos DB bulk mode is enabled for Sink connector. By default it is true.";
     private static final boolean DEFAULT_COSMOS_SINK_BULK_ENABLED = true;
 
-    public static final String COSMOS_SINK_BULK_NO_DUPLICATES_ENABLED_CONF = "connect.cosmos.sink.bulk.no.duplicates.enabled";
-    private static final String COSMOS_SINK_BULK_NO_DUPLICATES_ENABLED_DOC = "Flag to indicate whether Cosmos DB in bulk mode will allow duplicates in the same batch to be written for Sink connector. By default it is false.";
-    private static final boolean DEFAULT_COSMOS_SINK_BULK_NO_DUPLICATES_ENABLED = false;
+    public static final String COSMOS_SINK_BULK_COMPRESSION_ENABLED_CONF = "connect.cosmos.sink.bulk.no.duplicates.enabled";
+    private static final String COSMOS_SINK_BULK_COMPRESSION_ENABLED_DOC = "Flag to indicate whether Cosmos DB in bulk mode will allow duplicates in the same batch to be written for Sink connector. By default it is true.";
+    private static final boolean DEFAULT_COSMOS_SINK_BULK_COMPRESSION_ENABLED = true;
 
     public static final String COSMOS_SINK_MAX_RETRY_COUNT = "connect.cosmos.sink.maxRetryCount";
     private static final String COSMOS_SINK_MAX_RETRY_COUNT_DOC =
@@ -98,7 +98,7 @@ public class CosmosDBConfig extends AbstractConfig {
     private final boolean gatewayModeEnabled;
     private final boolean connectionSharingEnabled;
     private final int maxRetryCount;
-    private final boolean bulkModeNoDuplicatesEnabled;
+    private final boolean bulkModeCompressionEnabled;
     private TopicContainerMap topicContainerMap = TopicContainerMap.empty();
 
     public CosmosDBConfig(ConfigDef config, Map<String, String> parsedConfig) {
@@ -110,7 +110,7 @@ public class CosmosDBConfig extends AbstractConfig {
         this.topicContainerMap = TopicContainerMap.deserialize(this.getString(COSMOS_CONTAINER_TOPIC_MAP_CONF));
         this.providerName = this.getString(COSMOS_PROVIDER_NAME_CONF);
         this.bulkModeEnabled = this.getBoolean(COSMOS_SINK_BULK_ENABLED_CONF);
-        this.bulkModeNoDuplicatesEnabled = this.getBoolean(COSMOS_SINK_BULK_NO_DUPLICATES_ENABLED_CONF);
+        this.bulkModeCompressionEnabled = this.getBoolean(COSMOS_SINK_BULK_COMPRESSION_ENABLED_CONF);
         this.maxRetryCount = this.getInt(COSMOS_SINK_MAX_RETRY_COUNT);
         this.gatewayModeEnabled = this.getBoolean(COSMOS_GATEWAY_MODE_ENABLED);
         this.connectionSharingEnabled = this.getBoolean(COSMOS_CONNECTION_SHARING_ENABLED);
@@ -170,11 +170,11 @@ public class CosmosDBConfig extends AbstractConfig {
                         COSMOS_SINK_BULK_ENABLED_DOC
                 )
                 .define(
-                        COSMOS_SINK_BULK_NO_DUPLICATES_ENABLED_CONF,
+                        COSMOS_SINK_BULK_COMPRESSION_ENABLED_CONF,
                         Type.BOOLEAN,
-                        DEFAULT_COSMOS_SINK_BULK_NO_DUPLICATES_ENABLED,
+                        DEFAULT_COSMOS_SINK_BULK_COMPRESSION_ENABLED,
                         Importance.LOW,
-                        COSMOS_SINK_BULK_NO_DUPLICATES_ENABLED_DOC
+                        COSMOS_SINK_BULK_COMPRESSION_ENABLED_DOC
                 )
                 .define(
                         COSMOS_SINK_MAX_RETRY_COUNT,
@@ -263,8 +263,8 @@ public class CosmosDBConfig extends AbstractConfig {
         return this.bulkModeEnabled;
     }
 
-    public boolean isBulKNoDuplicatesEnabled() {
-        return this.bulkModeNoDuplicatesEnabled;
+    public boolean isBulKCompressionEnabled() {
+        return this.bulkModeCompressionEnabled;
     }
 
     public int getMaxRetryCount() {

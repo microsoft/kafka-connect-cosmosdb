@@ -20,7 +20,12 @@ import org.apache.kafka.connect.sink.SinkRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static com.azure.cosmos.implementation.guava25.base.Preconditions.checkArgument;
 import static com.azure.cosmos.implementation.guava25.base.Preconditions.checkNotNull;
@@ -30,11 +35,11 @@ public class BulkWriter extends SinkWriterBase {
 
     private final CosmosContainer cosmosContainer;
     private final PartitionKeyDefinition partitionKeyDefinition;
-    private final boolean noDuplicates;
+    private final boolean compressionEnabled;
 
     public BulkWriter(CosmosContainer container, int maxRetryCount, boolean noDuplicates) {
         super(maxRetryCount);
-        this.noDuplicates = noDuplicates;
+        this.compressionEnabled = noDuplicates;
         checkNotNull(container, "Argument 'container' can not be null");
         this.cosmosContainer = container;
         this.partitionKeyDefinition = container.read().getProperties().getPartitionKeyDefinition();
@@ -54,37 +59,25 @@ public class BulkWriter extends SinkWriterBase {
         }
 
         List<CosmosItemOperation> itemOperations = new ArrayList<>();
-        if (this.noDuplicates) {
-            HashMap<IdAndPartionKey, SinkRecord> uniqueItems = new HashMap<>();
+        if (this.compressionEnabled) {
+            ConcurrentHashMap<IdAndPartionKey, SinkRecord> uniqueItems = new ConcurrentHashMap<>();
             for (SinkRecord sinkRecord : sinkRecords) {
-                IdAndPartionKey idAndPartionKey = new IdAndPartionKey(((Map<String, String>) sinkRecord.value()).get("id"), this.getPartitionKeyValue(sinkRecord.value()));
+                IdAndPartionKey idAndPartionKey = new IdAndPartionKey(((Map<String, Object>) sinkRecord.value()).get("id"), this.getPartitionKeyValue(sinkRecord.value()));
                 SinkRecord uniqueItem = uniqueItems.putIfAbsent(idAndPartionKey, sinkRecord);
                 if (uniqueItem != null && uniqueItem.timestamp() != null && sinkRecord.timestamp() != null
                         && uniqueItem.timestamp() < sinkRecord.timestamp()) {
                     uniqueItems.replace(idAndPartionKey, sinkRecord);
                 }
             }
-            for (SinkRecord sinkRecord : uniqueItems.values()) {
-
-                CosmosItemOperation cosmosItemOperation = CosmosBulkOperations.getUpsertItemOperation(
-                        sinkRecord.value(),
-                        this.getPartitionKeyValue(sinkRecord.value()),
-                        new SinkOperationContext(sinkRecord));
-
-                itemOperations.add(cosmosItemOperation);
-            }
-        } else {
-            for (SinkRecord sinkRecord : sinkRecords) {
-
-                CosmosItemOperation cosmosItemOperation = CosmosBulkOperations.getUpsertItemOperation(
-                        sinkRecord.value(),
-                        this.getPartitionKeyValue(sinkRecord.value()),
-                        new SinkOperationContext(sinkRecord));
-
-                itemOperations.add(cosmosItemOperation);
-            }
+            sinkRecords = new ArrayList<>(uniqueItems.values());
         }
-
+        for (SinkRecord sinkRecord : sinkRecords) {
+            CosmosItemOperation cosmosItemOperation = CosmosBulkOperations.getUpsertItemOperation(
+                    sinkRecord.value(),
+                    this.getPartitionKeyValue(sinkRecord.value()),
+                    new SinkOperationContext(sinkRecord));
+            itemOperations.add(cosmosItemOperation);
+        }
 
         Iterable<CosmosBulkOperationResponse<Object>> responseList = cosmosContainer.executeBulkOperations(itemOperations);
 
@@ -170,16 +163,16 @@ public class BulkWriter extends SinkWriterBase {
     }
 
     private static class IdAndPartionKey {
-        String id;
+        Object id;
         PartitionKey partitionKey;
 
-        public IdAndPartionKey(String id, PartitionKey partitionKey) {
+        public IdAndPartionKey(Object id, PartitionKey partitionKey) {
             this.id = id;
             this.partitionKey = partitionKey;
         }
 
 
-        public String getId() {
+        public Object getId() {
             return id;
         }
 
@@ -188,12 +181,20 @@ public class BulkWriter extends SinkWriterBase {
         }
 
         @Override
-        public boolean equals(Object obj) {
-            if (obj instanceof IdAndPartionKey) {
-                IdAndPartionKey other = (IdAndPartionKey) obj;
-                return id.equals(other.id) && partitionKey.equals(other.partitionKey);
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
             }
-            return false;
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            IdAndPartionKey that = (IdAndPartionKey) o;
+            return Objects.equals(id, that.id) && Objects.equals(partitionKey, that.partitionKey);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(id, partitionKey);
         }
     }
 

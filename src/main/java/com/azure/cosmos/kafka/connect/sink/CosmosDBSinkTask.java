@@ -90,7 +90,7 @@ public class CosmosDBSinkTask extends SinkTask {
             IWriter cosmosdbWriter = this.containerWriterMap.compute(containerName, (name, writer) -> {
                 if (writer == null) {
                     if (this.config.isBulkModeEnabled()) {
-                        writer = new BulkWriter(container, this.config.getMaxRetryCount(), this.config.isBulKNoDuplicatesEnabled());
+                        writer = new BulkWriter(container, this.config.getMaxRetryCount(), this.config.isBulKCompressionEnabled());
                     } else {
                         writer = new PointWriter(container, this.config.getMaxRetryCount());
                     }
