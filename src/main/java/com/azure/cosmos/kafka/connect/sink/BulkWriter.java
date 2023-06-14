@@ -37,9 +37,9 @@ public class BulkWriter extends SinkWriterBase {
     private final PartitionKeyDefinition partitionKeyDefinition;
     private final boolean compressionEnabled;
 
-    public BulkWriter(CosmosContainer container, int maxRetryCount, boolean noDuplicates) {
+    public BulkWriter(CosmosContainer container, int maxRetryCount, boolean compressionEnabled) {
         super(maxRetryCount);
-        this.compressionEnabled = noDuplicates;
+        this.compressionEnabled = compressionEnabled;
         checkNotNull(container, "Argument 'container' can not be null");
         this.cosmosContainer = container;
         this.partitionKeyDefinition = container.read().getProperties().getPartitionKeyDefinition();
