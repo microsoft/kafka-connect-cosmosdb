@@ -25,7 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.HashMap;
 
 import static com.azure.cosmos.implementation.guava25.base.Preconditions.checkArgument;
 import static com.azure.cosmos.implementation.guava25.base.Preconditions.checkNotNull;
@@ -60,7 +60,7 @@ public class BulkWriter extends SinkWriterBase {
 
         List<CosmosItemOperation> itemOperations = new ArrayList<>();
         if (this.compressionEnabled) {
-            ConcurrentHashMap<IdAndPartionKey, SinkRecord> uniqueItems = new ConcurrentHashMap<>();
+            HashMap<IdAndPartionKey, SinkRecord> uniqueItems = new HashMap<>();
             for (SinkRecord sinkRecord : sinkRecords) {
                 IdAndPartionKey idAndPartionKey = new IdAndPartionKey(((Map<String, Object>) sinkRecord.value()).get("id"), this.getPartitionKeyValue(sinkRecord.value()));
                 SinkRecord uniqueItem = uniqueItems.putIfAbsent(idAndPartionKey, sinkRecord);
