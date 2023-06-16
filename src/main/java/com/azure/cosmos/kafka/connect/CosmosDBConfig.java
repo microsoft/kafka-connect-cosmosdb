@@ -70,7 +70,7 @@ public class CosmosDBConfig extends AbstractConfig {
     private static final String COSMOS_SINK_BULK_ENABLED_DOC = "Flag to indicate whether Cosmos DB bulk mode is enabled for Sink connector. By default it is true.";
     private static final boolean DEFAULT_COSMOS_SINK_BULK_ENABLED = true;
 
-    public static final String COSMOS_SINK_BULK_COMPRESSION_ENABLED_CONF = "connect.cosmos.sink.bulk.no.duplicates.enabled";
+    public static final String COSMOS_SINK_BULK_COMPRESSION_ENABLED_CONF = "connect.cosmos.sink.bulk.compression.enabled";
     private static final String COSMOS_SINK_BULK_COMPRESSION_ENABLED_DOC = "Flag to indicate whether Cosmos DB in bulk mode will allow duplicates in the same batch to be written for Sink connector. By default it is true.";
     private static final boolean DEFAULT_COSMOS_SINK_BULK_COMPRESSION_ENABLED = true;
 

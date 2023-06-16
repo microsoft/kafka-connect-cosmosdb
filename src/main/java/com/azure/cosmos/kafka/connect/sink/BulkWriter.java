@@ -25,7 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import static com.azure.cosmos.implementation.guava25.base.Preconditions.checkArgument;
 import static com.azure.cosmos.implementation.guava25.base.Preconditions.checkNotNull;
@@ -60,14 +60,16 @@ public class BulkWriter extends SinkWriterBase {
 
         List<CosmosItemOperation> itemOperations = new ArrayList<>();
         if (this.compressionEnabled) {
-            HashMap<IdAndPartionKey, SinkRecord> uniqueItems = new HashMap<>();
+            LinkedHashMap<IdAndPartitionKey, SinkRecord> uniqueItems = new LinkedHashMap<>();
             for (SinkRecord sinkRecord : sinkRecords) {
-                IdAndPartionKey idAndPartionKey = new IdAndPartionKey(((Map<String, Object>) sinkRecord.value()).get("id"), this.getPartitionKeyValue(sinkRecord.value()));
-                SinkRecord uniqueItem = uniqueItems.putIfAbsent(idAndPartionKey, sinkRecord);
-                if (uniqueItem != null && uniqueItem.timestamp() != null && sinkRecord.timestamp() != null
-                        && uniqueItem.timestamp() < sinkRecord.timestamp()) {
-                    uniqueItems.replace(idAndPartionKey, sinkRecord);
-                }
+                IdAndPartitionKey idAndPartitionKey = new IdAndPartitionKey(((Map<String, Object>) sinkRecord.value()).get("id"), this.getPartitionKeyValue(sinkRecord.value()));
+                uniqueItems.computeIfPresent(idAndPartitionKey, (key, previousSinkRecord) -> {
+                    if (previousSinkRecord.timestamp() != null && sinkRecord.timestamp() != null && previousSinkRecord.timestamp() < sinkRecord.timestamp()) {
+                        return sinkRecord;
+                    }
+                    return previousSinkRecord;
+                });
+
             }
             sinkRecords = new ArrayList<>(uniqueItems.values());
         }
@@ -162,11 +164,11 @@ public class BulkWriter extends SinkWriterBase {
         }
     }
 
-    private static class IdAndPartionKey {
+    private static class IdAndPartitionKey {
         Object id;
         PartitionKey partitionKey;
 
-        public IdAndPartionKey(Object id, PartitionKey partitionKey) {
+        public IdAndPartitionKey(Object id, PartitionKey partitionKey) {
             this.id = id;
             this.partitionKey = partitionKey;
         }
@@ -185,10 +187,10 @@ public class BulkWriter extends SinkWriterBase {
             if (this == o) {
                 return true;
             }
-            if (o == null || getClass() != o.getClass()) {
+            if (!(o instanceof IdAndPartitionKey)) {
                 return false;
             }
-            IdAndPartionKey that = (IdAndPartionKey) o;
+            IdAndPartitionKey that = (IdAndPartitionKey) o;
             return Objects.equals(id, that.id) && Objects.equals(partitionKey, that.partitionKey);
         }
 
