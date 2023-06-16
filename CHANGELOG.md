@@ -1,5 +1,9 @@
 ## Release History
+
 ### 1.9.0-beta.1 (Unreleased)
+#### Breaking Changes
+* Skipped updating lease container continuation token based on kafka offset. [PR 516](https://github.com/microsoft/kafka-connect-cosmosdb/pull/516)
+
 #### Key Bug Fixes
 * Fixed issue in `CosmosDBSourceConnector` where no record being read when configured `connect.cosmos.offset.useLatest` to be false. [PR 516](https://github.com/microsoft/kafka-connect-cosmosdb/pull/516)
 
