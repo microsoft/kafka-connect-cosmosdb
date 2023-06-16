@@ -63,8 +63,10 @@ public class BulkWriter extends SinkWriterBase {
             LinkedHashMap<IdAndPartitionKey, SinkRecord> uniqueItems = new LinkedHashMap<>();
             for (SinkRecord sinkRecord : sinkRecords) {
                 IdAndPartitionKey idAndPartitionKey = new IdAndPartitionKey(((Map<String, Object>) sinkRecord.value()).get("id"), this.getPartitionKeyValue(sinkRecord.value()));
-                uniqueItems.computeIfPresent(idAndPartitionKey, (key, previousSinkRecord) -> {
-                    if (previousSinkRecord.timestamp() != null && sinkRecord.timestamp() != null && previousSinkRecord.timestamp() < sinkRecord.timestamp()) {
+                uniqueItems.compute(idAndPartitionKey, (key, previousSinkRecord) -> {
+                    if (previousSinkRecord == null) {
+                        return sinkRecord;
+                    } else if (previousSinkRecord.timestamp() != null && sinkRecord.timestamp() != null && previousSinkRecord.timestamp() < sinkRecord.timestamp()) {
                         return sinkRecord;
                     }
                     return previousSinkRecord;
