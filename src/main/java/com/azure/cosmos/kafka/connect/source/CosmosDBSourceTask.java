@@ -287,8 +287,8 @@ public class CosmosDBSourceTask extends SourceTask {
         }
 
         if (docs.size() > 0) {
-            // it is important to flush the current batches to kafka as currently we are using lease container continuationToken for bookmarking
-            // so we would only want to move ahead of the bookmarking when all the records have been flushed to kafka
+            // it is important to flush the current batches to kafka as currently we are using lease container continuationToken for book marking
+            // so we would only want to move ahead of the book marking when all the records have been returned to kafka
             this.shouldFillMoreRecords.set(false);
         }
     }
