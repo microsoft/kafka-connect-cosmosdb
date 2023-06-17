@@ -54,6 +54,7 @@ public class CosmosDBSourceTask extends SourceTask {
     private JsonToStruct jsonToStruct = new JsonToStruct();
     private Map<String, String> partitionMap;
     private CosmosAsyncContainer leaseContainer;
+    private final AtomicBoolean shouldFillMoreRecords = new AtomicBoolean(true);
 
     @Override
     public String version() {
@@ -143,7 +144,8 @@ public class CosmosDBSourceTask extends SourceTask {
                 break;
             }
         }
-        
+
+        this.shouldFillMoreRecords.set(true);
         return records;
     }
 
@@ -154,7 +156,7 @@ public class CosmosDBSourceTask extends SourceTask {
         long maxWaitTime = System.currentTimeMillis() + config.getTaskTimeout();
 
         int count = 0;
-        while (bufferSize > 0 && count < batchSize && System.currentTimeMillis() < maxWaitTime) {
+        while (bufferSize > 0 && count < batchSize && System.currentTimeMillis() < maxWaitTime && this.shouldFillMoreRecords.get()) {
             JsonNode node = this.queue.poll(config.getTaskPollInterval(), TimeUnit.MILLISECONDS);
             
             if (node == null) { 
@@ -282,7 +284,12 @@ public class CosmosDBSourceTask extends SourceTask {
                 // Restore interrupted state...
                 Thread.currentThread().interrupt();                
             }
+        }
 
+        if (docs.size() > 0) {
+            // it is important to flush the current batches to kafka as currently we are using lease container continuationToken for bookmarking
+            // so we would only want to move ahead of the bookmarking when all the records have been flushed to kafka
+            this.shouldFillMoreRecords.set(false);
         }
     }
 
