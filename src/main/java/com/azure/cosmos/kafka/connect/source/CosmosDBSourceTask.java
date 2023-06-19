@@ -54,6 +54,7 @@ public class CosmosDBSourceTask extends SourceTask {
     private JsonToStruct jsonToStruct = new JsonToStruct();
     private Map<String, String> partitionMap;
     private CosmosAsyncContainer leaseContainer;
+    private final AtomicBoolean shouldFillMoreRecords = new AtomicBoolean(true);
 
     @Override
     public String version() {
@@ -143,7 +144,8 @@ public class CosmosDBSourceTask extends SourceTask {
                 break;
             }
         }
-        
+
+        this.shouldFillMoreRecords.set(true);
         return records;
     }
 
@@ -154,7 +156,7 @@ public class CosmosDBSourceTask extends SourceTask {
         long maxWaitTime = System.currentTimeMillis() + config.getTaskTimeout();
 
         int count = 0;
-        while (bufferSize > 0 && count < batchSize && System.currentTimeMillis() < maxWaitTime) {
+        while (bufferSize > 0 && count < batchSize && System.currentTimeMillis() < maxWaitTime && this.shouldFillMoreRecords.get()) {
             JsonNode node = this.queue.poll(config.getTaskPollInterval(), TimeUnit.MILLISECONDS);
             
             if (node == null) { 
@@ -276,13 +278,22 @@ public class CosmosDBSourceTask extends SourceTask {
             try {
                 logger.trace("Queuing document");
 
+                // The item is being transferred to the queue, and the method will only return if the item has been polled from the queue.
+                // The queue is being continuously polled and then put into a batch list, but the batch list is not being flushed right away
+                // until batch size or maxWaitTime reached. Which can cause CFP to checkpoint faster than kafka batch.
+                // In order to not move CFP checkpoint faster, we are using shouldFillMoreRecords to control the batch flush.
                 this.queue.transfer(document);
             } catch (InterruptedException e) {
                 logger.error("Interrupted! changeFeedReader.", e);
                 // Restore interrupted state...
                 Thread.currentThread().interrupt();                
             }
+        }
 
+        if (docs.size() > 0) {
+            // it is important to flush the current batches to kafka as currently we are using lease container continuationToken for book marking
+            // so we would only want to move ahead of the book marking when all the records have been returned to kafka
+            this.shouldFillMoreRecords.set(false);
         }
     }
 
