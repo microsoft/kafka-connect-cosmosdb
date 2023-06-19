@@ -3,6 +3,24 @@
 #### New Features
 * Added option for compression through new config `connect.cosmos.sink.bulk.compression.enabled`. [PR 515](https://github.com/microsoft/kafka-connect-cosmosdb/pull/515)
 
+### 1.9.0 (2023-06-19)
+#### New Features
+* Updated `azure-cosmos` version to 4.46.0.
+
+#### Breaking Changes
+* This change will stop updating the lease container continuation token based on kafka offset when using the config `connect.cosmos.offset.useLatest`. [PR 516](https://github.com/microsoft/kafka-connect-cosmosdb/pull/516)
+
+When set to `false`, if the lease container exists, connector will now process the changes from the current continuationToken in `leaseContainer`, if the lease container does not exist, then it will start process the changes from beginning.
+If you want to start from beginning, it is advised to delete the lease container or change the kafka worker name.
+
+when set to `true`, if the lease container exists, connector will now process the changes from the current continuation token in `leaseContainer`, if the lease container does exist, then it will start process the changes from now.
+
+#### Key Bug Fixes
+* Fixed issue in `CosmosDBSourceConnector` where no record being read when configured `connect.cosmos.offset.useLatest` to be false. [PR 516](https://github.com/microsoft/kafka-connect-cosmosdb/pull/516)
+
+#### Other Changes
+* Return from `poll` method once all records have been processed from the changeFeedProcessor batches. [PR 517](https://github.com/microsoft/kafka-connect-cosmosdb/pull/517)
+
 ### 1.8.0 (2023-04-12)
 #### New Features
 * Updated `azure-cosmos` version to 4.42.0.
