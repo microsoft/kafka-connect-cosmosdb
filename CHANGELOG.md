@@ -1,4 +1,7 @@
 ## Release History
+### 1.10.0-Beta.1 (Unreleased)
+#### New Features
+* Added option for compression through new config `connect.cosmos.sink.bulk.compression.enabled`. [PR 515](https://github.com/microsoft/kafka-connect-cosmosdb/pull/515)
 
 ### 1.8.0 (2023-04-12)
 #### New Features
