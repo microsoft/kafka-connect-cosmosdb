@@ -278,6 +278,10 @@ public class CosmosDBSourceTask extends SourceTask {
             try {
                 logger.trace("Queuing document");
 
+                // The item is being transferred to the queue, and the method will only return if the item has been polled from the queue.
+                // The queue is being continuously polled and then put into a batch list, but the batch list is not being flushed right away
+                // until batch size or maxWaitTime reached. Which can cause CFP to checkpoint faster than kafka batch.
+                // In order to not move CFP checkpoint faster, we are using shouldFillMoreRecords to control the batch flush.
                 this.queue.transfer(document);
             } catch (InterruptedException e) {
                 logger.error("Interrupted! changeFeedReader.", e);
