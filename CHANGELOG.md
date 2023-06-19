@@ -13,7 +13,7 @@ when set to `true`, if the lease container exists, connector will now process th
 * Fixed issue in `CosmosDBSourceConnector` where no record being read when configured `connect.cosmos.offset.useLatest` to be false. [PR 516](https://github.com/microsoft/kafka-connect-cosmosdb/pull/516)
 
 #### Other Changes
-* Return from `poll` method once all records have been processed from the changeFeedProcessor batches. 
+* Return from `poll` method once all records have been processed from the changeFeedProcessor batches. [PR 517](https://github.com/microsoft/kafka-connect-cosmosdb/pull/517)
 
 ### 1.8.0 (2023-04-12)
 #### New Features
