@@ -1,6 +1,9 @@
 ## Release History
 
-### 1.9.0-beta.1 (Unreleased)
+### 1.9.0-beta.1 (2023-06-19)
+#### New Features
+* Updated `azure-cosmos` version to 4.46.0.
+
 #### Breaking Changes
 * This change will stop updating the lease container continuation token based on kafka offset when using the config `connect.cosmos.offset.useLatest`. [PR 516](https://github.com/microsoft/kafka-connect-cosmosdb/pull/516)
 
