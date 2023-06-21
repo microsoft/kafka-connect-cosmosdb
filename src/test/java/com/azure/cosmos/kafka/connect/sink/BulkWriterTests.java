@@ -16,6 +16,7 @@ import com.azure.cosmos.models.CosmosContainerResponse;
 import com.azure.cosmos.models.CosmosItemOperation;
 import com.azure.cosmos.models.PartitionKey;
 import com.azure.cosmos.models.PartitionKeyDefinition;
+import org.apache.kafka.common.record.TimestampType;
 import org.apache.kafka.connect.data.ConnectSchema;
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.sink.SinkRecord;
@@ -31,6 +32,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static junit.framework.TestCase.assertEquals;
@@ -42,7 +44,7 @@ import static org.mockito.Mockito.verify;
 public class BulkWriterTests {
     private final int MAX_RETRY_COUNT = 2;
     private final String TOPIC_NAME = "testtopic";
-
+    private final boolean COMPRESSION_ENABLED = true;
     private CosmosContainer container;
     private BulkWriter bulkWriter;
 
@@ -58,7 +60,7 @@ public class BulkWriterTests {
         Mockito.when(mockedContainerProperties.getPartitionKeyDefinition()).thenReturn(mockedPartitionKeyDefinition);
         Mockito.when(mockedPartitionKeyDefinition.getPaths()).thenReturn(Arrays.asList("/id"));
 
-        bulkWriter = new BulkWriter(container, MAX_RETRY_COUNT);
+        bulkWriter = new BulkWriter(container, MAX_RETRY_COUNT, COMPRESSION_ENABLED);
     }
 
     @Test
@@ -79,6 +81,35 @@ public class BulkWriterTests {
         assertEquals(2, response.getSucceededRecords().size());
         assertEquals(record1, response.getSucceededRecords().get(0));
         assertEquals(record2, response.getSucceededRecords().get(1));
+        assertEquals(0, response.getFailedRecordResponses().size());
+    }
+
+    @Test
+    public void testBulkWriteSucceedWithDuplicateIds() {
+        String duplicateId = UUID.randomUUID().toString();
+        String record3Id = UUID.randomUUID().toString();
+        Random rand = new Random();
+        long timestamp1 = rand.nextLong();
+        long timestamp2 = rand.nextLong();
+        SinkRecord record1 = createSinkRecord(duplicateId, Math.min(timestamp1, timestamp2));
+        SinkRecord record2 = createSinkRecord(duplicateId, Math.max(timestamp1, timestamp2));
+        SinkRecord record3 = createSinkRecord(record3Id, rand.nextLong());
+
+        CosmosBulkOperationResponse<Object> successfulResponseForRecord1 = mockSuccessfulBulkOperationResponse(record1, duplicateId);
+        CosmosBulkOperationResponse<Object> successfulResponseForRecord3 = mockSuccessfulBulkOperationResponse(record3, record3Id);
+
+
+        List<CosmosBulkOperationResponse<Object>> mockedBulkOperationResponseList = new ArrayList<>();
+        mockedBulkOperationResponseList.add(successfulResponseForRecord1);
+        mockedBulkOperationResponseList.add(successfulResponseForRecord3);
+
+        Mockito.when(container.executeBulkOperations(any())).thenReturn(() -> mockedBulkOperationResponseList.iterator());
+
+        SinkWriteResponse response = bulkWriter.write(Arrays.asList(record1, record2, record3));
+
+        assertEquals(2, response.getSucceededRecords().size());
+        assertEquals(record1, response.getSucceededRecords().get(0));
+        assertEquals(record3, response.getSucceededRecords().get(1));
         assertEquals(0, response.getFailedRecordResponses().size());
     }
 
@@ -182,8 +213,16 @@ public class BulkWriterTests {
         Map<String, String> map = new HashMap<>();
         map.put("foo", "baaarrrrrgh");
         map.put("id", id);
-
         return new SinkRecord(TOPIC_NAME, 1, stringSchema, "nokey", mapSchema, map, 0L);
+    }
+
+    private SinkRecord createSinkRecord(String id, Long time) {
+        Schema stringSchema = new ConnectSchema(Schema.Type.STRING);
+        Schema mapSchema = new ConnectSchema(Schema.Type.MAP);
+        Map<String, String> map = new HashMap<>();
+        map.put("foo", "baaarrrrrgh");
+        map.put("id", id);
+        return new SinkRecord(TOPIC_NAME, 1, stringSchema, "nokey", mapSchema, map, 0L, time, TimestampType.CREATE_TIME);
     }
 
     private CosmosBulkOperationResponse mockSuccessfulBulkOperationResponse(SinkRecord sinkRecord, String partitionKeyValue) {
