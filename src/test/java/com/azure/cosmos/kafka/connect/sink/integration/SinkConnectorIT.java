@@ -165,7 +165,7 @@ public class SinkConnectorIT {
             .withConfig("connect.cosmos.master.key", config.get("connect.cosmos.master.key").textValue())
             .withConfig("connect.cosmos.databasename", config.get("connect.cosmos.databasename").textValue())
             .withConfig("connect.cosmos.containers.topicmap", config.get("connect.cosmos.containers.topicmap").textValue())
-            .withConfig("connect.cosmos.sink.bulk.no.duplicates.enabled", config.get("connect.cosmos.sink.bulk.no.duplicates.enabled").textValue());
+            .withConfig("connect.cosmos.sink.bulk.compression.enabled", config.get("connect.cosmos.sink.bulk.compression.enabled").textValue());
     }
 
     private void addAvroConfigs() {
