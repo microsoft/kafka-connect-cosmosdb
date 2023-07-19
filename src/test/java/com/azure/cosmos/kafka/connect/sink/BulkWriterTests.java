@@ -95,12 +95,12 @@ public class BulkWriterTests {
         SinkRecord record2 = createSinkRecord(duplicateId, Math.max(timestamp1, timestamp2));
         SinkRecord record3 = createSinkRecord(record3Id, rand.nextLong());
 
-        CosmosBulkOperationResponse<Object> successfulResponseForRecord1 = mockSuccessfulBulkOperationResponse(record1, duplicateId);
+        CosmosBulkOperationResponse<Object> successfulResponseForRecord2 = mockSuccessfulBulkOperationResponse(record2, duplicateId);
         CosmosBulkOperationResponse<Object> successfulResponseForRecord3 = mockSuccessfulBulkOperationResponse(record3, record3Id);
 
 
         List<CosmosBulkOperationResponse<Object>> mockedBulkOperationResponseList = new ArrayList<>();
-        mockedBulkOperationResponseList.add(successfulResponseForRecord1);
+        mockedBulkOperationResponseList.add(successfulResponseForRecord2);
         mockedBulkOperationResponseList.add(successfulResponseForRecord3);
 
         Mockito.when(container.executeBulkOperations(any())).thenReturn(() -> mockedBulkOperationResponseList.iterator());
@@ -108,7 +108,7 @@ public class BulkWriterTests {
         SinkWriteResponse response = bulkWriter.write(Arrays.asList(record1, record2, record3));
 
         assertEquals(2, response.getSucceededRecords().size());
-        assertEquals(record1, response.getSucceededRecords().get(0));
+        assertEquals(record2, response.getSucceededRecords().get(0));
         assertEquals(record3, response.getSucceededRecords().get(1));
         assertEquals(0, response.getFailedRecordResponses().size());
     }

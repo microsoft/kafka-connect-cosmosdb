@@ -198,7 +198,7 @@ public class BulkWriter extends SinkWriterBase {
 
         @Override
         public int hashCode() {
-            return Objects.hash(id, partitionKey);
+            return Objects.hash(id, partitionKey.toString());
         }
     }
 
