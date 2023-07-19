@@ -1,7 +1,7 @@
 ## Release History
 ### 1.10.0-Beta.1 (Unreleased)
 #### New Features
-* Added option for compression through new config `connect.cosmos.sink.bulk.compression.enabled`. [PR 515](https://github.com/microsoft/kafka-connect-cosmosdb/pull/515)
+* Added compression feature to resolve duplicate records in a single batch when consuming from kafka topic in the bulk mode for sink connector through new config `connect.cosmos.sink.bulk.compression.enabled`. [PR 515](https://github.com/microsoft/kafka-connect-cosmosdb/pull/515)
 
 ### 1.9.0 (2023-06-19)
 #### New Features
@@ -10,10 +10,10 @@
 #### Breaking Changes
 * This change will stop updating the lease container continuation token based on kafka offset when using the config `connect.cosmos.offset.useLatest`. [PR 516](https://github.com/microsoft/kafka-connect-cosmosdb/pull/516)
 
-When set to `false`, if the lease container exists, connector will now process the changes from the current continuationToken in `leaseContainer`, if the lease container does not exist, then it will start process the changes from beginning.
+When set to `false`, if the lease container exists, connector will now process the changes from the current continuationToken in `leaseContainer`, if the lease container does not exist, then it will start processing the changes from beginning.
 If you want to start from beginning, it is advised to delete the lease container or change the kafka worker name.
 
-when set to `true`, if the lease container exists, connector will now process the changes from the current continuation token in `leaseContainer`, if the lease container does exist, then it will start process the changes from now.
+when set to `true`, if the lease container exists, connector will now process the changes from the current continuation token in `leaseContainer`, if the lease container does exist, then it will start processing the changes from now.
 
 #### Key Bug Fixes
 * Fixed issue in `CosmosDBSourceConnector` where no record being read when configured `connect.cosmos.offset.useLatest` to be false. [PR 516](https://github.com/microsoft/kafka-connect-cosmosdb/pull/516)
