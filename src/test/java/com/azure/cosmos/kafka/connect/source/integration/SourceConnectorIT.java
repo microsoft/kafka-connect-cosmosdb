@@ -8,6 +8,7 @@ import com.azure.cosmos.CosmosClientBuilder;
 import com.azure.cosmos.CosmosContainer;
 import com.azure.cosmos.CosmosDatabase;
 import com.azure.cosmos.CosmosException;
+import com.azure.cosmos.kafka.connect.ConnectorTestConfigurations;
 import com.azure.cosmos.kafka.connect.IntegrationTest;
 import com.azure.cosmos.models.CosmosContainerProperties;
 import com.azure.cosmos.models.CosmosQueryRequestOptions;
@@ -63,10 +64,9 @@ public class SourceConnectorIT {
     private static final String SECOND_KAFKA_TOPIC = "source-test-2";
     private static final String AVRO_KAFKA_TOPIC = "source-test-avro";
     private static final String AVRO_CONVERTER = "io.confluent.connect.avro.AvroConverter";
-    private static final String AVRO_SCHEMA_REGISTRY = "http://schema-registry:8081";
-    private static final String SCHEMA_REGISTRY_URL = "http://localhost:8081";
+    private static final String SCHEMA_REGISTRY_URL = ConnectorTestConfigurations.SCHEMA_REGISTRY_URL;
     private static final String CONNECT_CLIENT_URL = "http://localhost:8083";
-    private static final String BOOTSTRAP_SERVER_ADD = "localhost:9092";
+    private static final String BOOTSTRAP_SERVER_ADD = ConnectorTestConfigurations.BOOTSTRAP_SERVER;
 
     private String databaseName;
     private String connectorName;
@@ -202,6 +202,13 @@ public class SourceConnectorIT {
         kafkaProperties.put("bootstrap.servers", BOOTSTRAP_SERVER_ADD);
         kafkaProperties.put("group.id", "IntegrationTest");
         kafkaProperties.put("key.deserializer", StringDeserializer.class.getName());
+        kafkaProperties.put("sasl.jaas.config", ConnectorTestConfigurations.SASL_JAAS);
+        kafkaProperties.put("security.protocol", "SASL_SSL");
+        kafkaProperties.put("sasl.mechanism", "PLAIN");
+        kafkaProperties.put("client.dns.lookup", "use_all_dns_ips");
+        kafkaProperties.put("session.timeout.ms", "45000");
+        kafkaProperties.put("basic.auth.credentials.source", "USER_INFO");
+        kafkaProperties.put("basic.auth.user.info", ConnectorTestConfigurations.BASIC_AUTH_USER_INFO);
         return kafkaProperties;
     }
 
@@ -315,10 +322,10 @@ public class SourceConnectorIT {
         // Create source connector with AVRO config
         connectClient.addConnector(connectConfig
             .withConfig("value.converter", AVRO_CONVERTER)
-            .withConfig("value.converter.schema.registry.url", AVRO_SCHEMA_REGISTRY)
+            .withConfig("value.converter.schema.registry.url", SCHEMA_REGISTRY_URL)
             .withConfig("value.converter.schemas.enable", "true")
             .withConfig("key.converter", AVRO_CONVERTER)
-            .withConfig("key.converter.schema.registry.url", AVRO_SCHEMA_REGISTRY)
+            .withConfig("key.converter.schema.registry.url", SCHEMA_REGISTRY_URL)
             .withConfig("key.converter.schemas.enable", "true")
             .withConfig("connect.cosmos.containers.topicmap", AVRO_KAFKA_TOPIC+"#kafka")
             .build());

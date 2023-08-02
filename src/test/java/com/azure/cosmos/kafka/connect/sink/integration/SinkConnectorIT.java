@@ -7,6 +7,8 @@ import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.CosmosClientBuilder;
 import com.azure.cosmos.CosmosContainer;
 import com.azure.cosmos.CosmosDatabase;
+import com.azure.cosmos.implementation.TestConfigurations;
+import com.azure.cosmos.kafka.connect.ConnectorTestConfigurations;
 import com.azure.cosmos.kafka.connect.sink.id.strategy.ProvidedInKeyStrategy;
 import com.azure.cosmos.kafka.connect.sink.id.strategy.ProvidedInValueStrategy;
 import com.azure.cosmos.kafka.connect.sink.id.strategy.TemplateStrategy;
@@ -66,10 +68,9 @@ public class SinkConnectorIT {
     private static final String KAFKA_TOPIC_JSON_SCHEMA = "sink-test-json-schema";
     private static final String KAFKA_TOPIC_AVRO = "sink-test-avro";
     private static final String AVRO_CONVERTER = "io.confluent.connect.avro.AvroConverter";
-    private static final String AVRO_SCHEMA_REGISTRY = "http://schema-registry:8081";
-    private static final String SCHEMA_REGISTRY_URL = "http://localhost:8081";
+    private static final String SCHEMA_REGISTRY_URL = ConnectorTestConfigurations.SCHEMA_REGISTRY_URL;
     private static final String CONNECT_CLIENT_URL = "http://localhost:8083";
-    private static final String BOOTSTRAP_SERVER_ADD = "localhost:9092";
+    private static final String BOOTSTRAP_SERVER_ADD = ConnectorTestConfigurations.BOOTSTRAP_SERVER;
 
     private String databaseName;
     private String connectorName;
@@ -172,10 +173,10 @@ public class SinkConnectorIT {
         connectConfig
             .withConfig("value.converter", AVRO_CONVERTER)
             .withConfig("value.converter.schemas.enable", "true")
-            .withConfig("value.converter.schema.registry.url", AVRO_SCHEMA_REGISTRY)
+            .withConfig("value.converter.schema.registry.url", SCHEMA_REGISTRY_URL)
             .withConfig("key.converter", AVRO_CONVERTER)
             .withConfig("key.converter.schemas.enable", "true")
-            .withConfig("key.converter.schema.registry.url", AVRO_SCHEMA_REGISTRY)
+            .withConfig("key.converter.schema.registry.url", SCHEMA_REGISTRY_URL)
             .withConfig("topics", KAFKA_TOPIC_AVRO)
             .withConfig("connect.cosmos.containers.topicmap", KAFKA_TOPIC_AVRO+"#kafka");
     }
@@ -190,7 +191,13 @@ public class SinkConnectorIT {
         kafkaProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         kafkaProperties.put(ProducerConfig.MAX_BLOCK_MS_CONFIG, 2000L);
         kafkaProperties.put(ProducerConfig.ACKS_CONFIG, "all");
-
+        kafkaProperties.put("sasl.jaas.config", ConnectorTestConfigurations.SASL_JAAS);
+        kafkaProperties.put("security.protocol", "SASL_SSL");
+        kafkaProperties.put("sasl.mechanism", "PLAIN");
+        kafkaProperties.put("client.dns.lookup", "use_all_dns_ips");
+        kafkaProperties.put("session.timeout.ms", "45000");
+        kafkaProperties.put("basic.auth.credentials.source", "USER_INFO");
+        kafkaProperties.put("basic.auth.user.info", ConnectorTestConfigurations.BASIC_AUTH_USER_INFO);
         return kafkaProperties;
     }
 
