@@ -7,7 +7,6 @@ import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.CosmosClientBuilder;
 import com.azure.cosmos.CosmosContainer;
 import com.azure.cosmos.CosmosDatabase;
-import com.azure.cosmos.implementation.TestConfigurations;
 import com.azure.cosmos.kafka.connect.ConnectorTestConfigurations;
 import com.azure.cosmos.kafka.connect.sink.id.strategy.ProvidedInKeyStrategy;
 import com.azure.cosmos.kafka.connect.sink.id.strategy.ProvidedInValueStrategy;
@@ -174,9 +173,13 @@ public class SinkConnectorIT {
             .withConfig("value.converter", AVRO_CONVERTER)
             .withConfig("value.converter.schemas.enable", "true")
             .withConfig("value.converter.schema.registry.url", SCHEMA_REGISTRY_URL)
+            .withConfig("value.converter.basic.auth.credentials.source", "USER_INFO")
+            .withConfig("value.converter.basic.auth.user.info", ConnectorTestConfigurations.BASIC_AUTH_USER_INFO)
             .withConfig("key.converter", AVRO_CONVERTER)
             .withConfig("key.converter.schemas.enable", "true")
             .withConfig("key.converter.schema.registry.url", SCHEMA_REGISTRY_URL)
+            .withConfig("key.converter.basic.auth.credentials.source", "USER_INFO")
+            .withConfig("key.converter.basic.auth.user.info", ConnectorTestConfigurations.BASIC_AUTH_USER_INFO)
             .withConfig("topics", KAFKA_TOPIC_AVRO)
             .withConfig("connect.cosmos.containers.topicmap", KAFKA_TOPIC_AVRO+"#kafka");
     }

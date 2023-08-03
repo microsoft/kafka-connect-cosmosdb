@@ -324,9 +324,13 @@ public class SourceConnectorIT {
             .withConfig("value.converter", AVRO_CONVERTER)
             .withConfig("value.converter.schema.registry.url", SCHEMA_REGISTRY_URL)
             .withConfig("value.converter.schemas.enable", "true")
+            .withConfig("value.converter.basic.auth.credentials.source", "USER_INFO")
+            .withConfig("value.converter.basic.auth.user.info", ConnectorTestConfigurations.BASIC_AUTH_USER_INFO)
             .withConfig("key.converter", AVRO_CONVERTER)
             .withConfig("key.converter.schema.registry.url", SCHEMA_REGISTRY_URL)
             .withConfig("key.converter.schemas.enable", "true")
+            .withConfig("key.converter.basic.auth.credentials.source", "USER_INFO")
+            .withConfig("key.converter.basic.auth.user.info", ConnectorTestConfigurations.BASIC_AUTH_USER_INFO)
             .withConfig("connect.cosmos.containers.topicmap", AVRO_KAFKA_TOPIC+"#kafka")
             .build());
         
