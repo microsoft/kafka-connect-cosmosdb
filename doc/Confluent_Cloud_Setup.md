@@ -129,7 +129,7 @@ mvn clean test-compile failsafe:integration-test
 
 ### Cleanup
 
-Tear down the Confluent Platform setup and cleanup any unneeded resources
+Tear down the Confluent Platform setup and cleanup any unnecessary resources
 
 ```bash
 
