@@ -9,6 +9,7 @@ import com.azure.cosmos.CosmosException;
 import com.azure.cosmos.implementation.HttpConstants;
 import com.azure.cosmos.implementation.ImplementationBridgeHelpers;
 import com.azure.cosmos.implementation.routing.PartitionKeyInternal;
+import com.azure.cosmos.models.CosmosBulkExecutionOptions;
 import com.azure.cosmos.models.CosmosBulkItemResponse;
 import com.azure.cosmos.models.CosmosBulkOperationResponse;
 import com.azure.cosmos.models.CosmosBulkOperations;
@@ -36,10 +37,12 @@ public class BulkWriter extends SinkWriterBase {
     private final CosmosContainer cosmosContainer;
     private final PartitionKeyDefinition partitionKeyDefinition;
     private final boolean compressionEnabled;
+    private final boolean preserveOrdering;
 
-    public BulkWriter(CosmosContainer container, int maxRetryCount, boolean compressionEnabled) {
+    public BulkWriter(CosmosContainer container, int maxRetryCount, boolean compressionEnabled, boolean preserveOrdering) {
         super(maxRetryCount);
         this.compressionEnabled = compressionEnabled;
+        this.preserveOrdering = preserveOrdering;
         checkNotNull(container, "Argument 'container' can not be null");
         this.cosmosContainer = container;
         this.partitionKeyDefinition = container.read().getProperties().getPartitionKeyDefinition();
@@ -83,7 +86,12 @@ public class BulkWriter extends SinkWriterBase {
             itemOperations.add(cosmosItemOperation);
         }
 
-        Iterable<CosmosBulkOperationResponse<Object>> responseList = cosmosContainer.executeBulkOperations(itemOperations);
+        CosmosBulkExecutionOptions cosmosBulkExecutionOptions = new CosmosBulkExecutionOptions();
+        ImplementationBridgeHelpers.CosmosBulkExecutionOptionsHelper
+                .getCosmosBulkExecutionOptionsAccessor()
+                .setPreserveOrdering(cosmosBulkExecutionOptions, preserveOrdering);
+
+        Iterable<CosmosBulkOperationResponse<Object>> responseList = cosmosContainer.executeBulkOperations(itemOperations, cosmosBulkExecutionOptions);
 
         // Non-transient exceptions will be put in the front of the list
         for (CosmosBulkOperationResponse<Object> bulkOperationResponse : responseList) {
