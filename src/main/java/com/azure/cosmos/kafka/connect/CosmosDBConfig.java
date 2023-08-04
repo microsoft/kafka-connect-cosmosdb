@@ -73,7 +73,7 @@ public class CosmosDBConfig extends AbstractConfig {
     public static final String COSMOS_SINK_BULK_COMPRESSION_ENABLED_CONF = "connect.cosmos.sink.bulk.compression.enabled";
     private static final String COSMOS_SINK_BULK_COMPRESSION_ENABLED_DOC = "Flag to indicate whether Cosmos DB in bulk mode will compress and resolve duplicates in the same batch to be written for Sink connector. By default it is true. ";
     private static final boolean DEFAULT_COSMOS_SINK_BULK_COMPRESSION_ENABLED = true;
-    private static final String COSMOS_SINK_BULK_ORDERING_PRESERVED_ENABLED_CONF = "connect.cosmos.sink.bulk.ordering.preserved";
+    private static final String COSMOS_SINK_BULK_ORDERING_PRESERVED_ENABLED_CONF = "connect.cosmos.sink.bulk.ordering.preserved.enabled";
     private static final String COSMOS_SINK_BULK_ORDERING_PRESERVED_ENABLED_DOC = "Flag to indicate whether Cosmos DB in bulk mode will preserve the ordering of items with the same id and partition key. By default it is true. ";
     private static final boolean DEFAULT_COSMOS_SINK_BULK_ORDERING_PRESERVED_ENABLED = true;
 
