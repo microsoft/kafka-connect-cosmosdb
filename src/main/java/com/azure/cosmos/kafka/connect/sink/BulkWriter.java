@@ -37,12 +37,12 @@ public class BulkWriter extends SinkWriterBase {
     private final CosmosContainer cosmosContainer;
     private final PartitionKeyDefinition partitionKeyDefinition;
     private final boolean compressionEnabled;
-    private final boolean preserveOrdering;
+    private final boolean orderingPreserved;
 
-    public BulkWriter(CosmosContainer container, int maxRetryCount, boolean compressionEnabled, boolean preserveOrdering) {
+    public BulkWriter(CosmosContainer container, int maxRetryCount, boolean compressionEnabled, boolean orderingPreserved) {
         super(maxRetryCount);
         this.compressionEnabled = compressionEnabled;
-        this.preserveOrdering = preserveOrdering;
+        this.orderingPreserved = orderingPreserved;
         checkNotNull(container, "Argument 'container' can not be null");
         this.cosmosContainer = container;
         this.partitionKeyDefinition = container.read().getProperties().getPartitionKeyDefinition();
@@ -89,7 +89,7 @@ public class BulkWriter extends SinkWriterBase {
         CosmosBulkExecutionOptions cosmosBulkExecutionOptions = new CosmosBulkExecutionOptions();
         ImplementationBridgeHelpers.CosmosBulkExecutionOptionsHelper
                 .getCosmosBulkExecutionOptionsAccessor()
-                .setPreserveOrdering(cosmosBulkExecutionOptions, preserveOrdering);
+                .setOrderingPreserved(cosmosBulkExecutionOptions, orderingPreserved);
 
         Iterable<CosmosBulkOperationResponse<Object>> responseList = cosmosContainer.executeBulkOperations(itemOperations, cosmosBulkExecutionOptions);
 
