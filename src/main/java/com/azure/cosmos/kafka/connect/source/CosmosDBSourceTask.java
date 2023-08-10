@@ -3,21 +3,30 @@
 
 package com.azure.cosmos.kafka.connect.source;
 
-import static java.lang.Thread.sleep;
-import static java.util.Collections.singletonMap;
-
-import com.azure.cosmos.*;
-import com.azure.cosmos.models.*;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.azure.cosmos.kafka.connect.TopicContainerMap;
+import com.azure.cosmos.ChangeFeedProcessor;
+import com.azure.cosmos.ChangeFeedProcessorBuilder;
+import com.azure.cosmos.ConsistencyLevel;
+import com.azure.cosmos.CosmosAsyncClient;
+import com.azure.cosmos.CosmosAsyncContainer;
+import com.azure.cosmos.CosmosAsyncDatabase;
+import com.azure.cosmos.CosmosClientBuilder;
+import com.azure.cosmos.CosmosException;
 import com.azure.cosmos.kafka.connect.CosmosDBConfig;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.azure.cosmos.kafka.connect.TopicContainerMap;
+import com.azure.cosmos.models.ChangeFeedProcessorOptions;
+import com.azure.cosmos.models.CosmosContainerProperties;
+import com.azure.cosmos.models.CosmosContainerRequestOptions;
+import com.azure.cosmos.models.CosmosContainerResponse;
+import com.azure.cosmos.models.CosmosQueryRequestOptions;
+import com.azure.cosmos.models.ThroughputProperties;
+import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.kafka.connect.data.Schema;
+import org.apache.kafka.connect.data.SchemaAndValue;
 import org.apache.kafka.connect.source.SourceRecord;
 import org.apache.kafka.connect.source.SourceTask;
-import org.apache.kafka.connect.data.SchemaAndValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import reactor.core.scheduler.Schedulers;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -28,14 +37,14 @@ import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import reactor.core.scheduler.Schedulers;
+import static java.lang.Thread.sleep;
+import static java.util.Collections.singletonMap;
 
 public class CosmosDBSourceTask extends SourceTask {
 
     private static final Logger logger = LoggerFactory.getLogger(CosmosDBSourceTask.class);
     private static final String OFFSET_KEY = "recordContinuationToken";
     private static final String CONTINUATION_TOKEN = "ContinuationToken";
-    private static final String ZERO_CONTINUATION_TOKEN = "0";
 
     private final AtomicBoolean running = new AtomicBoolean(false);
     private CosmosAsyncClient client = null;
@@ -45,6 +54,7 @@ public class CosmosDBSourceTask extends SourceTask {
     private JsonToStruct jsonToStruct = new JsonToStruct();
     private Map<String, String> partitionMap;
     private CosmosAsyncContainer leaseContainer;
+    private final AtomicBoolean shouldFillMoreRecords = new AtomicBoolean(true);
 
     @Override
     public String version() {
@@ -70,26 +80,13 @@ public class CosmosDBSourceTask extends SourceTask {
         partitionMap = new HashMap<>();
         partitionMap.put("DatabaseName", config.getDatabaseName());
         partitionMap.put("Container", config.getAssignedContainer());
-        
-        Map<String, Object> offset = context.offsetStorageReader().offset(partitionMap);
-        // If NOT using the latest offset, reset lease container token to earliest possible value
-        if (!config.useLatestOffset()) {
-            updateContinuationToken(ZERO_CONTINUATION_TOKEN);
-        } else if (offset != null) {
-            // Check for previous offset and compare with lease container token
-            // If there's a mismatch, rewind lease container token to offset value
-            String lastOffsetToken = (String) offset.get(OFFSET_KEY);
-            String continuationToken = getContinuationToken();
 
-            if (continuationToken != null && !lastOffsetToken.equals(continuationToken)) {
-                logger.info("Mismatch in last offset {} and current continuation token {}.", 
-                    lastOffsetToken, continuationToken);
-                updateContinuationToken(lastOffsetToken);
-            }
-        }
+        // ChangeFeedProcessor tracks its progress in the lease container
+        // We are going to skip using kafka offset
+        // In the future when we change to ues changeFeed pull model, then it will be required to track/use the kafka offset to resume the work
 
         // Initiate Cosmos change feed processor
-        changeFeedProcessor = getChangeFeedProcessor(config.getWorkerName(),feedContainer,leaseContainer);
+        changeFeedProcessor = getChangeFeedProcessor(config.getWorkerName(), feedContainer, leaseContainer, config.useLatestOffset());
         changeFeedProcessor.start()
                 .subscribeOn(Schedulers.boundedElastic())
                 .doOnSuccess(aVoid -> running.set(true))
@@ -130,14 +127,6 @@ public class CosmosDBSourceTask extends SourceTask {
         return leaseRecord.get(CONTINUATION_TOKEN).textValue();
     }
 
-    private void updateContinuationToken(String newToken) {        
-        JsonNode leaseRecord = getLeaseContainerRecord();
-        if (leaseRecord != null) {
-            ((ObjectNode)leaseRecord).put(CONTINUATION_TOKEN, newToken);
-            leaseContainer.upsertItem(leaseRecord).block();
-        }
-    }
-
     @Override
     public List<SourceRecord> poll() throws InterruptedException {
         List<SourceRecord> records = new ArrayList<>();
@@ -155,7 +144,8 @@ public class CosmosDBSourceTask extends SourceTask {
                 break;
             }
         }
-        
+
+        this.shouldFillMoreRecords.set(true);
         return records;
     }
 
@@ -166,7 +156,7 @@ public class CosmosDBSourceTask extends SourceTask {
         long maxWaitTime = System.currentTimeMillis() + config.getTaskTimeout();
 
         int count = 0;
-        while (bufferSize > 0 && count < batchSize && System.currentTimeMillis() < maxWaitTime) {
+        while (bufferSize > 0 && count < batchSize && System.currentTimeMillis() < maxWaitTime && this.shouldFillMoreRecords.get()) {
             JsonNode node = this.queue.poll(config.getTaskPollInterval(), TimeUnit.MILLISECONDS);
             
             if (node == null) { 
@@ -259,13 +249,18 @@ public class CosmosDBSourceTask extends SourceTask {
         return cosmosClientBuilder.buildAsyncClient();
     }
 
-    private ChangeFeedProcessor getChangeFeedProcessor(String hostName, CosmosAsyncContainer feedContainer, CosmosAsyncContainer leaseContainer) {
+    private ChangeFeedProcessor getChangeFeedProcessor(
+            String hostName,
+            CosmosAsyncContainer feedContainer,
+            CosmosAsyncContainer leaseContainer,
+            boolean useLatestOffset) {
         logger.info("Creating Change Feed Processor for {}.", hostName);
 
         ChangeFeedProcessorOptions changeFeedProcessorOptions = new ChangeFeedProcessorOptions();
         changeFeedProcessorOptions.setFeedPollDelay(Duration.ofMillis(config.getTaskPollInterval()));
         changeFeedProcessorOptions.setMaxItemCount(config.getTaskBatchSize().intValue());
         changeFeedProcessorOptions.setLeasePrefix(config.getAssignedContainer() + config.getDatabaseName() + ".");
+        changeFeedProcessorOptions.setStartFromBeginning(!useLatestOffset);
 
         return new ChangeFeedProcessorBuilder()
                 .options(changeFeedProcessorOptions)
@@ -283,13 +278,22 @@ public class CosmosDBSourceTask extends SourceTask {
             try {
                 logger.trace("Queuing document");
 
+                // The item is being transferred to the queue, and the method will only return if the item has been polled from the queue.
+                // The queue is being continuously polled and then put into a batch list, but the batch list is not being flushed right away
+                // until batch size or maxWaitTime reached. Which can cause CFP to checkpoint faster than kafka batch.
+                // In order to not move CFP checkpoint faster, we are using shouldFillMoreRecords to control the batch flush.
                 this.queue.transfer(document);
             } catch (InterruptedException e) {
                 logger.error("Interrupted! changeFeedReader.", e);
                 // Restore interrupted state...
                 Thread.currentThread().interrupt();                
             }
+        }
 
+        if (docs.size() > 0) {
+            // it is important to flush the current batches to kafka as currently we are using lease container continuationToken for book marking
+            // so we would only want to move ahead of the book marking when all the records have been returned to kafka
+            this.shouldFillMoreRecords.set(false);
         }
     }
 

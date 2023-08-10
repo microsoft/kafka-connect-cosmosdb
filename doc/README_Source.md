@@ -173,6 +173,7 @@ The following settings are used to configure the Cosmos DB Kafka Source Connecto
 | connect.cosmos.master.key | string | the configured master key for Cosmos                                                                                                                                  | Required |
 | connect.cosmos.connection.endpoint | uri | the endpoint for the Cosmos Account                                                                                                                                   | Required |
 | connect.cosmos.containers.topicmap | string | comma separated topic to container mapping, eg. topic1#coll1,topic2#coll2                                                                                             | Required |
+| connect.cosmos.connection.gateway.enabled | boolean | Flag to indicate whether to use gateway mode. By default it is `false`. | Optional  |
 | connect.cosmos.messagekey.enabled | boolean | set if the Kafka message key should be set. Default is `true`                                                                                                         | Required |
 | connect.cosmos.messagekey.field | string | use the field's value from the document as the message key. Default is `id`                                                                                           | Required |
 | connect.cosmos.offset.useLatest | boolean | Set to `"true"` to use the latest (most recent) source offset, `"false"` to use the earliest recorded offset. Default is `false`                                      | Required |

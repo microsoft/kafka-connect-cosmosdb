@@ -1,4 +1,45 @@
 ## Release History
+### 1.10.0-Beta.1 (Unreleased)
+#### New Features
+* Added compression feature to resolve duplicate records in a single batch when consuming from kafka topic in the bulk mode for sink connector through new config `connect.cosmos.sink.bulk.compression.enabled`. [PR 515](https://github.com/microsoft/kafka-connect-cosmosdb/pull/515)
+
+#### Other Changes
+* Added documentation and infrastructure for testing in distributed mode using confluent cloud integration. [PR 528](https://github.com/microsoft/kafka-connect-cosmosdb/pull/528)
+
+### 1.9.0 (2023-06-19)
+#### New Features
+* Updated `azure-cosmos` version to 4.46.0.
+
+#### Breaking Changes
+* This change will stop updating the lease container continuation token based on kafka offset when using the config `connect.cosmos.offset.useLatest`. [PR 516](https://github.com/microsoft/kafka-connect-cosmosdb/pull/516)
+
+When set to `false`, if the lease container exists, connector will now process the changes from the current continuationToken in `leaseContainer`, if the lease container does not exist, then it will start processing the changes from beginning.
+If you want to start from beginning, it is advised to delete the lease container or change the kafka worker name.
+
+when set to `true`, if the lease container exists, connector will now process the changes from the current continuation token in `leaseContainer`, if the lease container does exist, then it will start processing the changes from now.
+
+#### Key Bug Fixes
+* Fixed issue in `CosmosDBSourceConnector` where no record being read when configured `connect.cosmos.offset.useLatest` to be false. [PR 516](https://github.com/microsoft/kafka-connect-cosmosdb/pull/516)
+
+#### Other Changes
+* Return from `poll` method once all records have been processed from the changeFeedProcessor batches. [PR 517](https://github.com/microsoft/kafka-connect-cosmosdb/pull/517)
+
+### 1.8.0 (2023-04-12)
+#### New Features
+* Updated `azure-cosmos` version to 4.42.0.
+* Updated `json-path` version to 2.8.0.
+* Updated `kafka-connect` version to 2.8.2.
+
+#### Key Bug Fixes
+* Fixed issue in Sink Connector for nested maps in Struct types. [PR 510](https://github.com/microsoft/kafka-connect-cosmosdb/pull/510)
+
+### 1.7.1 (2023-03-24)
+#### Key Bug Fixes
+* Fixed issue in Sink Connector when using `AvroConverter`. [PR 503](https://github.com/microsoft/kafka-connect-cosmosdb/pull/503)
+
+### 1.7.0 (2023-03-17)
+#### New Features
+* Updated `azure-cosmos` version to 4.41.0.
 
 ### 1.6.0 (2022-10-13)
 #### New Features

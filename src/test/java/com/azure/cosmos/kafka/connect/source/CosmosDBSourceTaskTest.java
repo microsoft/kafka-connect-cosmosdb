@@ -40,6 +40,7 @@ public class CosmosDBSourceTaskTest {
     private CosmosAsyncContainer mockLeaseContainer;
     private Map<String, String> sourceSettings;
     private CosmosDBSourceConfig config;
+    private LinkedTransferQueue<JsonNode> queue;
 
     @Before
     @SuppressWarnings("unchecked") // Need to maintain Typed objects
@@ -59,7 +60,7 @@ public class CosmosDBSourceTaskTest {
         FieldUtils.writeField(testTask, "config", config, true);
 
         // Create the TransferQueue
-        LinkedTransferQueue<JsonNode> queue = new LinkedTransferQueue<>();
+        this.queue = new LinkedTransferQueue<>();
         FieldUtils.writeField(testTask, "queue", queue, true);
 
         // Set the running flag to true
@@ -95,7 +96,34 @@ public class CosmosDBSourceTaskTest {
     }
 
     @Test
-    public void testPoll() throws InterruptedException, JsonProcessingException {
+    public void testHandleChanges() throws JsonProcessingException, IllegalAccessException, InterruptedException {
+        String jsonString = "{\"k1\":\"v1\",\"k2\":\"v2\"}";
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode actualObj = mapper.readTree(jsonString);
+        List<JsonNode> changes = new ArrayList<>();
+        changes.add(actualObj);
+
+        new Thread(() -> {
+            testTask.handleCosmosDbChanges(changes);
+        }).start();
+        
+        int recordCount = 0;
+        while(recordCount == 0) {
+            JsonNode jsonNode = this.queue.poll();
+            if (jsonNode != null) {
+                recordCount++;
+            }
+        }
+
+        // wait for the handleChanges logic to finish
+        Thread.sleep(500);
+        AtomicBoolean shouldFillMoreRecords =
+                (AtomicBoolean) FieldUtils.readField(FieldUtils.getField(CosmosDBSourceTask.class, "shouldFillMoreRecords", true), testTask);
+        Assert.assertFalse(shouldFillMoreRecords.get());
+    }
+
+    @Test
+    public void testPoll() throws InterruptedException, JsonProcessingException, IllegalAccessException {
         String jsonString = "{\"k1\":\"v1\",\"k2\":\"v2\"}";
         ObjectMapper mapper = new ObjectMapper();
         JsonNode actualObj = mapper.readTree(jsonString);
@@ -108,6 +136,34 @@ public class CosmosDBSourceTaskTest {
 
         List<SourceRecord>  result=testTask.poll();
         Assert.assertEquals(1, result.size());
+        AtomicBoolean shouldFillMoreRecords =
+                (AtomicBoolean) FieldUtils.readField(FieldUtils.getField(CosmosDBSourceTask.class, "shouldFillMoreRecords", true), testTask);
+        Assert.assertTrue(shouldFillMoreRecords.get());
+    }
+
+    @Test
+    public void testPoll_shouldFillMoreRecordsFalse() throws InterruptedException, JsonProcessingException, IllegalAccessException {
+        // test when should fillMoreRecords false, then poll method will return immediately
+        String jsonString = "{\"k1\":\"v1\",\"k2\":\"v2\"}";
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode actualObj = mapper.readTree(jsonString);
+
+        new Thread(() -> {
+            try {
+                this.queue.transfer(actualObj);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }).start();
+
+        Thread.sleep(500);
+        AtomicBoolean shouldFillMoreRecords =
+                (AtomicBoolean) FieldUtils.readField(FieldUtils.getField(CosmosDBSourceTask.class, "shouldFillMoreRecords", true), testTask);
+        shouldFillMoreRecords.set(false);
+
+        List<SourceRecord>  result=testTask.poll();
+        Assert.assertEquals(0, result.size());
+        Assert.assertTrue(shouldFillMoreRecords.get());
     }
 
     @Test

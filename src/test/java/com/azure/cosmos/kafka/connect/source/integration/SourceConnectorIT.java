@@ -7,44 +7,46 @@ import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.CosmosClientBuilder;
 import com.azure.cosmos.CosmosContainer;
 import com.azure.cosmos.CosmosDatabase;
+import com.azure.cosmos.CosmosException;
+import com.azure.cosmos.kafka.connect.ConnectorTestConfigurations;
+import com.azure.cosmos.kafka.connect.IntegrationTest;
 import com.azure.cosmos.models.CosmosContainerProperties;
+import com.azure.cosmos.models.CosmosQueryRequestOptions;
 import com.azure.cosmos.models.ThroughputProperties;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
+import io.confluent.kafka.serializers.KafkaAvroDeserializer;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.connect.json.JsonDeserializer;
-import org.sourcelab.kafka.connect.apiclient.Configuration;
-import org.sourcelab.kafka.connect.apiclient.KafkaConnectClient;
-import org.sourcelab.kafka.connect.apiclient.request.dto.NewConnectorDefinition;
-import io.confluent.kafka.serializers.KafkaAvroDeserializer;
-
-import com.azure.cosmos.kafka.connect.IntegrationTest;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.After;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.sourcelab.kafka.connect.apiclient.Configuration;
+import org.sourcelab.kafka.connect.apiclient.KafkaConnectClient;
+import org.sourcelab.kafka.connect.apiclient.request.dto.NewConnectorDefinition;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Arrays;
+import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
-import java.time.Duration;
+import java.util.stream.Collectors;
 
 import static org.apache.kafka.common.utils.Utils.sleep;
 import static org.sourcelab.kafka.connect.apiclient.request.dto.NewConnectorDefinition.Builder;
@@ -62,10 +64,9 @@ public class SourceConnectorIT {
     private static final String SECOND_KAFKA_TOPIC = "source-test-2";
     private static final String AVRO_KAFKA_TOPIC = "source-test-avro";
     private static final String AVRO_CONVERTER = "io.confluent.connect.avro.AvroConverter";
-    private static final String AVRO_SCHEMA_REGISTRY = "http://schema-registry:8081";
-    private static final String SCHEMA_REGISTRY_URL = "http://localhost:8081";
+    private static final String SCHEMA_REGISTRY_URL = ConnectorTestConfigurations.SCHEMA_REGISTRY_URL;
     private static final String CONNECT_CLIENT_URL = "http://localhost:8083";
-    private static final String BOOTSTRAP_SERVER_ADD = "localhost:9092";
+    private static final String BOOTSTRAP_SERVER_ADD = ConnectorTestConfigurations.BOOTSTRAP_SERVER;
 
     private String databaseName;
     private String connectorName;
@@ -78,6 +79,7 @@ public class SourceConnectorIT {
     private KafkaConsumer<String, GenericRecord> avroConsumer;
     private List<ConsumerRecord<String, JsonNode>> recordBuffer;
     private List<ConsumerRecord<String, GenericRecord>> avroRecordBuffer;
+    private String leaseContainerName;
 
     /**
      * Load CosmosDB configuration from the connector config JSON and set up CosmosDB client.
@@ -93,7 +95,7 @@ public class SourceConnectorIT {
         String topicContainerMap = config.get("connect.cosmos.containers.topicmap").textValue();
         String topic = StringUtils.substringBefore(topicContainerMap, "#");
         String containerName = StringUtils.substringAfter(topicContainerMap, "#");
-
+        this.leaseContainerName = containerName + "-leases";
         // Setup Cosmos Client
         logger.debug("Setting up the Cosmos DB client");
         cosmosClient = new CosmosClientBuilder()
@@ -182,8 +184,14 @@ public class SourceConnectorIT {
             .withConfig("tasks.max", config.get("tasks.max").textValue())
             .withConfig("value.converter", config.get("value.converter").textValue())
             .withConfig("value.converter.schemas.enable", config.get("value.converter.schemas.enable").textValue())
+            .withConfig("value.converter.schema.registry.url", SCHEMA_REGISTRY_URL)
+            .withConfig("value.converter.basic.auth.credentials.source", "USER_INFO")
+            .withConfig("value.converter.basic.auth.user.info", ConnectorTestConfigurations.BASIC_AUTH_USER_INFO)
             .withConfig("key.converter", config.get("key.converter").textValue())
             .withConfig("key.converter.schemas.enable", config.get("key.converter.schemas.enable").textValue())
+            .withConfig("key.converter.schema.registry.url", SCHEMA_REGISTRY_URL)
+            .withConfig("key.converter.basic.auth.credentials.source", "USER_INFO")
+            .withConfig("key.converter.basic.auth.user.info", ConnectorTestConfigurations.BASIC_AUTH_USER_INFO)
             .withConfig("connect.cosmos.task.poll.interval", config.get("connect.cosmos.task.poll.interval").textValue())
             .withConfig("connect.cosmos.offset.useLatest", config.get("connect.cosmos.offset.useLatest").booleanValue())
             .withConfig("connect.cosmos.connection.endpoint", config.get("connect.cosmos.connection.endpoint").textValue())
@@ -200,6 +208,13 @@ public class SourceConnectorIT {
         kafkaProperties.put("bootstrap.servers", BOOTSTRAP_SERVER_ADD);
         kafkaProperties.put("group.id", "IntegrationTest");
         kafkaProperties.put("key.deserializer", StringDeserializer.class.getName());
+        kafkaProperties.put("sasl.jaas.config", ConnectorTestConfigurations.SASL_JAAS);
+        kafkaProperties.put("security.protocol", "SASL_SSL");
+        kafkaProperties.put("sasl.mechanism", "PLAIN");
+        kafkaProperties.put("client.dns.lookup", "use_all_dns_ips");
+        kafkaProperties.put("session.timeout.ms", "45000");
+        kafkaProperties.put("basic.auth.credentials.source", "USER_INFO");
+        kafkaProperties.put("basic.auth.user.info", ConnectorTestConfigurations.BASIC_AUTH_USER_INFO);
         return kafkaProperties;
     }
 
@@ -313,10 +328,8 @@ public class SourceConnectorIT {
         // Create source connector with AVRO config
         connectClient.addConnector(connectConfig
             .withConfig("value.converter", AVRO_CONVERTER)
-            .withConfig("value.converter.schema.registry.url", AVRO_SCHEMA_REGISTRY)
             .withConfig("value.converter.schemas.enable", "true")
             .withConfig("key.converter", AVRO_CONVERTER)
-            .withConfig("key.converter.schema.registry.url", AVRO_SCHEMA_REGISTRY)
             .withConfig("key.converter.schemas.enable", "true")
             .withConfig("connect.cosmos.containers.topicmap", AVRO_KAFKA_TOPIC+"#kafka")
             .build());
@@ -493,6 +506,101 @@ public class SourceConnectorIT {
         Assert.assertNotNull("Person A could not be retrieved from messages", resultRecord.orElse(null));
         resultRecord = searchConsumerRecords(secondPerson);
         Assert.assertNotNull("Person B could not be retrieved from messages", resultRecord.orElse(null));
+    }
+
+    /**
+     * Test when lease container is not initialized and connect.cosmos.offset.useLatest = false
+     * the change feed should start processing from beginning
+     */
+    @Test
+    public void testStart_notUseLatestOffset() {
+
+        // Delete previous created lease container
+        try {
+            cosmosClient.getDatabase(this.databaseName).getContainer(this.leaseContainerName).delete();
+        } catch (CosmosException e) {
+            if (e.getStatusCode() == 404) {
+                logger.info("Lease container does not exists");
+            } else {
+                throw e;
+            }
+        }
+
+        // Create source connector with default config
+        connectClient.addConnector(connectConfig.build());
+
+        // Allow time for Source connector to setup resources
+        sleep(8000);
+
+        // Create item in Cosmos DB
+        Person person = new Person("Lucy Ferr", RandomUtils.nextLong(1L, 9999999L) + "");
+        targetContainer.createItem(person);
+
+        // Allow time for Source connector to process data from Cosmos DB
+        sleep(8000);
+        // Verify the lease document continuationToken is not null and > 0
+        List<JsonNode> leaseDocuments = this.getAllLeaseDocuments();
+        for (JsonNode leaseDocument : leaseDocuments) {
+            Assert.assertTrue(
+                    Integer.parseInt(leaseDocument.get("ContinuationToken").asText().replace("\"", "")) > 0);
+        }
+    }
+
+    /**
+     * Test when lease container is not initialized and connect.cosmos.offset.useLatest = true
+     * the change feed should start processing from now
+     */
+    @Test
+    public void testStart_useLatestOffset() {
+
+        // Delete previous created lease container
+        try {
+            cosmosClient.getDatabase(this.databaseName).getContainer(this.leaseContainerName).delete();
+        } catch (CosmosException e) {
+            if (e.getStatusCode() == 404) {
+                logger.info("Lease container does not exists");
+            } else {
+                throw e;
+            }
+        }
+
+        // Create item before the task start
+        Person person = new Person("Lucy Ferr", RandomUtils.nextLong(1L, 9999999L) + "");
+        targetContainer.createItem(person);
+
+        // Create source connector with default config
+        connectClient.addConnector(
+                connectConfig.withConfig("connect.cosmos.offset.useLatest", true).build());
+
+        // Allow time for Source connector to setup resources
+        sleep(10000);
+
+        // Verify the lease document continuationToken will be null
+        List<JsonNode> leaseDocuments = this.getAllLeaseDocuments();
+        for (JsonNode leaseDocument : leaseDocuments) {
+            Assert.assertTrue(leaseDocument.get("ContinuationToken").isNull());
+        }
+
+        // now create some new items
+        person = new Person("Lucy Ferr", RandomUtils.nextLong(1L, 9999999L) + "");
+        targetContainer.createItem(person);
+        // Allow time for Source connector to setup resources
+        sleep(10000);
+
+        // Verify the lease document continuationToken will be null
+        leaseDocuments = this.getAllLeaseDocuments();
+        for (JsonNode leaseDocument : leaseDocuments) {
+            Assert.assertTrue(
+                    Integer.parseInt(leaseDocument.get("ContinuationToken").asText().replace("\"", "")) > 0);        }
+    }
+
+    private List<JsonNode> getAllLeaseDocuments() {
+        String sql = "SELECT * FROM c WHERE IS_DEFINED(c.Owner)";
+        return this.cosmosClient
+                .getDatabase(this.databaseName)
+                .getContainer(this.leaseContainerName)
+                .queryItems(sql, new CosmosQueryRequestOptions(), JsonNode.class)
+                .stream().collect(Collectors.toList());
     }
 
     /**
