@@ -10,10 +10,10 @@ File any issues / feature requests / questions etc. you may have in the [Issues]
 
 This project provides connectors for [Kafka Connect](http://kafka.apache.org/documentation.html#connect) to read from and write data to [Azure Cosmos DB](https://azure.microsoft.com/en-us/services/cosmos-db/)(SQL API).
 
-The connectors in this reposiotry are specifically for the Cosmos DB **SQL API**. 
+The connectors in this repository are specifically for the Cosmos DB **SQL API**. 
 If you are using Cosmos DB with other APIs then there is likely a specific connector for that API, but it's not this one. 
 - Mongo API - [MongoDB Kafka Connector](https://www.mongodb.com/docs/kafka-connector/current/)
-- Cassandra API - [Cassandra Sink Conenctor](https://docs.confluent.io/kafka-connect-cassandra/current/overview.html)
+- Cassandra API - [Cassandra Sink Connector](https://docs.confluent.io/kafka-connect-cassandra/current/overview.html)
 - Gremlin API - [Kafka Connect connector for Cosmos DB Gremlin API](https://github.com/Azure/kafka-connect-cosmosdb-graph)
 
 ## Exactly-Once Support
@@ -111,7 +111,7 @@ The example below shows the AvroConverter key and value properties that are adde
 ### Choosing a conversion format
 
 - If you're configuring a **Source connector** and
-  - If you want Kafka Connect to incldue plain JSON in the message it writes to Kafka, you'd set [JSON (Plain)](#json-plain) configuration.
+  - If you want Kafka Connect to include plain JSON in the message it writes to Kafka, you'd set [JSON (Plain)](#json-plain) configuration.
   - If you want Kafka Connect to include the schema in the message it writes to Kafka, you’d set [JSON with Schema](#json-with-schema) configuration.
   - If you want Kafka Connect to include AVRO format in the message it writes to Kafka, you'd set [AVRO](#avro) configuration.
 
@@ -125,7 +125,7 @@ The example below shows the AvroConverter key and value properties that are adde
 
 Some of the [common errors](https://www.confluent.io/blog/kafka-connect-deep-dive-converters-serialization-explained/#common-errors) you can get if you misconfigure the converters in Kafka Connect. These will show up in the sinks you configure for Kafka Connect, as it’s this point at which you’ll be trying to deserialize the messages already stored in Kafka. Converter problems tend not to occur in sources because it’s in the source that the serialization is set.
 
-![Converter Configuration Erros](doc/images/converter-misconfigurations.png "CosmosDB Converter Configurations")
+![Converter Configuration Errors](doc/images/converter-misconfigurations.png "CosmosDB Converter Configurations")
 
 ## Configuration
 
