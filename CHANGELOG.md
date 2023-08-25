@@ -4,6 +4,9 @@
 * Added a preserve ordering flag to use the preserve ordering bulk executor. This prevents consecutive updates to the same document from overwriting each other.  `connect.cosmos.sink.bulk.ordering.preserved.enabled`. [PR 529](https://github.com/microsoft/kafka-connect-cosmosdb/pull/529)
 * Added compression feature to resolve duplicate records in a single batch when consuming from kafka topic in the bulk mode for sink connector through new config `connect.cosmos.sink.bulk.compression.enabled`. [PR 515](https://github.com/microsoft/kafka-connect-cosmosdb/pull/515)
 
+#### Other Changes
+* Added documentation and infrastructure for testing in distributed mode using confluent cloud integration. [PR 528](https://github.com/microsoft/kafka-connect-cosmosdb/pull/528)
+
 ### 1.9.0 (2023-06-19)
 #### New Features
 * Updated `azure-cosmos` version to 4.46.0.
