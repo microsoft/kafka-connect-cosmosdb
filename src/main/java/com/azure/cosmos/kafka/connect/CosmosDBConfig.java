@@ -75,7 +75,7 @@ public class CosmosDBConfig extends AbstractConfig {
     private static final boolean DEFAULT_COSMOS_SINK_BULK_COMPRESSION_ENABLED = true;
     private static final String COSMOS_SINK_BULK_ORDERING_PRESERVED_ENABLED_CONF = "connect.cosmos.sink.bulk.ordering.preserved.enabled";
     private static final String COSMOS_SINK_BULK_ORDERING_PRESERVED_ENABLED_DOC = "Flag to indicate whether Cosmos DB in bulk mode will preserve the ordering of items with the same id and partition key. By default it is true. ";
-    private static final boolean DEFAULT_COSMOS_SINK_BULK_ORDERING_PRESERVED_ENABLED = true;
+    private static final boolean DEFAULT_COSMOS_SINK_BULK_ORDERING_PRESERVED_ENABLED = false;
 
     public static final String COSMOS_SINK_MAX_RETRY_COUNT = "connect.cosmos.sink.maxRetryCount";
     private static final String COSMOS_SINK_MAX_RETRY_COUNT_DOC =
