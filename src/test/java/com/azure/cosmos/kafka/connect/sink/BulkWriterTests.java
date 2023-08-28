@@ -45,6 +45,7 @@ public class BulkWriterTests {
     private final int MAX_RETRY_COUNT = 2;
     private final String TOPIC_NAME = "testtopic";
     private final boolean COMPRESSION_ENABLED = true;
+    private final boolean PRESERVE_ORDER_ENABLED = false;
     private CosmosContainer container;
     private BulkWriter bulkWriter;
 
@@ -60,7 +61,7 @@ public class BulkWriterTests {
         Mockito.when(mockedContainerProperties.getPartitionKeyDefinition()).thenReturn(mockedPartitionKeyDefinition);
         Mockito.when(mockedPartitionKeyDefinition.getPaths()).thenReturn(Arrays.asList("/id"));
 
-        bulkWriter = new BulkWriter(container, MAX_RETRY_COUNT, COMPRESSION_ENABLED);
+        bulkWriter = new BulkWriter(container, MAX_RETRY_COUNT, COMPRESSION_ENABLED, PRESERVE_ORDER_ENABLED);
     }
 
     @Test
