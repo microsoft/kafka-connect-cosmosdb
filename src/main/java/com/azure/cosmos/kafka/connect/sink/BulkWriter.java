@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.LinkedHashMap;
 
 import static com.azure.cosmos.implementation.guava25.base.Preconditions.checkArgument;
 import static com.azure.cosmos.implementation.guava25.base.Preconditions.checkNotNull;
@@ -33,10 +35,11 @@ public class BulkWriter extends SinkWriterBase {
 
     private final CosmosContainer cosmosContainer;
     private final PartitionKeyDefinition partitionKeyDefinition;
+    private final boolean compressionEnabled;
 
-    public BulkWriter(CosmosContainer container, int maxRetryCount) {
+    public BulkWriter(CosmosContainer container, int maxRetryCount, boolean compressionEnabled) {
         super(maxRetryCount);
-
+        this.compressionEnabled = compressionEnabled;
         checkNotNull(container, "Argument 'container' can not be null");
         this.cosmosContainer = container;
         this.partitionKeyDefinition = container.read().getProperties().getPartitionKeyDefinition();
@@ -56,12 +59,27 @@ public class BulkWriter extends SinkWriterBase {
         }
 
         List<CosmosItemOperation> itemOperations = new ArrayList<>();
+        if (this.compressionEnabled) {
+            LinkedHashMap<IdAndPartitionKey, SinkRecord> uniqueItems = new LinkedHashMap<>();
+            for (SinkRecord sinkRecord : sinkRecords) {
+                IdAndPartitionKey idAndPartitionKey = new IdAndPartitionKey(((Map<String, Object>) sinkRecord.value()).get("id"), this.getPartitionKeyValue(sinkRecord.value()));
+                uniqueItems.compute(idAndPartitionKey, (key, previousSinkRecord) -> {
+                    if (previousSinkRecord == null) {
+                        return sinkRecord;
+                    } else if (previousSinkRecord.timestamp() != null && sinkRecord.timestamp() != null && previousSinkRecord.timestamp() < sinkRecord.timestamp()) {
+                        return sinkRecord;
+                    }
+                    return previousSinkRecord;
+                });
+
+            }
+            sinkRecords = new ArrayList<>(uniqueItems.values());
+        }
         for (SinkRecord sinkRecord : sinkRecords) {
             CosmosItemOperation cosmosItemOperation = CosmosBulkOperations.getUpsertItemOperation(
                     sinkRecord.value(),
                     this.getPartitionKeyValue(sinkRecord.value()),
                     new SinkOperationContext(sinkRecord));
-
             itemOperations.add(cosmosItemOperation);
         }
 
@@ -147,4 +165,41 @@ public class BulkWriter extends SinkWriterBase {
             BridgeInternal.setSubStatusCode(this, subStatusCode);
         }
     }
+
+    private static class IdAndPartitionKey {
+        Object id;
+        PartitionKey partitionKey;
+
+        public IdAndPartitionKey(Object id, PartitionKey partitionKey) {
+            this.id = id;
+            this.partitionKey = partitionKey;
+        }
+
+
+        public Object getId() {
+            return id;
+        }
+
+        public PartitionKey getPartitionKey() {
+            return partitionKey;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (!(o instanceof IdAndPartitionKey)) {
+                return false;
+            }
+            IdAndPartitionKey that = (IdAndPartitionKey) o;
+            return Objects.equals(id, that.id) && Objects.equals(partitionKey, that.partitionKey);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(id, partitionKey.toString());
+        }
+    }
+
 }

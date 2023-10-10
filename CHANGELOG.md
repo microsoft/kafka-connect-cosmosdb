@@ -1,4 +1,11 @@
 ## Release History
+### 1.10.0 (2023-10-10)
+#### New Features
+* Added compression feature to resolve duplicate records in a single batch when consuming from kafka topic in the bulk mode for sink connector through new config `connect.cosmos.sink.bulk.compression.enabled`. [PR 515](https://github.com/microsoft/kafka-connect-cosmosdb/pull/515)
+* Updated `azure-cosmos` version to 4.51.0.
+
+#### Other Changes
+* Added documentation and infrastructure for testing in distributed mode using confluent cloud integration. [PR 528](https://github.com/microsoft/kafka-connect-cosmosdb/pull/528)
 
 ### 1.9.0 (2023-06-19)
 #### New Features
