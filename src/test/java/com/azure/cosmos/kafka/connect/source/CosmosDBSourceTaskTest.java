@@ -98,7 +98,7 @@ public class CosmosDBSourceTaskTest {
 
     @Test
     public void testHandleChanges() throws JsonProcessingException, IllegalAccessException, InterruptedException {
-        String jsonString = "{\"k1\":\"v1\",\"k2\":\"v2\"}";
+        String jsonString = "{\"k1\":\"v1\",\"k2\":\"v2\", \"_lsn\":\"2\"}";
         ObjectMapper mapper = new ObjectMapper();
         JsonNode actualObj = mapper.readTree(jsonString);
         List<JsonNode> changes = new ArrayList<>();
@@ -125,7 +125,7 @@ public class CosmosDBSourceTaskTest {
 
     @Test
     public void testPoll() throws InterruptedException, JsonProcessingException, IllegalAccessException {
-        String jsonString = "{\"k1\":\"v1\",\"k2\":\"v2\"}";
+        String jsonString = "{\"k1\":\"v1\",\"k2\":\"v2\", \"_lsn\":\"2\"}";
         ObjectMapper mapper = new ObjectMapper();
         JsonNode actualObj = mapper.readTree(jsonString);
         List<JsonNode> changes = new ArrayList<>();
@@ -145,7 +145,7 @@ public class CosmosDBSourceTaskTest {
     @Test
     public void testPoll_shouldFillMoreRecordsFalse() throws InterruptedException, JsonProcessingException, IllegalAccessException {
         // test when should fillMoreRecords false, then poll method will return immediately
-        String jsonString = "{\"k1\":\"v1\",\"k2\":\"v2\"}";
+        String jsonString = "{\"k1\":\"v1\",\"k2\":\"v2\", \"_lsn\":\"2\"}";
         ObjectMapper mapper = new ObjectMapper();
         JsonNode actualObj = mapper.readTree(jsonString);
 
@@ -169,7 +169,7 @@ public class CosmosDBSourceTaskTest {
 
     @Test
     public void testPollWithMessageKey() throws InterruptedException, JsonProcessingException {
-        String jsonString = "{\"id\":123,\"k1\":\"v1\",\"k2\":\"v2\"}";
+        String jsonString = "{\"id\":123,\"k1\":\"v1\",\"k2\":\"v2\", \"_lsn\":\"2\"}";
         ObjectMapper mapper = new ObjectMapper();
         JsonNode actualObj = mapper.readTree(jsonString);
         List<JsonNode> changes = new ArrayList<>();
@@ -204,7 +204,7 @@ public class CosmosDBSourceTaskTest {
 
     @Test
     public void testZeroBatchSize() throws InterruptedException, JsonProcessingException, IllegalAccessException {
-        String jsonString = "{\"k1\":\"v1\",\"k2\":\"v2\"}";
+        String jsonString = "{\"k1\":\"v1\",\"k2\":\"v2\", \"_lsn\":\"2\"}";
         ObjectMapper mapper = new ObjectMapper();
         JsonNode actualObj = mapper.readTree(jsonString);
         List<JsonNode> changes = new ArrayList<>();
@@ -223,7 +223,7 @@ public class CosmosDBSourceTaskTest {
 
     @Test
     public void testSmallBufferSize() throws InterruptedException, JsonProcessingException, IllegalAccessException {
-        String jsonString = "{\"k1\":\"v1\",\"k2\":\"v2\"}";
+        String jsonString = "{\"k1\":\"v1\",\"k2\":\"v2\", \"_lsn\":\"2\"}";
         ObjectMapper mapper = new ObjectMapper();
         JsonNode actualObj = mapper.readTree(jsonString);
         List<JsonNode> changes = new ArrayList<>();
@@ -243,7 +243,7 @@ public class CosmosDBSourceTaskTest {
 
     @Test(expected=IllegalStateException.class)
     public void testEmptyAssignedContainerThrowsIllegalStateException() throws InterruptedException, JsonProcessingException, IllegalAccessException {
-        String jsonString = "{\"k1\":\"v1\",\"k2\":\"v2\"}";
+        String jsonString = "{\"k1\":\"v1\",\"k2\":\"v2\", \"_lsn\":\"2\"}";
         ObjectMapper mapper = new ObjectMapper();
         JsonNode actualObj = mapper.readTree(jsonString);
         List<JsonNode> changes = new ArrayList<>();
