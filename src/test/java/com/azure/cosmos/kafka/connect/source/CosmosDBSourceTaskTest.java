@@ -35,6 +35,7 @@ public class CosmosDBSourceTaskTest {
     private final String topicName = "testtopic";
     private final String containerName = "container666";
     private final String databaseName = "fakeDatabase312";
+    private final String OFFSET_KEY = "recordContinuationToken";
     private CosmosAsyncClient mockCosmosClient;
     private CosmosAsyncContainer mockFeedContainer;
     private CosmosAsyncContainer mockLeaseContainer;
@@ -181,6 +182,24 @@ public class CosmosDBSourceTaskTest {
         List<SourceRecord>  result=testTask.poll();
         Assert.assertEquals(1, result.size());
         Assert.assertEquals("123", result.get(0).key());
+    }
+
+    @Test
+    public void testSourceRecordOffset() throws InterruptedException, JsonProcessingException {
+        String jsonString = "{\"id\":123,\"k1\":\"v1\",\"k2\":\"v2\", \"_lsn\":\"2\"}";
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode actualObj = mapper.readTree(jsonString);
+        List<JsonNode> changes = new ArrayList<>();
+        changes.add(actualObj);
+
+        new Thread(() -> {
+            testTask.handleCosmosDbChanges(changes);
+        }).start();
+
+        List<SourceRecord> results = testTask.poll();
+        Assert.assertEquals(1, results.size());
+        Assert.assertEquals("123", results.get(0).key());
+        Assert.assertEquals("2", results.get(0).sourceOffset().get(OFFSET_KEY));
     }
 
     @Test
