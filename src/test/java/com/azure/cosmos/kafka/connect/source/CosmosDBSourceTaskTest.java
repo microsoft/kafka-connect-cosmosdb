@@ -35,6 +35,7 @@ public class CosmosDBSourceTaskTest {
     private final String topicName = "testtopic";
     private final String containerName = "container666";
     private final String databaseName = "fakeDatabase312";
+    private final String OFFSET_KEY = "recordContinuationToken";
     private CosmosAsyncClient mockCosmosClient;
     private CosmosAsyncContainer mockFeedContainer;
     private CosmosAsyncContainer mockLeaseContainer;
@@ -97,7 +98,7 @@ public class CosmosDBSourceTaskTest {
 
     @Test
     public void testHandleChanges() throws JsonProcessingException, IllegalAccessException, InterruptedException {
-        String jsonString = "{\"k1\":\"v1\",\"k2\":\"v2\"}";
+        String jsonString = "{\"k1\":\"v1\",\"k2\":\"v2\", \"_lsn\":\"2\"}";
         ObjectMapper mapper = new ObjectMapper();
         JsonNode actualObj = mapper.readTree(jsonString);
         List<JsonNode> changes = new ArrayList<>();
@@ -124,7 +125,7 @@ public class CosmosDBSourceTaskTest {
 
     @Test
     public void testPoll() throws InterruptedException, JsonProcessingException, IllegalAccessException {
-        String jsonString = "{\"k1\":\"v1\",\"k2\":\"v2\"}";
+        String jsonString = "{\"k1\":\"v1\",\"k2\":\"v2\", \"_lsn\":\"2\"}";
         ObjectMapper mapper = new ObjectMapper();
         JsonNode actualObj = mapper.readTree(jsonString);
         List<JsonNode> changes = new ArrayList<>();
@@ -144,7 +145,7 @@ public class CosmosDBSourceTaskTest {
     @Test
     public void testPoll_shouldFillMoreRecordsFalse() throws InterruptedException, JsonProcessingException, IllegalAccessException {
         // test when should fillMoreRecords false, then poll method will return immediately
-        String jsonString = "{\"k1\":\"v1\",\"k2\":\"v2\"}";
+        String jsonString = "{\"k1\":\"v1\",\"k2\":\"v2\", \"_lsn\":\"2\"}";
         ObjectMapper mapper = new ObjectMapper();
         JsonNode actualObj = mapper.readTree(jsonString);
 
@@ -168,7 +169,7 @@ public class CosmosDBSourceTaskTest {
 
     @Test
     public void testPollWithMessageKey() throws InterruptedException, JsonProcessingException {
-        String jsonString = "{\"id\":123,\"k1\":\"v1\",\"k2\":\"v2\"}";
+        String jsonString = "{\"id\":123,\"k1\":\"v1\",\"k2\":\"v2\", \"_lsn\":\"2\"}";
         ObjectMapper mapper = new ObjectMapper();
         JsonNode actualObj = mapper.readTree(jsonString);
         List<JsonNode> changes = new ArrayList<>();
@@ -184,8 +185,26 @@ public class CosmosDBSourceTaskTest {
     }
 
     @Test
+    public void testSourceRecordOffset() throws InterruptedException, JsonProcessingException {
+        String jsonString = "{\"id\":123,\"k1\":\"v1\",\"k2\":\"v2\", \"_lsn\":\"2\"}";
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode actualObj = mapper.readTree(jsonString);
+        List<JsonNode> changes = new ArrayList<>();
+        changes.add(actualObj);
+
+        new Thread(() -> {
+            testTask.handleCosmosDbChanges(changes);
+        }).start();
+
+        List<SourceRecord> results = testTask.poll();
+        Assert.assertEquals(1, results.size());
+        Assert.assertEquals("123", results.get(0).key());
+        Assert.assertEquals("2", results.get(0).sourceOffset().get(OFFSET_KEY));
+    }
+
+    @Test
     public void testZeroBatchSize() throws InterruptedException, JsonProcessingException, IllegalAccessException {
-        String jsonString = "{\"k1\":\"v1\",\"k2\":\"v2\"}";
+        String jsonString = "{\"k1\":\"v1\",\"k2\":\"v2\", \"_lsn\":\"2\"}";
         ObjectMapper mapper = new ObjectMapper();
         JsonNode actualObj = mapper.readTree(jsonString);
         List<JsonNode> changes = new ArrayList<>();
@@ -204,7 +223,7 @@ public class CosmosDBSourceTaskTest {
 
     @Test
     public void testSmallBufferSize() throws InterruptedException, JsonProcessingException, IllegalAccessException {
-        String jsonString = "{\"k1\":\"v1\",\"k2\":\"v2\"}";
+        String jsonString = "{\"k1\":\"v1\",\"k2\":\"v2\", \"_lsn\":\"2\"}";
         ObjectMapper mapper = new ObjectMapper();
         JsonNode actualObj = mapper.readTree(jsonString);
         List<JsonNode> changes = new ArrayList<>();
@@ -224,7 +243,7 @@ public class CosmosDBSourceTaskTest {
 
     @Test(expected=IllegalStateException.class)
     public void testEmptyAssignedContainerThrowsIllegalStateException() throws InterruptedException, JsonProcessingException, IllegalAccessException {
-        String jsonString = "{\"k1\":\"v1\",\"k2\":\"v2\"}";
+        String jsonString = "{\"k1\":\"v1\",\"k2\":\"v2\", \"_lsn\":\"2\"}";
         ObjectMapper mapper = new ObjectMapper();
         JsonNode actualObj = mapper.readTree(jsonString);
         List<JsonNode> changes = new ArrayList<>();
