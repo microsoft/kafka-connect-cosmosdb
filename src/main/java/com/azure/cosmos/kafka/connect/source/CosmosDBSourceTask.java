@@ -111,20 +111,16 @@ public class CosmosDBSourceTask extends SourceTask {
     @Override
     public List<SourceRecord> poll() throws InterruptedException {
         List<SourceRecord> records = new ArrayList<>();
-        
-        long maxWaitTime = System.currentTimeMillis() + config.getTaskTimeout();
 
         TopicContainerMap topicContainerMap = config.getTopicContainerMap();
         String topic = topicContainerMap.getTopicForContainer(config.getAssignedContainer()).orElseThrow(
             () -> new IllegalStateException("No topic defined for container " + config.getAssignedContainer() + "."));
-        
-        while (running.get()) {
-            fillRecords(records, topic);            
-            if (records.isEmpty() || System.currentTimeMillis() > maxWaitTime) {
-                logger.info("Sending {} documents.", records.size());
-                break;
-            }
-        }
+
+        // When we have returned from the fillRecords, it means
+        // maxBufferSize has reached
+        // or maxTaskTime has reached
+        // or all the items from the changeFeed batches has been consumed
+        fillRecords(records, topic);
 
         this.shouldFillMoreRecords.set(true);
         return records;

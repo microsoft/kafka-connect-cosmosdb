@@ -18,6 +18,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import com.azure.cosmos.CosmosAsyncClient;
 import com.azure.cosmos.CosmosAsyncContainer;
 import com.azure.cosmos.CosmosAsyncDatabase;
+import com.azure.cosmos.implementation.guava25.base.Stopwatch;
 import com.azure.cosmos.util.CosmosPagedFlux;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -238,6 +239,28 @@ public class CosmosDBSourceTaskTest {
 
         List<SourceRecord>  result=testTask.poll();
         Assert.assertEquals(1, result.size());
+    }
+
+    @Test
+    public void testPollDuration() throws InterruptedException, JsonProcessingException, IllegalAccessException {
+        String jsonString = "{\"k1\":\"v1\",\"k2\":\"v2\", \"_lsn\":\"2\"}";
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode actualObj = mapper.readTree(jsonString);
+        List<JsonNode> changes = new ArrayList<>();
+        changes.add(actualObj);
+        config = new CosmosDBSourceConfig(sourceSettings);
+        sourceSettings.put(CosmosDBSourceConfig.COSMOS_SOURCE_TASK_BUFFER_SIZE_CONF, String.valueOf(changes.size() + 1));
+        FieldUtils.writeField(testTask, "config", config, true);
+
+        new Thread(() -> {
+            testTask.handleCosmosDbChanges(changes);
+        }).start();
+
+        Stopwatch stopwatch = Stopwatch.createStarted();
+        List<SourceRecord>  result=testTask.poll();
+        stopwatch.stop();
+        Assert.assertEquals(1, result.size());
+        Assert.assertTrue(stopwatch.elapsed().toMillis() < config.getTaskTimeout());
     }
 
 
