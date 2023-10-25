@@ -1,5 +1,8 @@
 ## Release History
-### 1.11.0-Beta.1 (Unreleased)
+### 1.11.0 (2023-10-25)
+#### New Features
+* Updated `azure-cosmos` version to 4.52.0.
+
 #### Other Changes
 * Construct `SourceRecord` offset based on `_lsn` from the item in `CosmosDBSourceConnector`. [PR 534](https://github.com/microsoft/kafka-connect-cosmosdb/pull/534)
 
