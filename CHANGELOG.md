@@ -1,4 +1,11 @@
 ## Release History
+### 1.11.0 (2023-10-25)
+#### New Features
+* Updated `azure-cosmos` version to 4.52.0.
+
+#### Other Changes
+* Construct `SourceRecord` offset based on `_lsn` from the item in `CosmosDBSourceConnector`. [PR 534](https://github.com/microsoft/kafka-connect-cosmosdb/pull/534)
+
 ### 1.10.0 (2023-10-10)
 #### New Features
 * Added compression feature to resolve duplicate records in a single batch when consuming from kafka topic in the bulk mode for sink connector through new config `connect.cosmos.sink.bulk.compression.enabled`. [PR 515](https://github.com/microsoft/kafka-connect-cosmosdb/pull/515)

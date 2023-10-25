@@ -17,7 +17,6 @@ import com.azure.cosmos.models.ChangeFeedProcessorOptions;
 import com.azure.cosmos.models.CosmosContainerProperties;
 import com.azure.cosmos.models.CosmosContainerRequestOptions;
 import com.azure.cosmos.models.CosmosContainerResponse;
-import com.azure.cosmos.models.CosmosQueryRequestOptions;
 import com.azure.cosmos.models.ThroughputProperties;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.kafka.connect.data.Schema;
@@ -44,7 +43,7 @@ public class CosmosDBSourceTask extends SourceTask {
 
     private static final Logger logger = LoggerFactory.getLogger(CosmosDBSourceTask.class);
     private static final String OFFSET_KEY = "recordContinuationToken";
-    private static final String CONTINUATION_TOKEN = "ContinuationToken";
+    private static final String LSN_ATTRIBUTE_NAME = "_lsn";
 
     private final AtomicBoolean running = new AtomicBoolean(false);
     private CosmosAsyncClient client = null;
@@ -105,26 +104,8 @@ public class CosmosDBSourceTask extends SourceTask {
         logger.info("Started CosmosDB source task.");
     }
 
-    private JsonNode getLeaseContainerRecord() {
-        String sql = "SELECT * FROM c WHERE IS_DEFINED(c.Owner)";
-        Iterable<JsonNode> filteredDocs = leaseContainer.queryItems(sql, new CosmosQueryRequestOptions(), JsonNode.class).toIterable();
-        if (filteredDocs.iterator().hasNext()) {
-            JsonNode result = filteredDocs.iterator().next();
-            // Return node only if it has the continuation token field present
-            if (result.has(CONTINUATION_TOKEN)) {
-                return result;
-            }
-        }
-
-        return null;
-    }
-
-    private String getContinuationToken() {
-        JsonNode leaseRecord = getLeaseContainerRecord();
-        if (client == null || leaseRecord == null) {
-            return null;
-        }
-        return leaseRecord.get(CONTINUATION_TOKEN).textValue();
+    private String getItemLsn(JsonNode item) {
+        return item.get(LSN_ATTRIBUTE_NAME).asText();
     }
 
     @Override
@@ -171,10 +152,8 @@ public class CosmosDBSourceTask extends SourceTask {
                     messageKey = (messageKeyFieldNode != null) ? messageKeyFieldNode.toString() : "";
                 }
 
-                // Get the latest token and record as offset
-                // TODO: The continuationToken here is picked from any lease with owner, so maybe a little bit random
-                // change to show the continuationToken for the leases processed by the current worker
-                Map<String, Object> sourceOffset = singletonMap(OFFSET_KEY, getContinuationToken());
+                // Get the latest lsn and record as offset
+                Map<String, Object> sourceOffset = singletonMap(OFFSET_KEY, getItemLsn(node));
 
                 if (logger.isDebugEnabled()) {
                     logger.debug("Latest offset is {}.", sourceOffset.get(OFFSET_KEY));
