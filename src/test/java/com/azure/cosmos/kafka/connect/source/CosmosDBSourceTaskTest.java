@@ -271,6 +271,8 @@ public class CosmosDBSourceTaskTest {
             testTask.handleCosmosDbChanges(changes);
         }).start();
 
+        Thread.sleep(500); // give some time for the above task to run
+
         testTask.stop();
         AtomicBoolean isRunning =
             (AtomicBoolean) FieldUtils.readField(
