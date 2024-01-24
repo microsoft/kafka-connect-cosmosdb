@@ -82,7 +82,7 @@ public class CosmosDBSourceTaskTest {
         //Mock query results and iterator for getting lease container token
         CosmosPagedFlux<JsonNode> mockLeaseQueryResults = (CosmosPagedFlux<JsonNode>) Mockito.mock(CosmosPagedFlux.class);
         when(mockLeaseContainer.queryItems(anyString(), any(), eq(JsonNode.class))).thenReturn(mockLeaseQueryResults);
-        
+
         Iterable<JsonNode> mockLeaseQueryIterable = (Iterable<JsonNode>) Mockito.mock(Iterable.class);
         when(mockLeaseQueryResults.toIterable()).thenReturn(mockLeaseQueryIterable);
 
@@ -107,9 +107,9 @@ public class CosmosDBSourceTaskTest {
         new Thread(() -> {
             testTask.handleCosmosDbChanges(changes);
         }).start();
-        
+
         int recordCount = 0;
-        while(recordCount == 0) {
+        while (recordCount == 0) {
             JsonNode jsonNode = this.queue.poll();
             if (jsonNode != null) {
                 recordCount++;
@@ -135,7 +135,7 @@ public class CosmosDBSourceTaskTest {
             testTask.handleCosmosDbChanges(changes);
         }).start();
 
-        List<SourceRecord>  result=testTask.poll();
+        List<SourceRecord> result = testTask.poll();
         Assert.assertEquals(1, result.size());
         AtomicBoolean shouldFillMoreRecords =
                 (AtomicBoolean) FieldUtils.readField(FieldUtils.getField(CosmosDBSourceTask.class, "shouldFillMoreRecords", true), testTask);
@@ -162,7 +162,7 @@ public class CosmosDBSourceTaskTest {
                 (AtomicBoolean) FieldUtils.readField(FieldUtils.getField(CosmosDBSourceTask.class, "shouldFillMoreRecords", true), testTask);
         shouldFillMoreRecords.set(false);
 
-        List<SourceRecord>  result=testTask.poll();
+        List<SourceRecord> result = testTask.poll();
         Assert.assertEquals(0, result.size());
         Assert.assertTrue(shouldFillMoreRecords.get());
     }
@@ -179,7 +179,7 @@ public class CosmosDBSourceTaskTest {
             testTask.handleCosmosDbChanges(changes);
         }).start();
 
-        List<SourceRecord>  result=testTask.poll();
+        List<SourceRecord> result = testTask.poll();
         Assert.assertEquals(1, result.size());
         Assert.assertEquals("123", result.get(0).key());
     }
@@ -217,7 +217,7 @@ public class CosmosDBSourceTaskTest {
             testTask.handleCosmosDbChanges(changes);
         }).start();
 
-        List<SourceRecord>  result=testTask.poll();
+        List<SourceRecord> result = testTask.poll();
         Assert.assertEquals(0, result.size());
     }
 
@@ -236,12 +236,11 @@ public class CosmosDBSourceTaskTest {
             testTask.handleCosmosDbChanges(changes);
         }).start();
 
-        List<SourceRecord>  result=testTask.poll();
+        List<SourceRecord> result = testTask.poll();
         Assert.assertEquals(1, result.size());
     }
 
-
-    @Test(expected=IllegalStateException.class)
+    @Test(expected = IllegalStateException.class)
     public void testEmptyAssignedContainerThrowsIllegalStateException() throws InterruptedException, JsonProcessingException, IllegalAccessException {
         String jsonString = "{\"k1\":\"v1\",\"k2\":\"v2\", \"_lsn\":\"2\"}";
         ObjectMapper mapper = new ObjectMapper();
@@ -256,6 +255,32 @@ public class CosmosDBSourceTaskTest {
             testTask.handleCosmosDbChanges(changes);
         }).start();
 
+        testTask.poll();
+    }
+
+    @Test
+    public void testStop() throws JsonProcessingException, IllegalAccessException, InterruptedException {
+        // validate when stop() being called, even though the queue is not empty, it can still return successfully
+        String jsonString = "{\"k1\":\"v1\",\"k2\":\"v2\", \"_lsn\":\"2\"}";
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode actualObj = mapper.readTree(jsonString);
+        List<JsonNode> changes = new ArrayList<>();
+        changes.add(actualObj);
+
+        new Thread(() -> {
+            testTask.handleCosmosDbChanges(changes);
+        }).start();
+
+        testTask.stop();
+        AtomicBoolean isRunning =
+            (AtomicBoolean) FieldUtils.readField(
+                FieldUtils.getField(CosmosDBSourceTask.class, "running", true),
+                testTask
+            );
+        Assert.assertFalse(isRunning.get());
+
+        // revert back to running status to avoid interrupt other tests
+        FieldUtils.writeField(testTask, "running", new AtomicBoolean(true), true);
         testTask.poll();
     }
 }
