@@ -1,4 +1,8 @@
 ## Release History
+### 1.13.0-beta.1 (Unreleased)
+#### Other Changes
+* Fixed an issue where source connector can be stuck in an infinite loop when task got cancelled. [PR 545](https://github.com/microsoft/kafka-connect-cosmosdb/pull/545) 
+
 ### 1.12.0 (2023-12-18)
 #### New Features
 * Updated `azure-cosmos` version to 4.53.1.
