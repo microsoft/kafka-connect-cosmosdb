@@ -13,6 +13,7 @@ import com.azure.cosmos.CosmosClientBuilder;
 import com.azure.cosmos.CosmosException;
 import com.azure.cosmos.kafka.connect.CosmosDBConfig;
 import com.azure.cosmos.kafka.connect.TopicContainerMap;
+import com.azure.cosmos.kafka.connect.implementations.CosmosKafkaSchedulers;
 import com.azure.cosmos.models.ChangeFeedProcessorOptions;
 import com.azure.cosmos.models.CosmosContainerProperties;
 import com.azure.cosmos.models.CosmosContainerRequestOptions;
@@ -25,7 +26,6 @@ import org.apache.kafka.connect.source.SourceRecord;
 import org.apache.kafka.connect.source.SourceTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import reactor.core.scheduler.Schedulers;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -87,7 +87,7 @@ public class CosmosDBSourceTask extends SourceTask {
         // Initiate Cosmos change feed processor
         changeFeedProcessor = getChangeFeedProcessor(config.getWorkerName(), feedContainer, leaseContainer, config.useLatestOffset());
         changeFeedProcessor.start()
-                .subscribeOn(Schedulers.boundedElastic())
+                .subscribeOn(CosmosKafkaSchedulers.COSMOS_KAFKA_CFP_BOUNDED_ELASTIC)
                 .doOnSuccess(aVoid -> running.set(true))
                 .subscribe();
 
@@ -191,21 +191,13 @@ public class CosmosDBSourceTask extends SourceTask {
     @Override
     public void stop() {
         logger.info("Stopping CosmosDB source task.");
-        while (!this.queue.isEmpty()) {
-            // Wait till the items are drained by poll before stopping.
-            try {
-                sleep(500);
-            } catch (InterruptedException e) {
-                logger.error("Interrupted! Failed to stop the task", e);            
-                // Restore interrupted state...
-                Thread.currentThread().interrupt();                      
-            }
-        }
+        // NOTE: poll() method and stop() method are both called from the same thread,
+        // so it is important not to include any changes which may block both places forever
         running.set(false);
         
         // Release all the resources.
         if (changeFeedProcessor != null) {
-            changeFeedProcessor.stop();
+            changeFeedProcessor.stop().block();
             changeFeedProcessor = null;
         }
     }
