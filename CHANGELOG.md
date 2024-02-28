@@ -1,4 +1,15 @@
 ## Release History
+
+### 1.14.0 (2024-02-28)
+#### New Features
+* Updated `azure-cosmos` version to 4.56.0.
+
+#### Key Bug Fixes
+* Fixed `NullPointerException` in `CosmosDBSinkConnector` when `TRACE` level log is enabled and `SinkRecord` value being null
+
+#### Other Changes
+* Added more DEBUG level logs in `CosmosDBSourceConnector`
+
 ### 1.13.0 (2024-01-25)
 #### New Features
 * Updated `azure-cosmos` version to 4.54.0.
