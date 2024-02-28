@@ -132,11 +132,11 @@ public class CosmosDBSourceTask extends SourceTask {
             List<String> recordDetails =
                 records
                     .stream()
-                    .map(sourceRecord -> String.format("key %s, offset %s", sourceRecord.key(), sourceRecord.sourceOffset()))
+                    .map(sourceRecord -> String.format("[key %s - offset %s]", sourceRecord.key(), sourceRecord.sourceOffset()))
                     .collect(Collectors.toList());
 
             logger.debug(
-                "Worker {}, sending docs {}",
+                "Worker {}, sending {} documents",
                 this.config.getWorkerName(),
                 recordDetails
             );
