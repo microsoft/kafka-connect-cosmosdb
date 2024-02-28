@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 import static java.lang.Thread.sleep;
 import static java.util.Collections.singletonMap;
@@ -62,11 +63,11 @@ public class CosmosDBSourceTask extends SourceTask {
 
     @Override
     public void start(Map<String, String> map) {
-        logger.info("Starting CosmosDBSourceTask.");
+        logger.info("Worker {} Starting CosmosDBSourceTask.", this.config.getWorkerName());
         config = new CosmosDBSourceConfig(map);        
         this.queue = new LinkedTransferQueue<>();
 
-        logger.info("Creating the client.");
+        logger.info("Worker {} Creating the client.", this.config.getWorkerName());
         client = getCosmosClient(config);
 
         // Initialize the database, feed and lease containers
@@ -101,7 +102,7 @@ public class CosmosDBSourceTask extends SourceTask {
             }
         } // Wait for ChangeFeedProcessor to start.
 
-        logger.info("Started CosmosDB source task.");
+        logger.info("Worker {} Started CosmosDB source task.", this.config.getWorkerName());
     }
 
     private String getItemLsn(JsonNode item) {
@@ -121,11 +122,27 @@ public class CosmosDBSourceTask extends SourceTask {
         while (running.get()) {
             fillRecords(records, topic);            
             if (records.isEmpty() || System.currentTimeMillis() > maxWaitTime) {
-                logger.info("Sending {} documents.", records.size());
                 break;
             }
         }
 
+        logger.info("Worker {}, Sending {} documents.", this.config.getWorkerName(), records.size());
+
+        if (logger.isDebugEnabled()) {
+            List<String> recordDetails =
+                records
+                    .stream()
+                    .map(sourceRecord -> String.format("[key %s - offset %s]", sourceRecord.key(), sourceRecord.sourceOffset()))
+                    .collect(Collectors.toList());
+
+            logger.debug(
+                "Worker {}, sending {} documents",
+                this.config.getWorkerName(),
+                recordDetails
+            );
+        }
+
+        logger.debug("Worker {}, shouldFillMoreRecords {}", this.config.getWorkerName(), true);
         this.shouldFillMoreRecords.set(true);
         return records;
     }
@@ -155,9 +172,6 @@ public class CosmosDBSourceTask extends SourceTask {
                 // Get the latest lsn and record as offset
                 Map<String, Object> sourceOffset = singletonMap(OFFSET_KEY, getItemLsn(node));
 
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Latest offset is {}.", sourceOffset.get(OFFSET_KEY));
-                }
                 // Convert JSON to Kafka Connect struct and JSON schema
                 SchemaAndValue schemaAndValue = jsonToStruct.recordToSchemaAndValue(node);
 
@@ -176,13 +190,16 @@ public class CosmosDBSourceTask extends SourceTask {
                 } else {
                     // If the buffer Size exceeds then do not remove the node.
                     if (logger.isDebugEnabled()) {
-                        logger.debug("Adding record back to the queue since adding it exceeds the allowed buffer size {}", config.getTaskBufferSize());
+                        logger.debug(
+                            "Worker {} Adding record back to the queue since adding it exceeds the allowed buffer size {}",
+                            this.config.getWorkerName(),
+                            config.getTaskBufferSize());
                     }
                     this.queue.add(node);
                     break;
                 }
             } catch (Exception e) {
-                logger.error("Failed to fill Source Records for Topic {}", topic);
+                logger.error("Worker {} Failed to fill Source Records for Topic {}", this.config.getWorkerName(), topic);
                 throw e;
             }
         }
@@ -190,7 +207,7 @@ public class CosmosDBSourceTask extends SourceTask {
 
     @Override
     public void stop() {
-        logger.info("Stopping CosmosDB source task.");
+        logger.info("Worker {} Stopping CosmosDB source task.", this.config.getWorkerName());
         // NOTE: poll() method and stop() method are both called from the same thread,
         // so it is important not to include any changes which may block both places forever
         running.set(false);
@@ -200,10 +217,14 @@ public class CosmosDBSourceTask extends SourceTask {
             changeFeedProcessor.stop().block();
             changeFeedProcessor = null;
         }
+
+        if (this.client != null) {
+            this.client.close();
+        }
     }
 
     private CosmosAsyncClient getCosmosClient(CosmosDBSourceConfig config) {
-        logger.info("Creating Cosmos Client.");
+        logger.info("Worker {} Creating Cosmos Client.", this.config.getWorkerName());
 
         CosmosClientBuilder cosmosClientBuilder = new CosmosClientBuilder()
                 .endpoint(config.getConnEndpoint())
@@ -211,13 +232,17 @@ public class CosmosDBSourceTask extends SourceTask {
                 .consistencyLevel(ConsistencyLevel.SESSION)
                 .contentResponseOnWriteEnabled(true)
                 .connectionSharingAcrossClientsEnabled(config.isConnectionSharingEnabled())
-                .userAgentSuffix(CosmosDBConfig.COSMOS_CLIENT_USER_AGENT_SUFFIX + version());
+                .userAgentSuffix(getUserAgentSuffix());
 
         if (config.isGatewayModeEnabled()) {
             cosmosClientBuilder.gatewayMode();
         }
 
         return cosmosClientBuilder.buildAsyncClient();
+    }
+
+    private String getUserAgentSuffix() {
+        return CosmosDBConfig.COSMOS_CLIENT_USER_AGENT_SUFFIX + version() + "|" + this.config.getWorkerName();
     }
 
     private ChangeFeedProcessor getChangeFeedProcessor(
@@ -243,11 +268,24 @@ public class CosmosDBSourceTask extends SourceTask {
     }
 
     protected void handleCosmosDbChanges(List<JsonNode> docs)  {
+        if (docs != null) {
+            List<String> docIds =
+                docs
+                    .stream()
+                    .map(jsonNode -> jsonNode.get("id") != null ? jsonNode.get("id").asText() : "null")
+                    .collect(Collectors.toList());
+            logger.debug(
+                "handleCosmosDbChanges - Worker {}, total docs {}, Details [{}].",
+                this.config.getWorkerName(),
+                docIds.size(),
+                docIds);
+        }
+
         for (JsonNode document : docs) {
             // Blocks for each transfer till it is processed by the poll method.
             // If we fail before checkpointing then the new worker starts again.
             try {
-                logger.trace("Queuing document");
+                logger.trace("Queuing document {}", document.get("id") != null ? document.get("id").asText() : "null");
 
                 // The item is being transferred to the queue, and the method will only return if the item has been polled from the queue.
                 // The queue is being continuously polled and then put into a batch list, but the batch list is not being flushed right away
@@ -264,6 +302,7 @@ public class CosmosDBSourceTask extends SourceTask {
         if (docs.size() > 0) {
             // it is important to flush the current batches to kafka as currently we are using lease container continuationToken for book marking
             // so we would only want to move ahead of the book marking when all the records have been returned to kafka
+            logger.debug("Worker {}, shouldFillMoreRecords {}", this.config.getWorkerName(), false);
             this.shouldFillMoreRecords.set(false);
         }
     }
