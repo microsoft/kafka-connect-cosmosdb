@@ -7,12 +7,19 @@ on:
 
 name: Build and create release
 permissions:
-  actions: write
-  contents: read
-  deployments: write
-  packages: write
-  pull-requests: write
-  security-events: write
+    actions: write
+    checks: write
+    contents: write
+    deployments: write
+    id-token: write
+    issues: write
+    discussions: write
+    packages: write
+    pages: write
+    pull-requests: write
+    repository-projects: write
+    security-events: write
+    statuses: write
 
 jobs:
   build:
