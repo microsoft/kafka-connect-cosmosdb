@@ -63,11 +63,11 @@ public class CosmosDBSourceTask extends SourceTask {
 
     @Override
     public void start(Map<String, String> map) {
-        logger.info("Starting CosmosDBSourceTask.");
+        logger.info("Worker {} Starting CosmosDBSourceTask.", this.config.getWorkerName());
         config = new CosmosDBSourceConfig(map);        
         this.queue = new LinkedTransferQueue<>();
 
-        logger.info("Creating the client.");
+        logger.info("Worker {} Creating the client.", this.config.getWorkerName());
         client = getCosmosClient(config);
 
         // Initialize the database, feed and lease containers
@@ -102,7 +102,7 @@ public class CosmosDBSourceTask extends SourceTask {
             }
         } // Wait for ChangeFeedProcessor to start.
 
-        logger.info("Started CosmosDB source task.");
+        logger.info("Worker {} Started CosmosDB source task.", this.config.getWorkerName());
     }
 
     private String getItemLsn(JsonNode item) {
@@ -172,9 +172,6 @@ public class CosmosDBSourceTask extends SourceTask {
                 // Get the latest lsn and record as offset
                 Map<String, Object> sourceOffset = singletonMap(OFFSET_KEY, getItemLsn(node));
 
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Latest offset is {}.", sourceOffset.get(OFFSET_KEY));
-                }
                 // Convert JSON to Kafka Connect struct and JSON schema
                 SchemaAndValue schemaAndValue = jsonToStruct.recordToSchemaAndValue(node);
 
@@ -193,13 +190,16 @@ public class CosmosDBSourceTask extends SourceTask {
                 } else {
                     // If the buffer Size exceeds then do not remove the node.
                     if (logger.isDebugEnabled()) {
-                        logger.debug("Adding record back to the queue since adding it exceeds the allowed buffer size {}", config.getTaskBufferSize());
+                        logger.debug(
+                            "Worker {} Adding record back to the queue since adding it exceeds the allowed buffer size {}",
+                            this.config.getWorkerName(),
+                            config.getTaskBufferSize());
                     }
                     this.queue.add(node);
                     break;
                 }
             } catch (Exception e) {
-                logger.error("Failed to fill Source Records for Topic {}", topic);
+                logger.error("Worker {} Failed to fill Source Records for Topic {}", this.config.getWorkerName(), topic);
                 throw e;
             }
         }
@@ -207,7 +207,7 @@ public class CosmosDBSourceTask extends SourceTask {
 
     @Override
     public void stop() {
-        logger.info("Stopping CosmosDB source task.");
+        logger.info("Worker {} Stopping CosmosDB source task.", this.config.getWorkerName());
         // NOTE: poll() method and stop() method are both called from the same thread,
         // so it is important not to include any changes which may block both places forever
         running.set(false);
@@ -217,10 +217,14 @@ public class CosmosDBSourceTask extends SourceTask {
             changeFeedProcessor.stop().block();
             changeFeedProcessor = null;
         }
+
+        if (this.client != null) {
+            this.client.close();
+        }
     }
 
     private CosmosAsyncClient getCosmosClient(CosmosDBSourceConfig config) {
-        logger.info("Creating Cosmos Client.");
+        logger.info("Worker {} Creating Cosmos Client.", this.config.getWorkerName());
 
         CosmosClientBuilder cosmosClientBuilder = new CosmosClientBuilder()
                 .endpoint(config.getConnEndpoint())
@@ -271,7 +275,7 @@ public class CosmosDBSourceTask extends SourceTask {
                     .map(jsonNode -> jsonNode.get("id").asText())
                     .collect(Collectors.toList());
             logger.debug(
-                "handleCosmosDbChanges - Worker {}, docIds {}, Details [{}].",
+                "handleCosmosDbChanges - Worker {}, total docs {}, Details [{}].",
                 this.config.getWorkerName(),
                 docIds.size(),
                 docIds);
