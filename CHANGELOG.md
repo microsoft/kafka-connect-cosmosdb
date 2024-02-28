@@ -5,10 +5,10 @@
 * Updated `azure-cosmos` version to 4.56.0.
 
 #### Key Bug Fixes
-* Fixed `NullPointerException` in `CosmosDBSinkConnector` when `TRACE` level log is enabled and `SinkRecord` value being null
+* Fixed `NullPointerException` in `CosmosDBSinkConnector` when `TRACE` level log is enabled and `SinkRecord` value being null. [PR 549](https://github.com/microsoft/kafka-connect-cosmosdb/pull/549)
 
 #### Other Changes
-* Added more DEBUG level logs in `CosmosDBSourceConnector`
+* Added more DEBUG level logs in `CosmosDBSourceConnector`. [PR 549](https://github.com/microsoft/kafka-connect-cosmosdb/pull/549)
 
 ### 1.13.0 (2024-01-25)
 #### New Features
