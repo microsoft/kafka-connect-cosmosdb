@@ -272,7 +272,7 @@ public class CosmosDBSourceTask extends SourceTask {
             List<String> docIds =
                 docs
                     .stream()
-                    .map(jsonNode -> jsonNode.get("id").asText())
+                    .map(jsonNode -> jsonNode.get("id") != null ? jsonNode.get("id").asText() : "null")
                     .collect(Collectors.toList());
             logger.debug(
                 "handleCosmosDbChanges - Worker {}, total docs {}, Details [{}].",
@@ -285,7 +285,7 @@ public class CosmosDBSourceTask extends SourceTask {
             // Blocks for each transfer till it is processed by the poll method.
             // If we fail before checkpointing then the new worker starts again.
             try {
-                logger.trace("Queuing document");
+                logger.trace("Queuing document {}", document.get("id") != null ? document.get("id").asText() : "null");
 
                 // The item is being transferred to the queue, and the method will only return if the item has been polled from the queue.
                 // The queue is being continuously polled and then put into a batch list, but the batch list is not being flushed right away
