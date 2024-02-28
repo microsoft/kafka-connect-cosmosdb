@@ -9,11 +9,16 @@ name: Build and create release
 
 jobs:
   build:
-
     name: Build and upload release binary
     if: ${{ startsWith(github.ref, 'refs/tags/v')}}
     runs-on: ubuntu-latest
-    
+    permissions:
+      actions: write
+      contents: read
+      deployments: write
+      packages: write
+      pull-requests: write
+      security-events: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
