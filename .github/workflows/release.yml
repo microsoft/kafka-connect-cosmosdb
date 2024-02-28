@@ -6,14 +6,14 @@ on:
       - v*
 
 name: Build and create release
-permission:
+permissions:
   actions: write
   contents: read
   deployments: write
   packages: write
   pull-requests: write
   security-events: write
-  
+
 jobs:
   build:
     name: Build and upload release binary
