@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -94,6 +95,12 @@ public class CosmosDBSourceTaskTest {
         FieldUtils.writeField(testTask, "client", mockCosmosClient, true);
         FieldUtils.writeField(testTask, "leaseContainer", mockLeaseContainer, true);
 
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void start() {
+        CosmosDBSourceTask testTask = new CosmosDBSourceTask();
+        testTask.start(sourceSettings);
     }
 
     @Test
