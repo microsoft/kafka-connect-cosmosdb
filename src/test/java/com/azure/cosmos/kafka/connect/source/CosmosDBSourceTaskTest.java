@@ -32,8 +32,6 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 public class CosmosDBSourceTaskTest {
-    private final static String COSMOS_EMULATOR_KEY = "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==";
-    private final static String COSMOS_EMULATOR_HOST = "https://localhost:8081/";
     private CosmosDBSourceTask testTask;
     private final String topicName = "testtopic";
     private final String containerName = "container666";
@@ -102,11 +100,6 @@ public class CosmosDBSourceTaskTest {
     @Test(expected = IllegalArgumentException.class)
     public void start() {
         CosmosDBSourceTask testTask = new CosmosDBSourceTask();
-        HashMap<String, String> configs = new HashMap<>();
-        configs.put(CosmosDBSourceConfig.COSMOS_CONN_ENDPOINT_CONF, COSMOS_EMULATOR_HOST);
-        configs.put(CosmosDBSourceConfig.COSMOS_CONN_KEY_CONF, COSMOS_EMULATOR_KEY);
-        configs.put(CosmosDBSourceConfig.COSMOS_DATABASE_NAME_CONF, "mydb");
-        configs.put(CosmosDBSourceConfig.COSMOS_CONTAINER_TOPIC_MAP_CONF, "mytopic5#mycontainer6");
         testTask.start(sourceSettings);
     }
 
