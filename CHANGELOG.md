@@ -1,6 +1,22 @@
 ## Release History
-### 1.13.0-beta.1 (Unreleased)
+
+### 1.14.0 (2024-02-28)
+#### New Features
+* Updated `azure-cosmos` version to 4.56.0.
+
+#### Key Bug Fixes
+* Fixed `NullPointerException` in `CosmosDBSinkConnector` when `TRACE` level log is enabled and `SinkRecord` value being null. [PR 549](https://github.com/microsoft/kafka-connect-cosmosdb/pull/549)
+
 #### Other Changes
+* Added more DEBUG level logs in `CosmosDBSourceConnector`. [PR 549](https://github.com/microsoft/kafka-connect-cosmosdb/pull/549)
+
+### 1.13.0 (2024-01-25)
+#### New Features
+* Updated `azure-cosmos` version to 4.54.0.
+
+#### Key Bug Fixes
+* Upgraded `com.jayway.jsonpath:json-path` from 2.8.0 to 2.9.0 to address the security vulnerability. [PR 544](https://github.com/microsoft/kafka-connect-cosmosdb/pull/544)
+  https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2023-51074
 * Fixed an issue where source connector can be stuck in an infinite loop when task got cancelled. [PR 545](https://github.com/microsoft/kafka-connect-cosmosdb/pull/545) 
 
 ### 1.12.0 (2023-12-18)
