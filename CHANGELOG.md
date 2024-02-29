@@ -2,7 +2,7 @@
 
 ### 1.14.1 (2024-02-29)
 #### Key Bug Fixes
-* Fixed `NullPointerException` in `CosmosDBSourceConnector`.
+* Fixed `NullPointerException` in `CosmosDBSourceConnector`. [PR 555](https://github.com/microsoft/kafka-connect-cosmosdb/pull/555)
 
 ### 1.14.0 (2024-02-28)
 #### New Features
