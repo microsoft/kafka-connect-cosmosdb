@@ -1,5 +1,9 @@
 ## Release History
 
+### 1.14.1 (2024-02-29)
+#### Key Bug Fixes
+* Fixed `NullPointerException` in `CosmosDBSourceConnector`.
+
 ### 1.14.0 (2024-02-28)
 #### New Features
 * Updated `azure-cosmos` version to 4.56.0.
