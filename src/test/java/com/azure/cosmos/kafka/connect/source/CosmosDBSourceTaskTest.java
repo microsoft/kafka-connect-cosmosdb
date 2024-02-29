@@ -97,6 +97,12 @@ public class CosmosDBSourceTaskTest {
     }
 
     @Test
+    public void start() {
+        testTask = new CosmosDBSourceTask();
+        testTask.start(sourceSettings);
+    }
+
+    @Test
     public void testHandleChanges() throws JsonProcessingException, IllegalAccessException, InterruptedException {
         String jsonString = "{\"k1\":\"v1\",\"k2\":\"v2\", \"_lsn\":\"2\"}";
         ObjectMapper mapper = new ObjectMapper();

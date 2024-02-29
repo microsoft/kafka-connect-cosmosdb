@@ -63,7 +63,7 @@ public class CosmosDBSourceTask extends SourceTask {
     @Override
     public void start(Map<String, String> map) {
         logger.info("Starting CosmosDBSourceTask.");
-        config = new CosmosDBSourceConfig(map);        
+        config = new CosmosDBSourceConfig(map);
         this.queue = new LinkedTransferQueue<>();
 
         logger.info("Creating the client.");
