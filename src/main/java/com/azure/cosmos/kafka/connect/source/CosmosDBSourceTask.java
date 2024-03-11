@@ -5,20 +5,14 @@ package com.azure.cosmos.kafka.connect.source;
 
 import com.azure.cosmos.ChangeFeedProcessor;
 import com.azure.cosmos.ChangeFeedProcessorBuilder;
-import com.azure.cosmos.ConsistencyLevel;
 import com.azure.cosmos.CosmosAsyncClient;
 import com.azure.cosmos.CosmosAsyncContainer;
 import com.azure.cosmos.CosmosAsyncDatabase;
-import com.azure.cosmos.CosmosClientBuilder;
-import com.azure.cosmos.CosmosException;
 import com.azure.cosmos.kafka.connect.CosmosDBConfig;
 import com.azure.cosmos.kafka.connect.TopicContainerMap;
+import com.azure.cosmos.kafka.connect.implementations.CosmosClientStore;
 import com.azure.cosmos.kafka.connect.implementations.CosmosKafkaSchedulers;
 import com.azure.cosmos.models.ChangeFeedProcessorOptions;
-import com.azure.cosmos.models.CosmosContainerProperties;
-import com.azure.cosmos.models.CosmosContainerRequestOptions;
-import com.azure.cosmos.models.CosmosContainerResponse;
-import com.azure.cosmos.models.ThroughputProperties;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.SchemaAndValue;
@@ -26,6 +20,7 @@ import org.apache.kafka.connect.source.SourceRecord;
 import org.apache.kafka.connect.source.SourceTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -69,13 +64,13 @@ public class CosmosDBSourceTask extends SourceTask {
         this.queue = new LinkedTransferQueue<>();
 
         logger.info("Worker {} Creating the client.", this.config.getWorkerName());
-        client = getCosmosClient(config);
+        client = CosmosClientStore.getCosmosClient(this.config, this.getUserAgentSuffix());
 
         // Initialize the database, feed and lease containers
         CosmosAsyncDatabase database = client.getDatabase(config.getDatabaseName());
         String container = config.getAssignedContainer();
         CosmosAsyncContainer feedContainer = database.getContainer(container);
-        leaseContainer = createNewLeaseContainer(client, config.getDatabaseName(), container + "-leases");
+        leaseContainer = database.getContainer(this.config.getAssignedLeaseContainer());
 
         // Create source partition map
         partitionMap = new HashMap<>();
@@ -212,34 +207,28 @@ public class CosmosDBSourceTask extends SourceTask {
         // NOTE: poll() method and stop() method are both called from the same thread,
         // so it is important not to include any changes which may block both places forever
         running.set(false);
-        
-        // Release all the resources.
-        if (changeFeedProcessor != null) {
-            changeFeedProcessor.stop().block();
-            changeFeedProcessor = null;
-        }
 
+        Mono.just(this)
+            .flatMap(connectorTask -> {
+                if (this.changeFeedProcessor != null) {
+                    return this.changeFeedProcessor.stop()
+                        .delayElement(Duration.ofMillis(500)) // delay some time here as the partitionProcessor will release the lease in background
+                        .doOnNext(t -> {
+                            this.changeFeedProcessor = null;
+                            this.safeCloseClient();
+                        });
+                } else {
+                    this.safeCloseClient();
+                    return Mono.empty();
+                }
+            })
+            .block();
+    }
+
+    private void safeCloseClient() {
         if (this.client != null) {
             this.client.close();
         }
-    }
-
-    private CosmosAsyncClient getCosmosClient(CosmosDBSourceConfig config) {
-        logger.info("Worker {} Creating Cosmos Client.", this.config.getWorkerName());
-
-        CosmosClientBuilder cosmosClientBuilder = new CosmosClientBuilder()
-                .endpoint(config.getConnEndpoint())
-                .key(config.getConnKey())
-                .consistencyLevel(ConsistencyLevel.SESSION)
-                .contentResponseOnWriteEnabled(true)
-                .connectionSharingAcrossClientsEnabled(config.isConnectionSharingEnabled())
-                .userAgentSuffix(getUserAgentSuffix());
-
-        if (config.isGatewayModeEnabled()) {
-            cosmosClientBuilder.gatewayMode();
-        }
-
-        return cosmosClientBuilder.buildAsyncClient();
     }
 
     private String getUserAgentSuffix() {
@@ -292,6 +281,7 @@ public class CosmosDBSourceTask extends SourceTask {
                 // The queue is being continuously polled and then put into a batch list, but the batch list is not being flushed right away
                 // until batch size or maxWaitTime reached. Which can cause CFP to checkpoint faster than kafka batch.
                 // In order to not move CFP checkpoint faster, we are using shouldFillMoreRecords to control the batch flush.
+                logger.debug("Transferring document " + this.config.getWorkerName());
                 this.queue.transfer(document);
             } catch (InterruptedException e) {
                 logger.error("Interrupted! changeFeedReader.", e);
@@ -306,39 +296,5 @@ public class CosmosDBSourceTask extends SourceTask {
             logger.debug("Worker {}, shouldFillMoreRecords {}", this.config.getWorkerName(), false);
             this.shouldFillMoreRecords.set(false);
         }
-    }
-
-    private CosmosAsyncContainer createNewLeaseContainer(CosmosAsyncClient client, String databaseName, String leaseCollectionName) {
-        CosmosAsyncDatabase database = client.getDatabase(databaseName);
-        CosmosAsyncContainer leaseCollection = database.getContainer(leaseCollectionName);
-        CosmosContainerResponse leaseContainerResponse = null;
-
-        logger.info("Checking whether the lease container exists.");
-        try {
-            leaseContainerResponse = leaseCollection.read().block();
-        } catch (CosmosException ex) {
-            // Swallowing exceptions when the type is CosmosException and statusCode is 404
-            if (ex.getStatusCode() != 404) {
-                throw ex;
-            }
-            logger.info("Lease container does not exist {}", ex.getMessage());
-        }
-
-        if (leaseContainerResponse == null) {
-            logger.info("Creating the Lease container : {}", leaseCollectionName);
-            CosmosContainerProperties containerSettings = new CosmosContainerProperties(leaseCollectionName, "/id");
-            ThroughputProperties throughputProperties = ThroughputProperties.createManualThroughput(400);
-            CosmosContainerRequestOptions requestOptions = new CosmosContainerRequestOptions();
-
-            try {
-                database.createContainer(containerSettings, throughputProperties, requestOptions).block();
-            } catch (Exception e) {
-                logger.error("Failed to create container {} in database {}", leaseCollectionName, databaseName);
-                throw e;
-            }
-            logger.info("Successfully created new lease container.");
-        }
-
-        return database.getContainer(leaseCollectionName);
     }
 }
