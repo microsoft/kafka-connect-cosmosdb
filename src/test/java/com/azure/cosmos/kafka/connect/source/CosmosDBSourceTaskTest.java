@@ -3,19 +3,6 @@
 
 package com.azure.cosmos.kafka.connect.source;
 
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.LinkedTransferQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import com.azure.cosmos.CosmosAsyncClient;
 import com.azure.cosmos.CosmosAsyncContainer;
 import com.azure.cosmos.CosmosAsyncDatabase;
@@ -23,13 +10,24 @@ import com.azure.cosmos.util.CosmosPagedFlux;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.kafka.connect.source.SourceRecord;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.LinkedTransferQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 
 public class CosmosDBSourceTaskTest {
     private CosmosDBSourceTask testTask;
@@ -54,6 +52,7 @@ public class CosmosDBSourceTaskTest {
         sourceSettings.put(CosmosDBSourceConfig.COSMOS_CONTAINER_TOPIC_MAP_CONF, topicName + "#" + containerName);
         sourceSettings.put(CosmosDBSourceConfig.COSMOS_DATABASE_NAME_CONF, databaseName);
         sourceSettings.put(CosmosDBSourceConfig.COSMOS_ASSIGNED_CONTAINER_CONF, containerName);
+        sourceSettings.put(CosmosDBSourceConfig.COSMOS_ASSIGNED_LEASE_CONTAINER_CONF, containerName + "-leases");
         sourceSettings.put(CosmosDBSourceConfig.COSMOS_SOURCE_TASK_POLL_INTERVAL_CONF, "500");
         sourceSettings.put(CosmosDBSourceConfig.COSMOS_SOURCE_TASK_BATCH_SIZE_CONF, "1");
         sourceSettings.put(CosmosDBSourceConfig.COSMOS_SOURCE_TASK_BUFFER_SIZE_CONF, "5000");
@@ -94,7 +93,6 @@ public class CosmosDBSourceTaskTest {
 
         FieldUtils.writeField(testTask, "client", mockCosmosClient, true);
         FieldUtils.writeField(testTask, "leaseContainer", mockLeaseContainer, true);
-
     }
 
     @Test(expected = IllegalArgumentException.class)
