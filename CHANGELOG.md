@@ -1,5 +1,9 @@
 ## Release History
 
+### 1.14.2 (2024-03-12)
+#### Key Bug Fixes
+* Fixed an issue where only 1 task run successfully when `CosmosDBSourceConnector` is configured with `maxTasks` larger than `1` - [PR 561](https://github.com/microsoft/kafka-connect-cosmosdb/pull/561)
+
 ### 1.14.1 (2024-02-29)
 #### Key Bug Fixes
 * Fixed `NullPointerException` in `CosmosDBSourceConnector`. [PR 555](https://github.com/microsoft/kafka-connect-cosmosdb/pull/555)
