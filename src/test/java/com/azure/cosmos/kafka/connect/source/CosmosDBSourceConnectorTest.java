@@ -3,15 +3,28 @@
 
 package com.azure.cosmos.kafka.connect.source;
 
+import com.azure.cosmos.CosmosAsyncClient;
+import com.azure.cosmos.CosmosAsyncContainer;
+import com.azure.cosmos.CosmosAsyncDatabase;
+import com.azure.cosmos.kafka.connect.implementations.CosmosClientStore;
+import com.azure.cosmos.models.CosmosContainerResponse;
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.common.config.ConfigValue;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 
 /**
  * Tests the configuration of Source Connector
@@ -21,6 +34,22 @@ public class CosmosDBSourceConnectorTest {
     private static final String ASSIGNED_CONTAINER = CosmosDBSourceConfig.COSMOS_ASSIGNED_CONTAINER_CONF;
     private static final String BATCH_SETTING_NAME = CosmosDBSourceConfig.COSMOS_SOURCE_TASK_BATCH_SIZE_CONF;
     private static final Long BATCH_SETTING = new CosmosDBSourceConfig(CosmosDBSourceConfigTest.setupConfigs()).getTaskBatchSize();
+
+    @BeforeClass
+    public static void setup() {
+        MockedStatic<CosmosClientStore> clientStoreMock = Mockito.mockStatic(CosmosClientStore.class);
+        CosmosAsyncClient clientMock = Mockito.mock(CosmosAsyncClient.class);
+        clientStoreMock.when(() -> CosmosClientStore.getCosmosClient(any(), any())).thenReturn(clientMock);
+
+        CosmosAsyncDatabase databaseMock = Mockito.mock(CosmosAsyncDatabase.class);
+        Mockito.when(clientMock.getDatabase(anyString())).thenReturn(databaseMock);
+
+        CosmosAsyncContainer containerMock = Mockito.mock(CosmosAsyncContainer.class);
+        Mockito.when(databaseMock.getContainer(anyString())).thenReturn(containerMock);
+
+        CosmosContainerResponse containerResponseMock = Mockito.mock(CosmosContainerResponse.class);
+        Mockito.when(containerMock.read()).thenReturn(Mono.just(containerResponseMock));
+    }
 
     @Test
     public void testConfig(){
@@ -61,7 +90,7 @@ public class CosmosDBSourceConnectorTest {
     }
 
     @Test
-    public void testTaskConfigs(){
+    public void testTaskConfigs() {
         Map<String, String> settingAssignment = CosmosDBSourceConfigTest.setupConfigs();
         CosmosDBSourceConnector sourceConnector = new CosmosDBSourceConnector();
         sourceConnector.start(settingAssignment);

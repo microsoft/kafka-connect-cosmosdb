@@ -64,6 +64,7 @@ public class CosmosDBSourceConfig extends CosmosDBConfig {
     private static final String COSMOS_USE_LATEST_OFFSET_DISPLAY = "Use latest offset";
 
     static final String COSMOS_ASSIGNED_CONTAINER_CONF = "connect.cosmos.assigned.container";
+    static final String COSMOS_ASSIGNED_LEASE_CONTAINER_CONF = "connect.cosmos.assigned.lease.container";
 
     static final String COSMOS_WORKER_NAME_CONF = "connect.cosmos.worker.name";
     static final String COSMOS_WORKER_NAME_DEFAULT = "worker";
@@ -80,6 +81,7 @@ public class CosmosDBSourceConfig extends CosmosDBConfig {
     // Variables not defined as Connect configs, should not be exposed when creating connector
     private String workerName;
     private String assignedContainer;
+    private String assignedLeaseContainer;
 
     public CosmosDBSourceConfig(ConfigDef config, Map<String, String> parsedConfig) {
         super(config, parsedConfig);
@@ -98,6 +100,7 @@ public class CosmosDBSourceConfig extends CosmosDBConfig {
 
         // Since variables are not defined as Connect configs, grab values directly from Map
         assignedContainer = parsedConfig.get(COSMOS_ASSIGNED_CONTAINER_CONF);
+        assignedLeaseContainer = parsedConfig.get(COSMOS_ASSIGNED_LEASE_CONTAINER_CONF);
         workerName = parsedConfig.get(COSMOS_WORKER_NAME_CONF);
     }
 
@@ -240,6 +243,10 @@ public class CosmosDBSourceConfig extends CosmosDBConfig {
 
     public String getAssignedContainer() {
         return this.assignedContainer;
+    }
+
+    public String getAssignedLeaseContainer() {
+        return assignedLeaseContainer;
     }
 
     public String getWorkerName() {
