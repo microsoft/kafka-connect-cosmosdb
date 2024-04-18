@@ -1,4 +1,7 @@
 ## Release History
+### 1.15.0-beta.1 (Unreleased)
+#### Key Bug Fixes
+* Fixed an issue where using `CosmosDBSinkConnector` in bulk mode failed to write items for container with nested partition key path - [PR 565](https://github.com/microsoft/kafka-connect-cosmosdb/pull/565)
 
 ### 1.14.2 (2024-03-12)
 #### Key Bug Fixes
