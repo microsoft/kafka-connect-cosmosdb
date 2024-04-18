@@ -7,19 +7,24 @@ import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.CosmosClientBuilder;
 import com.azure.cosmos.CosmosContainer;
 import com.azure.cosmos.CosmosDatabase;
+import com.azure.cosmos.implementation.Utils;
 import com.azure.cosmos.kafka.connect.ConnectorTestConfigurations;
+import com.azure.cosmos.kafka.connect.sink.BulkWriter;
 import com.azure.cosmos.kafka.connect.sink.id.strategy.ProvidedInKeyStrategy;
 import com.azure.cosmos.kafka.connect.sink.id.strategy.ProvidedInValueStrategy;
 import com.azure.cosmos.kafka.connect.sink.id.strategy.TemplateStrategy;
 import com.azure.cosmos.models.CosmosContainerProperties;
 import com.azure.cosmos.models.CosmosQueryRequestOptions;
+import com.azure.cosmos.models.PartitionKey;
 import com.azure.cosmos.models.ThroughputProperties;
 import com.azure.cosmos.util.CosmosPagedIterable;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
@@ -29,7 +34,9 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.apache.kafka.connect.data.ConnectSchema;
 import org.apache.kafka.connect.json.JsonSerializer;
+import org.apache.kafka.connect.sink.SinkRecord;
 import org.sourcelab.kafka.connect.apiclient.Configuration;
 import org.sourcelab.kafka.connect.apiclient.KafkaConnectClient;
 import org.sourcelab.kafka.connect.apiclient.request.dto.NewConnectorDefinition;
@@ -48,10 +55,14 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
+import static junit.framework.Assert.fail;
 import static org.apache.kafka.common.utils.Utils.sleep;
 import static org.sourcelab.kafka.connect.apiclient.request.dto.NewConnectorDefinition.Builder;
 
@@ -86,7 +97,7 @@ public class SinkConnectorIT {
      * Create an embedded Kafka Connect cluster.
      */
     @Before
-    public void before() throws URISyntaxException, IOException {
+    public void before() throws IOException {
 
         // Load the sink.config.json config file
         URL configFileUrl = SinkConnectorIT.class.getClassLoader().getResource("sink.config.json");
@@ -588,6 +599,60 @@ public class SinkConnectorIT {
         readResponse = targetContainer.queryItems(sql, new CosmosQueryRequestOptions(), Person.class);
         retrievedPerson = readResponse.stream().filter(p -> p.getId().equals(person.getId())).findFirst();
         Assert.assertFalse("Record still in DB", retrievedPerson.isPresent());
+    }
+
+    @Test
+    public void testBulkWriteForContainerWithNestedPartitionKey() {
+        // verify bulk writer can create records successfully for container with nested partition key path
+        CosmosDatabase database = null;
+        try {
+            // create a container with nested partition key
+            database = cosmosClient.getDatabase(UUID.randomUUID().toString());
+            cosmosClient.createDatabaseIfNotExists(database.getId());
+
+            String containerWithNestedPartitionKey = UUID.randomUUID().toString();
+            cosmosClient
+                .getDatabase(database.getId())
+                .createContainerIfNotExists(containerWithNestedPartitionKey, "/location/city/zipCode");
+            CosmosContainer testContainer = cosmosClient.getDatabase(database.getId()).getContainer(containerWithNestedPartitionKey);
+
+            String itemId = UUID.randomUUID().toString();
+            String pkValue = "1234";
+
+            ObjectNode objectNode = Utils.getSimpleObjectMapper().createObjectNode();
+            objectNode.put("id", itemId);
+            ObjectNode locationNode = Utils.getSimpleObjectMapper().createObjectNode();
+            ObjectNode cityNode = Utils.getSimpleObjectMapper().createObjectNode();
+            cityNode.put("zipCode", pkValue);
+            locationNode.put("city", cityNode);
+            objectNode.put("location", locationNode);
+
+            SinkRecord sinkRecord =
+                new SinkRecord(
+                    kafkaTopicJson,
+                    1,
+                    new ConnectSchema(org.apache.kafka.connect.data.Schema.Type.STRING),
+                    objectNode.get("id"),
+                    new ConnectSchema(org.apache.kafka.connect.data.Schema.Type.MAP),
+                    Utils.getSimpleObjectMapper().convertValue(objectNode, new TypeReference<Map<String, Object>>() {}),
+                    0L);
+
+            BulkWriter testWriter = new BulkWriter(testContainer, 1, false);
+            testWriter.write(Arrays.asList(sinkRecord));
+
+            // verify the item is created successfully
+            try {
+                testContainer.readItem(itemId, new PartitionKey(pkValue), ObjectNode.class).getItem();
+            } catch (Exception e) {
+                fail("Should be able to read item " + e.getMessage());
+            }
+        } finally {
+            if (cosmosClient != null) {
+                if (database != null) {
+                    database.delete();
+                }
+            }
+        }
     }
 
     /**

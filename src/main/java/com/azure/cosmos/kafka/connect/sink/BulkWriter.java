@@ -22,10 +22,10 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.LinkedHashMap;
 
 import static com.azure.cosmos.implementation.guava25.base.Preconditions.checkArgument;
 import static com.azure.cosmos.implementation.guava25.base.Preconditions.checkNotNull;
@@ -120,16 +120,8 @@ public class BulkWriter extends SinkWriterBase {
     private PartitionKey getPartitionKeyValue(Object recordValue) {
         checkArgument(recordValue instanceof Map, "Argument 'recordValue' is not valid map format.");
 
-        //TODO: examine the code here for sub-partition
-        String partitionKeyPath = StringUtils.join(this.partitionKeyDefinition.getPaths(), "");
         Map<String, Object> recordMap = (Map<String, Object>) recordValue;
-        Object partitionKeyValue = recordMap.get(partitionKeyPath.substring(1));
-        PartitionKeyInternal partitionKeyInternal = PartitionKeyInternal.fromObjectArray(Collections.singletonList(partitionKeyValue), false);
-
-        return ImplementationBridgeHelpers
-                .PartitionKeyHelper
-                .getPartitionKeyAccessor()
-                .toPartitionKey(partitionKeyInternal);
+        return PartitionKey.fromItem(recordMap, this.partitionKeyDefinition);
     }
 
     BulkOperationFailedException handleErrorStatusCode(

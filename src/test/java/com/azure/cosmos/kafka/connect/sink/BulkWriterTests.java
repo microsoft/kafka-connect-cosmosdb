@@ -8,6 +8,7 @@ import com.azure.cosmos.CosmosException;
 import com.azure.cosmos.implementation.BadRequestException;
 import com.azure.cosmos.implementation.HttpConstants;
 import com.azure.cosmos.implementation.RequestTimeoutException;
+import com.azure.cosmos.implementation.Utils;
 import com.azure.cosmos.models.CosmosBulkItemResponse;
 import com.azure.cosmos.models.CosmosBulkOperationResponse;
 import com.azure.cosmos.models.CosmosBulkOperations;
@@ -16,6 +17,9 @@ import com.azure.cosmos.models.CosmosContainerResponse;
 import com.azure.cosmos.models.CosmosItemOperation;
 import com.azure.cosmos.models.PartitionKey;
 import com.azure.cosmos.models.PartitionKeyDefinition;
+import com.azure.cosmos.models.PartitionKind;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.kafka.common.record.TimestampType;
 import org.apache.kafka.connect.data.ConnectSchema;
 import org.apache.kafka.connect.data.Schema;
@@ -31,11 +35,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static junit.framework.Assert.assertNotNull;
 import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -59,6 +65,7 @@ public class BulkWriterTests {
         PartitionKeyDefinition mockedPartitionKeyDefinition = Mockito.mock(PartitionKeyDefinition.class);
         Mockito.when(mockedContainerProperties.getPartitionKeyDefinition()).thenReturn(mockedPartitionKeyDefinition);
         Mockito.when(mockedPartitionKeyDefinition.getPaths()).thenReturn(Arrays.asList("/id"));
+        Mockito.when(mockedPartitionKeyDefinition.getKind()).thenReturn(PartitionKind.HASH);
 
         bulkWriter = new BulkWriter(container, MAX_RETRY_COUNT, COMPRESSION_ENABLED);
     }
@@ -205,6 +212,65 @@ public class BulkWriterTests {
         assertEquals(record2, response.getFailedRecordResponses().get(0).getSinkRecord());
         assertTrue(response.getFailedRecordResponses().get(0).getException() instanceof CosmosException);
         assertEquals(HttpConstants.StatusCodes.REQUEST_TIMEOUT, ((CosmosException)response.getFailedRecordResponses().get(0).getException()).getStatusCode());
+    }
+
+    @Test
+    public void testBulkWriteForContainerWithNestedPartitionKey() {
+        CosmosContainer containerWithNestedPartitionKey = Mockito.mock(CosmosContainer.class);
+
+        CosmosContainerResponse mockedContainerResponse = Mockito.mock(CosmosContainerResponse.class);
+        Mockito.when(containerWithNestedPartitionKey.read()).thenReturn(mockedContainerResponse);
+        CosmosContainerProperties mockedContainerProperties = Mockito.mock(CosmosContainerProperties.class);
+        Mockito.when(mockedContainerResponse.getProperties()).thenReturn(mockedContainerProperties);
+        PartitionKeyDefinition mockedPartitionKeyDefinition = Mockito.mock(PartitionKeyDefinition.class);
+        Mockito.when(mockedContainerProperties.getPartitionKeyDefinition()).thenReturn(mockedPartitionKeyDefinition);
+        Mockito.when(mockedPartitionKeyDefinition.getPaths()).thenReturn(Arrays.asList("/location/city/zipCode"));
+        Mockito.when(mockedPartitionKeyDefinition.getKind()).thenReturn(PartitionKind.HASH);
+
+        BulkWriter testWriter = new BulkWriter(containerWithNestedPartitionKey, MAX_RETRY_COUNT, COMPRESSION_ENABLED);
+
+        String itemId = UUID.randomUUID().toString();
+        String pkValue = "1234";
+
+        ObjectNode objectNode = Utils.getSimpleObjectMapper().createObjectNode();
+        objectNode.put("id", itemId);
+
+        ObjectNode locationNode = Utils.getSimpleObjectMapper().createObjectNode();
+        ObjectNode cityNode = Utils.getSimpleObjectMapper().createObjectNode();
+        cityNode.put("zipCode", pkValue);
+        locationNode.put("city", cityNode);
+        objectNode.put("location", locationNode);
+
+        SinkRecord sinkRecord =
+            new SinkRecord(
+                TOPIC_NAME,
+                1,
+                new ConnectSchema(org.apache.kafka.connect.data.Schema.Type.STRING),
+                objectNode.get("id"),
+                new ConnectSchema(org.apache.kafka.connect.data.Schema.Type.MAP),
+                Utils.getSimpleObjectMapper().convertValue(objectNode, new TypeReference<Map<String, Object>>() {}),
+                0L);
+
+        // setup successful item response
+        List<CosmosBulkOperationResponse<Object>> mockedBulkOperationResponseList = new ArrayList<>();
+        mockedBulkOperationResponseList.add(mockSuccessfulBulkOperationResponse(sinkRecord, itemId));
+
+        ArgumentCaptor<Iterable<CosmosItemOperation>> parameters = ArgumentCaptor.forClass(Iterable.class);
+        Mockito
+            .when(containerWithNestedPartitionKey.executeBulkOperations(parameters.capture()))
+            .thenReturn(() -> mockedBulkOperationResponseList.iterator());
+
+        testWriter.write(Arrays.asList(sinkRecord));
+
+        Iterator<CosmosItemOperation> bulkExecutionParameters = parameters.getValue().iterator();
+
+        assertTrue(bulkExecutionParameters.hasNext());
+        CosmosItemOperation bulkItemOperation = bulkExecutionParameters.next();
+        assertNotNull(bulkItemOperation.getPartitionKeyValue());
+        assertEquals(bulkItemOperation.getPartitionKeyValue(), new PartitionKey(pkValue));
+
+        // there should only be 1 operation
+        assertFalse(bulkExecutionParameters.hasNext());
     }
 
     private SinkRecord createSinkRecord(String id) {
