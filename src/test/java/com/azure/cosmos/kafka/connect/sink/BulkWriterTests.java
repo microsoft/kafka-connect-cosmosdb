@@ -251,7 +251,6 @@ public class BulkWriterTests {
                 Utils.getSimpleObjectMapper().convertValue(objectNode, new TypeReference<Map<String, Object>>() {}),
                 0L);
 
-
         // setup successful item response
         List<CosmosBulkOperationResponse<Object>> mockedBulkOperationResponseList = new ArrayList<>();
         mockedBulkOperationResponseList.add(mockSuccessfulBulkOperationResponse(sinkRecord, itemId));
