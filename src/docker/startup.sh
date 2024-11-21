@@ -1,6 +1,6 @@
 #!/bin/bash
 echo "Shutting down Docker Compose orchestration..."
-docker-compose down
+docker compose down
 
 echo "Deleting prior Cosmos DB connectors..."
 rm -rf connectors
@@ -24,4 +24,4 @@ echo "Building Cosmos DB Kafka Connect Docker image"
 docker build . -t cosmosdb-kafka-connect:latest
 
 echo "Starting Docker Compose..."
-docker-compose up -d
+docker compose up -d
