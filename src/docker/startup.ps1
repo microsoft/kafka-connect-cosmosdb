@@ -2,7 +2,7 @@
 $ErrorActionPreference='Stop'
 cd $PSScriptRoot
 Write-Host "Shutting down Docker Compose orchestration..."
-docker-compose down
+docker compose down
 
 Write-Host "Deleting prior Cosmos DB connectors..."
 rm -rf "$PSScriptRoot/connectors"
@@ -26,4 +26,4 @@ Write-Host "Building Cosmos DB Kafka Connect Docker image"
 docker build . -t cosmosdb-kafka-connect:latest
 
 Write-Host "Starting Docker Compose..."
-docker-compose up -d
+docker compose up -d
