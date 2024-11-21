@@ -29,7 +29,6 @@ jobs:
     - name: Run Integration Test
       shell: pwsh
       run: ./src/docker/startup.ps1
-      if: github.ref == 'refs/heads/main'
     - name: Upload JaCoCo coverage report
       uses: actions/upload-artifact@v3
       with:
