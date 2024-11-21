@@ -1,4 +1,8 @@
 ## Release History
+### 1.16.0 (2024-11-21)
+#### New Features
+* Updated `azure-cosmos` version to 4.65.0.
+
 ### 1.15.0 (2024-04-18)
 #### Key Bug Fixes
 * Fixed an issue where using `CosmosDBSinkConnector` in bulk mode failed to write items for container with nested partition key path - [PR 565](https://github.com/microsoft/kafka-connect-cosmosdb/pull/565)
