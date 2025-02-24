@@ -55,6 +55,7 @@
             <artifactId>json-path</artifactId>
             <version>2.9.0</version>
         </dependency>
+        <!-- remove once jsonpath increments version -->
         <dependency>
             <groupId>net.minidev</groupId>
             <artifactId>json-smart</artifactId>
