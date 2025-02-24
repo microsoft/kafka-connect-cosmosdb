@@ -1,7 +1,11 @@
 ## Release History
 ### 1.17.0 (2025-02-24)
-#### New Features
-* Updated `azure-cosmos` version to 4.67.0.
+#### Key Bug Fixes
+* Updated `azure-cosmos` version to 4.67.0 to address these security vulnerabilities.
+  https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-25193,
+  https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-24970
+* Added direct dependency on json smart to address the security vulnerability. - [PR 579](https://github.com/microsoft/kafka-connect-cosmosdb/pull/579/files)
+  https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2024-57699
 
 ### 1.16.0 (2024-11-21)
 #### New Features
