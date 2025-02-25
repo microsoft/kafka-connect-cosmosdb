@@ -31,7 +31,7 @@ jobs:
       run: ./src/docker/startup.ps1
       if: github.ref == 'refs/heads/main'
     - name: Upload JaCoCo coverage report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: jacoco-report
         path: target/site/jacoco/
