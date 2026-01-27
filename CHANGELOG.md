@@ -1,5 +1,12 @@
 ## Release History
 
+### 1.19.0 (2026-01-27)
+#### Key Bug Fixes
+* Updated `azure-cosmos` version to `4.77.0` to address these security vulnerabilities. - [PR 585](https://github.com/microsoft/kafka-connect-cosmosdb/pull/585)
+  https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-67735
+* Updated `log4j-core` to `3.20.0` to address the security vulnerability. - [PR 585](https://github.com/microsoft/kafka-connect-cosmosdb/pull/585)
+  https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-68161
+
 ### 1.18.0 (2025-11-17)
 #### Key Bug Fixes
 * Updated `azure-cosmos` version to `4.75.0` to address these security vulnerabilities. - [PR 585](https://github.com/microsoft/kafka-connect-cosmosdb/pull/585)
