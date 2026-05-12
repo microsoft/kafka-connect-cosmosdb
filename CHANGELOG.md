@@ -1,12 +1,5 @@
 ## Release History
 
-### 1.20.0 (Unreleased)
-#### Key Bug Fixes
-* Updated `azure-cosmos` version to `4.80.0` to pick up patched transitive dependencies (`jackson-core` `2.18.6` and `netty` `4.1.132.Final`) that address the following security vulnerabilities:
-  https://github.com/advisories/GHSA-72hv-8253-57qq
-  https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-33870
-  https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-33871
-
 ### 1.19.0 (2026-01-27)
 #### Key Bug Fixes
 * Updated `azure-cosmos` version to `4.77.0` to address these security vulnerabilities. - [PR 585](https://github.com/microsoft/kafka-connect-cosmosdb/pull/585)
