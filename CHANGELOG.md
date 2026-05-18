@@ -1,6 +1,6 @@
 ## Release History
 
-### 1.20.0 (Unreleased)
+### 1.20.0 (2026-05-18)
 #### Other Changes
 * Updated `azure-cosmos` version to `4.80.0`. - [PR 593](https://github.com/microsoft/kafka-connect-cosmosdb/pull/593)
 
