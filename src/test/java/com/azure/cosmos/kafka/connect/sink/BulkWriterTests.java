@@ -121,6 +121,34 @@ public class BulkWriterTests {
     }
 
     @Test
+    public void testBulkWriteSucceedWithDuplicateIdsWithSameTimestamp() {
+        String duplicateId = UUID.randomUUID().toString();
+        String record3Id = UUID.randomUUID().toString();
+        Random rand = new Random();
+        long timestamp = rand.nextLong();
+        SinkRecord record1 = createSinkRecord(duplicateId, timestamp, 0);
+        SinkRecord record2 = createSinkRecord(duplicateId, timestamp, 1);
+        SinkRecord record3 = createSinkRecord(record3Id, rand.nextLong(), 2);
+
+        CosmosBulkOperationResponse<Object> successfulResponseForRecord2 = mockSuccessfulBulkOperationResponse(record2, duplicateId);
+        CosmosBulkOperationResponse<Object> successfulResponseForRecord3 = mockSuccessfulBulkOperationResponse(record3, record3Id);
+
+
+        List<CosmosBulkOperationResponse<Object>> mockedBulkOperationResponseList = new ArrayList<>();
+        mockedBulkOperationResponseList.add(successfulResponseForRecord2);
+        mockedBulkOperationResponseList.add(successfulResponseForRecord3);
+
+        Mockito.when(container.executeBulkOperations(any())).thenReturn(() -> mockedBulkOperationResponseList.iterator());
+
+        SinkWriteResponse response = bulkWriter.write(Arrays.asList(record1, record2, record3));
+
+        assertEquals(2, response.getSucceededRecords().size());
+        assertEquals(record2, response.getSucceededRecords().get(0));
+        assertEquals(record3, response.getSucceededRecords().get(1));
+        assertEquals(0, response.getFailedRecordResponses().size());
+    }
+
+    @Test
     public void testBulkWriteWithNonTransientException() {
         String record1Id = UUID.randomUUID().toString();
         String record2Id = UUID.randomUUID().toString();
@@ -289,6 +317,15 @@ public class BulkWriterTests {
         map.put("foo", "baaarrrrrgh");
         map.put("id", id);
         return new SinkRecord(TOPIC_NAME, 1, stringSchema, "nokey", mapSchema, map, 0L, time, TimestampType.CREATE_TIME);
+    }
+
+    private SinkRecord createSinkRecord(String id, Long time, long kafkaOffset) {
+        Schema stringSchema = new ConnectSchema(Schema.Type.STRING);
+        Schema mapSchema = new ConnectSchema(Schema.Type.MAP);
+        Map<String, String> map = new HashMap<>();
+        map.put("foo", "baaarrrrrgh");
+        map.put("id", id);
+        return new SinkRecord(TOPIC_NAME, 1, stringSchema, "nokey", mapSchema, map, kafkaOffset, time, TimestampType.CREATE_TIME);
     }
 
     private CosmosBulkOperationResponse mockSuccessfulBulkOperationResponse(SinkRecord sinkRecord, String partitionKeyValue) {

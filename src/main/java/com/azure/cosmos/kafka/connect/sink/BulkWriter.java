@@ -68,8 +68,11 @@ public class BulkWriter extends SinkWriterBase {
                         return sinkRecord;
                     } else if (previousSinkRecord.timestamp() != null && sinkRecord.timestamp() != null && previousSinkRecord.timestamp() < sinkRecord.timestamp()) {
                         return sinkRecord;
+                    } else if (previousSinkRecord.kafkaOffset() < sinkRecord.kafkaOffset()) {
+                        return sinkRecord;
+                    } else {
+                        return previousSinkRecord;
                     }
-                    return previousSinkRecord;
                 });
 
             }
