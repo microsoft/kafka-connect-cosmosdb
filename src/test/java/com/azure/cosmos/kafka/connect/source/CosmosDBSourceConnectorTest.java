@@ -114,4 +114,19 @@ public class CosmosDBSourceConnectorTest {
         assertEquals("C4", taskConfigs.get(4).get(ASSIGNED_CONTAINER));
         assertEquals("C1", taskConfigs.get(5).get(ASSIGNED_CONTAINER));
     }
+
+    @Test
+    public void testTaskConfigsSucceedsWhenMaxTasksEqualsContainerCount() {
+        Map<String, String> settingAssignment = CosmosDBSourceConfigTest.setupConfigs();
+        settingAssignment.put(
+            CosmosDBSourceConfig.COSMOS_CONTAINER_TOPIC_MAP_CONF,
+            "T1#C1,T2#C2,T3#C3,T4#C4");
+    
+        CosmosDBSourceConnector sourceConnector = new CosmosDBSourceConnector();
+        sourceConnector.start(settingAssignment);
+    
+        List<Map<String, String>> taskConfigs = sourceConnector.taskConfigs(4);
+        assertEquals(4, taskConfigs.size());
+    }
+
 }

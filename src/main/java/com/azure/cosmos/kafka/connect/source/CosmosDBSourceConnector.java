@@ -75,6 +75,13 @@ public class CosmosDBSourceConnector extends SourceConnector {
             return taskConfigs;
         }
 
+        if (maxTasks < containerList.size()) {
+            throw new ConfigException(String.format(
+                        "tasks.max (%d) must be greater than or equal to the number of containers in the topic map (%d). "
+                        + "Otherwise some containers will not be read.",
+                        maxTasks, containerList.size()));
+        }
+
         for (int i = 0; i < maxTasks; i++) {
             // Equally distribute workers by assigning workers to containers in round-robin fashion.
             Map<String, String> taskProps = config.originalsStrings();
