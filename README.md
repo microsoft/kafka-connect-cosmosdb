@@ -136,13 +136,54 @@ The Sink and Source connectors share the following common configuration properti
 | Name | Type | Description | Required/Optional |
 | :--- | :--- | :--- | :--- |
 | connect.cosmos.connection.endpoint | uri | Cosmos endpoint URI string | Required |
-| connect.cosmos.master.key | string | The Cosmos primary key that the sink connects with | Required |
+| connect.cosmos.master.key | password | Cosmos primary key. Not used with managed identity authentication. | Required for `MasterKey` authentication only |
+| connect.cosmos.auth.type | string | Authentication type: `MasterKey` (default) or `ManagedIdentity`. | Optional |
+| connect.cosmos.managed.identity.client.id | string | Client ID of a user-assigned managed identity. Omit for a system-assigned identity. | Optional; only valid with `ManagedIdentity` |
 | connect.cosmos.databasename | string | The name of the Cosmos database the sink writes to | Required |
 | connect.cosmos.containers.topicmap | string | Mapping between Kafka Topics and Cosmos Containers, formatted using CSV as shown: `topic#container,topic2#container2` | Required |
 
 For Sink connector specific configuration, please refer to the [Sink Connector Documentation](./doc/README_Sink.md)
 
 For Source connector specific configuration, please refer to the [Source Connector Documentation](./doc/README_Source.md)
+
+### Managed identity authentication
+
+Both connectors support Microsoft Entra authentication using the managed identity of the Azure resource hosting Kafka Connect. Enable a system-assigned identity on that resource, or attach a user-assigned identity. The identity must be available to every worker running the connector or its tasks.
+
+Set the following properties in the connector configuration and remove `connect.cosmos.master.key`:
+
+```properties
+connect.cosmos.connection.endpoint=https://<account>.documents.azure.com:443/
+connect.cosmos.auth.type=ManagedIdentity
+```
+
+For a user-assigned identity, also set its **client ID** (not its principal/object ID):
+
+```properties
+connect.cosmos.managed.identity.client.id=<managed-identity-client-id>
+```
+
+The connector uses `ManagedIdentityCredential`, automatically renewing access tokens without storing account keys. It does not fall back to master keys, developer credentials, or Azure CLI credentials if authentication fails. Existing configurations continue to use `MasterKey` by default.
+
+Assign [Cosmos DB for NoSQL data-plane RBAC permissions](https://learn.microsoft.com/azure/cosmos-db/nosql/how-to-connect-role-based-access-control) to the identity's **principal ID**. Azure subscription/resource roles such as Contributor do not grant data access.
+
+- **Sink:** grant Cosmos DB Built-in Data Contributor, scoped to the target database or containers, including metadata access.
+- **Source:** grant Cosmos DB Built-in Data Reader on monitored containers (including change-feed access), and Cosmos DB Built-in Data Contributor on lease containers. A database-scoped Data Contributor assignment is a simpler, broader alternative.
+
+Pre-create the database and target containers using the Azure portal, Azure CLI, or infrastructure tooling. For the source, also pre-create one lease container named `<source-container>-leases` per monitored container, in the same database, with partition key `/id`. Cosmos DB data-plane token authentication does not support database or container creation. In managed identity mode, the sink checks that the database exists instead of creating it, and the source reports an error if a lease container is missing. Master-key provisioning behavior is unchanged.
+
+For example, assign Data Contributor at database scope using Azure CLI:
+
+```bash
+az cosmosdb sql role assignment create \
+  --resource-group <resource-group> \
+  --account-name <account> \
+  --principal-id <managed-identity-principal-id> \
+  --role-definition-id 00000000-0000-0000-0000-000000000002 \
+  --scope "/dbs/<database>"
+```
+
+Allow time for role assignments to propagate before starting the connector. Managed identity also requires network access to the identity endpoint and Cosmos DB; it does not bypass firewalls or private endpoint configuration.
 
 ## Project Setup
 

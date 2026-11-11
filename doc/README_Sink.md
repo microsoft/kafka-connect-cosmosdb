@@ -95,6 +95,8 @@ The following JSON body defines the config for the Cosmos DB Sink Connector.
 
 Refer to the [sink properties](#sink-configuration-properties) section for more information on each of these configuration properties.
 
+For keyless authentication, replace the master key property with `"connect.cosmos.auth.type": "ManagedIdentity"` and follow the [managed identity setup](../README.md#managed-identity-authentication), including data-plane role assignments and pre-creating the database and containers.
+
 ```json
 
 {
@@ -173,7 +175,9 @@ The following settings are used to configure the Cosmos DB Kafka Sink Connector.
 | topics | list    | A list of Kafka topics to watch                                                                                                                              | Required |
 | connector.class | string  | Classname of the Cosmos DB sink. Should be set to `com.azure.cosmos.kafka.connect.sink.CosmosDBSinkConnector`                                                | Required |
 | connect.cosmos.connection.endpoint | uri     | Cosmos endpoint URI string                                                                                                                                   | Required |
-| connect.cosmos.master.key | string  | The Cosmos primary key that the sink connects with                                                                                                           | Required |
+| connect.cosmos.master.key | password | Cosmos primary key; not used with managed identity. | Required for `MasterKey` only |
+| connect.cosmos.auth.type | string | `MasterKey` (default) or `ManagedIdentity`. See [managed identity setup](../README.md#managed-identity-authentication). | Optional |
+| connect.cosmos.managed.identity.client.id | string | User-assigned managed identity client ID. Omit for a system-assigned identity. | Optional; `ManagedIdentity` only |
 | connect.cosmos.databasename | string  | The name of the Cosmos database the sink writes to                                                                                                           | Required |
 | connect.cosmos.containers.topicmap | string  | Mapping between Kafka Topics and Cosmos Containers, formatted using CSV as shown: `topic#container,topic2#container2`                                        | Required |
 | connect.cosmos.connection.gateway.enabled | boolean | Flag to indicate whether to use gateway mode. By default it is `false`.                                                                                      | Optional  |

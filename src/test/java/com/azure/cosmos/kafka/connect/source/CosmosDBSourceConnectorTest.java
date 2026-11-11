@@ -6,11 +6,14 @@ package com.azure.cosmos.kafka.connect.source;
 import com.azure.cosmos.CosmosAsyncClient;
 import com.azure.cosmos.CosmosAsyncContainer;
 import com.azure.cosmos.CosmosAsyncDatabase;
+import com.azure.cosmos.CosmosException;
+import com.azure.cosmos.kafka.connect.CosmosConfigTest;
 import com.azure.cosmos.kafka.connect.implementations.CosmosClientStore;
 import com.azure.cosmos.models.CosmosContainerResponse;
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.common.config.ConfigValue;
 import org.junit.BeforeClass;
+import org.junit.AfterClass;
 import org.junit.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
@@ -23,6 +26,8 @@ import java.util.Set;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 
@@ -34,21 +39,59 @@ public class CosmosDBSourceConnectorTest {
     private static final String ASSIGNED_CONTAINER = CosmosDBSourceConfig.COSMOS_ASSIGNED_CONTAINER_CONF;
     private static final String BATCH_SETTING_NAME = CosmosDBSourceConfig.COSMOS_SOURCE_TASK_BATCH_SIZE_CONF;
     private static final Long BATCH_SETTING = new CosmosDBSourceConfig(CosmosDBSourceConfigTest.setupConfigs()).getTaskBatchSize();
+    private static MockedStatic<CosmosClientStore> clientStoreMock;
+    private static CosmosAsyncDatabase databaseMock;
+    private static CosmosAsyncContainer containerMock;
+    private static CosmosContainerResponse containerResponseMock;
 
     @BeforeClass
     public static void setup() {
-        MockedStatic<CosmosClientStore> clientStoreMock = Mockito.mockStatic(CosmosClientStore.class);
+        clientStoreMock = Mockito.mockStatic(CosmosClientStore.class);
         CosmosAsyncClient clientMock = Mockito.mock(CosmosAsyncClient.class);
         clientStoreMock.when(() -> CosmosClientStore.getCosmosClient(any(), any())).thenReturn(clientMock);
 
-        CosmosAsyncDatabase databaseMock = Mockito.mock(CosmosAsyncDatabase.class);
+        databaseMock = Mockito.mock(CosmosAsyncDatabase.class);
         Mockito.when(clientMock.getDatabase(anyString())).thenReturn(databaseMock);
 
-        CosmosAsyncContainer containerMock = Mockito.mock(CosmosAsyncContainer.class);
+        containerMock = Mockito.mock(CosmosAsyncContainer.class);
         Mockito.when(databaseMock.getContainer(anyString())).thenReturn(containerMock);
 
-        CosmosContainerResponse containerResponseMock = Mockito.mock(CosmosContainerResponse.class);
+        containerResponseMock = Mockito.mock(CosmosContainerResponse.class);
         Mockito.when(containerMock.read()).thenReturn(Mono.just(containerResponseMock));
+    }
+
+    @AfterClass
+    public static void tearDown() {
+        clientStoreMock.close();
+    }
+
+    @Test
+    public void shouldUseExistingLeaseContainerWithManagedIdentity() {
+        CosmosDBSourceConnector connector = new CosmosDBSourceConnector();
+        connector.start(CosmosConfigTest.managedIdentityConfigs());
+        assertEquals(CosmosDBSourceConfig.AUTH_TYPE_MANAGED_IDENTITY,
+            connector.taskConfigs(1).get(0).get(CosmosDBSourceConfig.COSMOS_AUTH_TYPE_CONF));
+        connector.stop();
+    }
+
+    @Test
+    public void shouldExplainMissingLeaseContainerWithManagedIdentity() {
+        Mockito.clearInvocations(databaseMock);
+        CosmosException notFound = Mockito.mock(CosmosException.class);
+        Mockito.when(notFound.getStatusCode()).thenReturn(404);
+        Mockito.when(containerMock.read()).thenReturn(Mono.error(notFound));
+        try {
+            org.apache.kafka.connect.errors.ConnectException exception =
+                assertThrows(org.apache.kafka.connect.errors.ConnectException.class,
+                    () -> new CosmosDBSourceConnector().start(CosmosConfigTest.managedIdentityConfigs()));
+            assertTrue(exception.getMessage().contains("pre-created lease container"));
+            Mockito.verify(databaseMock, Mockito.never()).createContainer(
+                any(com.azure.cosmos.models.CosmosContainerProperties.class),
+                any(com.azure.cosmos.models.ThroughputProperties.class),
+                any(com.azure.cosmos.models.CosmosContainerRequestOptions.class));
+        } finally {
+            Mockito.when(containerMock.read()).thenReturn(Mono.just(containerResponseMock));
+        }
     }
 
     @Test
