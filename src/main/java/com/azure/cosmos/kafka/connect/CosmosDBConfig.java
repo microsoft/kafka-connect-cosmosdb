@@ -6,6 +6,7 @@ package com.azure.cosmos.kafka.connect;
 import static com.azure.cosmos.kafka.connect.CosmosDBConfig.CosmosClientBuilder.createClient;
 
 import com.azure.cosmos.CosmosClient;
+import com.azure.cosmos.kafka.connect.implementations.CosmosClientStore;
 import com.azure.cosmos.kafka.connect.sink.CosmosDBSinkConfig;
 import java.net.InetAddress;
 import java.net.URI;
@@ -42,8 +43,14 @@ public class CosmosDBConfig extends AbstractConfig {
     private static final String COSMOS_CONN_ENDPOINT_DISPLAY = "Cosmos Endpoint";
     
     public static final String COSMOS_CONN_KEY_CONF = "connect.cosmos.master.key";             
-    private static final String COSMOS_CONN_KEY_DOC = "Cosmos connection master (primary) key.";
+    private static final String COSMOS_CONN_KEY_DOC =
+        "Cosmos connection master (primary) key. Required only with MasterKey authentication.";
     private static final String COSMOS_CONN_KEY_DISPLAY = "Cosmos Connection Key";
+
+    public static final String COSMOS_AUTH_TYPE_CONF = "connect.cosmos.auth.type";
+    public static final String AUTH_TYPE_MASTER_KEY = "MasterKey";
+    public static final String AUTH_TYPE_MANAGED_IDENTITY = "ManagedIdentity";
+    public static final String COSMOS_MANAGED_IDENTITY_CLIENT_ID_CONF = "connect.cosmos.managed.identity.client.id";
 
     public static final String COSMOS_DATABASE_NAME_CONF = "connect.cosmos.databasename";
     private static final String COSMOS_DATABASE_NAME_DOC = "Cosmos target database to write records into.";
@@ -92,6 +99,8 @@ public class CosmosDBConfig extends AbstractConfig {
 
     private final String connEndpoint;
     private final String connKey;
+    private final String authType;
+    private final String managedIdentityClientId;
     private final String databaseName;
     private final String providerName;
     private final boolean bulkModeEnabled;
@@ -105,7 +114,11 @@ public class CosmosDBConfig extends AbstractConfig {
         super(config, parsedConfig);
 
         this.connEndpoint = this.getString(COSMOS_CONN_ENDPOINT_CONF);
-        this.connKey = this.getPassword(COSMOS_CONN_KEY_CONF).value();
+        this.connKey = this.getPassword(COSMOS_CONN_KEY_CONF) == null
+            ? null : this.getPassword(COSMOS_CONN_KEY_CONF).value();
+        this.authType = this.getString(COSMOS_AUTH_TYPE_CONF);
+        this.managedIdentityClientId = this.getString(COSMOS_MANAGED_IDENTITY_CLIENT_ID_CONF);
+        ensureAuthenticationValid(this.authType, this.connKey, this.managedIdentityClientId);
         this.databaseName = this.getString(COSMOS_DATABASE_NAME_CONF);
         this.topicContainerMap = TopicContainerMap.deserialize(this.getString(COSMOS_CONTAINER_TOPIC_MAP_CONF));
         this.providerName = this.getString(COSMOS_PROVIDER_NAME_CONF);
@@ -149,13 +162,28 @@ public class CosmosDBConfig extends AbstractConfig {
                 .define(
                         COSMOS_CONN_KEY_CONF,
                         Type.PASSWORD,
-                        ConfigDef.NO_DEFAULT_VALUE,
+                        null,
                         Importance.HIGH,
                         COSMOS_CONN_KEY_DOC,
                         connectionGroupName,
                         connectionGroupOrder++,
                         Width.LONG,
                         COSMOS_CONN_KEY_DISPLAY
+                )
+                .define(
+                        COSMOS_AUTH_TYPE_CONF,
+                        Type.STRING,
+                        AUTH_TYPE_MASTER_KEY,
+                        ConfigDef.ValidString.in(AUTH_TYPE_MASTER_KEY, AUTH_TYPE_MANAGED_IDENTITY),
+                        Importance.HIGH,
+                        "Authentication type: MasterKey (default) or ManagedIdentity."
+                )
+                .define(
+                        COSMOS_MANAGED_IDENTITY_CLIENT_ID_CONF,
+                        Type.STRING,
+                        null,
+                        Importance.MEDIUM,
+                        "Client ID of a user-assigned managed identity. Omit for a system-assigned identity."
                 ).define(
                         TOLERANCE_ON_ERROR_CONFIG,
                         Type.STRING,
@@ -247,6 +275,14 @@ public class CosmosDBConfig extends AbstractConfig {
         return this.connKey;
     }
 
+    public boolean isManagedIdentityEnabled() {
+        return AUTH_TYPE_MANAGED_IDENTITY.equals(this.authType);
+    }
+
+    public String getManagedIdentityClientId() {
+        return this.managedIdentityClientId;
+    }
+
     public String getDatabaseName() {
         return this.databaseName;
     }
@@ -279,15 +315,46 @@ public class CosmosDBConfig extends AbstractConfig {
         return this.connectionSharingEnabled;
     }
 
+    private static void ensureAuthenticationValid(String authType, String key, String clientId) {
+        if (AUTH_TYPE_MASTER_KEY.equals(authType) && (key == null || key.trim().isEmpty())) {
+            throw new ConfigException(COSMOS_CONN_KEY_CONF, "[hidden]",
+                "A non-empty master key is required when authentication type is MasterKey.");
+        }
+        if (clientId != null && (!AUTH_TYPE_MANAGED_IDENTITY.equals(authType) || clientId.trim().isEmpty())) {
+            throw new ConfigException(COSMOS_MANAGED_IDENTITY_CLIENT_ID_CONF, clientId,
+                "A non-empty client ID can only be used with ManagedIdentity authentication.");
+        }
+    }
+
+    public static void validateAuthentication(Map<String, String> connectorConfigs,
+        Map<String, ConfigValue> configValues) {
+        String authType = (String) configValues.get(COSMOS_AUTH_TYPE_CONF).value();
+        try {
+            ensureAuthenticationValid(authType, connectorConfigs.get(COSMOS_CONN_KEY_CONF),
+                connectorConfigs.get(COSMOS_MANAGED_IDENTITY_CLIENT_ID_CONF));
+        } catch (ConfigException e) {
+            String field = AUTH_TYPE_MASTER_KEY.equals(authType)
+                && (connectorConfigs.get(COSMOS_CONN_KEY_CONF) == null
+                    || connectorConfigs.get(COSMOS_CONN_KEY_CONF).trim().isEmpty())
+                ? COSMOS_CONN_KEY_CONF : COSMOS_MANAGED_IDENTITY_CLIENT_ID_CONF;
+            configValues.get(field).addErrorMessage(e.getMessage());
+        }
+    }
+
     public static void validateConnection(Map<String, String> connectorConfigs, Map<String, ConfigValue> configValues) {
         String endpoint = connectorConfigs.get(CosmosDBSinkConfig.COSMOS_CONN_ENDPOINT_CONF);
         String key = connectorConfigs.get(CosmosDBSinkConfig.COSMOS_CONN_KEY_CONF);
+        boolean managedIdentity = AUTH_TYPE_MANAGED_IDENTITY.equals(configValues.get(COSMOS_AUTH_TYPE_CONF).value());
         try {
-            createClient(endpoint, key);
+            if (managedIdentity) {
+                CosmosClientBuilder.createClient(new CosmosDBConfig(connectorConfigs));
+            } else {
+                createClient(endpoint, key);
+            }
         } catch (Exception e) {
             configValues.get(CosmosDBSinkConfig.COSMOS_CONN_ENDPOINT_CONF)
                 .addErrorMessage("Could not connect to endpoint with error: " + e.getMessage());
-            configValues.get(CosmosDBSinkConfig.COSMOS_CONN_KEY_CONF)
+            configValues.get(managedIdentity ? COSMOS_AUTH_TYPE_CONF : COSMOS_CONN_KEY_CONF)
                 .addErrorMessage("Could not connect to endpoint with error: " + e.getMessage());
         }
     }
@@ -306,6 +373,15 @@ public class CosmosDBConfig extends AbstractConfig {
 
     /* separate class for mocking static method in tests */
     public static class CosmosClientBuilder {
+        public static void createClient(CosmosDBConfig config) {
+            try (CosmosClient client = CosmosClientStore.getClientBuilder(config)
+                .userAgentSuffix(COSMOS_CLIENT_USER_AGENT_SUFFIX
+                    + CosmosDBConfig.class.getPackage().getImplementationVersion())
+                .buildClient()) {
+                client.getDatabase(config.getDatabaseName()).read();
+            }
+        }
+
         public static void createClient(String endpoint, String key) {
             try (CosmosClient unused = new com.azure.cosmos.CosmosClientBuilder()
                 .endpoint(endpoint)

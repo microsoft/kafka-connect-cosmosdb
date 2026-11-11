@@ -8,6 +8,7 @@ import com.azure.cosmos.CosmosClientBuilder;
 import com.azure.cosmos.CosmosContainer;
 import com.azure.cosmos.ThrottlingRetryOptions;
 import com.azure.cosmos.kafka.connect.CosmosDBConfig;
+import com.azure.cosmos.kafka.connect.implementations.CosmosClientStore;
 import com.azure.cosmos.kafka.connect.sink.id.strategy.AbstractIdStrategyConfig;
 import com.azure.cosmos.kafka.connect.sink.id.strategy.IdStrategy;
 import org.apache.commons.collections4.CollectionUtils;
@@ -48,9 +49,7 @@ public class CosmosDBSinkTask extends SinkTask {
         this.config = new CosmosDBSinkConfig(map);
 
         CosmosClientBuilder cosmosClientBuilder =
-                new CosmosClientBuilder()
-                        .endpoint(config.getConnEndpoint())
-                        .key(config.getConnKey())
+                CosmosClientStore.getClientBuilder(config)
                         .connectionSharingAcrossClientsEnabled(this.config.isConnectionSharingEnabled())
                         .userAgentSuffix(CosmosDBConfig.COSMOS_CLIENT_USER_AGENT_SUFFIX + version())
                         .throttlingRetryOptions(
@@ -63,7 +62,11 @@ public class CosmosDBSinkTask extends SinkTask {
 
         this.client = cosmosClientBuilder.buildClient();
 
-        client.createDatabaseIfNotExists(config.getDatabaseName());
+        if (config.isManagedIdentityEnabled()) {
+            client.getDatabase(config.getDatabaseName()).read();
+        } else {
+            client.createDatabaseIfNotExists(config.getDatabaseName());
+        }
     }
 
     @Override

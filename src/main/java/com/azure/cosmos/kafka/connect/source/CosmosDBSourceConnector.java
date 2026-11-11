@@ -4,6 +4,7 @@
 package com.azure.cosmos.kafka.connect.source;
 
 import static com.azure.cosmos.kafka.connect.CosmosDBConfig.validateConnection;
+import static com.azure.cosmos.kafka.connect.CosmosDBConfig.validateAuthentication;
 import static com.azure.cosmos.kafka.connect.CosmosDBConfig.validateTopicMap;
 
 import java.util.function.Function;
@@ -113,12 +114,12 @@ public class CosmosDBSourceConnector extends SourceConnector {
     @Override
     public Config validate(Map<String, String> connectorConfigs) {
         Config config = super.validate(connectorConfigs);
+        Map<String, ConfigValue> configValues = config.configValues().stream().collect(
+            Collectors.toMap(ConfigValue::name, Function.identity()));
+        validateAuthentication(connectorConfigs, configValues);
         if (config.configValues().stream().anyMatch(cv -> !cv.errorMessages().isEmpty())) {
             return config;
         }
-
-        Map<String, ConfigValue> configValues = config.configValues().stream().collect(
-            Collectors.toMap(ConfigValue::name, Function.identity()));
 
         validateConnection(connectorConfigs, configValues);
         validateTopicMap(connectorConfigs, configValues);
@@ -146,6 +147,10 @@ public class CosmosDBSourceConnector extends SourceConnector {
             // Swallowing exceptions when the type is CosmosException and statusCode is 404
             if (ex.getStatusCode() != 404) {
                 throw ex;
+            }
+            if (this.config.isManagedIdentityEnabled()) {
+                throw new ConnectException("Managed identity requires a pre-created lease container '"
+                    + leaseCollectionName + "' with partition key /id in database '" + databaseName + "'.", ex);
             }
             logger.info("Lease container does not exist {}", ex.getMessage());
         }
