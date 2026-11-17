@@ -1,7 +1,7 @@
 # Kafka Connect for Azure Cosmos DB (SQL API)
 
 > [!WARNING]
-> This repository and the Azure Cosmos DB Kafka V1 connectors are deprecated. Use the [Azure Cosmos DB Kafka V2 connector](https://github.com/Azure/azure-sdk-for-java/tree/main/sdk/cosmos/azure-cosmos-kafka-connect) instead. See the V2 connector documentation for setup and configuration.
+> This repository and the Azure Cosmos DB Kafka V1 connectors are deprecated. Use the [Azure Cosmos DB Kafka V2 connector](https://github.com/Azure/azure-sdk-for-java/tree/main/sdk/cosmos/azure-cosmos-kafka-connect) instead. See the [V2 connector documentation](https://learn.microsoft.com/en-us/azure/cosmos-db/kafka-connector-v2) for setup and configuration.
 
 [![Open Source Love svg2](https://badges.frapsoft.com/os/v2/open-source.svg?v=103)](https://github.com/microsoft/kafka-connect-cosmosdb/blob/dev/CODE_OF_CONDUCT.MD)
 
