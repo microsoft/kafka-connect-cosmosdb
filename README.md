@@ -1,12 +1,15 @@
 # Kafka Connect for Azure Cosmos DB (SQL API)
 
-[![Open Source Love svg2](https://badges.frapsoft.com/os/v2/open-source.svg?v=103)](https://github.com/microsoft/kafka-connect-cosmosdb/blob/dev/CODE_OF_CONDUCT.MD) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/microsoft/kafka-connect-cosmosdb/blob/dev/CONTRIBUTING.md) [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/microsoft/kafka-connect-cosmosdb/pulse)
+> [!WARNING]
+> This repository and the Azure Cosmos DB Kafka V1 connectors are deprecated. Use the [Azure Cosmos DB Kafka V2 connector](https://github.com/Azure/azure-sdk-for-java/tree/main/sdk/cosmos/azure-cosmos-kafka-connect) instead. See the V2 connector documentation for setup and configuration.
+
+[![Open Source Love svg2](https://badges.frapsoft.com/os/v2/open-source.svg?v=103)](https://github.com/microsoft/kafka-connect-cosmosdb/blob/dev/CODE_OF_CONDUCT.MD)
 
 [![Java CI with Maven](https://github.com/microsoft/kafka-connect-cosmosdb/workflows/Java%20CI%20with%20Maven/badge.svg)](https://github.com/microsoft/kafka-connect-cosmosdb/actions?query=workflow%3A%22Java+CI+with+Maven%22) [![Release](https://img.shields.io/github/v/release/microsoft/kafka-connect-cosmosdb?include_prereleases&label=Latest%20Release)](https://github.com/microsoft/kafka-connect-cosmosdb/releases/)
 
 ## Introduction
 
-File any issues / feature requests / questions etc. you may have in the [Issues](https://github.com/microsoft/kafka-connect-cosmosdb/issues) for this repo.
+The documentation below applies to the deprecated V1 connectors.
 
 This project provides connectors for [Kafka Connect](http://kafka.apache.org/documentation.html#connect) to read from and write data to [Azure Cosmos DB](https://azure.microsoft.com/en-us/services/cosmos-db/)(SQL API).
 
